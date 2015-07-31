@@ -1,0 +1,165 @@
+******  Estuary release 1.1 ******
+
+These are the release notes for the Estuary version 1.1. Read them carefully,
+as they tell you what this is all about, explain how to get, build, and run it.
+
+
+1. Introduction 
+=================
+
+  Estuary is a development version of the whole software solution which target
+  is the ICT market. It is a long term solution and focus on the combination
+  of the high level components. And It is expected to be rebased from the
+  newest version of the community quickly.
+
+
+2. Components
+================
+
+- Toolchain
+  This part is about the cross compiler for the arm platform. Now we directly
+  use the binary downloaded from the Linaro. It is a tool to be used to
+  compile the Linux kernel, boot loader and so on.
+
+  URL: http://www.linaro.org/downloads/
+  32bit gcc: http://releases.linaro.org/14.09/components/toolchain/binaries/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
+  64bit gcc: http://releases.linaro.org/14.09/components/toolchain/binaries/gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
+
+- UEFI
+  This part is about the boot loader, now we use the UEFI as the bootloader. 
+  The UEFI source code for D02 is not public currently, maybe we will publish
+  it later, but now we can only provide binaries for D02.
+  
+  There is a "binary" directory in our project:
+  https://github.com/hisilicon/estuary.git
+
+  The source code for D01, you can get it by following commands:
+  	$git clone http://git.linaro.org/git/uefi/linaro-edk2.git
+  ...or
+  	$git clone https://github.com/hisilicon/UEFI.git
+
+- Grub
+  This part is also about the boot loader. Grub can run in the UEFI, and
+  supply some advanced function. We get the source code from the community.
+  You can get it by following command:
+  	$git clone git://git.savannah.gnu.org/grub.git
+
+- Linux Kernel
+  This part is about the OS kernel. Now we use the HULK (Huawei Unified Linux
+  Kernel) which is the Linux Kernel maintained by the CSI and HTSAT together.
+  it can support several SoCs, such as P650, P660, etc. 
+  
+  The latest avaible Kernel source code for estuary project is provided in
+  following git repository by a branch named "estuary":
+  github: https://github.com/hisilicon/linaro-kernel.git -b estuary  
+  
+  You can always get the latest version by following command:
+	$git clone https://github.com/hisilicon/linaro-kernel.git -b estuary
+  ...or get it with a special tag by following command:
+	$git clone https://github.com/hislicon/linaro-kernel.git -b refs/tags/estuary-vx.x
+
+- Distributions
+  This part is about the rootfs of several distibutions (OpenEmbedded, Debian,
+  Ubuntu, OpenSuse and Fedora). Now we directly use the binary. The
+  OpenEmbedded is downloaded from the Linaro, and the else are downloaded from
+  the respective offical website. 
+  OpenEmbedded:
+  http://releases.linaro.org/14.06/openembedded/aarch64/vexpress64-openembedded_minimal-armv8-gcc-4.8_20140623-668.img.gz
+  Debian:
+  http://people.debian.org/~wookey/bootstrap/rootfs/debian-unstable-arm64.tar.gz
+  Ubuntu:
+  http://snapshots.linaro.org/ubuntu/images/developer-arm64/latest/
+  OpenSuse:
+  http://download.opensuse.org/ports/aarch64/distribution/13.1/appliances/ 
+  Fedora:
+  http://dmarlin.fedorapeople.org/fedora-arm/aarch64/F21-20140407-foundation-v8.tar.xz
+
+- QEMU
+  This part is about the virtual platform. The QEMU (Quick EMUlater) can
+  emulate the ARMv8 virtual machine on the x86 host machine, so we can use the
+  virtual platform to do the validation of the common part for the whole
+  software solution. We now get the source code from the community. You can get
+  it by following command:
+  	$git clone git://git.qemu-project.org/qemu.git
+
+3. Status
+================
+
+  In this version, the software solution are validated with the D01 boards,
+  QEMU ARMv8 platform, the P660 EVB board and D02 board.
+  Now the validated components are as following:
+	- Toolchain
+	- UEFI (only for D01)
+	- UEFI\trust fw (only for D02)
+	- GRUB2 (for D01, D02)
+	- HULK
+	- Distributions
+	- QEMU
+
+
+4. Fetching and Building
+================
+  How to fetch our whole solution and how to use it? This part will answer
+  these questions.
+
+ 4.1 Preparation
+  You need download repo by following commands:
+	$mkdir -p ~/bin
+	$curl "https://android.git.linaro.org/gitweb?p=tools/repo.git;a=blob_plain;f=repo;hb=refs/heads/stable" > ~/bin/repo
+	$chmod a+x ~/bin/repo
+	$export PATH=~/bin:$PATH
+
+ 4.2 Fetch it
+  Create a work directory by following commands:
+	$mkdir workdir
+	$cd workdir
+
+  Download the whole project resource by following commands:
+  	$repo init -u https://github.com/hisilicon/estuary.git -b estuary-v1.1 --no-repo-verify --repo-url=git://android.git.linaro.org/tools/repo
+ 	$repo sync
+	If it fails during repo sync, you can just try to do 'repo sync' again.
+
+  Continue to download the toolchains and a variety of distributions by:
+	$./estuary/init.sh
+	
+ 4.3 Build it
+  Finally, build the estuary and run it on QEMU, D01, D02 or P660 EVB board. The
+  build.sh is used to do it. 
+
+  If want to read the help message, can type this commond:
+  	$./estuary/build.sh -h
+  
+  Here is the example for running the OpenEmbedded with ARMv8 QEMU platform:
+	$./estuary/build.sh -p QEMU -d OpenEmbedded
+
+  Here is the example for building the software for D01 board:
+	$./estuary/build.sh -p D01 -d Ubuntu
+
+  Here is the example for building the software for D02 board:
+	$./estuary/build.sh -p D02 -d Ubuntu
+
+  Here is the example for building the software for P660 EVB board:
+	$./estuary/build.sh -p EVB -d OpenEmbedded
+
+  Here is the example for building the software for P660 D02 board:
+	$./estuary/build.sh -p D02 -d OpenEmbedded
+
+5. Deployment
+================
+  How to deploy the system into our board, please refer to documents named "Deploy_on_the_xxx".
+
+6. Contact us
+================
+  About the technical support, you can contact with chenxiang66@hisilicon.com.
+  About how to apply to use our device boards, please contact with huangdaode@hisilicon.com.
+
+7.Changes compared with last version
+    Add the support for xge in kernel
+    Add the support for pcie in kernel
+    Update the latest version of binary file 
+
+8. TODO
+================
+  Further more platforms will be supported in the esturay.
+  More detail information about estuary, please refer to
+  http://hislicon.github.com

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+
+  <remote  name="hisilicon"
+           fetch="https://github.com/hisilicon/" />
+
+  <remote  name="qemu"
+           fetch="git://git.qemu-project.org/" />
+		   
+  <remote  name="grub"
+           fetch="git://git.savannah.gnu.org/" />
+
+  <default revision="master"
+           remote="hisilicon"
+           sync-j="4" />
+  
+  <!-- kernel -->
+  <project path="kernel" name="linaro-kernel" revision="refs/tags/estuary-v1.1" />
+
+  <!-- uefi -->
+  <project path="uefi" name="UEFI" />
+
+  <!-- grub -->
+  <project name="grub" remote="grub" />
+  
+  <!-- tools -->
+  <project name="tools" revision="estuary-v1.0" />
+
+  <!-- toolchain -->
+  <!-- project path="toolchain" name="estuary-toolchain" revision="refs/tags/estuary-v1.0" groups="linaro" / -->
+
+  <!-- distro -->
+  <!-- project path="distro" name="estuary-distro" revision="refs/tags/estuary-v1.0" / -->
+
+  <!-- qemu -->
+  <project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" />
+
+  <!-- estuary -->
+  <project name="estuary" revision="estuary-v1.1" />
+
+</manifest>

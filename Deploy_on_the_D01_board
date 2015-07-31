@@ -1,0 +1,117 @@
+***** Deploy on the D01 Board *****
+
+1. Purpose
+================
+
+  This document describes how to build some files by Estuary tools v0.2, and
+  also record the process of booting D01 board using those files.
+
+
+2. Preparative
+================
+
+(1) Build FTP server in local host 
+
+  We need to build FTP server in local host to communicate with D01 board
+  whatever the system of local host is Windows or Ubuntu. For Ubuntu system it
+  can download, compile and burn codes directly, but for Windows system it needs
+  another server which is linux to compile source codes at first, and then
+  transfer it to local host. 
+
+  If local host system is Windows, what we should do is to set names and
+  passwords of user, and directory of sharing files after installing software
+  wftp32.  
+
+(2) Build DHCP and TFTP server 
+
+  PXE boot is built upon DHCP and TFTP server. So if we want to boot with PXE,
+  DHCP and TFTP server should be set up at our local network. Refer to these
+  to set up DHCP server and TFTP server on Ubuntu:
+    https://wiki.linaro.org/Boards/D01/PXE. 
+
+  But on Windows what we have to do is to install and set software tftp32.
+ 
+
+3. Deploying
+================
+ 
+(1)	Get the whole project and initialize it according to chapter 4 of README. 
+
+(2)	Run the scripts build.sh to build files we need 
+
+	./tools/build.sh –p D01 –d Ubuntu 
+
+	Note: D01 is the platform that can run those built files, and Ubuntu is
+          the distribution which will run on D01 board.
+
+	After that there is a folder named build on current directory, and a
+	folder named D01 in build folder. Under the D01 folder there are file
+	folders: distro, grub2, linux, toolchain, uefi. The distribution is under
+	the distro, grub files exit under the grub2, compiled source codes of
+	kernel lay under the linux, cross-compiled toolchain is under the
+    toolchain, EFI-BOOT.fd is under the ufei.  
+
+(3)	Create folder structure under your TFTP root path 
+
+  1) The distribution under distro
+	 We should copy the distribution to the sharing directory of FTP server,
+	 and the distribution will be transferred to D01 board’s disk which will
+	 be mounted to some file on D01. D01 board will boot the distribution from
+     disk.  
+
+  2) zImage/hip04-d01-dtb/grub.efi 
+     create folder structure under your tftp root patha as follow:
+		| -- zImage
+		| -- hip04-d01.dtb
+		| -- efi
+			  | -- grub.efi
+			  | -- lib/grub/arm-efi
+			  | -- grub.cfg
+ 
+	 NOTES: zImage and hip04-d01.dtb come from the file folder linux, and
+			grub.efi comes from the file folder grub2. The context on file
+            grub.cfg must looks like: 
+				set timeout=3
+				# By default, boot the D01 kernel
+				set default=D01
+				# For booting GNU/Linux
+				menuentry "D01-Linux" --id D01 { 
+					devicetree hip04-d01.dtb 
+					linux zImage console=ttyS0,115200 root=/dev/sdb1
+                          rootfstype=ext4 rw earlyprintk ip=dhcp
+					# linux zImage console=ttyS0 earlyprintk root=/dev/sda1
+					#     rootfstype=ext4 rw
+				}
+   3) Rename file D01.fd to EFI-BOOT.fd, and put it on FTP sharing directory
+
+(4)	Upgrade UEFI to support PXE boot 
+
+	Press “s” until UEFI menu appears after rebooting D01 board. Select “b”
+    and enter into command line pattern. Set IP address as follow: 
+
+		ifconfig -s eth0 192.168.10.142 255.255.255.0 192.168.10.1
+
+	load UEFI which supports PXE boot: 
+
+		provision 192.168.10.38 -u xc -p 123456789 -f  UEFI-BOOT.fd 
+		updateL1 EFI-BOOT.fd modify 
+
+	boot parameters to make D01 board boot from sda1: 
+
+		changelinuxatag 
+		console=ttyS0,115200 root=/dev/sda1 rootfstype=ext4 rw earlyprink setlinuxatag 
+
+(5)	Reboot D01 board, and press “s” to enter UEFI menu. 
+
+    Input these commands in turn:
+		a	// Boot Manager
+		1	// Add Boot Device Entry
+		3	// PXE on MAC Address: ...
+		PXE // Description for this Entry
+		5	// Return to main menu
+		2	// PXE
+ 
+	These will enable the board to download ‘grub2.efi’ and launch it, then in
+	3 seconds, grub2 will download and boot linux.
+
+More detail information, please refer to http://hisilicon.github.com.
