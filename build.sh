@@ -107,7 +107,7 @@ if [ x"$PLATFORM" = x"" -o x"$DISTRO" = x"" ]; then
     exit 1
 fi
 
-
+LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
 cd $TOOLS_DIR/../
 build_dir=./build/$PLATFORM
@@ -264,14 +264,42 @@ if [ x"D02" = x"$PLATFORM" ]; then
 fi
 
 # compile the kernel
+# preprocess for kernel building
 kernel_dir=./build/$PLATFORM/kernel
 mkdir -p "$kernel_dir" 2> /dev/null
-if [ x"QEMU" = x"$PLATFORM" ]; then
+if [ x"D01" = x"$PLATFORM" ]; then
+	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
+		BUILDFLAG=TRUE
+		KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
+
+		export ARCH=arm
+		if [ "$LOCALARCH" != "arm" ]; then
+			export CROSS_COMPILE=$CROSS 
+		fi
+	fi
+else
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		pushd kernel/
-		make ARCH=arm64 mrproper
-		make O=../$kernel_dir ARCH=arm64 mrproper
-		make O=../$kernel_dir ARCH=arm64 hulk_defconfig
+		BUILDKERNEL=TRUE
+		KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
+
+		export ARCH=arm64
+		if [ "$LOCALARCH" != "aarch64" ]; then
+			export CROSS_COMPILE=$CROSS 
+		fi
+	fi
+fi
+
+if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	pushd kernel/
+	
+	make mrproper
+	make O=../$kernel_dir mrproper
+fi
+
+# kernel building
+if [ x"QEMU" = x"$PLATFORM" ]; then
+	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+		make O=../$kernel_dir hulk_defconfig
 		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
 		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
 		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
@@ -280,49 +308,35 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
 		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
 		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
-		make O=../$kernel_dir ARCH=arm64 CROSS_COMPILE=$CROSS -j8 Image
-		popd
+		make O=../$kernel_dir -j8 Image
+		make O=../$kernel_dir hisi_p660_evb_32core.dtb
 	fi
-	KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
+	DTB=$kernel_dir/arch/arm64/boot/dts/hisi_p660_evb_32core.dtb
 fi
 
 if [ x"EVB" = x"$PLATFORM" ]; then
-	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		pushd kernel/
-		make ARCH=arm64 mrproper
-		make O=../$kernel_dir ARCH=arm64 mrproper
-		make O=../$kernel_dir ARCH=arm64 hulk_defconfig
-		make O=../$kernel_dir ARCH=arm64 CROSS_COMPILE=$CROSS -j8 Image
-		make O=../$kernel_dir ARCH=arm64 CROSS_COMPILE=$CROSS hisi_p660_evb_32core.dtb
-		make O=../$kernel_dir ARCH=arm64 CROSS_COMPILE=$CROSS hisi_p660_evb_16core.dtb
-		popd
+	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+		make O=../$kernel_dir hulk_defconfig
+		make O=../$kernel_dir -j8 Image
+		make O=../$kernel_dir hisi_p660_evb_32core.dtb
+		make O=../$kernel_dir hisi_p660_evb_16core.dtb
 	fi
-	KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
+	DTB=$kernel_dir/arch/arm64/boot/dts/hisi_p660_evb_32core.dtb
 fi
 
 if [ x"D02" = x"$PLATFORM" ]; then
 	mkdir -p $kernel_dir/arch/arm64/boot/dts/hisilicon
-	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		pushd kernel/
-		make ARCH=arm64 mrproper
-		make O=../$kernel_dir ARCH=arm64 mrproper
-		make O=../$kernel_dir ARCH=arm64 defconfig
-		make O=../$kernel_dir ARCH=arm64 CROSS_COMPILE=$CROSS -j8 Image
-		make O=../$kernel_dir ARCH=arm64 CROSS_COMPILE=$CROSS hisilicon/hip05-d02.dtb
-		popd
+	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+		make O=../$kernel_dir defconfig
+		make O=../$kernel_dir -j8 Image
+		make O=../$kernel_dir hisilicon/hip05-d02.dtb
 	fi
-	KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
-	DTB=`pwd`/$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
-	cp $KERNEL ./build/$PLATFORM/binary
-	cp $DTB ./build/$PLATFORM/binary
+	DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
 fi
 
 if [ x"D01" = x"$PLATFORM" ]; then
-	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
-		pushd kernel/
-		make ARCH=arm mrproper
-		make O=../$kernel_dir ARCH=arm mrproper
-		make O=../$kernel_dir ARCH=arm hisi_defconfig
+	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+		make O=../$kernel_dir hisi_defconfig
 
 		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
 		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
@@ -334,16 +348,25 @@ if [ x"D01" = x"$PLATFORM" ]; then
 		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
 
-		make O=../$kernel_dir ARCH=arm CROSS_COMPILE=$CROSS -j8 zImage
-		make O=../$kernel_dir ARCH=arm CROSS_COMPILE=$CROSS hip04-d01.dtb
-		popd
+		make O=../$kernel_dir -j8 zImage
+		make O=../$kernel_dir hip04-d01.dtb
 	fi
-	KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
-	DTB=`pwd`/$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
-	cat $KERNEL $DTB > ./build/$PLATFORM/kernel/.kernel
-	cp $KERNEL $binary_dir
-	cp $DTB $binary_dir
+	DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
 fi
+
+# postprocess for kernel building
+if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	if [[ "$LOCALARCH" = "arm" || "$LOCALARCH" = "aarch64" ]]; then
+		make O=../$kernel_dir modules
+		make O=../$kernel_dir modules_install
+	fi
+
+	popd
+fi
+DTB=`pwd`/$DTB
+cat $KERNEL $DTB > ./build/$PLATFORM/kernel/.kernel
+cp $KERNEL $binary_dir
+cp $DTB $binary_dir
 
 
 # uncompress the distro
