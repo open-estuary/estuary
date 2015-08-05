@@ -116,7 +116,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
 	$cd workdir
 
   Download the whole project resource by following commands:
-  	$repo init -u https://github.com/hisilicon/estuary.git -b estuary-v1.1 --no-repo-verify --repo-url=git://android.git.linaro.org/tools/repo
+  	$repo init -u https://github.com/hisilicon/estuary.git -b refs/tags/estuary-v1.2 --no-repo-verify --repo-url=git://android.git.linaro.org/tools/repo
  	$repo sync
 	If it fails during repo sync, you can just try to do 'repo sync' again.
 
