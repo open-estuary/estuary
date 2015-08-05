@@ -24,7 +24,7 @@
   <project name="grub" remote="grub" />
   
   <!-- tools -->
-  <project name="tools" revision="estuary-v1.0" />
+  <project name="tools" revision="refs/tags/estuary-v1.0" />
 
   <!-- toolchain -->
   <!-- project path="toolchain" name="estuary-toolchain" revision="refs/tags/estuary-v1.0" groups="linaro" / -->
