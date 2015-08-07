@@ -130,9 +130,6 @@ as they tell you what this is all about, explain how to get, build, and run it.
  	$repo sync
 	If it fails during repo sync, you can just try to do 'repo sync' again.
 
-  Continue to download the toolchains and prebuilt binaries by:
-	$./estuary/init.sh
-	
  4.3 Build it
   Finally, build the estuary and run it on QEMU, D01, D02 or P660 EVB board. The
   build.sh is used to do it. 
