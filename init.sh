@@ -4,10 +4,11 @@
 
 TOOLCHAIN_DIR=toolchain
 DISTRO_DIR=distro
+BINARY_DIR=binary
 GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 
-#fetch toolchains
+# obtain toolchains
 if [ ! -d "$TOOLCHAIN_DIR" ]; then
 mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 

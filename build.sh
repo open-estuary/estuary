@@ -1,4 +1,7 @@
 #!/bin/bash
+#description: download necessary files firstly, then build target system according to indicated parameters by user
+#author: Justin Zhao
+#date: August 7, 2015
 
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse Fedora)
@@ -6,10 +9,10 @@ distros_evb=(OpenEmbedded)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
 platforms=(QEMU D01 EVB D02)
 
-PATH_OPENSUSE_D02=http://download.opensuse.org/ports/aarch64/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.aarch64-rootfs.aarch64-1.12.1-Build37.1.tbz
-PATH_UBUNTU_D02=http://snapshots.linaro.org/ubuntu/images/developer-arm64/latest/linaro-utopic-developer-20150410-92.tar.gz
-PATH_OPENSUSE_D01=uhttp://download.opensuse.org/ports/armv7hl/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.armv7-rootfs.armv7l-1.12.1-Build37.1.tbz
-PATH_UBUNTU_D01=http://releases.linaro.org/latest/ubuntu/utopic-images/server/linaro-utopic-server-20150220-698.tar.gz
+PATH_OPENSUSE64=http://download.opensuse.org/ports/aarch64/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.aarch64-rootfs.aarch64-1.12.1-Build37.1.tbz
+PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
+PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.armv7-rootfs.armv7l-1.12.1-Build37.1.tbz
+PATH_UBUNTU32=http://releases.linaro.org/latest/ubuntu/utopic-images/server/linaro-utopic-server-20150220-698.tar.gz
 
 usage()
 {
@@ -109,9 +112,11 @@ fi
 
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
+
 cd $TOOLS_DIR/../
 build_dir=./build/$PLATFORM
 mkdir -p "$build_dir" 2> /dev/null
+
 case $PLATFORM in
 	"QEMU" | "EVB" | "D02")
 		cross_gcc=aarch64-linux-gnu-gcc
@@ -123,61 +128,80 @@ case $PLATFORM in
 		;;
 esac
 
+# Download & uncompress the cross-compile-chain
+toolchain_dir=toolchain
+GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
+GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 
-# uncompress the cross-compile-chain
-toolchain_dir=./build/$PLATFORM/toolchain
-mkdir -p "$toolchain_dir" 2> /dev/null
+if [ ! -d "$toolchain_dir" ] ; then
+	mkdir -p "$toolchain_dir" 2> /dev/null
+
+	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 > $toolchain_dir/$GCC32
+	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 > $toolchain_dir/$GCC64
+fi
 
 arm_gcc=`find "$toolchain_dir" -name "$cross_gcc"`
 if [ x"" = x"$arm_gcc" ]; then 
-	package=`ls ./toolchain/*.xz | grep "$cross_prefix"`
+	package=`ls $toolchain_dir/*.xz | grep "$cross_prefix"`
 	echo "uncompress the toolchain......"
 	tar Jxf $package -C $toolchain_dir
-	arm_gcc=`find "$build_dir" -name $cross_gcc`
+	arm_gcc=`find $toolchain_dir -name $cross_gcc`
 fi
 CROSS=`pwd`/${arm_gcc%g*}
 echo "Cross compiler is $CROSS"
 
-#Download filesystem according to special PLATFORM and DISTRO
+#Download distribution according to special PLATFORM and DISTRO
 DISTRO_DIR=distro
 if [ ! -d "$DISTRO_DIR" ] ; then
 	mkdir -p "$DISTRO_DIR" 2> /dev/null
 fi
-if [ x"$PLATFORM" = x"D02" -o x"$PLATFORM" = x"QEMU" ] ; then
-	case $DISTRO in
-		"OpenSuse" )
-			if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tbz ] ; then
-				wget $PATH_OPENSUSE_D02 
-				chmod 777 openSUSE-13.1-ARM-JeOS.aarch64-rootfs.aarch64-1.12.1-Build37.1.tbz
-				mv openSUSE-13.1-ARM-JeOS.aarch64-rootfs.aarch64-1.12.1-Build37.1.tbz ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tbz
-			fi
-			;;
-		"Ubuntu" )
-			if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tar.gz ] ; then
-				echo "$DISTRO"_"$PLATFORM".tar.gz
-				curl $PATH_UBUNTU_D02 > ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tar.gz
-			fi
-			;;	
-	esac
-fi
 if [ x"$PLATFORM" = x"D01" ] ; then
 	case $DISTRO in
 		"OpenSuse" )
-			if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tbz ] ; then
-				curl $PATH_OPENSUSE_D01 > ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tbz
-			fi
+			DISTRO_SOURCE=$PATH_OPENSUSE32
 			;;
 		"Ubuntu" )
-			if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tar.gz ] ; then
-				curl $PATH_UBUNTU_D01 > ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".tar.gz	
-			fi
+			DISTRO_SOURCE=$PATH_UBUNTU32
+			;;	
+	esac
+else
+	case $DISTRO in
+		"OpenSuse" )
+			DISTRO_SOURCE=$PATH_OPENSUSE64
+			;;
+		"Ubuntu" )
+			DISTRO_SOURCE=$PATH_UBUNTU64
 			;;	
 	esac
 fi
 
+postfix=${DISTRO_SOURCE#*.} 
+if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix" ] ; then
+	curl $DISTRO_SOURCE > ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix"
+	chmod 777 ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".$postfix
+fi
+
+#Download binary files
+binary_dir=$build_dir/binary/
+BINARY_DIR=binary
+BINARY_SOURCE=https://github.com/hisilicon/estuary/releases/download/bin-v1.2
+if [ ! -d "$BINARY_DIR" ] ; then
+	mkdir -p "$BINARY_DIR" 2> /dev/null
+
+	curl $BINARY_SOURCE/bl1.bin 			> ./$BINARY_DIR/bl1.bin
+	curl $BINARY_SOURCE/CH02TEVBC_V03.bin 	> ./$BINARY_DIR/CH02TEVBC_V03.bin
+	curl $BINARY_SOURCE/fip.bin				> ./$BINARY_DIR/fip.bin
+	curl $BINARY_SOURCE/grub.cfg			> ./$BINARY_DIR/grub.cfg
+	curl $BINARY_SOURCE/grubaa64.efi 		> ./$BINARY_DIR/grubaa64.efi
+	curl $BINARY_SOURCE/hip05-d02.dtb		> ./$BINARY_DIR/hip05-d02.dtb
+	curl $BINARY_SOURCE/hulk-hip05.cpio.gz	> ./$BINARY_DIR/hulk-hip05.cpio.gz
+	curl $BINARY_SOURCE/Image				> ./$BINARY_DIR/Image
+	curl $BINARY_SOURCE/UEFI_Release.bin	> ./$BINARY_DIR/UEFI_Release.bin
+fi
+
+#Prepare tools for D01's UEFI
 if [ x"D01" = x"$PLATFORM" ]; then
 	#build binary dir for special PLATFORM
-	binary_dir=./build/$PLATFORM/binary/
 	mkdir -p "$binary_dir" 2> /dev/null
 
 	# use uefi-tools to compile
@@ -199,13 +223,13 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	#env CROSS_COMPILE_32=$CROSS ./uefi-tools/uefi-build.sh -b DEBUG d01
 	../uefi-tools/uefi-build.sh -b DEBUG d01
 	popd
-	uefi_dir=./build/$PLATFORM/uefi
+	uefi_dir=$build_dir/uefi
 	mkdir -p "$uefi_dir" 2> /dev/null
 	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir
 	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir
 
 	# compile the grub
-	grub_dir=./build/$PLATFORM/grub
+	grub_dir=$build_dir/grub
 	mkdir -p "$grub_dir" 2> /dev/null
 	echo path:`pwd`
 	cd $grub_dir
@@ -214,7 +238,6 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	pushd grub/
 	make distclean
 	./autogen.sh
-	old_path=$PATH
 	export PATH=${CROSS%/*}:$PATH
 	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
 	make -j8 
@@ -229,19 +252,18 @@ fi
 
 if [ x"EVB" = x"$PLATFORM" ]; then
 	# copy the uefi binary to build dir
-	uefi_dir=./build/$PLATFORM/uefi
+	uefi_dir=$build_dir/uefi
 	mkdir -p "$uefi_dir" 2> /dev/null
 	cp ./uefi/HisiPkg/PV660_EFI_L1_EVBa_TC.fd $uefi_dir
 fi
 
 if [ x"D02" = x"$PLATFORM" ]; then
 	# copy the uefi binary to build dir
-	binary_dir=./build/$PLATFORM/binary/
 	mkdir -p "$binary_dir" 2> /dev/null
-	cp -r ./estuary/binary/* $binary_dir
+	cp -r ./$BINARY_DIR/* $binary_dir
 
 	# compile the grub
-	grub_dir=./build/$PLATFORM/grub
+	grub_dir=$build_dir/grub
 	mkdir -p "$grub_dir" 2> /dev/null
 	echo path:`pwd`
 	cd $grub_dir
@@ -249,23 +271,23 @@ if [ x"D02" = x"$PLATFORM" ]; then
 	cd -
 	pushd grub/
 	./autogen.sh
-	old_path=$PATH
 	export PATH=${CROSS%/*}:$PATH
 	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
 	make -j8
 	make  install
 	popd
 	# TODO -- check whether it is useful
+	target=`pwd`/$BINARY_DIR/
 	cd $grub_dir
 	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p ./ boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
-	mv grubaa64.efi ../binary
+	mv grubaa64.efi $TARGET
 	echo $PATH
 	cd -
 fi
 
 # compile the kernel
 # preprocess for kernel building
-kernel_dir=./build/$PLATFORM/kernel
+kernel_dir=$build_dir/kernel
 mkdir -p "$kernel_dir" 2> /dev/null
 if [ x"D01" = x"$PLATFORM" ]; then
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
@@ -364,45 +386,70 @@ if [ x"BUILDKERNEL" = x"TRUE" ]; then
 	popd
 fi
 DTB=`pwd`/$DTB
-cat $KERNEL $DTB > ./build/$PLATFORM/kernel/.kernel
+cat $KERNEL $DTB > $build_dir/kernel/.kernel
 cp $KERNEL $binary_dir
 cp $DTB $binary_dir
 
 
-# uncompress the distro
-distro_dir=./build/$PLATFORM/distro/$DISTRO
+# Uncompress the distribution
+distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 mkdir -p $distro_dir 2> /dev/null
+if [ ! -d "$distro_dir" ] ; then
+	mkdir -p "$distro_dir" 2> /dev/null
 
-if [ x"QEMU" = x"$PLATFORM" ]; then
-	image=`ls "$distro_dir" | grep -E "*.img$|*.raw$"`
-	
-	if [ $? -ne 0 ]; then
-		fs_file=`pwd`/distro/$DISTRO/`ls "distro/$DISTRO" | grep -vE "armhfp|armv7l|arm32"`
-		echo "uncompress the distribution($DISTRO) ......"
-		cd $distro_dir
-		case ${fs_file##*.} in
-			gz)
-				cp $fs_file ./
-				gunzip ${fs_file##*/} 
-				;;
-			xz)
-				cp $fs_file ./
-				xz -d ${fs_file##*/}
-				;;
-			*)
-				echo "error suffix of the distro"
-				exit 1
-				;;
-		esac
-		image=`ls *.img 2>/dev/null`
-		if [ x"" = x"$image" ]; then
-			image=`ls *.raw`
+	image=`ls "./$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
+	fs_file=`pwd`/$build_dir/$DISTRO_DIR/$DISTRO
+	echo $fs_file
+   	echo "uncompress the distribution($DISTRO) ......"
+	if [ x"${image##*.}" = x"bz2" ] ; then
+		TEMP=${image%.*}
+		if [ x"${TEMP##*.}" = x"tar" ] ; then
+			tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo This is a tar.bz2 package
+		else
+			bunzip2 ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo This is a bz2 package
 		fi
-		cd -
+	fi
+	if [ x"${image##*.}" = x"gz" ] ; then
+		TEMP=${image%.*}
+		if [ x"${TEMP##*.}" = x"tar" ] ; then
+			tar zxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo This is a tar.gz package
+		else
+			gunzip ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo This is a gz package
+		fi
+	fi
+	if [ x"${image##*.}" = x"tar" ] ; then 
+		tar xvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		echo This is a tar package
+	fi
+	if [ x"${image##*.}" = x"xz" ] ; then 
+#		echo This is a xz package
+		TEMP=${image%.*}
+		if [ x"${TEMP##*.}" = x"tar" ] ; then
+			xz -d ./$DISTRO_DIR/$image 2> /dev/null 1>&2
+			tar xvf ./$DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
+		fi
+	fi
+	if [ x"${image##*.}" = x"tbz" ] ; then
+		sudo tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	fi
+	if [ x"${image}" = x"" ] ; then
+		echo no found suitable filesystem
+	fi
+fi
+
+# Build Qemu and start it
+if [ x"QEMU" = x"$PLATFORM" ]; then
+#Find the image file's name
+	image=`ls $distro_dir/*.img 2>/dev/null`
+	if [ x"" = x"$image" ]; then
+		image=`ls $distro_dir/*.raw`
 	fi
 	
-	cd $distro_dir
-	ROOTFS=`pwd`/$image
+	ROOTFS=`pwd`/$distro_dir/$image
 	case $DISTRO in 
 		OpenEmbedded | OpenSuse)
 			partition=2
@@ -414,78 +461,26 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 			;;
 	esac
 	CMDLINE="console=ttyAMA0 root=/dev/vda$partition rw"
-	cd -
-fi
 
-if [ x"EVB" = x"$PLATFORM" ] || [ x"D02" = x"$PLATFORM" ] || [ x"D01" = x"$PLATFORM" ]; then
-#	image=`ls "$distro_dir" | grep -E "*.img$|*.raw$"`
-	image=`ls "./distro/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
-	fs_file=`pwd`/build/$PLATFORM/distro/$DISTRO
-	echo $fs_file
-   	echo "uncompress the distribution($DISTRO) ......"
-	if [ x"${image##*.}" = x"bz2" ] ; then
-		TEMP=${image%.*}
-		if [ x"${TEMP##*.}" = x"tar" ] ; then
-			tar jxvf ./distro/$image -C $fs_file 2> /dev/null 1>&2
-			echo This is a tar.bz2 package
-		else
-			bunzip2 ./distro/$image -C $fs_file 2> /dev/null 1>&2
-			echo This is a bz2 package
-		fi
-	fi
-	if [ x"${image##*.}" = x"gz" ] ; then
-		TEMP=${image%.*}
-		if [ x"${TEMP##*.}" = x"tar" ] ; then
-			tar zxvf ./distro/$image -C $fs_file 2> /dev/null 1>&2
-			echo This is a tar.gz package
-		else
-			gunzip ./distro/$image -C $fs_file 2> /dev/null 1>&2
-			echo This is a gz package
-		fi
-	fi
-	if [ x"${image##*.}" = x"tar" ] ; then 
-		tar xvf ./distro/$image -C $fs_file 2> /dev/null 1>&2
-		echo This is a tar package
-	fi
-	if [ x"${image##*.}" = x"xz" ] ; then 
-#		echo This is a xz package
-		TEMP=${image%.*}
-		if [ x"${TEMP##*.}" = x"tar" ] ; then
-			xz -d ./distro/$image 2> /dev/null 1>&2
-			tar xvf ./distro/$TEMP -C $fs_file 2> /dev/null 1>&2
-		fi
-	fi
-	if [ x"${image##*.}" = x"tbz" ] ; then
-		sudo tar jxvf ./distro/$image -C $fs_file 2> /dev/null 1>&2
-	fi
-	if [ x"${image}" = x"" ] ; then
-		echo no found suitable filesystem
-	fi
-fi
+#Compile qemu
+	all_path=`pwd`/$binary_dir
+	mkdir -p $qemu_dir 2> /dev/null
 
-if [ x"QEMU" = x"$PLATFORM" ]; then
-	
-	distro_dir=./build/$PLATFORM/qemu
-	all_path=`pwd`/build/$PLATFORM/qemu
-	mkdir -p $distro_dir 2> /dev/null
-
-	# compile the qemu
-	QEMU=`find ./build -name qemu-system-aarch64`
+	QEMU=`find $binary_dir -name qemu-system-aarch64`
 	if [ x"" = x"$QEMU" ]; then
 		pushd qemu/
 		./configure --prefix=$all_path --target-list=aarch64-softmmu
 		make -j8
 		make install
 		popd
-		QEMU=$distro_dir/bin/qemu-system-aarch64
+		QEMU=$binary_dir/qemu-system-aarch64
 	fi
 	
-	# run the qemu
+# run the qemu
 	$QEMU -machine virt -cpu cortex-a57 \
 	    -kernel $KERNEL \
 	    -drive if=none,file=$ROOTFS,id=fs \
 	    -device virtio-blk-device,drive=fs \
 	    -append "$CMDLINE" \
 	    -nographic
-	
 fi

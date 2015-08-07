@@ -120,7 +120,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
 	$echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
 	$export PATH=~/bin:$PATH
 
- 4.2 Fetch it
+ 4.2 Obtain whole project
   Create a work directory by following commands:
 	$mkdir workdir
 	$cd workdir
@@ -130,7 +130,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
  	$repo sync
 	If it fails during repo sync, you can just try to do 'repo sync' again.
 
-  Continue to download the toolchains and a variety of distributions by:
+  Continue to download the toolchains and prebuilt binaries by:
 	$./estuary/init.sh
 	
  4.3 Build it
