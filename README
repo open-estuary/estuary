@@ -1,6 +1,6 @@
-******  Estuary release 1.1 ******
+******  Estuary release 1.2 ******
 
-These are the release notes for the Estuary version 1.1. Read them carefully,
+These are the release notes for the Estuary version 1.2. Read them carefully,
 as they tell you what this is all about, explain how to get, build, and run it.
 
 
@@ -30,8 +30,8 @@ as they tell you what this is all about, explain how to get, build, and run it.
   The UEFI source code for D02 is not public currently, maybe we will publish
   it later, but now we can only provide binaries for D02.
   
-  There is a "binary" directory in our project:
-  https://github.com/hisilicon/estuary.git
+  You can get the binaries directory from the release in this project as follow:
+  https://github.com/hisilicon/estuary/releases
 
   The source code for D01, you can get it by following commands:
   	$git clone http://git.linaro.org/git/uefi/linaro-edk2.git
@@ -62,7 +62,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
   This part is about the rootfs of several distibutions (OpenEmbedded, Debian,
   Ubuntu, OpenSuse and Fedora). Now we directly use the binary. The
   OpenEmbedded is downloaded from the Linaro, and the else are downloaded from
-  the respective offical website. 
+  the respective offical website: 
   OpenEmbedded:
   http://releases.linaro.org/14.06/openembedded/aarch64/vexpress64-openembedded_minimal-armv8-gcc-4.8_20140623-668.img.gz
   Debian:
@@ -74,6 +74,9 @@ as they tell you what this is all about, explain how to get, build, and run it.
   Fedora:
   http://dmarlin.fedorapeople.org/fedora-arm/aarch64/F21-20140407-foundation-v8.tar.xz
 
+  For the validated distributions to our board, you can get them from following website:
+  Ubuntu: http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
+
 - QEMU
   This part is about the virtual platform. The QEMU (Quick EMUlater) can
   emulate the ARMv8 virtual machine on the x86 host machine, so we can use the
@@ -81,6 +84,13 @@ as they tell you what this is all about, explain how to get, build, and run it.
   software solution. We now get the source code from the community. You can get
   it by following command:
   	$git clone git://git.qemu-project.org/qemu.git
+
+- Binaries
+  You can get most binary files of above components from this project's release as follow, apart from tool chain, distributions and qemu.
+    https://github.com/hisilicon/estuary/releases
+  
+  More detail about how to use this binaries directly, please refer to:
+    http://hisilicon.github.io/2015/04/17/D02-hacking-manual/
 
 3. Status
 ================
