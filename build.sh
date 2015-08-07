@@ -148,6 +148,7 @@ if [ x"" = x"$arm_gcc" ]; then
 	arm_gcc=`find $toolchain_dir -name $cross_gcc`
 fi
 CROSS=`pwd`/${arm_gcc%g*}
+export PATH=${CROSS%/*}:$PATH
 echo "Cross compiler is $CROSS"
 
 #Download distribution according to special PLATFORM and DISTRO
@@ -155,6 +156,7 @@ DISTRO_DIR=distro
 if [ ! -d "$DISTRO_DIR" ] ; then
 	mkdir -p "$DISTRO_DIR" 2> /dev/null
 fi
+
 if [ x"$PLATFORM" = x"D01" ] ; then
 	case $DISTRO in
 		"OpenSuse" )
@@ -187,23 +189,23 @@ BINARY_DIR=binary
 BINARY_SOURCE=https://github.com/hisilicon/estuary/releases/download/bin-v1.2
 if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
+	mkdir -p "$binary_dir" 2> /dev/null
 
-	curl $BINARY_SOURCE/bl1.bin 			> ./$BINARY_DIR/bl1.bin
-	curl $BINARY_SOURCE/CH02TEVBC_V03.bin 	> ./$BINARY_DIR/CH02TEVBC_V03.bin
-	curl $BINARY_SOURCE/fip.bin				> ./$BINARY_DIR/fip.bin
-	curl $BINARY_SOURCE/grub.cfg			> ./$BINARY_DIR/grub.cfg
-	curl $BINARY_SOURCE/grubaa64.efi 		> ./$BINARY_DIR/grubaa64.efi
-	curl $BINARY_SOURCE/hip05-d02.dtb		> ./$BINARY_DIR/hip05-d02.dtb
-	curl $BINARY_SOURCE/hulk-hip05.cpio.gz	> ./$BINARY_DIR/hulk-hip05.cpio.gz
-	curl $BINARY_SOURCE/Image				> ./$BINARY_DIR/Image
-	curl $BINARY_SOURCE/UEFI_Release.bin	> ./$BINARY_DIR/UEFI_Release.bin
+	curl $BINARY_SOURCE/bl1.bin 			> $BINARY_DIR/bl1.bin
+	curl $BINARY_SOURCE/CH02TEVBC_V03.bin 	> $BINARY_DIR/CH02TEVBC_V03.bin
+	curl $BINARY_SOURCE/fip.bin				> $BINARY_DIR/fip.bin
+	curl $BINARY_SOURCE/grub.cfg			> $BINARY_DIR/grub.cfg
+	curl $BINARY_SOURCE/grubaa64.efi 		> $BINARY_DIR/grubaa64.efi
+	curl $BINARY_SOURCE/hip05-d02.dtb		> $BINARY_DIR/hip05-d02.dtb
+	curl $BINARY_SOURCE/hulk-hip05.cpio.gz	> $BINARY_DIR/hulk-hip05.cpio.gz
+	curl $BINARY_SOURCE/Image				> $BINARY_DIR/Image
+	curl $BINARY_SOURCE/UEFI_Release.bin	> $BINARY_DIR/UEFI_Release.bin
+
+	cp $BINARY_DIR/* $binary_dir
 fi
 
 #Prepare tools for D01's UEFI
 if [ x"D01" = x"$PLATFORM" ]; then
-	#build binary dir for special PLATFORM
-	mkdir -p "$binary_dir" 2> /dev/null
-
 	# use uefi-tools to compile
 	if [ ! -d uefi-tools ] ; then 
 		git clone git://git.linaro.org/uefi/uefi-tools.git
@@ -238,7 +240,6 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	pushd grub/
 	make distclean
 	./autogen.sh
-	export PATH=${CROSS%/*}:$PATH
 	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
 	make -j8 
 	make install
@@ -247,7 +248,7 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	cd $grub_dir
 	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
 	cd -
-	cp ./$grub_dir/grub.efi ./$binary_dir
+	cp $grub_dir/grub.efi $binary_dir
 fi
 
 if [ x"EVB" = x"$PLATFORM" ]; then
@@ -271,7 +272,6 @@ if [ x"D02" = x"$PLATFORM" ]; then
 	cd -
 	pushd grub/
 	./autogen.sh
-	export PATH=${CROSS%/*}:$PATH
 	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
 	make -j8
 	make  install
@@ -280,9 +280,9 @@ if [ x"D02" = x"$PLATFORM" ]; then
 	target=`pwd`/$BINARY_DIR/
 	cd $grub_dir
 	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p ./ boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
-	mv grubaa64.efi $TARGET
 	echo $PATH
 	cd -
+	cp $grub_dir/grubaa64.efi $grub_dir/
 fi
 
 # compile the kernel
@@ -295,9 +295,6 @@ if [ x"D01" = x"$PLATFORM" ]; then
 		KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
 
 		export ARCH=arm
-		if [ "$LOCALARCH" != "arm" ]; then
-			export CROSS_COMPILE=$CROSS 
-		fi
 	fi
 else
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
@@ -305,13 +302,14 @@ else
 		KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
 
 		export ARCH=arm64
-		if [ "$LOCALARCH" != "aarch64" ]; then
-			export CROSS_COMPILE=$CROSS 
-		fi
 	fi
 fi
 
 if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
+		export CROSS_COMPILE=$CROSS 
+	fi
+
 	pushd kernel/
 	
 	make mrproper
@@ -378,9 +376,9 @@ fi
 
 # postprocess for kernel building
 if [ x"BUILDKERNEL" = x"TRUE" ]; then
-	if [[ "$LOCALARCH" = "arm" || "$LOCALARCH" = "aarch64" ]]; then
-		make O=../$kernel_dir modules
-		make O=../$kernel_dir modules_install
+	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
+		make O=../$kernel_dir -j8 modules
+		make O=../$kernel_dir -j8 modules_install
 	fi
 
 	popd
@@ -393,13 +391,10 @@ cp $DTB $binary_dir
 
 # Uncompress the distribution
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
-mkdir -p $distro_dir 2> /dev/null
 if [ ! -d "$distro_dir" ] ; then
 	mkdir -p "$distro_dir" 2> /dev/null
 
 	image=`ls "./$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
-	fs_file=`pwd`/$build_dir/$DISTRO_DIR/$DISTRO
-	echo $fs_file
    	echo "uncompress the distribution($DISTRO) ......"
 	if [ x"${image##*.}" = x"bz2" ] ; then
 		TEMP=${image%.*}
@@ -463,17 +458,17 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	CMDLINE="console=ttyAMA0 root=/dev/vda$partition rw"
 
 #Compile qemu
-	all_path=`pwd`/$binary_dir
+	qemu_dir=`pwd`/$build_dir/qemu
 	mkdir -p $qemu_dir 2> /dev/null
 
-	QEMU=`find $binary_dir -name qemu-system-aarch64`
+	QEMU=`find $qemu_dir -name qemu-system-aarch64`
 	if [ x"" = x"$QEMU" ]; then
 		pushd qemu/
-		./configure --prefix=$all_path --target-list=aarch64-softmmu
+		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
 		make -j8
 		make install
 		popd
-		QEMU=$binary_dir/qemu-system-aarch64
+		QEMU=$qemu_dir/qemu-system-aarch64
 	fi
 	
 # run the qemu
