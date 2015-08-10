@@ -310,13 +310,13 @@ if [ x"D01" = x"$PLATFORM" ]; then
 else
 	KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		BUILDKERNEL=TRUE
+		BUILDFLAG=TRUE
 
 		export ARCH=arm64
 	fi
 fi
 
-if [ x"BUILDKERNEL" = x"TRUE" ]; then
+if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
 		export CROSS_COMPILE=$CROSS 
 	fi
@@ -329,7 +329,7 @@ fi
 
 # kernel building
 if [ x"QEMU" = x"$PLATFORM" ]; then
-	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir hulk_defconfig
 		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
 		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
@@ -346,7 +346,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 fi
 
 if [ x"EVB" = x"$PLATFORM" ]; then
-	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir hulk_defconfig
 		make O=../$kernel_dir -j8 Image
 		make O=../$kernel_dir hisi_p660_evb_32core.dtb
@@ -357,7 +357,7 @@ fi
 
 if [ x"D02" = x"$PLATFORM" ]; then
 	mkdir -p $kernel_dir/arch/arm64/boot/dts/hisilicon
-	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir defconfig
 		make O=../$kernel_dir -j8 Image
 		make O=../$kernel_dir hisilicon/hip05-d02.dtb
@@ -366,7 +366,7 @@ if [ x"D02" = x"$PLATFORM" ]; then
 fi
 
 if [ x"D01" = x"$PLATFORM" ]; then
-	if [ x"BUILDKERNEL" = x"TRUE" ]; then
+	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir hisi_defconfig
 
 		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
@@ -386,7 +386,7 @@ if [ x"D01" = x"$PLATFORM" ]; then
 fi
 
 # postprocess for kernel building
-if [ x"BUILDKERNEL" = x"TRUE" ]; then
+if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
 		make O=../$kernel_dir -j8 modules
 		make O=../$kernel_dir -j8 modules_install
