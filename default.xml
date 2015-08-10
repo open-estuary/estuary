@@ -15,7 +15,7 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project path="kernel" name="linaro-kernel" />
+  <project path="kernel" name="linaro-kernel" revision="estuary" />
 
   <!-- uefi -->
   <project path="uefi" name="UEFI" />
