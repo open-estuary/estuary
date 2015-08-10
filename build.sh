@@ -193,7 +193,7 @@ if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix" ] ; then
 fi
 
 #Download binary files
-binary_dir=$build_dir/binary/
+binary_dir=$build_dir/binary
 BINARY_DIR=binary
 BINARY_SOURCE=https://github.com/hisilicon/estuary/releases/download/bin-v1.2
 if [ ! -d "$BINARY_DIR" ] ; then
@@ -210,7 +210,11 @@ if [ ! -d "$BINARY_DIR" ] ; then
 	curl $BINARY_SOURCE/Image				> $BINARY_DIR/Image
 	curl $BINARY_SOURCE/UEFI_Release.bin	> $BINARY_DIR/UEFI_Release.bin
 
-	cp $BINARY_DIR/* $binary_dir
+fi
+
+if [ ! -d "$binary_dir" ] ; then
+	mkdir -p "$binary_dir" 2> /dev/null
+	cp $BINARY_DIR/* $binary_dir/
 fi
 
 #Prepare tools for D01's UEFI
@@ -236,8 +240,8 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	popd
 	uefi_dir=$build_dir/uefi
 	mkdir -p "$uefi_dir" 2> /dev/null
-	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir
-	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir
+	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
+	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
 
 	# compile the grub
 	grub_dir=$build_dir/grub
@@ -257,21 +261,17 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	cd $grub_dir
 	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
 	cd -
-	cp $grub_dir/grub.efi $binary_dir
+	cp $grub_dir/grub.efi $binary_dir/
 fi
 
 if [ x"EVB" = x"$PLATFORM" ]; then
 	# copy the uefi binary to build dir
 	uefi_dir=$build_dir/uefi
 	mkdir -p "$uefi_dir" 2> /dev/null
-	cp ./uefi/HisiPkg/PV660_EFI_L1_EVBa_TC.fd $uefi_dir
+	cp ./uefi/HisiPkg/PV660_EFI_L1_EVBa_TC.fd $uefi_dir/
 fi
 
 if [ x"D02" = x"$PLATFORM" ]; then
-	# copy the uefi binary to build dir
-	mkdir -p "$binary_dir" 2> /dev/null
-	cp -r ./$BINARY_DIR/* $binary_dir
-
 	# compile the grub
 	grub_dir=$build_dir/grub
 	mkdir -p "$grub_dir" 2> /dev/null
@@ -286,12 +286,11 @@ if [ x"D02" = x"$PLATFORM" ]; then
 	make  install
 	popd
 	# TODO -- check whether it is useful
-	target=`pwd`/$BINARY_DIR/
 	cd $grub_dir
 	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p ./ boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
 	echo $PATH
 	cd -
-	cp $grub_dir/grubaa64.efi $grub_dir/
+	cp $grub_dir/grubaa64.efi $binary_dir/
 fi
 
 # compile the kernel
@@ -394,8 +393,8 @@ if [ x"BUILDKERNEL" = x"TRUE" ]; then
 fi
 DTB=`pwd`/$DTB
 cat $KERNEL $DTB > $build_dir/kernel/.kernel
-cp $KERNEL $binary_dir
-cp $DTB $binary_dir
+cp $KERNEL $binary_dir/
+cp $DTB $binary_dir/
 
 
 # Uncompress the distribution
