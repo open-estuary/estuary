@@ -112,7 +112,7 @@ fi
 
 # Setup host environment
 automake --version | grep '1.11' > /dev/null
-if [ x"$?" = "1" ]; then
+if [ x"$?" = x"1" ]; then
   sudo apt-get update
   sudo apt-get install -y automake1.11
 fi
