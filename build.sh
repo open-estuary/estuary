@@ -111,14 +111,17 @@ if [ x"$PLATFORM" = x"" -o x"$DISTRO" = x"" ]; then
 fi
 
 # Setup host environment
-sudo apt-get update
-sudo apt-get install -y automake1.11
+automake --version | grep '1.11' > /dev/null
+if [ x"$?" = "1" ]; then
+  sudo apt-get update
+  sudo apt-get install -y automake1.11
+fi
 
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
 
 cd $TOOLS_DIR/../
-build_dir=./build/$PLATFORM
+build_dir=build/$PLATFORM
 mkdir -p "$build_dir" 2> /dev/null
 
 case $PLATFORM in
@@ -186,10 +189,14 @@ else
 	esac
 fi
 
-postfix=${DISTRO_SOURCE#*.} 
-if [ ! -e ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix" ] ; then
-	curl $DISTRO_SOURCE > ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix"
-	chmod 777 ./$DISTRO_DIR/"$DISTRO"_"$PLATFORM".$postfix
+postfix=${DISTRO_SOURCE#*.tar} 
+if [ x"$postfix" = x"" ] then
+    postfix=${DISTRO_SOURCE##*.} 
+fi
+
+if [ ! -e $DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix" ] ; then
+	curl $DISTRO_SOURCE > $DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix"
+	chmod 777 $DISTRO_DIR/"$DISTRO"_"$PLATFORM".$postfix
 fi
 
 #Download binary files
@@ -239,13 +246,13 @@ if [ x"" = x"$grubimg" ]; then
     	export PATH=$PATH:`pwd`/uefi-tools/
     	# compile uefi for d01
     	pushd uefi/
-    	#env CROSS_COMPILE_32=$CROSS ./uefi-tools/uefi-build.sh -b DEBUG d01
+    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
     	../uefi-tools/uefi-build.sh -b DEBUG d01
     	popd
     	uefi_dir=$build_dir/uefi
     	mkdir -p "$uefi_dir" 2> /dev/null
-    	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
-    	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
+    	cp uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
+    	cp uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
     
     	# compile the grub
     	mkdir -p "$grub_dir" 2> /dev/null
@@ -395,7 +402,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	popd
 fi
 DTB=`pwd`/$DTB
-cat $KERNEL $DTB > $build_dir/kernel/.kernel
+#cat $KERNEL $DTB > $build_dir/kernel/.kernel
 cp $KERNEL $binary_dir/
 cp $DTB $binary_dir/
 
@@ -404,42 +411,42 @@ cp $DTB $binary_dir/
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 mkdir -p "$distro_dir" 2> /dev/null
 
-image=`ls "./$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
+image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
 echo "uncompress the distribution($DISTRO) ......"
 if [ x"${image##*.}" = x"bz2" ] ; then
 	TEMP=${image%.*}
 	if [ x"${TEMP##*.}" = x"tar" ] ; then
-		tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
 		echo This is a tar.bz2 package
 	else
-		bunzip2 ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
 		echo This is a bz2 package
 	fi
 fi
 if [ x"${image##*.}" = x"gz" ] ; then
 	TEMP=${image%.*}
 	if [ x"${TEMP##*.}" = x"tar" ] ; then
-		tar zxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
 		echo This is a tar.gz package
 	else
-		gunzip ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
 		echo This is a gz package
 	fi
 fi
 if [ x"${image##*.}" = x"tar" ] ; then 
-	tar xvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
 	echo This is a tar package
 fi
 if [ x"${image##*.}" = x"xz" ] ; then 
 #	echo This is a xz package
 	TEMP=${image%.*}
 	if [ x"${TEMP##*.}" = x"tar" ] ; then
-		xz -d ./$DISTRO_DIR/$image 2> /dev/null 1>&2
-		tar xvf ./$DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
+		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
+		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
 	fi
 fi
 if [ x"${image##*.}" = x"tbz" ] ; then
-	sudo tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	sudo tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
 fi
 if [ x"${image}" = x"" ] ; then
 	echo no found suitable filesystem
