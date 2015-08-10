@@ -17,40 +17,28 @@ as they tell you what this is all about, explain how to get, build, and run it.
 ================
 
 - Toolchain
-  This part is about the cross compiler for the arm platform. Now we directly
-  use the binary downloaded from the Linaro. It is a tool to be used to
-  compile the Linux kernel, boot loader and so on.
+  This part is about the cross compiler for the arm platform. Now we directly use the binary downloaded from the Linaro as follow.
 
   URL: http://www.linaro.org/downloads/
-  32bit gcc: http://releases.linaro.org/14.09/components/toolchain/binaries/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
-  64bit gcc: http://releases.linaro.org/14.09/components/toolchain/binaries/gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 
 - UEFI
   This part is about the boot loader, now we use the UEFI as the bootloader. 
-  The UEFI source code for D02 is not public currently, maybe we will publish
-  it later, but now we can only provide binaries for D02.
+  The UEFI source code for D02 is not public currently, maybe we will publish it later, but now we can only provide binaries for D02.
   
-  You can get the binaries directory from the release in this project as follow:
-  https://github.com/hisilicon/estuary/releases
-
   The source code for D01, you can get it by following commands:
   	$git clone http://git.linaro.org/git/uefi/linaro-edk2.git
   ...or
   	$git clone https://github.com/hisilicon/UEFI.git
 
 - Grub
-  This part is also about the boot loader. Grub can run in the UEFI, and
-  supply some advanced function. We get the source code from the community.
+  This part is also about the boot loader. Grub can run in the UEFI, and supply some advanced function. We get the source code from the community.
   You can get it by following command:
   	$git clone git://git.savannah.gnu.org/grub.git
 
 - Linux Kernel
-  This part is about the OS kernel. Now we use the HULK (Huawei Unified Linux
-  Kernel) which is the Linux Kernel maintained by the CSI and HTSAT together.
-  it can support several SoCs, such as P650, P660, etc. 
+  This part is about the OS kernel, the latest version can support D01 or D02 boards, etc. 
   
-  The latest avaible Kernel source code for estuary project is provided in
-  following git repository by a branch named "estuary":
+  The latest avaible Kernel source code for estuary project is provided in following git repository by a branch named "estuary":
   github: https://github.com/hisilicon/linaro-kernel.git -b estuary  
   
   You can always get the latest version by following command:
@@ -59,23 +47,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
 	$git clone https://github.com/hislicon/linaro-kernel.git -b refs/tags/estuary-vx.x
 
 - Distributions
-  This part is about the rootfs of several distibutions (OpenEmbedded, Debian,
-  Ubuntu, OpenSuse and Fedora). Now we directly use the binary. The
-  OpenEmbedded is downloaded from the Linaro, and the else are downloaded from
-  the respective offical website: 
-  OpenEmbedded:
-  http://releases.linaro.org/14.06/openembedded/aarch64/vexpress64-openembedded_minimal-armv8-gcc-4.8_20140623-668.img.gz
-  Debian:
-  http://people.debian.org/~wookey/bootstrap/rootfs/debian-unstable-arm64.tar.gz
-  Ubuntu:
-  http://snapshots.linaro.org/ubuntu/images/developer-arm64/latest/
-  OpenSuse:
-  http://download.opensuse.org/ports/aarch64/distribution/13.1/appliances/ 
-  Fedora:
-  http://dmarlin.fedorapeople.org/fedora-arm/aarch64/F21-20140407-foundation-v8.tar.xz
-
-  For the validated distributions to our board, you can get them from following website:
-  Ubuntu: http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
+  This part is about the rootfs of several distibutions (OpenEmbedded, Debian, Ubuntu, OpenSuse and Fedora). All of them can be downloaded from their official website.
 
 - QEMU
   This part is about the virtual platform. The QEMU (Quick EMUlater) can
@@ -89,8 +61,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
   You can get most binary files of above components from this project's release as follow, apart from tool chain, distributions and qemu.
     https://github.com/hisilicon/estuary/releases
   
-  More detail about how to use this binaries directly, please refer to:
-    http://hisilicon.github.io/2015/04/17/D02-hacking-manual/
+For more detail information about all components mentioned above, please refer to http://hisilicon.github.com. 
 
 3. Status
 ================
