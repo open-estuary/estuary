@@ -190,7 +190,7 @@ else
 fi
 
 postfix=${DISTRO_SOURCE#*.tar} 
-if [ x"$postfix" = x"" ] then
+if [ x"$postfix" = x"" ]; then
     postfix=${DISTRO_SOURCE##*.} 
 fi
 
