@@ -178,7 +178,7 @@ if [ x"$PLATFORM" = x"D01" ] ; then
 			DISTRO_SOURCE=$PATH_UBUNTU32
 			;;	
 			* )
-			DISTRO_SOURCE=none
+			DISTRO_SOURCE="none"
 			;;
 	esac
 else
@@ -190,24 +190,24 @@ else
 			DISTRO_SOURCE=$PATH_UBUNTU64
 			;;	
 			* )
-			DISTRO_SOURCE=none
+			DISTRO_SOURCE="none"
 			;;
 	esac
 fi
 
 if [ x"$DISTRO_SOURCE" = x"none" ]; then
-	echo "The distributions [$DISTRO] can't be supported now!
+	echo "The distributions [$DISTRO] can not be supported now!"
 	exit
 fi
 
 postfix=${DISTRO_SOURCE#*.tar} 
 if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
     postfix=${DISTRO_SOURCE##*.} 
-ese
-	if [x"$postfix" = x"" ]; then
+else
+	if [ x"$postfix" = x"" ]; then
 		postfix=".tar"
 	else
-		postfix="tar."$postfix	
+		postfix="tar"$postfix	
 	fi
 fi
 
