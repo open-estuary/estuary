@@ -217,80 +217,83 @@ if [ ! -d "$binary_dir" ] ; then
 	cp $BINARY_DIR/* $binary_dir/
 fi
 
-#Prepare tools for D01's UEFI
-if [ x"D01" = x"$PLATFORM" ]; then
-	# use uefi-tools to compile
-	if [ ! -d uefi-tools ] ; then 
-		git clone git://git.linaro.org/uefi/uefi-tools.git
-    	# add a build item for d01 in uefi-tools
-    	pushd uefi-tools/
-		echo "[d01]" >> platforms.config 
-		echo "LONGNAME=HiSilicon D01 Cortex-A15 16-cores" >> platforms.config
-		echo "BUILDFLAGS=-D EDK2_ARMVE_STANDALONE=1" >> platforms.config
-		echo "DSC=HisiPkg/D01BoardPkg/D01BoardPkg.dsc" >> platforms.config
-		echo "ARCH=ARM" >> platforms.config
-		popd
-	fi
+grub_dir=$build_dir/grub
+grubimg=`find $grub_dir -name *.efi`
 
-	export PATH=$PATH:`pwd`/uefi-tools/
-	# compile uefi for d01
-	pushd uefi/
-	#env CROSS_COMPILE_32=$CROSS ./uefi-tools/uefi-build.sh -b DEBUG d01
-	../uefi-tools/uefi-build.sh -b DEBUG d01
-	popd
-	uefi_dir=$build_dir/uefi
-	mkdir -p "$uefi_dir" 2> /dev/null
-	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
-	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
-
-	# compile the grub
-	grub_dir=$build_dir/grub
-	mkdir -p "$grub_dir" 2> /dev/null
-	echo path:`pwd`
-	cd $grub_dir
-	absolute_dir=`pwd`
-	cd -
-	pushd grub/
-	make distclean
-	./autogen.sh
-	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
-	make -j8 
-	make install
-	popd
-	# TODO -- check whether it is useful
-	cd $grub_dir
-	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
-	cd -
-	cp $grub_dir/grub.efi $binary_dir/
-fi
-
-if [ x"EVB" = x"$PLATFORM" ]; then
-	# copy the uefi binary to build dir
-	uefi_dir=$build_dir/uefi
-	mkdir -p "$uefi_dir" 2> /dev/null
-	cp ./uefi/HisiPkg/PV660_EFI_L1_EVBa_TC.fd $uefi_dir/
-fi
-
-if [ x"D02" = x"$PLATFORM" ]; then
-	# compile the grub
-	grub_dir=$build_dir/grub
-	mkdir -p "$grub_dir" 2> /dev/null
-	echo path:`pwd`
-	cd $grub_dir
-	absolute_dir=`pwd`
-	cd -
-	pushd grub/
-	./autogen.sh
-	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
-	make -j8
-	make  install
-	popd
-	# TODO -- check whether it is useful
-	cd $grub_dir
-	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p ./ boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
-	echo $PATH
-	cd -
-	cp $grub_dir/grubaa64.efi $binary_dir/
+if [ x"" = x"$grubimg" ]; then
+    #Prepare tools for D01's UEFI
+    if [ x"D01" = x"$PLATFORM" ]; then
+    	# use uefi-tools to compile
+    	if [ ! -d uefi-tools ] ; then 
+    		git clone git://git.linaro.org/uefi/uefi-tools.git
+        	# add a build item for d01 in uefi-tools
+        	pushd uefi-tools/
+    		echo "[d01]" >> platforms.config 
+    		echo "LONGNAME=HiSilicon D01 Cortex-A15 16-cores" >> platforms.config
+    		echo "BUILDFLAGS=-D EDK2_ARMVE_STANDALONE=1" >> platforms.config
+    		echo "DSC=HisiPkg/D01BoardPkg/D01BoardPkg.dsc" >> platforms.config
+    		echo "ARCH=ARM" >> platforms.config
+    		popd
+    	fi
+    
+    	export PATH=$PATH:`pwd`/uefi-tools/
+    	# compile uefi for d01
+    	pushd uefi/
+    	#env CROSS_COMPILE_32=$CROSS ./uefi-tools/uefi-build.sh -b DEBUG d01
+    	../uefi-tools/uefi-build.sh -b DEBUG d01
+    	popd
+    	uefi_dir=$build_dir/uefi
+    	mkdir -p "$uefi_dir" 2> /dev/null
+    	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
+    	cp ./uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
+    
+    	# compile the grub
+    	mkdir -p "$grub_dir" 2> /dev/null
+    	echo path:`pwd`
+    	cd $grub_dir
+    	absolute_dir=`pwd`
+    	cd -
+    	pushd grub/
+    	make distclean
+    	./autogen.sh
+    	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
+    	make -j8 
+    	make install
+    	popd
+    	# TODO -- check whether it is useful
+    	cd $grub_dir
+    	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
+    	cd -
+    	cp $grub_dir/grub.efi $binary_dir/
+    else
+    	# Prepare aarch64 efi bianry
+        if [ x"EVB" = x"$PLATFORM" ]; then
+        	# copy the uefi binary to build dir
+        	uefi_dir=$build_dir/uefi
+        	mkdir -p "$uefi_dir" 2> /dev/null
+        	cp $binary_dir/PV660_EFI_L1_EVBa_TC.fd $uefi_dir/
+        fi
+        
+    	# compile the grub for aarch64
+    	grub_dir=$build_dir/grub
+    	mkdir -p "$grub_dir" 2> /dev/null
+    	echo path:`pwd`
+    	cd $grub_dir
+    	absolute_dir=`pwd`
+    	cd -
+    	pushd grub/
+    	./autogen.sh
+    	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
+    	make -j8
+    	make  install
+    	popd
+    	# TODO -- check whether it is useful
+    	cd $grub_dir
+    	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p ./ boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
+    	echo $PATH
+    	cd -
+    	cp $grub_dir/grubaa64.efi $binary_dir/
+    fi
 fi
 
 # compile the kernel
@@ -298,16 +301,16 @@ fi
 kernel_dir=$build_dir/kernel
 mkdir -p "$kernel_dir" 2> /dev/null
 if [ x"D01" = x"$PLATFORM" ]; then
+	KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
 		BUILDFLAG=TRUE
-		KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
 
 		export ARCH=arm
 	fi
 else
+	KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
 		BUILDKERNEL=TRUE
-		KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
 
 		export ARCH=arm64
 	fi
