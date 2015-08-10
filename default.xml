@@ -21,7 +21,7 @@
   <project path="uefi" name="UEFI" />
 
   <!-- grub -->
-  <project name="grub" remote="grub" revision="refs/tags/2.0" />
+  <project name="grub" remote="grub" />
   
   <!-- tools -->
   <project name="tools" revision="refs/tags/estuary-v1.0" />
