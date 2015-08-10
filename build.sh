@@ -112,7 +112,7 @@ fi
 
 # Setup host environment
 sudo apt-get update
-sudo apt-get install automake1.11
+sudo apt-get install -y automake1.11
 
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
