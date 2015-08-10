@@ -110,6 +110,10 @@ if [ x"$PLATFORM" = x"" -o x"$DISTRO" = x"" ]; then
     exit 1
 fi
 
+# Setup host environment
+sudo apt-get update
+sudo apt-get install automake1.11
+
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
 
@@ -129,23 +133,28 @@ case $PLATFORM in
 esac
 
 # Download & uncompress the cross-compile-chain
-toolchain_dir=toolchain
+TOOLCHAIN_DIR=toolchain
+toolchain_dir=$build/toochain
 GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 
-if [ ! -d "$toolchain_dir" ] ; then
+if [ ! -d "$TOOLCHAIN_DIR" ] ; then
+	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 	mkdir -p "$toolchain_dir" 2> /dev/null
 
-	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 > $toolchain_dir/$GCC32
-	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 > $toolchain_dir/$GCC64
+	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 > $TOOLCHAIN_DIR/$GCC32
+	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 > $TOOLCHAIN_DIR/$GCC64
+
+	cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
+	cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
 fi
 
-arm_gcc=`find "$toolchain_dir" -name "$cross_gcc"`
+arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc"`
 if [ x"" = x"$arm_gcc" ]; then 
-	package=`ls $toolchain_dir/*.xz | grep "$cross_prefix"`
+	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
 	echo "uncompress the toolchain......"
-	tar Jxf $package -C $toolchain_dir
-	arm_gcc=`find $toolchain_dir -name $cross_gcc`
+	tar Jxf $package -C $TOOLCHAIN_DIR
+	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc`
 fi
 CROSS=`pwd`/${arm_gcc%g*}
 export PATH=${CROSS%/*}:$PATH
@@ -391,49 +400,47 @@ cp $DTB $binary_dir
 
 # Uncompress the distribution
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
-if [ ! -d "$distro_dir" ] ; then
-	mkdir -p "$distro_dir" 2> /dev/null
+mkdir -p "$distro_dir" 2> /dev/null
 
-	image=`ls "./$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
-   	echo "uncompress the distribution($DISTRO) ......"
-	if [ x"${image##*.}" = x"bz2" ] ; then
-		TEMP=${image%.*}
-		if [ x"${TEMP##*.}" = x"tar" ] ; then
-			tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-			echo This is a tar.bz2 package
-		else
-			bunzip2 ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-			echo This is a bz2 package
-		fi
+image=`ls "./$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
+echo "uncompress the distribution($DISTRO) ......"
+if [ x"${image##*.}" = x"bz2" ] ; then
+	TEMP=${image%.*}
+	if [ x"${TEMP##*.}" = x"tar" ] ; then
+		tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		echo This is a tar.bz2 package
+	else
+		bunzip2 ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		echo This is a bz2 package
 	fi
-	if [ x"${image##*.}" = x"gz" ] ; then
-		TEMP=${image%.*}
-		if [ x"${TEMP##*.}" = x"tar" ] ; then
-			tar zxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-			echo This is a tar.gz package
-		else
-			gunzip ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-			echo This is a gz package
-		fi
+fi
+if [ x"${image##*.}" = x"gz" ] ; then
+	TEMP=${image%.*}
+	if [ x"${TEMP##*.}" = x"tar" ] ; then
+		tar zxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		echo This is a tar.gz package
+	else
+		gunzip ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+		echo This is a gz package
 	fi
-	if [ x"${image##*.}" = x"tar" ] ; then 
-		tar xvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-		echo This is a tar package
+fi
+if [ x"${image##*.}" = x"tar" ] ; then 
+	tar xvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	echo This is a tar package
+fi
+if [ x"${image##*.}" = x"xz" ] ; then 
+#	echo This is a xz package
+	TEMP=${image%.*}
+	if [ x"${TEMP##*.}" = x"tar" ] ; then
+		xz -d ./$DISTRO_DIR/$image 2> /dev/null 1>&2
+		tar xvf ./$DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
 	fi
-	if [ x"${image##*.}" = x"xz" ] ; then 
-#		echo This is a xz package
-		TEMP=${image%.*}
-		if [ x"${TEMP##*.}" = x"tar" ] ; then
-			xz -d ./$DISTRO_DIR/$image 2> /dev/null 1>&2
-			tar xvf ./$DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
-		fi
-	fi
-	if [ x"${image##*.}" = x"tbz" ] ; then
-		sudo tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	fi
-	if [ x"${image}" = x"" ] ; then
-		echo no found suitable filesystem
-	fi
+fi
+if [ x"${image##*.}" = x"tbz" ] ; then
+	sudo tar jxvf ./$DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+fi
+if [ x"${image}" = x"" ] ; then
+	echo no found suitable filesystem
 fi
 
 # Build Qemu and start it
