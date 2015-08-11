@@ -219,9 +219,9 @@ else
 	fi
 fi
 
-if [ ! -e $DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix" ] ; then
-	curl $DISTRO_SOURCE > $DISTRO_DIR/"$DISTRO"_"$PLATFORM"."$postfix"
-	chmod 777 $DISTRO_DIR/"$DISTRO"_"$PLATFORM".$postfix
+if [ ! -e $DISTRO_DIR/"$DISTRO"."$postfix" ] ; then
+	curl $DISTRO_SOURCE > $DISTRO_DIR/"$DISTRO"."$postfix"
+	chmod 777 $DISTRO_DIR/"$DISTRO".$postfix
 fi
 
 #Download binary files
@@ -441,7 +441,7 @@ cp $DTB $binary_dir/
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 mkdir -p "$distro_dir" 2> /dev/null
 
-image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$PLATFORM"`
+image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*"`
 echo "uncompress the distribution($DISTRO) ......"
 if [ x"${image##*.}" = x"bz2" ] ; then
 	TEMP=${image%.*}
