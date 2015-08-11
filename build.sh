@@ -224,16 +224,19 @@ if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
 	mkdir -p "$binary_dir" 2> /dev/null
 
-	curl $BINARY_SOURCE/bl1.bin 			> $BINARY_DIR/bl1.bin
-	curl $BINARY_SOURCE/CH02TEVBC_V03.bin 	> $BINARY_DIR/CH02TEVBC_V03.bin
-	curl $BINARY_SOURCE/fip.bin				> $BINARY_DIR/fip.bin
-	curl $BINARY_SOURCE/grub.cfg			> $BINARY_DIR/grub.cfg
-	curl $BINARY_SOURCE/grubaa64.efi 		> $BINARY_DIR/grubaa64.efi
-	curl $BINARY_SOURCE/hip05-d02.dtb		> $BINARY_DIR/hip05-d02.dtb
-	curl $BINARY_SOURCE/hulk-hip05.cpio.gz	> $BINARY_DIR/hulk-hip05.cpio.gz
-	curl $BINARY_SOURCE/Image				> $BINARY_DIR/Image
-	curl $BINARY_SOURCE/UEFI_Release.bin	> $BINARY_DIR/UEFI_Release.bin
+    cd $BINARY_DIR/
 
+	wget -c $BINARY_SOURCE/bl1.bin 
+	wget -c $BINARY_SOURCE/CH02TEVBC_V03.bin
+	wget -c $BINARY_SOURCE/fip.bin
+	wget -c $BINARY_SOURCE/grub.cfg
+	wget -c $BINARY_SOURCE/grubaa64.efi
+	wget -c $BINARY_SOURCE/hip05-d02.dtb
+	wget -c $BINARY_SOURCE/hulk-hip05.cpio.gzio.gz
+	wget -c $BINARY_SOURCE/Image
+	wget -c $BINARY_SOURCE/UEFI_Release.bin
+
+    cd -
 fi
 
 if [ ! -d "$binary_dir" ] ; then
