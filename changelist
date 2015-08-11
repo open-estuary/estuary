@@ -1,0 +1,11 @@
+Change list for Estuary V1.2:
+1. Update UEFI to version B905.
+	A. Supported kernel Image to maximum 31M bytes.
+	B. Supported roofs file to maximus 64M bytes.
+	C. Enabled USB boot feature.
+	D. Enabled 2 ethernet ports in UEFI.
+2. Enabled full configurations for kernel as same as Ubuntu vivid.
+3. Added lxc patches into kernel to enable full lxc features.
+4. Added patches to enable lscpu command with cache information.
+5. Enabled and validated Ubuntu and Fedora distributions.
+6. Updated the documentations in hisilicon.github.com.
