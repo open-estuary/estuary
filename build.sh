@@ -244,9 +244,9 @@ fi
 grub_dir=$build_dir/grub
 grubimg=`find $grub_dir -name *.efi`
 
-if [ x"" = x"$grubimg" ]; then
-    #Prepare tools for D01's UEFI
-    if [ x"D01" = x"$PLATFORM" ]; then
+#Prepare tools for D01's UEFI
+if [ x"D01" = x"$PLATFORM" ]; then
+	if [ x"" = x"$grubimg" ]; then
     	# use uefi-tools to compile
     	if [ ! -d uefi-tools ] ; then 
     		git clone git://git.linaro.org/uefi/uefi-tools.git
@@ -288,8 +288,10 @@ if [ x"" = x"$grubimg" ]; then
     	cd $grub_dir
     	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	cd -
-    	cp $grub_dir/grub.efi $binary_dir/
-    else
+	fi
+    cp $grub_dir/grub.efi $binary_dir/
+else
+	if [ x"" = x"$grubimg" ]; then
     	# Prepare aarch64 efi bianry
         if [ x"EVB" = x"$PLATFORM" ]; then
         	# copy the uefi binary to build dir
@@ -316,8 +318,8 @@ if [ x"" = x"$grubimg" ]; then
     	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p ./ boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	echo $PATH
     	cd -
-    	cp $grub_dir/grubaa64.efi $binary_dir/
     fi
+	cp $grub_dir/grubaa64.efi $binary_dir/
 fi
 
 # compile the kernel
