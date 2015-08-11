@@ -22,6 +22,9 @@
 
   <!-- grub -->
   <project name="grub" remote="grub" />
+
+  <!-- caliper -->
+  <project name="caliper" remote="caliper" />
   
   <!-- tools -->
   <project name="tools" revision="refs/tags/estuary-v1.0" />
