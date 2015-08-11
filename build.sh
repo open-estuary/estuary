@@ -7,7 +7,7 @@ distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse Fedora)
 distros_evb=(OpenEmbedded)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
-platforms=(QEMU D01 EVB D02)
+platforms=(QEMU D01 D02)
 
 PATH_OPENSUSE64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse.img.tar.gz
 PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
@@ -29,7 +29,6 @@ usage()
 	echo " -p,--platform	platform"
 	echo " -d,--distro	distribuation"
 	echo "		*for D01, only support Ubuntu, OpenSuse, Fedora"
-	echo "		*for EVB, only support OpenEmbedded"
 	echo "		*for D02, support OpenEmbedded Ubuntu, OpenSuse, Fedora"
 }
 
@@ -45,13 +44,6 @@ check_distro()
 		done
 	elif [ x"D01" = x"$PLATFORM" ]; then
 		for dis in ${distros_d01[@]}; do
-			if [ x"$dis" = x"$1" ]; then 
-				DISTRO=$1
-				return
-			fi
-		done
-	elif [ x"EVB" = x"$PLATFORM" ]; then
-		for dis in ${distros_evb[@]}; do
 			if [ x"$dis" = x"$1" ]; then 
 				DISTRO=$1
 				return
@@ -365,43 +357,6 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 fi
 
 # kernel building
-if [ x"QEMU" = x"$PLATFORM" ]; then
-	if [ x"$BUILDFLAG" = x"TRUE" ]; then
-		make O=../$kernel_dir hulk_defconfig
-		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
-		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
-		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
-		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
-		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
-		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
-		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
-		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
-		make O=../$kernel_dir -j8 Image
-		make O=../$kernel_dir hisi_p660_evb_32core.dtb
-	fi
-	DTB=$kernel_dir/arch/arm64/boot/dts/hisi_p660_evb_32core.dtb
-fi
-
-if [ x"EVB" = x"$PLATFORM" ]; then
-	if [ x"$BUILDFLAG" = x"TRUE" ]; then
-		make O=../$kernel_dir hulk_defconfig
-		make O=../$kernel_dir -j8 Image
-		make O=../$kernel_dir hisi_p660_evb_32core.dtb
-		make O=../$kernel_dir hisi_p660_evb_16core.dtb
-	fi
-	DTB=$kernel_dir/arch/arm64/boot/dts/hisi_p660_evb_32core.dtb
-fi
-
-if [ x"D02" = x"$PLATFORM" ]; then
-	mkdir -p $kernel_dir/arch/arm64/boot/dts/hisilicon
-	if [ x"$BUILDFLAG" = x"TRUE" ]; then
-		make O=../$kernel_dir defconfig
-		make O=../$kernel_dir -j8 Image
-		make O=../$kernel_dir hisilicon/hip05-d02.dtb
-	fi
-	DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
-fi
-
 if [ x"D01" = x"$PLATFORM" ]; then
 	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir hisi_defconfig
@@ -420,6 +375,24 @@ if [ x"D01" = x"$PLATFORM" ]; then
 		make O=../$kernel_dir hip04-d01.dtb
 	fi
 	DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+else
+	mkdir -p $kernel_dir/arch/arm64/boot/dts/hisilicon
+	if [ x"$BUILDFLAG" = x"TRUE" ]; then
+		make O=../$kernel_dir defconfig
+        if [ x"QEMU" = x"$PLATFORM" ]; then
+    		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
+    		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
+        fi
+		make O=../$kernel_dir -j8 Image
+		make O=../$kernel_dir hisilicon/hip05-d02.dtb
+	fi
+	DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
 fi
 
 # postprocess for kernel building
@@ -435,7 +408,6 @@ DTB=`pwd`/$DTB
 #cat $KERNEL $DTB > $build_dir/kernel/.kernel
 cp $KERNEL $binary_dir/
 cp $DTB $binary_dir/
-
 
 # Uncompress the distribution
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
