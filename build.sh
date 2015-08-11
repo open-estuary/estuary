@@ -462,7 +462,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 		image=`ls $distro_dir/*.raw`
 	fi
 	
-	ROOTFS=`pwd`/$distro_dir/$image
+	ROOTFS=`pwd`/$image
 	case $DISTRO in 
 		OpenEmbedded | OpenSuse)
 			partition=2
