@@ -24,7 +24,7 @@
   <project name="grub" remote="grub" />
 
   <!-- caliper -->
-  <project name="caliper" remote="caliper" />
+  <project name="caliper" />
   
   <!-- tools -->
   <project name="tools" revision="refs/tags/estuary-v1.0" />
