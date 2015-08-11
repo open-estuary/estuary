@@ -9,10 +9,12 @@ distros_evb=(OpenEmbedded)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
 platforms=(QEMU D01 EVB D02)
 
-PATH_OPENSUSE64=http://download.opensuse.org/ports/aarch64/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.aarch64-rootfs.aarch64-1.12.1-Build37.1.tbz
+PATH_OPENSUSE64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse.img.tar.gz
 PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
+PATH_FEDORA64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
 PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.armv7-rootfs.armv7l-1.12.1-Build37.1.tbz
 PATH_UBUNTU32=http://releases.linaro.org/latest/ubuntu/utopic-images/server/linaro-utopic-server-20150220-698.tar.gz
+PATH_FEDORA32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
 
 usage()
 {
@@ -177,6 +179,9 @@ if [ x"$PLATFORM" = x"D01" ] ; then
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU32
 			;;	
+		"Fedora" )
+			DISTRO_SOURCE=$PATH_FEDORA32
+			;;	
 			* )
 			DISTRO_SOURCE="none"
 			;;
@@ -188,6 +193,9 @@ else
 			;;
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU64
+			;;	
+		"Fedora" )
+			DISTRO_SOURCE=$PATH_FEDORA64
 			;;	
 			* )
 			DISTRO_SOURCE="none"
@@ -292,7 +300,7 @@ if [ x"D01" = x"$PLATFORM" ]; then
     	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	cd -
 	fi
-    cp $grub_dir/grub.efi $binary_dir/
+#    cp $grub_dir/grub.efi $binary_dir/
 else
 	if [ x"" = x"$grubimg" ]; then
     	# Prepare aarch64 efi bianry
@@ -322,7 +330,7 @@ else
     	echo $PATH
     	cd -
     fi
-	cp $grub_dir/grubaa64.efi $binary_dir/
+#	cp $grub_dir/grubaa64.efi $binary_dir/
 fi
 
 # compile the kernel
