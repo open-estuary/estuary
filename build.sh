@@ -58,7 +58,8 @@ check_distro()
 		done
 	fi
 
-	echo "error distro!"
+	echo "Error distro!"
+    echo "Please do ./estuary/build.sh -h to get help"
 	exit 1
 }
 
@@ -70,7 +71,8 @@ check_platform()
 			return
 		fi
 	done
-	echo "error platform!"
+	echo "Error platform!"
+    echo "Please do ./estuary/build.sh -h to get help"
 	exit 1
 }
 
