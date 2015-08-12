@@ -44,7 +44,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
   You can always get the latest version by following command:
 	$git clone https://github.com/hisilicon/linaro-kernel.git -b estuary
   ...or get it with a special tag by following command:
-	$git clone https://github.com/hislicon/linaro-kernel.git -b refs/tags/estuary-vx.x
+	$git clone https://github.com/hisilicon/linaro-kernel.git -b refs/tags/estuary-vx.x
 
 - Distributions
   This part is about the rootfs of several distibutions (OpenEmbedded, Debian, Ubuntu, OpenSuse and Fedora). All of them can be downloaded from their official website.
