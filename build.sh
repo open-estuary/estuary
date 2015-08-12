@@ -406,7 +406,9 @@ fi
 DTB=`pwd`/$DTB
 #cat $KERNEL $DTB > $build_dir/kernel/.kernel
 cp $KERNEL $binary_dir/
-cp $DTB $binary_dir/
+if [ x"QEMU" != x"$PLATFORM" ]; then
+    cp $DTB $binary_dir/
+fi
 
 # Uncompress the distribution
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
