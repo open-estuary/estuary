@@ -123,6 +123,8 @@ For more detail information about all components mentioned above, please refer t
   Here is the example for building the software for P660 D02 board:
 	$./estuary/build.sh -p D02 -d OpenEmbedded
 
+  After building, you will find all binaries in 'binary' directory.
+
 5. Deployment
 ================
   How to deploy the system into our board, please refer to documents named "Deploy_on_the_xxx".
