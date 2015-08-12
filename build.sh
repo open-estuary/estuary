@@ -125,7 +125,7 @@ cd $TOOLS_DIR/../
 build_dir=build/$PLATFORM
 mkdir -p "$build_dir" 2> /dev/null
 
-if [ x"$TARGETARCH" = x"ARM32"]; then
+if [ x"$TARGETARCH" = x"ARM32" ]; then
 	cross_gcc=arm-linux-gnueabihf-gcc
 	cross_prefix=arm-linux-gnueabihf
 else
@@ -412,58 +412,66 @@ fi
 
 # Uncompress the distribution
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
-mkdir -p "$distro_dir" 2> /dev/null
-
-image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH"`
-echo "uncompress the distribution($DISTRO) ......"
-if [ x"${image##*.}" = x"bz2" ] ; then
-	TEMP=${image%.*}
-	if [ x"${TEMP##*.}" = x"tar" ] ; then
-		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-		echo This is a tar.bz2 package
-	else
-		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-		echo This is a bz2 package
-	fi
-fi
-if [ x"${image##*.}" = x"gz" ] ; then
-	TEMP=${image%.*}
-	if [ x"${TEMP##*.}" = x"tar" ] ; then
-		tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-		echo This is a tar.gz package
-	else
-		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-		echo This is a gz package
-	fi
-fi
-if [ x"${image##*.}" = x"tar" ] ; then 
-	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	echo This is a tar package
-fi
-if [ x"${image##*.}" = x"xz" ] ; then 
-#	echo This is a xz package
-	TEMP=${image%.*}
-	if [ x"${TEMP##*.}" = x"tar" ] ; then
-		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
-		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
-	fi
-fi
-if [ x"${image##*.}" = x"tbz" ] ; then
-	sudo tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-fi
-if [ x"${image}" = x"" ] ; then
-	echo no found suitable filesystem
+if [ ! -d "$distro_dir" ] ; then
+    mkdir -p "$distro_dir" 2> /dev/null
+    
+    image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH"`
+    echo "uncompress the distribution($DISTRO) ......"
+    if [ x"${image##*.}" = x"bz2" ] ; then
+    	TEMP=${image%.*}
+    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+    		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    		echo This is a tar.bz2 package
+    	else
+    		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    		echo This is a bz2 package
+    	fi
+    fi
+    if [ x"${image##*.}" = x"gz" ] ; then
+    	TEMP=${image%.*}
+    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+    		tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    		echo This is a tar.gz package
+    	else
+    		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    		echo This is a gz package
+    	fi
+    fi
+    if [ x"${image##*.}" = x"tar" ] ; then 
+    	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    	echo This is a tar package
+    fi
+    if [ x"${image##*.}" = x"xz" ] ; then 
+    #	echo This is a xz package
+    	TEMP=${image%.*}
+    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+    		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
+    		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
+    	fi
+    fi
+    if [ x"${image##*.}" = x"tbz" ] ; then
+    	sudo tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    fi
+    if [ x"${image}" = x"" ] ; then
+    	echo "Do not found suitable root filesystem!"
+        exit
+    fi
 fi
 
 # Build Qemu and start it
 if [ x"QEMU" = x"$PLATFORM" ]; then
 #Find the image file's name
-	image=`ls $distro_dir/*.img 2>/dev/null`
-	if [ x"" = x"$image" ]; then
-		image=`ls $distro_dir/*.raw`
+	rootfs=`ls $distro_dir/*.img 2>/dev/null`
+	if [ x"" = x"$rootfs" ]; then
+		rootfs=`ls $distro_dir/*.raw`
 	fi
+
+	if [ x"" = x"$rootfs" ]; then
+    	echo "Do not found suitable root filesystem!"
+        exit
+    fi
 	
-	ROOTFS=`pwd`/$image
+	rootfs=`pwd`/$rootfs
 	case $DISTRO in 
 		OpenEmbedded | OpenSuse)
 			partition=2
@@ -475,6 +483,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 			;;
 	esac
 	CMDLINE="console=ttyAMA0 root=/dev/vda$partition rw"
+	CMDLINE="console=ttyAMA0 root=/dev/vda rw"
 
 #Compile qemu
 	qemu_dir=`pwd`/$build_dir/qemu
@@ -493,7 +502,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 # run the qemu
 	$QEMU -machine virt -cpu cortex-a57 \
 	    -kernel $KERNEL \
-	    -drive if=none,file=$ROOTFS,id=fs \
+	    -drive if=none,file=$rootfs,id=fs \
 	    -device virtio-blk-device,drive=fs \
 	    -append "$CMDLINE" \
 	    -nographic
