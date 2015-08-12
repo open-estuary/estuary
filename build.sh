@@ -485,7 +485,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 		make -j8
 		make install
 		popd
-		QEMU=$qemu_dir/qemu-system-aarch64
+		QEMU=$qemu_dir/bin/qemu-system-aarch64
 	fi
 	
 # run the qemu
