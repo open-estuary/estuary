@@ -15,7 +15,7 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project path="kernel" name="linaro-kernel" revision="estuary" />
+  <project path="kernel" name="linaro-kernel" revision="refs/tags/estuary-v1.2" />
 
   <!-- uefi -->
   <project path="uefi" name="UEFI" />
@@ -24,7 +24,7 @@
   <project name="grub" remote="grub" />
 
   <!-- caliper -->
-  <project name="caliper" />
+  <project name="caliper" revision="refs/tags/v1.2-rc" />
   
   <!-- tools -->
   <project name="tools" revision="refs/tags/estuary-v1.0" />
@@ -39,6 +39,6 @@
   <project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" />
 
   <!-- estuary -->
-  <project name="estuary" />
+  <project name="estuary" revision="refs/tags/estuary-v1.2" />
 
 </manifest>
