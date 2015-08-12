@@ -278,8 +278,8 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
     	uefi_dir=$build_dir/uefi
     	mkdir -p "$uefi_dir" 2> /dev/null
         UEFI_BIN=`find "$UEFI_DIR" -name "D01.fd"`
-    	cp $UEFI_BIN $uefi_dir/
-    	cp $UEFI_BIN $binary_dir/
+    	cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
+    	cp $UEFI_BIN $binary_dir/UEFI_Release.bin
     
     	# compile the grub
     	mkdir -p "$grub_dir" 2> /dev/null
