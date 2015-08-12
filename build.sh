@@ -252,29 +252,33 @@ grubimg=`find $grub_dir -name *.efi`
 #Prepare tools for D01's UEFI
 if [ x"ARM32" = x"$TARGETARCH" ]; then
 	if [ x"" = x"$grubimg" ]; then
-    	# use uefi-tools to compile
-    	if [ ! -d uefi-tools ] ; then 
-    		git clone git://git.linaro.org/uefi/uefi-tools.git
-        	# add a build item for d01 in uefi-tools
-        	pushd uefi-tools/
-    		echo "[d01]" >> platforms.config 
-    		echo "LONGNAME=HiSilicon D01 Cortex-A15 16-cores" >> platforms.config
-    		echo "BUILDFLAGS=-D EDK2_ARMVE_STANDALONE=1" >> platforms.config
-    		echo "DSC=HisiPkg/D01BoardPkg/D01BoardPkg.dsc" >> platforms.config
-    		echo "ARCH=ARM" >> platforms.config
-    		popd
-    	fi
+    	# use uefi_tools to compile
+        UEFI_TOOLS=tools/uefi-tools
+        UEFI_DIR=uefi
+
+    	if [ ! -d "$UEFI_TOOLS" ] ; then 
+            echo "Do not find uefi-tools!"
+            exit 1
+        fi
+
+     	pushd $UEFI_TOOLS/
+     	echo "[d01]" >> platforms.config 
+     	echo "LONGNAME=HiSilicon D01 Cortex-A15 16-cores" >> platforms.config
+     	echo "BUILDFLAGS=-D EDK2_ARMVE_STANDALONE=1" >> platforms.config
+     	echo "DSC=HisiPkg/D01BoardPkg/D01BoardPkg.dsc" >> platforms.config
+     	echo "ARCH=ARM" >> platforms.config
+     	popd
     
     	export PATH=$PATH:`pwd`/uefi-tools/
     	# compile uefi for d01
-    	pushd uefi/
+    	pushd $UEFI_DIR/
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
-    	../uefi-tools/uefi-build.sh -b DEBUG d01
+    	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
     	uefi_dir=$build_dir/uefi
     	mkdir -p "$uefi_dir" 2> /dev/null
-    	cp uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
-    	cp uefi/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
+    	cp $UEFI_DIR/Build/D01/DEBUG_GCC48/FV/D01.fd $uefi_dir/
+    	cp $UEFI_DIR/Build/D01/DEBUG_GCC48/FV/D01.fd $binary_dir/
     
     	# compile the grub
     	mkdir -p "$grub_dir" 2> /dev/null
