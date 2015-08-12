@@ -59,7 +59,7 @@ check_distro()
 	fi
 
 	echo "Error distro!"
-    echo "Please do ./estuary/build.sh -h to get help"
+    echo "Please do ./estuary/build.sh -h to get help."
 	exit 1
 }
 
@@ -72,7 +72,7 @@ check_platform()
 		fi
 	done
 	echo "Error platform!"
-    echo "Please do ./estuary/build.sh -h to get help"
+    echo "Please do ./estuary/build.sh -h to get help."
 	exit 1
 }
 
@@ -115,21 +115,23 @@ fi
 
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
+if [ x"$PLATFORM" = x"D01" ]; then
+    TARGETARCH = "ARM32"
+else
+    TARGETARCH = "ARM64"
+fi
 
 cd $TOOLS_DIR/../
 build_dir=build/$PLATFORM
 mkdir -p "$build_dir" 2> /dev/null
 
-case $PLATFORM in
-	"QEMU" | "EVB" | "D02")
-		cross_gcc=aarch64-linux-gnu-gcc
-		cross_prefix=aarch64-linux-gnu
-		;;
-	"D01" )
-		cross_gcc=arm-linux-gnueabihf-gcc
-		cross_prefix=arm-linux-gnueabihf
-		;;
-esac
+if [ x"$TARGETARCH" = x"ARM32"]; then
+	cross_gcc=arm-linux-gnueabihf-gcc
+	cross_prefix=arm-linux-gnueabihf
+else
+	cross_gcc=aarch64-linux-gnu-gcc
+	cross_prefix=aarch64-linux-gnu
+fi
 
 # Download & uncompress the cross-compile-chain
 TOOLCHAIN_DIR=toolchain
@@ -165,7 +167,7 @@ if [ ! -d "$DISTRO_DIR" ] ; then
 	mkdir -p "$DISTRO_DIR" 2> /dev/null
 fi
 
-if [ x"$PLATFORM" = x"D01" ] ; then
+if [ x"$TARGETARCH" = x"ARM32" ] ; then
 	case $DISTRO in
 		"OpenSuse" )
 			DISTRO_SOURCE=$PATH_OPENSUSE32
@@ -199,6 +201,7 @@ fi
 
 if [ x"$DISTRO_SOURCE" = x"none" ]; then
 	echo "The distributions [$DISTRO] can not be supported now!"
+    echo "Please do ./estuary/build.sh -h to get help."
 	exit
 fi
 
@@ -213,9 +216,9 @@ else
 	fi
 fi
 
-if [ ! -e $DISTRO_DIR/"$DISTRO"."$postfix" ] ; then
-	curl $DISTRO_SOURCE > $DISTRO_DIR/"$DISTRO"."$postfix"
-	chmod 777 $DISTRO_DIR/"$DISTRO".$postfix
+if [ ! -e $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix" ] ; then
+	curl $DISTRO_SOURCE > $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
+	chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
 fi
 
 #Download binary files
@@ -250,7 +253,7 @@ grub_dir=$build_dir/grub
 grubimg=`find $grub_dir -name *.efi`
 
 #Prepare tools for D01's UEFI
-if [ x"D01" = x"$PLATFORM" ]; then
+if [ x"ARM32" = x"$TARGETARCH" ]; then
 	if [ x"" = x"$grubimg" ]; then
     	# use uefi-tools to compile
     	if [ ! -d uefi-tools ] ; then 
@@ -297,14 +300,6 @@ if [ x"D01" = x"$PLATFORM" ]; then
 #    cp $grub_dir/grub.efi $binary_dir/
 else
 	if [ x"" = x"$grubimg" ]; then
-    	# Prepare aarch64 efi bianry
-        if [ x"EVB" = x"$PLATFORM" ]; then
-        	# copy the uefi binary to build dir
-        	uefi_dir=$build_dir/uefi
-        	mkdir -p "$uefi_dir" 2> /dev/null
-        	cp $binary_dir/PV660_EFI_L1_EVBa_TC.fd $uefi_dir/
-        fi
-        
     	# compile the grub for aarch64
     	grub_dir=$build_dir/grub
     	mkdir -p "$grub_dir" 2> /dev/null
@@ -331,7 +326,7 @@ fi
 # preprocess for kernel building
 kernel_dir=$build_dir/kernel
 mkdir -p "$kernel_dir" 2> /dev/null
-if [ x"D01" = x"$PLATFORM" ]; then
+if [ x"ARM32" = x"$TARGETARCH" ]; then
 	KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
 		BUILDFLAG=TRUE
@@ -359,7 +354,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 fi
 
 # kernel building
-if [ x"D01" = x"$PLATFORM" ]; then
+if [ x"ARM32" = x"$TARGETARCH" ]; then
 	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir hisi_defconfig
 
@@ -415,7 +410,7 @@ cp $DTB $binary_dir/
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 mkdir -p "$distro_dir" 2> /dev/null
 
-image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*"`
+image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH"`
 echo "uncompress the distribution($DISTRO) ......"
 if [ x"${image##*.}" = x"bz2" ] ; then
 	TEMP=${image%.*}
