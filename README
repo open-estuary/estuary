@@ -108,20 +108,17 @@ For more detail information about all components mentioned above, please refer t
   If want to read the help message, can type this commond:
   	$./estuary/build.sh -h
   
-  Here is the example for running the OpenEmbedded with ARMv8 QEMU platform:
-	$./estuary/build.sh -p QEMU -d OpenEmbedded
+  Here is the example for running the Ubuntu with ARMv8 QEMU platform:
+	$./estuary/build.sh -p QEMU -d Ubuntu
 
-  Here is the example for building the software for D01 board:
+  Here is the example for building the Ubuntu target system for D01 board:
 	$./estuary/build.sh -p D01 -d Ubuntu
 
-  Here is the example for building the software for D02 board:
+  Here is the example for building the Ubuntu target system for D02 board:
 	$./estuary/build.sh -p D02 -d Ubuntu
 
-  Here is the example for building the software for P660 EVB board:
-	$./estuary/build.sh -p EVB -d OpenEmbedded
-
-  Here is the example for building the software for P660 D02 board:
-	$./estuary/build.sh -p D02 -d OpenEmbedded
+  Here is the example for building the Fedora target system for D02 board:
+	$./estuary/build.sh -p D02 -d Fedora
 
   After building, you will find all target files in 'build' directory.
 
