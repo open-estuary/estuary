@@ -116,9 +116,9 @@ fi
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
 if [ x"$PLATFORM" = x"D01" ]; then
-    TARGETARCH = "ARM32"
+    TARGETARCH="ARM32"
 else
-    TARGETARCH = "ARM64"
+    TARGETARCH="ARM64"
 fi
 
 cd $TOOLS_DIR/../
