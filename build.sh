@@ -135,20 +135,22 @@ fi
 
 # Download & uncompress the cross-compile-chain
 TOOLCHAIN_DIR=toolchain
-toolchain_dir=$build/toolchain
+toolchain_dir=$build_dir/toolchain
 GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 
 if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
-	mkdir -p "$toolchain_dir" 2> /dev/null
 
 	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 > $TOOLCHAIN_DIR/$GCC32
 	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 > $TOOLCHAIN_DIR/$GCC64
 fi
 
-cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
-cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+if [ ! -d "$toolchain_dir" ] ; then
+	mkdir -p "$toolchain_dir" 2> /dev/null
+    cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
+    cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+fi
 
 arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc"`
 if [ x"" = x"$arm_gcc" ]; then 
