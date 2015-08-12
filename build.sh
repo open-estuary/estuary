@@ -4,17 +4,15 @@
 #date: August 7, 2015
 
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
-distros_d01=(Ubuntu OpenSuse Fedora)
-distros_evb=(OpenEmbedded)
+distros_d01=(Ubuntu OpenSuse)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
 platforms=(QEMU D01 D02)
 
 PATH_OPENSUSE64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse.img.tar.gz
 PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
 PATH_FEDORA64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
-PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.1/appliances/openSUSE-13.1-ARM-JeOS.armv7-rootfs.armv7l-1.12.1-Build37.1.tbz
-PATH_UBUNTU32=http://releases.linaro.org/latest/ubuntu/utopic-images/server/linaro-utopic-server-20150220-698.tar.gz
-PATH_FEDORA32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
+PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.2/appliances/openSUSE-13.2-ARM-XFCE.armv7-rootfs.armv7l-1.12.1-Build33.7.tbz
+PATH_UBUNTU32=http://releases.linaro.org/15.02/ubuntu/lt-d01/linaro-utopic-server-20150220-698.tar.gz
 
 usage()
 {
@@ -28,7 +26,7 @@ usage()
 	echo -e "\n -h,--help	print this message"
 	echo " -p,--platform	platform"
 	echo " -d,--distro	distribuation"
-	echo "		*for D01, only support Ubuntu, OpenSuse, Fedora"
+	echo "		*for D01, only support Ubuntu, OpenSuse"
 	echo "		*for D02, support OpenEmbedded Ubuntu, OpenSuse, Fedora"
 }
 
@@ -58,8 +56,8 @@ check_distro()
 		done
 	fi
 
-	echo "Error distro!"
-    echo "Please do ./estuary/build.sh -h to get help."
+	echo "Error distribution!"
+    usage
 	exit 1
 }
 
@@ -72,7 +70,7 @@ check_platform()
 		fi
 	done
 	echo "Error platform!"
-    echo "Please do ./estuary/build.sh -h to get help."
+    usage
 	exit 1
 }
 
@@ -192,9 +190,6 @@ else
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU64
 			;;	
-		"Fedora" )
-			DISTRO_SOURCE=$PATH_FEDORA64
-			;;	
 			* )
 			DISTRO_SOURCE="none"
 			;;
@@ -202,9 +197,9 @@ else
 fi
 
 if [ x"$DISTRO_SOURCE" = x"none" ]; then
-	echo "The distributions [$DISTRO] can not be supported now!"
-    echo "Please do ./estuary/build.sh -h to get help."
-	exit
+	echo "The distributions [$DISTRO] can not be supported on $PLATFORM now!"
+    usage
+	exit 1
 fi
 
 postfix=${DISTRO_SOURCE#*.tar} 
@@ -454,7 +449,7 @@ if [ ! -d "$distro_dir" ] ; then
     fi
     if [ x"${image}" = x"" ] ; then
     	echo "Do not found suitable root filesystem!"
-        exit
+        exit 1
     fi
 fi
 
@@ -468,7 +463,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 
 	if [ x"" = x"$rootfs" ]; then
     	echo "Do not found suitable root filesystem!"
-        exit
+        exit 1
     fi
 	
 	rootfs=`pwd`/$rootfs
