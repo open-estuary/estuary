@@ -15,7 +15,7 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project path="kernel" name="linaro-kernel" revision="refs/tags/estuary-v1.2" />
+  <project path="kernel" name="linaro-kernel" revision="estuary" />
 
   <!-- uefi -->
   <project path="uefi" name="UEFI" />
@@ -39,6 +39,6 @@
   <project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" />
 
   <!-- estuary -->
-  <project name="estuary" revision="refs/tags/estuary-v1.2" />
+  <project name="estuary" />
 
 </manifest>
