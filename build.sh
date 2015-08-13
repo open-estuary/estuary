@@ -214,7 +214,7 @@ else
 fi
 
 if [ ! -e $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix" ] ; then
-	curl $DISTRO_SOURCE > $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
+	wget -c $DISTRO_SOURCE -O $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
 	chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
 fi
 
