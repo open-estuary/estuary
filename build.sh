@@ -140,8 +140,8 @@ GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 
-	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 > $TOOLCHAIN_DIR/$GCC32
-	curl http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 > $TOOLCHAIN_DIR/$GCC64
+	wget -c http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 -O $TOOLCHAIN_DIR/$GCC32
+	wget -c http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 -O $TOOLCHAIN_DIR/$GCC64
 fi
 
 if [ ! -d "$toolchain_dir" ] ; then
