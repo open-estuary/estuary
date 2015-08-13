@@ -237,6 +237,7 @@ if [ ! -d "$BINARY_DIR" ] ; then
 	wget -c $BINARY_SOURCE/hulk-hip05.cpio.gzio.gz
 	wget -c $BINARY_SOURCE/Image
 	wget -c $BINARY_SOURCE/UEFI_Release.bin
+	wget -c $BINARY_SOURCE/rootfs.tar.gz
 
     cd -
 fi
