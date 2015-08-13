@@ -175,9 +175,6 @@ if [ x"$TARGETARCH" = x"ARM32" ] ; then
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU32
 			;;	
-		"Fedora" )
-			DISTRO_SOURCE=$PATH_FEDORA32
-			;;	
 			* )
 			DISTRO_SOURCE="none"
 			;;
@@ -189,6 +186,9 @@ else
 			;;
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU64
+			;;	
+		"Fedora" )
+			DISTRO_SOURCE=$PATH_FEDORA64
 			;;	
 			* )
 			DISTRO_SOURCE="none"
@@ -483,6 +483,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 			;;
 	esac
 	CMDLINE="console=ttyAMA0 root=/dev/vda$partition rw"
+# Temporarily use fixed vda
 	CMDLINE="console=ttyAMA0 root=/dev/vda rw"
 
 #Compile qemu
