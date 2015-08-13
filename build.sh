@@ -450,7 +450,7 @@ if [ ! -d "$distro_dir" ] ; then
     	fi
     fi
     if [ x"${image##*.}" = x"tbz" ] ; then
-    	sudo tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
     fi
     if [ x"${image}" = x"" ] ; then
     	echo "Do not found suitable root filesystem!"
