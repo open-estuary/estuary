@@ -375,7 +375,6 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 	fi
 	DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
 else
-	mkdir -p $kernel_dir/arch/arm64/boot/dts/hisilicon
 	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir defconfig
         if [ x"QEMU" = x"$PLATFORM" ]; then
@@ -389,6 +388,8 @@ else
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
         fi
 		make O=../$kernel_dir -j8 Image
+
+	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
 		make O=../$kernel_dir hisilicon/hip05-d02.dtb
 	fi
 	DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
