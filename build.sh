@@ -108,6 +108,7 @@ fi
 automake --version | grep '1.11' > /dev/null
 if [ x"$?" = x"1" ]; then
   sudo apt-get update
+  sudo apt-get remove -y --purge automake*
   sudo apt-get install -y automake1.11
 fi
 
