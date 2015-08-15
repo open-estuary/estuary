@@ -108,9 +108,11 @@ fi
 automake --version | grep '1.11' > /dev/null
 if [ x"$?" = x"1" ]; then
   sudo apt-get update
+  sudo apt-get remove -y --purge automake*
   sudo apt-get install -y automake1.11
 fi
 
+# Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
 if [ x"$PLATFORM" = x"D01" ]; then
@@ -139,10 +141,10 @@ GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 
 if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
-
-	wget -c http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC32 -O $TOOLCHAIN_DIR/$GCC32
-	wget -c http://releases.linaro.org/14.09/components/toolchain/binaries/$GCC64 -O $TOOLCHAIN_DIR/$GCC64
 fi
+
+wget -c http://7xjz0v.com1.z0.glb.clouddn.com/toolchain/$GCC32 -O $TOOLCHAIN_DIR/$GCC32
+wget -c http://7xjz0v.com1.z0.glb.clouddn.com/toolchain/$GCC64 -O $TOOLCHAIN_DIR/$GCC64
 
 if [ ! -d "$toolchain_dir" ] ; then
 	mkdir -p "$toolchain_dir" 2> /dev/null
@@ -213,10 +215,8 @@ else
 	fi
 fi
 
-if [ ! -e $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix" ] ; then
-	wget -c $DISTRO_SOURCE -O $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
-	chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
-fi
+wget -c $DISTRO_SOURCE -O $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
+chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
 
 #Download binary files
 binary_dir=$build_dir/binary
@@ -225,21 +225,21 @@ BINARY_SOURCE=https://github.com/hisilicon/estuary/releases/download/bin-v1.2
 if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
 	mkdir -p "$binary_dir" 2> /dev/null
-
-    cd $BINARY_DIR/
-
-	wget -c $BINARY_SOURCE/bl1.bin 
-	wget -c $BINARY_SOURCE/CH02TEVBC_V03.bin
-	wget -c $BINARY_SOURCE/fip.bin
-	wget -c $BINARY_SOURCE/grub.cfg
-	wget -c $BINARY_SOURCE/grubaa64.efi
-	wget -c $BINARY_SOURCE/hip05-d02.dtb
-	wget -c $BINARY_SOURCE/hulk-hip05.cpio.gzio.gz
-	wget -c $BINARY_SOURCE/Image
-	wget -c $BINARY_SOURCE/UEFI_Release.bin
-
-    cd -
 fi
+
+cd $BINARY_DIR/
+
+wget -c $BINARY_SOURCE/bl1.bin 
+wget -c $BINARY_SOURCE/CH02TEVBC_V03.bin
+wget -c $BINARY_SOURCE/fip.bin
+wget -c $BINARY_SOURCE/grub.cfg
+wget -c $BINARY_SOURCE/grubaa64.efi
+wget -c $BINARY_SOURCE/hip05-d02.dtb
+wget -c $BINARY_SOURCE/hulk-hip05.cpio.gzio.gz
+wget -c $BINARY_SOURCE/Image
+wget -c $BINARY_SOURCE/UEFI_Release.bin
+
+cd -
 
 if [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
@@ -375,7 +375,6 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 	fi
 	DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
 else
-	mkdir -p $kernel_dir/arch/arm64/boot/dts/hisilicon
 	if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir defconfig
         if [ x"QEMU" = x"$PLATFORM" ]; then
@@ -389,6 +388,8 @@ else
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
         fi
 		make O=../$kernel_dir -j8 Image
+
+	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
 		make O=../$kernel_dir hisilicon/hip05-d02.dtb
 	fi
 	DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
