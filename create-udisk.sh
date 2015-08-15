@@ -5,7 +5,6 @@
 
 export LANG=C
 
-wyl_debug=y
 en_shield=y
 build_PLATFORM=D02
 build_DISTRO=Ubuntu
@@ -14,7 +13,6 @@ build_DISTRO=Ubuntu
 PWD=`pwd`
 EXE=$(echo $0 | sed "s/.*\///")
 EXEPATH="$PWD"/"$EXE"
-echo "wyl-trace -> $PWD $EXE $EXEPATH"
 clear
 cat << EOM
 
@@ -44,7 +42,6 @@ fi
 THEPWD=$EXEPATH
 PARSEPATH=`echo $THEPWD | grep -o -E '.*udisk.*Start/'`
 
-echo "wyl-trace -> PARSEPATH="$PARSEPATH
 
 if [ "$PARSEPATH" != "" ] ; then
 PATHVALID=1
@@ -96,13 +93,11 @@ check_for_udisk()
 
 populate_2_partitions() {
     ENTERCORRECTLY="0"
-    echo "wyl-trace -> build_PLATFORM=$build_PLATFORM,build_DISTRO=$build_DISTRO"
 	
     while [ $ENTERCORRECTLY -ne 1 ]
 	do
 		#read -e -p 'Enter path where USB disk tarballs were downloaded : '  TARBALLPATH
         TARBALLPATH="$PWD"/"udisk_images"
-		echo "wyl-trace -> TARBALLPATH=$TARBALLPATH"
         echo ""
 		ENTERCORRECTLY=1
 		if [ -d $TARBALLPATH ]
@@ -206,7 +201,6 @@ EOM
 # be shielded 
 if [ x"n" = x"$en_shield" ]
 then
-echo "wyl-trace -> en_shield ... "
 fi
         umount boot rootfs
         sync;sync
@@ -218,16 +212,13 @@ fi
 
 # find the avaible SD cards
 ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-9`
-echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 if [ "$ROOTDRIVE" = "root" ]; then
     ROOTDRIVE=`readlink /dev/root | cut -c1-3`
 else
     ROOTDRIVE=`echo $ROOTDRIVE | cut -c1-3`
 fi
-echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 
 PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
-echo "wyl-trace -> PARTITION_TEST = $PARTITION_TEST"
 # Check for available mounts
 check_for_udisk
 
@@ -328,7 +319,6 @@ if [ "$NUM_OF_DRIVES" != "0" ]; then
         echo "Unmounting the $DEVICEDRIVENAME drives"
 		c=`cat /proc/partitions | grep -v 'sda' | grep "$DEVICEDRIVENAME." | grep -n '' | awk '{print $5}' | cut -c4`
 		START_OF_DRIVES=$c
-		echo "wyl-trace -> c = $c"
         for ((; c<"$NUM_OF_DRIVES" + "$START_OF_DRIVES"; c++ ))
         do
                 unmounted=`df | grep '\<'$DEVICEDRIVENAME$P$c'\>' | awk '{print $1}'`
@@ -524,7 +514,6 @@ else
 fi
 popd
 
-echo "wyl-trace -> build pwd=$PWD"
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
 do
@@ -591,8 +580,3 @@ EOM
     exit 0
 fi
 
-#wyl debud 
-if [ x"n" = x"$wyl_debug" ]
-then
-echo "wyl-trace -> debug ... "
-fi
