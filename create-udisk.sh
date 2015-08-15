@@ -1,7 +1,12 @@
 #!/bin/bash
+#description: create USB startup Disk used for deploying estuary.
+#author: wangyanliang
+#date: August 12, 2015
 
 export LANG=C
 
+wyl_debug=y
+en_shield=y
 build_PLATFORM=D02
 build_DISTRO=Ubuntu
 # Determine the absolute path to the executable
@@ -9,6 +14,7 @@ build_DISTRO=Ubuntu
 PWD=`pwd`
 EXE=$(echo $0 | sed "s/.*\///")
 EXEPATH="$PWD"/"$EXE"
+echo "wyl-trace -> $PWD $EXE $EXEPATH"
 clear
 cat << EOM
 
@@ -38,6 +44,7 @@ fi
 THEPWD=$EXEPATH
 PARSEPATH=`echo $THEPWD | grep -o -E '.*udisk.*Start/'`
 
+echo "wyl-trace -> PARSEPATH="$PARSEPATH
 
 if [ "$PARSEPATH" != "" ] ; then
 PATHVALID=1
@@ -89,11 +96,13 @@ check_for_udisk()
 
 populate_2_partitions() {
     ENTERCORRECTLY="0"
+    echo "wyl-trace -> build_PLATFORM=$build_PLATFORM,build_DISTRO=$build_DISTRO"
 	
     while [ $ENTERCORRECTLY -ne 1 ]
 	do
 		#read -e -p 'Enter path where USB disk tarballs were downloaded : '  TARBALLPATH
         TARBALLPATH="$PWD"/"udisk_images"
+		echo "wyl-trace -> TARBALLPATH=$TARBALLPATH"
         echo ""
 		ENTERCORRECTLY=1
 		if [ -d $TARBALLPATH ]
@@ -123,10 +132,9 @@ populate_2_partitions() {
             continue
         fi
 
-        if [ ! -e "$TARBALLPATH""/ubuntu-vivid-ok.img" ]
-        #if [ ! -e "$TARBALLPATH""/rootfs.tar.gz" ]
+        if [ ! -e "$TARBALLPATH""/udisk_rootfs.tar.gz" ]
         then
-            echo "Could not find rootfs.tar.gz as expected.  Please"
+            echo "Could not find udisk_rootfs.tar.gz as expected.  Please"
             echo "point to the directory containing the rootfs.tar.gz"
             ENTERCORRECTLY=0
             continue
@@ -170,19 +178,36 @@ cat << EOM
 
 ################################################################################
 EOM
-        #untar_progress $TARBALLPATH/rootfs.tar.gz rootfs/
-        dd if=$TARBALLPATH/ubuntu-vivid-ok.img of=${DRIVE}${P}2
+        untar_progress $TARBALLPATH/udisk_rootfs.tar.gz rootfs/
 
         mkdir -p rootfs/sys_setup/boot/EFI/GRUB2 2> /dev/null
         mkdir -p rootfs/sys_setup/distro 2> /dev/null
+        mkdir -p rootfs/sys_setup/bin 2> /dev/null
 
-        cp -a ../build/$build_PLATFORM/binary/grub* rootfs/sys_setup/boot/EFI/GRUB2
-        cp -a ../build/$build_PLATFORM/binary/Image rootfs/sys_setup/boot
-        cp -a ../build/$build_PLATFORM/binary/hip05-d02.dtb rootfs/sys_setup/boot
+        cp -a ../binary/grub* rootfs/sys_setup/boot/EFI/GRUB2
+        cp -a ../binary/Image rootfs/sys_setup/boot
+        cp -a ../binary/hip05-d02.dtb rootfs/sys_setup/boot
         
-        TOTALSIZE=`sudo du -c ../build/$build_PLATFORM/distro/$build_DISTRO/*.img | grep total | awk {'print $1'}`
-        cp -a ../build/$build_PLATFORM/distro/$build_DISTRO/*.img rootfs/sys_setup/distro &
-        cp_progress $TOTALSIZE rootfs/sys_setup/distro
+        cp -a ../build/$build_PLATFORM/distro/$build_DISTRO/*.img rootfs/sys_setup/distro
+
+        cp -a sys_setup.sh rootfs/sys_setup/bin
+        cp -a functions.sh rootfs/sys_setup/bin
+        cp -a find_disk.sh rootfs/sys_setup/bin
+
+        touch rootfs/etc/profile.d/antoStartUp.sh
+        chmod a+x rootfs/etc/profile.d/antoStartUp.sh
+cat > rootfs/etc/profile.d/antoStartUp.sh << EOM
+#!/bin/bash
+
+pushd /sys_setup/bin
+sudo ./sys_setup.sh
+popd
+EOM
+# be shielded 
+if [ x"n" = x"$en_shield" ]
+then
+echo "wyl-trace -> en_shield ... "
+fi
         umount boot rootfs
         sync;sync
 
@@ -193,13 +218,16 @@ EOM
 
 # find the avaible SD cards
 ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-9`
+echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 if [ "$ROOTDRIVE" = "root" ]; then
     ROOTDRIVE=`readlink /dev/root | cut -c1-3`
 else
     ROOTDRIVE=`echo $ROOTDRIVE | cut -c1-3`
 fi
+echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 
 PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
+echo "wyl-trace -> PARTITION_TEST = $PARTITION_TEST"
 # Check for available mounts
 check_for_udisk
 
@@ -300,6 +328,7 @@ if [ "$NUM_OF_DRIVES" != "0" ]; then
         echo "Unmounting the $DEVICEDRIVENAME drives"
 		c=`cat /proc/partitions | grep -v 'sda' | grep "$DEVICEDRIVENAME." | grep -n '' | awk '{print $5}' | cut -c4`
 		START_OF_DRIVES=$c
+		echo "wyl-trace -> c = $c"
         for ((; c<"$NUM_OF_DRIVES" + "$START_OF_DRIVES"; c++ ))
         do
                 unmounted=`df | grep '\<'$DEVICEDRIVENAME$P$c'\>' | awk '{print $1}'`
@@ -317,14 +346,15 @@ fi
 NUM_OF_PARTS=`cat /proc/partitions | grep -v 'sda' | grep -c $DEVICEDRIVENAME`
 c=`cat /proc/partitions | grep -v 'sda' | grep "$DEVICEDRIVENAME." | grep -n '' | awk '{print $5}' | cut -c4`
 START_OF_DRIVES=$c
-for ((; c<"$NUM_OF_PARTS" + "$START_OF_DRIVES" - 1; c++ ))
+for (( ; c<"$NUM_OF_PARTS" + "$START_OF_DRIVES" - 1; c++ ))
 do
         SIZE=`cat /proc/partitions | grep -v 'sda' | grep '\<'$DEVICEDRIVENAME$P$c'\>'  | awk '{print $3}'`
         echo "Current size of $DEVICEDRIVENAME$P$c $SIZE bytes"
 done
 
 # check to see if the device is already partitioned
-for ((  c="$START_OF_DRIVES"; c<"$NUM_OF_PARTS" + "$START_OF_DRIVES" - 1; c++ ))
+c=$START_OF_DRIVES
+for (( ; c<"$NUM_OF_PARTS" + "$START_OF_DRIVES" - 1; c++ ))
 do
 	eval "SIZE$c=`cat /proc/partitions | grep -v 'sda' | grep '\<'$DEVICEDRIVENAME$P$c'\>'  | awk '{print $3}'`"
 done
@@ -453,8 +483,7 @@ cat << EOM
 
 ################################################################################
 EOM
-#cmd_str="parted $DRIVE mkpart rootfs 256M 8000M"
-cmd_str="parted $DRIVE mkpart rootfs 256M 3072M"
+cmd_str="parted $DRIVE mkpart rootfs 256M 12288M"
 echo -n "make root partition by "$cmd_str
 eval $cmd_str
 
@@ -481,25 +510,21 @@ cat << EOM
 
 
 EOM
+
+
 pushd ..
-# Make sure that the init.sh file exists
-if [ -f $PWD/estuary/init.sh ]; then
-    #$PWD/estuary/init.sh
-    echo "execute init.sh"
-else
-    echo "init.sh does not exist in the directory"
-    exit 1
-fi
 
 # Make sure that the build.sh file exists
 if [ -f $PWD/estuary/build.sh ]; then
-    $PWD/estuary/build.sh -p $build_PLATFORM -d $build_DISTRO
+    #$PWD/estuary/build.sh -p $build_PLATFORM -d $build_DISTRO
     echo "execute build.sh"
 else
     echo "build.sh does not exist in the directory"
     exit 1
 fi
 popd
+
+echo "wyl-trace -> build pwd=$PWD"
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
 do
@@ -517,22 +542,44 @@ done
 if [ "$PARTS" -eq "2" ]
 then
     if [ ! -d "udisk_images" ] ; then
-        mkdir $PWD/tmp 2> /dev/null
         mkdir $PWD/udisk_images 2> /dev/null
+        mkdir $PWD/tmp 2> /dev/null
         mkdir -p tmp/boot/EFI/GRUB2 2> /dev/null
         mkdir -p tmp/distro 2> /dev/null
 
-        cp -a ../build/$build_PLATFORM/binary/grub* tmp/boot/EFI/GRUB2
-        cp -a ../build/$build_PLATFORM/binary/Image tmp/boot
-        cp -a ../build/$build_PLATFORM/binary/hip05-d02.dtb tmp/boot
+rootfs_dev2=${DRIVE}${P}2
+rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
+touch tmp/grub.cfg
+cat > tmp/grub.cfg << EOM
+#
+# Sample GRUB configuration file
+#
 
+# Boot automatically after 0 secs.
+set timeout=5
+
+# By default, boot the Euler/Linux
+set default=ubuntu_usb
+
+# For booting GNU/Linux
+menuentry "Ubuntu USB" --id ubuntu_usb {
+	set root=(hd0,gpt1)
+	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=:::::eth0:dhcp
+	devicetree /hip05-d02.dtb
+}
+EOM
+
+        cp -a ../binary/grub* tmp/boot/EFI/GRUB2
+        rm -f tmp/boot/EFI/GRUB2/grub.cfg
+        mv tmp/grub.cfg tmp/boot/EFI/GRUB2/
+        cp -a ../binary/Image tmp/boot
+        cp -a ../binary/hip05-d02.dtb tmp/boot
         pushd tmp/boot
         tar -czf boot.tar.gz ./*
         popd
         cp -a tmp/boot/boot.tar.gz udisk_images/ 
-        
-        untar_progress ../build/$build_PLATFORM/distro/$build_DISTRO/*.img.tar.gz ../build/$build_PLATFORM/distro/$build_DISTRO/
-        cp -a ../build/$build_PLATFORM/distro/$build_DISTRO/*.img udisk_images/
+       
+        wget -P udisk_images/ -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/udisk_rootfs.tar.gz
 
         rm -rf tmp
     fi
@@ -544,3 +591,8 @@ then
     exit 0
 fi
 
+#wyl debud 
+if [ x"n" = x"$wyl_debug" ]
+then
+echo "wyl-trace -> debug ... "
+fi
