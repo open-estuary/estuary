@@ -27,7 +27,7 @@ usage()
 	echo " -p,--platform	platform"
 	echo " -d,--distro	distribuation"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
-	echo "		*for D02, support OpenEmbedded Ubuntu, OpenSuse, Fedora"
+	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
 }
 
 # identify the distro
