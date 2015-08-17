@@ -1,0 +1,7 @@
+#!/bin/bash
+#description: create USB startup Disk used for deploying estuary.
+#author: wangyanliang
+#date: August 18, 2015
+
+platform=D02
+distro=Ubuntu
