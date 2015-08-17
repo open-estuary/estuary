@@ -1,5 +1,6 @@
 #!/bin/bash
 
+wyl_debug=y
 
 LANG=C
 
@@ -71,16 +72,39 @@ done
 
 
 if [ -z "$BRD_TYPE" ]; then
-	para_sel  platforms BRD_TYPE
+	#para_sel  platforms BRD_TYPE
 	#BRD_TYPE=$out_var  #another way to get function output
+    echo ""
 fi
 #the default is D02
 (( ${BRD_TYPE:=D02} ))
 echo "BRD_TYPE  is "$BRD_TYPE
 
 if [ -z "$ROOT_FS" ]; then
-	para_sel  distros  ROOT_FS 
+	#para_sel  distros  ROOT_FS
+    echo ""
 fi
+
+cat << EOM
+parsing config ...
+EOM
+while read line
+do
+    name=`echo $line | awk -F '=' '{print $1}'`
+    value=`echo $line | awk -F '=' '{print $2}'`
+    case $name in
+        "platform")
+        BRD_TYPE=$value
+        echo "wyl-trace -> BRD_TYPE = "$BRD_TYPE
+        ;;
+        "distro")
+        ROOT_FS=$value
+        eco "wyl-trace -> ROOT_FS = "$ROOT_FS
+        ;;
+        *)
+        ;;
+    esac
+done < config
 
 #echo "${distros[@]}"
 #make a choice what root fs is wanted to setup
@@ -109,3 +133,23 @@ pushd . >/dev/null 2>&1
 . find_disk.sh
 popd >/dev/null 2>&1
 
+#wyl debud
+if [ x"n" = x"$wyl_debug" ]
+then
+
+echo "wyl-trace -> sys_setup() ater find_disk star "make_${ROOT_FS}
+echo "wyl-trace -> pwd = "$PWD
+##differentiate the shell according to the root filesystem type
+pushd .
+. make_${ROOT_FS}.sh
+[ $? ] || exit
+popd
+
+
+pushd .
+. build_${BRD_TYPE}.sh
+[ $? ] || exit
+popd
+
+###successful... here
+fi

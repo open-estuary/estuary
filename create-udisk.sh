@@ -5,14 +5,14 @@
 
 export LANG=C
 
+wyl_debug=y
 en_shield=y
-build_PLATFORM=D02
-build_DISTRO=Ubuntu
 # Determine the absolute path to the executable
 # EXE will have the PWD removed so we can concatenate with the PWD safely
 PWD=`pwd`
 EXE=$(echo $0 | sed "s/.*\///")
 EXEPATH="$PWD"/"$EXE"
+echo "wyl-trace -> $PWD $EXE $EXEPATH"
 clear
 cat << EOM
 
@@ -30,7 +30,6 @@ partitioned properly.
 
 EOM
 
-
 AMIROOT=`whoami | awk {'print $1'}`
 if [ "$AMIROOT" != "root" ] ; then
 
@@ -40,8 +39,9 @@ if [ "$AMIROOT" != "root" ] ; then
 fi
 
 THEPWD=$EXEPATH
-PARSEPATH=`echo $THEPWD | grep -o -E '.*udisk.*Start/'`
+PARSEPATH=`echo $THEPWD | grep -o -E 'estuary'`
 
+echo "wyl-trace -> PARSEPATH="$PARSEPATH
 
 if [ "$PARSEPATH" != "" ] ; then
 PATHVALID=1
@@ -49,6 +49,26 @@ else
 PATHVALID=0
 fi
 
+cat << EOM
+parsing config ...
+EOM
+while read line
+do
+    name=`echo $line | awk -F '=' '{print $1}'`
+    value=`echo $line | awk -F '=' '{print $2}'`
+    case $name in
+        "platform")
+        build_PLATFORM=$value
+        ;;
+        "distro")
+        build_DISTRO=$value
+        ;;
+        *)
+        ;;
+    esac
+done < config
+echo "wyl-trace -> platform="$build_PLATFORM
+echo "wyl-trace -> distro="$build_DISTRO
 
 #Precentage function
 untar_progress ()
@@ -93,11 +113,13 @@ check_for_udisk()
 
 populate_2_partitions() {
     ENTERCORRECTLY="0"
+    echo "wyl-trace -> build_PLATFORM=$build_PLATFORM,build_DISTRO=$build_DISTRO"
 	
     while [ $ENTERCORRECTLY -ne 1 ]
 	do
 		#read -e -p 'Enter path where USB disk tarballs were downloaded : '  TARBALLPATH
         TARBALLPATH="$PWD"/"udisk_images"
+		echo "wyl-trace -> TARBALLPATH=$TARBALLPATH"
         echo ""
 		ENTERCORRECTLY=1
 		if [ -d $TARBALLPATH ]
@@ -183,11 +205,14 @@ EOM
         cp -a ../binary/Image rootfs/sys_setup/boot
         cp -a ../binary/hip05-d02.dtb rootfs/sys_setup/boot
         
-        cp -a ../build/$build_PLATFORM/distro/$build_DISTRO/*.img rootfs/sys_setup/distro
-
+        TOTALSIZE=`sudo du -c ../build/$build_PLATFORM/distro/$build_DISTRO/*.img | grep total | awk {'print $1'}`
+        cp -af ../build/$build_PLATFORM/distro/$build_DISTRO/*.img rootfs/sys_setup/distro &
+        cp_progress $TOTALSIZE rootfs/sys_setup/distro
+        
         cp -a sys_setup.sh rootfs/sys_setup/bin
         cp -a functions.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
+        cp -a config rootfs/sys_setup/bin
 
         touch rootfs/etc/profile.d/antoStartUp.sh
         chmod a+x rootfs/etc/profile.d/antoStartUp.sh
@@ -201,6 +226,7 @@ EOM
 # be shielded 
 if [ x"n" = x"$en_shield" ]
 then
+echo "wyl-trace -> en_shield ... "
 fi
         umount boot rootfs
         sync;sync
@@ -212,13 +238,16 @@ fi
 
 # find the avaible SD cards
 ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-9`
+echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 if [ "$ROOTDRIVE" = "root" ]; then
     ROOTDRIVE=`readlink /dev/root | cut -c1-3`
 else
     ROOTDRIVE=`echo $ROOTDRIVE | cut -c1-3`
 fi
+echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 
 PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
+echo "wyl-trace -> PARTITION_TEST = $PARTITION_TEST"
 # Check for available mounts
 check_for_udisk
 
@@ -265,34 +294,20 @@ done
 
 echo "$DEVICEDRIVENAME was selected"
 #Check the size of disk to make sure its under 16GB
-if [ $DEVICESIZE -gt 17000000 ] ; then
+if [ $DEVICESIZE -lt 7000000 ] ; then
 cat << EOM
 
 ################################################################################
 
 		**********WARNING**********
 
-	Selected Device is greater then 16GB
-	Continuing past this point will erase data from device
-	Double check that this is the correct USB disk
-
+	Selected Device is less than 8GB
+    Please plug in a USB Disk greater than 8GB.
 ################################################################################
 
 EOM
-	ENTERCORRECTLY=0
-	while [ $ENTERCORRECTLY -ne 1 ]
-	do
-		read -p 'Would you like to continue [y/n] : ' SIZECHECK
-		echo ""
-		echo " "
-		ENTERCORRECTLY=1
-		case $SIZECHECK in
-		"y")  ;;
-		"n")  exit;;
-		*)  echo "Please enter y or n";ENTERCORRECTLY=0;;
-		esac
-		echo ""
-	done
+
+exit 1
 
 fi
 echo ""
@@ -319,6 +334,7 @@ if [ "$NUM_OF_DRIVES" != "0" ]; then
         echo "Unmounting the $DEVICEDRIVENAME drives"
 		c=`cat /proc/partitions | grep -v 'sda' | grep "$DEVICEDRIVENAME." | grep -n '' | awk '{print $5}' | cut -c4`
 		START_OF_DRIVES=$c
+		echo "wyl-trace -> c = $c"
         for ((; c<"$NUM_OF_DRIVES" + "$START_OF_DRIVES"; c++ ))
         do
                 unmounted=`df | grep '\<'$DEVICEDRIVENAME$P$c'\>' | awk '{print $1}'`
@@ -399,7 +415,7 @@ cat << EOM
 
 ################################################################################
 
-	Select 2 partitions if need boot and rootfs
+	USB Disk will be partitioned with boot and rootfs.
 
 	****WARNING**** continuing will erase all data on $DEVICEDRIVENAME
 
@@ -473,7 +489,9 @@ cat << EOM
 
 ################################################################################
 EOM
-cmd_str="parted $DRIVE mkpart rootfs 256M 12288M"
+echo "wyl-trace -> DEVICESIZE="$DEVICESIZE
+partition_size=$(($DEVICESIZE/1000-1024))
+cmd_str="parted $DRIVE mkpart rootfs 256M ${partition_size}M"
 echo -n "make root partition by "$cmd_str
 eval $cmd_str
 
@@ -503,17 +521,20 @@ EOM
 
 
 pushd ..
-
-# Make sure that the build.sh file exists
-if [ -f $PWD/estuary/build.sh ]; then
-    #$PWD/estuary/build.sh -p $build_PLATFORM -d $build_DISTRO
-    echo "execute build.sh"
-else
-    echo "build.sh does not exist in the directory"
-    exit 1
+if [ ! -d binary ]
+then
+    # Make sure that the build.sh file exists
+    if [ -f $PWD/estuary/build.sh ]; then
+        $PWD/estuary/build.sh -p $build_PLATFORM -d $build_DISTRO
+        echo "execute build.sh"
+    else
+        echo "build.sh does not exist in the directory"
+        exit 1
+    fi
 fi
 popd
 
+echo "wyl-trace -> build pwd=$PWD"
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
 do
@@ -530,15 +551,14 @@ done
 
 if [ "$PARTS" -eq "2" ]
 then
-    if [ ! -d "udisk_images" ] ; then
-        mkdir $PWD/udisk_images 2> /dev/null
-        mkdir $PWD/tmp 2> /dev/null
-        mkdir -p tmp/boot/EFI/GRUB2 2> /dev/null
-        mkdir -p tmp/distro 2> /dev/null
+    mkdir $PWD/udisk_images 2> /dev/null
+    mkdir $PWD/tmp 2> /dev/null
+    mkdir -p tmp/boot/EFI/GRUB2 2> /dev/null
+    mkdir -p tmp/distro 2> /dev/null
 
-rootfs_dev2=${DRIVE}${P}2
-rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
-touch tmp/grub.cfg
+    rootfs_dev2=${DRIVE}${P}2
+    rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
+    touch tmp/grub.cfg
 cat > tmp/grub.cfg << EOM
 #
 # Sample GRUB configuration file
@@ -558,20 +578,22 @@ menuentry "Ubuntu USB" --id ubuntu_usb {
 }
 EOM
 
-        cp -a ../binary/grub* tmp/boot/EFI/GRUB2
-        rm -f tmp/boot/EFI/GRUB2/grub.cfg
-        mv tmp/grub.cfg tmp/boot/EFI/GRUB2/
-        cp -a ../binary/Image tmp/boot
-        cp -a ../binary/hip05-d02.dtb tmp/boot
-        pushd tmp/boot
-        tar -czf boot.tar.gz ./*
-        popd
-        cp -a tmp/boot/boot.tar.gz udisk_images/ 
-       
+    cp -a ../binary/grub* tmp/boot/EFI/GRUB2
+    rm -f tmp/boot/EFI/GRUB2/grub.cfg
+    mv tmp/grub.cfg tmp/boot/EFI/GRUB2/
+    cp -a ../binary/Image tmp/boot
+    cp -a ../binary/hip05-d02.dtb tmp/boot
+    pushd tmp/boot
+    tar -czf boot.tar.gz ./*
+    popd
+    cp -a tmp/boot/boot.tar.gz udisk_images/ 
+    if [ ! -f  udisk_images/udisk_rootfs.tar.gz ]
+    then
         wget -P udisk_images/ -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/udisk_rootfs.tar.gz
-
-        rm -rf tmp
     fi
+
+    rm -rf tmp
+    
     populate_2_partitions
 
     echo " "
@@ -580,3 +602,8 @@ EOM
     exit 0
 fi
 
+#wyl debud 
+if [ x"n" = x"$wyl_debug" ]
+then
+echo "wyl-trace -> debug ... "
+fi
