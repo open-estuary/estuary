@@ -7,11 +7,8 @@ as they tell you what this is all about, explain how to get, build, and run it.
 1. Introduction 
 =================
 
-  Estuary is a development version of the whole software solution which target
-  is the ICT market. It is a long term solution and focus on the combination
-  of the high level components. And It is expected to be rebased from the
-  newest version of the community quickly.
-
+  Estuary is a development version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
+  You need do some preparation to get all target binaries before you booting system, and you are supposedly using Ubunt newer than 12.04 as your host OS. (But only Ubuntu 12.04 is validated)
 
 2. Components
 ================
@@ -124,7 +121,7 @@ For more detail information about all components mentioned above, please refer t
 
 5. Deployment
 ================
-  How to deploy the system into our board, please refer to documents named "Deploy_on_the_xxx".
+  How to deploy the system into our board, please refer to "Go Through" at http://hisilicon.github.io/tags/Go-Through/.
 
 6. Contact us
 ================
@@ -132,9 +129,7 @@ For more detail information about all components mentioned above, please refer t
   About how to apply to use our device boards, please contact with huangdaode@hisilicon.com.
 
 7.Changes compared with last version
-    Add the support for xge in kernel
-    Add the support for pcie in kernel
-    Update the latest version of binary file 
+  Please refer to "changelist.txt" in this project.
 
 8. TODO
 ================
