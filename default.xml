@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
 
-  <remote  name="hisilicon"
-           fetch="https://github.com/hisilicon/" />
+  <remote  name="estuary"
+           fetch="https://github.com/open-estuary/" />
 
   <remote  name="qemu"
            fetch="git://git.qemu-project.org/" />
