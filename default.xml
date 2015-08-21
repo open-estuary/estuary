@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
 
-  <remote  name="estuary"
+  <remote  name="open-estuary"
            fetch="https://github.com/open-estuary/" />
 
   <remote  name="qemu"
@@ -10,12 +10,12 @@
   <remote  name="grub"
            fetch="git://git.savannah.gnu.org/" />
 
-  <default revision="master"
+  <default revision="open-estuary"
            remote="hisilicon"
            sync-j="4" />
   
   <!-- kernel -->
-  <project path="kernel" name="linaro-kernel" revision="refs/tags/estuary-v1.2" />
+  <project path="kernel" name="linaro-kernel" />
 
   <!-- uefi -->
   <project path="uefi" name="UEFI" />
@@ -24,10 +24,10 @@
   <project name="grub" remote="grub" />
 
   <!-- caliper -->
-  <project name="caliper" revision="refs/tags/v1.2-rc" />
+  <project name="caliper" />
   
   <!-- tools -->
-  <project name="tools" revision="refs/tags/estuary-v1.0" />
+  <project name="tools" />
 
   <!-- toolchain -->
   <!-- project path="toolchain" name="estuary-toolchain" revision="refs/tags/estuary-v1.0" groups="linaro" / -->
@@ -39,6 +39,6 @@
   <project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" />
 
   <!-- estuary -->
-  <project name="estuary" revision="refs/tags/estuary-v1.2" />
+  <project name="estuary" />
 
 </manifest>

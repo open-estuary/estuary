@@ -1,13 +1,12 @@
-******  Estuary release 1.2 ******
+******  Estuary release 2.0 ******
 
-These are the release notes for the Estuary version 1.2. Read them carefully,
-as they tell you what this is all about, explain how to get, build, and run it.
+These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
 
 
 1. Introduction 
 =================
 
-  Estuary is a development version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
+  Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
   You need do some preparation to get all target binaries before you booting system, and you are supposedly using Ubunt newer than 12.04 as your host OS. (But only Ubuntu 12.04 is validated)
 
 2. Components
@@ -25,7 +24,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
   The source code for D01, you can get it by following commands:
   	$git clone http://git.linaro.org/git/uefi/linaro-edk2.git
   ...or
-  	$git clone https://github.com/hisilicon/UEFI.git
+  	$git clone https://github.com/open-estuary/uefi.git
 
 - Grub
   This part is also about the boot loader. Grub can run in the UEFI, and supply some advanced function. We get the source code from the community.
@@ -36,12 +35,12 @@ as they tell you what this is all about, explain how to get, build, and run it.
   This part is about the OS kernel, the latest version can support D01 or D02 boards, etc. 
   
   The latest avaible Kernel source code for estuary project is provided in following git repository by a branch named "estuary":
-  github: https://github.com/hisilicon/linaro-kernel.git -b estuary  
+  github: https://github.com/open-estuary/kernel.git  
   
   You can always get the latest version by following command:
-	$git clone https://github.com/hisilicon/linaro-kernel.git -b estuary
+	$git clone https://github.com/open-estuary/kernel.git
   ...or get it with a special tag by following command:
-	$git clone https://github.com/hisilicon/linaro-kernel.git -b refs/tags/estuary-vx.x
+	$git clone https://github.com/open-estuary/kernel.git -b refs/tags/estuary-vx.x
 
 - Distributions
   This part is about the rootfs of several distibutions (OpenEmbedded, Debian, Ubuntu, OpenSuse and Fedora). All of them can be downloaded from their official website.
@@ -56,7 +55,7 @@ as they tell you what this is all about, explain how to get, build, and run it.
 
 - Binaries
   You can get most binary files of above components from this project's release as follow, apart from tool chain, distributions and qemu.
-    https://github.com/hisilicon/estuary/releases
+    https://github.com/open-estuary/estuary/releases
   
 For more detail information about all components mentioned above, please refer to http://hisilicon.github.com. 
 
@@ -94,7 +93,7 @@ For more detail information about all components mentioned above, please refer t
 	$cd workdir
 
   Download the whole project resource by following commands:
-  	$repo init -u https://github.com/hisilicon/estuary.git -b refs/tags/estuary-v1.2 --no-repo-verify --repo-url=git://android.git.linaro.org/tools/repo
+  	$repo init -u https://github.com/open-estuary/estuary.git --no-repo-verify --repo-url=git://android.git.linaro.org/tools/repo
  	$repo sync
 	If it fails during repo sync, you can just try to do 'repo sync' again.
 
@@ -125,8 +124,8 @@ For more detail information about all components mentioned above, please refer t
 
 6. Contact us
 ================
-  About the technical support, you can contact with chenxiang66@hisilicon.com.
-  About how to apply to use our device boards, please contact with huangdaode@hisilicon.com.
+  About the technical support, you can contact with justin-zhao@qq.com.
+  About how to apply to use our device boards, please contact with justin-zhao@qq.com.
 
 7.Changes compared with last version
   Please refer to "changelist.txt" in this project.
