@@ -10,8 +10,8 @@
   <remote  name="grub"
            fetch="git://git.savannah.gnu.org/" />
 
-  <default revision="open-estuary"
-           remote="hisilicon"
+  <default revision="master"
+           remote="open-estuary"
            sync-j="4" />
   
   <!-- kernel -->
