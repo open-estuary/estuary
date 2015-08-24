@@ -2,7 +2,7 @@
 
 #set -x
 
-
+en_shield=y
 declare -a disk_list
 export disk_list=
 
@@ -173,8 +173,10 @@ if [ -z "$CUR_RTDEV" ]; then
 else
 	#for non-nfs, only one root-disk, or not less than two disks. For one root-disk, if we choose it, then 
 	#disk_list[0] is it; for multiple disks, the root-disk will not be in disk_list[].
+	#read -a nonboot_part <<< $(sudo parted /dev/${disk_list[0]} print |\
+	#	awk '$1 ~ /[0-9]+/ && ! /boot/ {print $1}' | sort)
 	read -a nonboot_part <<< $(sudo parted /dev/${disk_list[0]} print |\
-		awk '$1 ~ /[0-9]+/ && ! /boot/ {print $1}' | sort)
+		awk '$1 ~ /[0-9]+/ {print $1}' | sort)
 fi
 
 
@@ -203,11 +205,14 @@ part_name[(( part_list_idx++ ))]="all"
 part_name[part_list_idx]="exit"
 
 
-
 assert_flag=""
+
 while [ "$assert_flag" != "y" ]; do
 ##Begin to remove the idle partitions
 sudo parted "/dev/"${disk_list[0]} print
+#only debud 
+if [ "$en_shield" == "n" ]
+then
 echo "Please choose the partition to be removed:"
 select part_tormv in "${part_name[@]}"; do
 	echo "select input "$part_tormv
@@ -225,6 +230,21 @@ select part_tormv in "${part_name[@]}"; do
 	sel_idx=`expr $REPLY - 1`
 	break
 done
+fi
+
+#only debud 
+if [ "$en_shield" == "y" ]
+then
+wait_user_choose "all partitions of this Hard Disk will be deleted?" "y|n"
+
+
+if [ "$assert_flag" == "y" ]; then
+    part_tormv=all
+    sel_idx=${#part_list[@]}
+else
+    exit 1
+fi
+fi
 
 echo "sel_idx "$sel_idx "part_list count:"${#part_list[@]} "part_list[0] :"${part_list[0]}
 ind=0
@@ -487,6 +507,5 @@ sudo dd if=/sys_setup/distro/ubuntu-vivid.img of=/dev/${disk_list[0]}2
 
 sudo umount boot rootfs
 sudo rm -rf boot rootfs tmp 
-
 
 ##OK. Partitions are ready in Hard_disk. Can start the boot, root file-system making
