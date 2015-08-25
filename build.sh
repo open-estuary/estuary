@@ -224,7 +224,6 @@ BINARY_DIR=binary
 BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
 if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
-	mkdir -p "$binary_dir" 2> /dev/null
 fi
 
 cd $BINARY_DIR/
