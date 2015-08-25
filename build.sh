@@ -221,7 +221,7 @@ chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
 #Download binary files
 binary_dir=$build_dir/binary
 BINARY_DIR=binary
-BINARY_SOURCE=https://github.com/hisilicon/estuary/releases/download/bin-v1.2
+BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
 if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
 	mkdir -p "$binary_dir" 2> /dev/null
