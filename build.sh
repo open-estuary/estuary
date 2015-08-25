@@ -399,6 +399,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
 		make O=../$kernel_dir -j8 modules
 		make O=../$kernel_dir -j8 modules_install
+		make O=../$kernel_dir -j8 firmware_install
 	fi
 
 	popd
