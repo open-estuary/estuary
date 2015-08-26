@@ -228,15 +228,19 @@ fi
 
 cd $BINARY_DIR/
 
-wget -c $BINARY_SOURCE/bl1.bin 
-wget -c $BINARY_SOURCE/CH02TEVBC_V03.bin
-wget -c $BINARY_SOURCE/fip.bin
-wget -c $BINARY_SOURCE/grub.cfg
-wget -c $BINARY_SOURCE/grubaa64.efi
-wget -c $BINARY_SOURCE/hip05-d02.dtb
-wget -c $BINARY_SOURCE/hulk-hip05.cpio.gzio.gz
-wget -c $BINARY_SOURCE/Image
-wget -c $BINARY_SOURCE/UEFI_Release.bin
+wget -c $BINARY_SOURCE/checksum.txt
+md5sum --quiet --check checksum.txt | grep 'FAILED'
+if [ x"$?" = x"0" ]; then
+	wget -c $BINARY_SOURCE/bl1.bin 
+	wget -c $BINARY_SOURCE/CH02TEVBC_V03.bin
+	wget -c $BINARY_SOURCE/fip.bin
+	wget -c $BINARY_SOURCE/grub.cfg
+	wget -c $BINARY_SOURCE/grubaa64.efi
+	wget -c $BINARY_SOURCE/hip05-d02.dtb
+	wget -c $BINARY_SOURCE/hulk-hip05.cpio.gz
+	wget -c $BINARY_SOURCE/Image
+	wget -c $BINARY_SOURCE/UEFI_Release.bin
+fi
 
 cd -
 
