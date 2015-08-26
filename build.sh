@@ -143,8 +143,19 @@ if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 fi
 
-wget -c http://7xjz0v.com1.z0.glb.clouddn.com/toolchain/$GCC32 -O $TOOLCHAIN_DIR/$GCC32
-wget -c http://7xjz0v.com1.z0.glb.clouddn.com/toolchain/$GCC64 -O $TOOLCHAIN_DIR/$GCC64
+TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
+
+cd $TOOLCHAIN_DIR
+
+wget -c $TOOLCHAIN_SOURCE/toolchain.sum
+md5sum --quiet --check toolchain.sum 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+while read LINE
+	wget -c $TOOLCHAIN_SOURCE/$LINE
+do
+done  < $TEMPFILE
+rm $TEMPFILE
+
+cd-
 
 if [ ! -d "$toolchain_dir" ] ; then
 	mkdir -p "$toolchain_dir" 2> /dev/null
@@ -188,8 +199,7 @@ else
 			;;
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU64
-			;;	
-		"Fedora" )
+			;;	"Fedora" )
 			DISTRO_SOURCE=$PATH_FEDORA64
 			;;	
 			* )
@@ -217,12 +227,15 @@ fi
 
 cd $DISTRO_DIR
 
-wget -c "$DISTRO_SOURCE"."sum" -O "$DISTRO"."sum"
-md5sum --quiet --check "$DISTRO"."sum" | grep 'FAILED'
+SUMFILE="$DISTRO"_"$TARGETARCH"."sum"
+#echo "$DISTRO_SOURCE"": FAILED" > $SUMFILE
+wget -c "$DISTRO_SOURCE"."sum" -O $SUMFILE
+md5sum --quiet --check $SUMFILE | grep 'FAILED'
 if [ x"$?" = x"0" ]; then
-    wget -c $DISTRO_SOURCE -O $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
-    chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
+    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
+    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
 fi
+rm $SUMFILE
 
 cd -
 
@@ -240,10 +253,10 @@ TEMPFILE="temp"
 wget -c $BINARY_SOURCE/checksum.txt
 md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
-	wget -c $BINARY_SOURCE/$TEMPFILE 
+	wget -c $BINARY_SOURCE/$LINE
 do
 done  < $TEMPFILE
-rm $FILENAME 
+rm $TEMPFILE
 
 cd -
 
