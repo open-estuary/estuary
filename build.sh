@@ -215,8 +215,16 @@ else
 	fi
 fi
 
-wget -c $DISTRO_SOURCE -O $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
-chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
+cd $DISTRO_DIR
+
+wget -c "$DISTRO_SOURCE"."sum" -O "$DISTRO"."sum"
+md5sum --quiet --check "$DISTRO"."sum" | grep 'FAILED'
+if [ x"$?" = x"0" ]; then
+    wget -c $DISTRO_SOURCE -O $DISTRO_DIR/"$DISTRO"_"$TARGETARCH"."$postfix"
+    chmod 777 $DISTRO_DIR/"$DISTRO"_"$TARGETARCH".$postfix
+fi
+
+cd -
 
 #Download binary files
 binary_dir=$build_dir/binary
@@ -228,19 +236,14 @@ fi
 
 cd $BINARY_DIR/
 
+TEMPFILE="temp"
 wget -c $BINARY_SOURCE/checksum.txt
-md5sum --quiet --check checksum.txt | grep 'FAILED'
-if [ x"$?" = x"0" ]; then
-	wget -c $BINARY_SOURCE/bl1.bin 
-	wget -c $BINARY_SOURCE/CH02TEVBC_V03.bin
-	wget -c $BINARY_SOURCE/fip.bin
-	wget -c $BINARY_SOURCE/grub.cfg
-	wget -c $BINARY_SOURCE/grubaa64.efi
-	wget -c $BINARY_SOURCE/hip05-d02.dtb
-	wget -c $BINARY_SOURCE/hulk-hip05.cpio.gz
-	wget -c $BINARY_SOURCE/Image
-	wget -c $BINARY_SOURCE/UEFI_Release.bin
-fi
+md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+while read LINE
+	wget -c $BINARY_SOURCE/$TEMPFILE 
+do
+done  < $TEMPFILE
+rm $FILENAME 
 
 cd -
 
