@@ -109,8 +109,8 @@ automake --version | grep 'automake (GNU automake) 1.11' > /dev/null
 if [ x"$?" = x"1" ]; then
   sudo apt-get update
   sudo apt-get remove -y --purge automake*
-  sudo apt-get install -y automake1.11 make bc libncurses5-dev
 fi
+sudo apt-get install -y automake1.11 make bc libncurses5-dev libc6:i386 libncurses5:i386 libstdc++6:i386
 
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
