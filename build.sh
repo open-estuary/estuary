@@ -309,6 +309,8 @@ else
     	absolute_dir=`pwd`
     	cd -
     	pushd grub/
+        git reset --hard
+        git checkout grub-2.02-beta2
     	./autogen.sh
     	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
     	make -j8
