@@ -18,7 +18,10 @@
   <project name="kernel" />
 
   <!-- uefi -->
-  <project path="uefi" name="UEFI" />
+  <project name="uefi" />
+
+  <!-- patches -->
+  <project name="patches" />
 
   <!-- grub -->
   <project name="grub" remote="grub" />
