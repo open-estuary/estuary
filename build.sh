@@ -266,7 +266,6 @@ if [ x"$?" = x"0" ]; then
     wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
     chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
 fi
-rm $SUMFILE
 
 cd -
 
