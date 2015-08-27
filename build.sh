@@ -544,7 +544,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
         else
     	    if [ x"$findfs" = x"first" ]; then
                 # Create a new image file from rootfs directory for QEMU
-                sudo find . -name etc | grep --quiet "etc"
+                sudo find $distro_dir -name "etc" | grep --quiet "etc"
                 if [ x"$?" = x"0" ]; then
         	        echo "Create a new rootfs image file for QEMU..."
                     cd $distro_dir
