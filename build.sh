@@ -529,18 +529,45 @@ fi
 ################ Build QEMU and start it if platform is QEMU   ####################
 ###################################################################################
 if [ x"QEMU" = x"$PLATFORM" ]; then
-# Find the image file's name
-	rootfs=`ls $distro_dir/*.img 2>/dev/null`
-	if [ x"" = x"$rootfs" ]; then
-		rootfs=`ls $distro_dir/*.raw`
-	fi
+# Find the rootfs image file's name for QEMU
+    findfs="first"
+    while [ x"$findfs" != x"false" ]
+    do
+    	rootfs=`ls $distro_dir/*.img 2>/dev/null`
+    	if [ x"" = x"$rootfs" ]; then
+    		rootfs=`ls $distro_dir/*.raw`
+    	fi
+    
+    	if [ x"" != x"$rootfs" ]; then
+            findfs="false"
+            break
+        else
+    	    if [ x"$findfs" = x"first" ]; then
+                # Create a new image file from rootfs directory for QEMU
+                sudo find . -name etc | grep --quiet "etc"
+                if [ x"$?" = x"0" ]; then
+                    cd $distro_dir
+                    
+                    IMAGEFILE="$DISTRO"_"$TARGETARCH"."img"
+                    dd if=/dev/zero of=../$IMAGEFILE bs=1M count=10240
+                    mkfs.ext4 ../$IMAGEFILE
+                    mkdir ../tempdir
+                    sudo mount ../$IMAGEFILE ../tempdir
+                    sudo cp -a * ../tempdir/
+                    sudo umount ../tempdir
+                    mv ../$IMAGEFILE ./
 
-	if [ x"" = x"$rootfs" ]; then
-    	echo "Do not found suitable root filesystem!"
-        exit 1
-    fi
-	
-	rootfs=`pwd`/$rootfs
+                    cd -
+                fi
+
+                findfs="second"
+            else
+                findfs="false"
+        	    echo "Do not found suitable root filesystem!"
+                exit 1
+            fi
+        fi
+    done
 
 # Find the vda device
 	case $DISTRO in 
