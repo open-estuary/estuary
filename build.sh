@@ -173,7 +173,9 @@ wget -c $TOOLCHAIN_SOURCE/toolchain.sum
 md5sum --quiet --check toolchain.sum 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
-	wget -c $TOOLCHAIN_SOURCE/$LINE
+    if [ x"$LINE" != x"" ]; then
+	    wget -c $TOOLCHAIN_SOURCE/$LINE
+    fi
 done  < $TEMPFILE
 rm $TEMPFILE
 
@@ -284,7 +286,9 @@ wget -c $BINARY_SOURCE/checksum.txt
 md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
-	wget -c $BINARY_SOURCE/$LINE
+    if [ x"$LINE" != x"" ]; then
+	    wget -c $BINARY_SOURCE/$LINE
+    fi
 done  < $TEMPFILE
 rm $TEMPFILE
 cd -
