@@ -497,7 +497,7 @@ if [ ! -d "$distro_dir" ] ; then
     if [ x"${image##*.}" = x"gz" ] ; then
     	TEMP=${image%.*}
     	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+    		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
     		echo This is a tar.gz package
     	else
     		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
