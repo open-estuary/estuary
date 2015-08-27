@@ -1,8 +1,14 @@
 #!/bin/bash
-#description: download necessary files firstly, then build target system according to indicated parameters by user
-#author: Justin Zhao
-#date: August 7, 2015
+#Description: download necessary files firstly, then build target system according to parameters indicated by user
+#Use case:
+#   ./build.sh -h:                  to get help information for this script
+#   ./build.sh -p D02 -d Ubuntu:    to build Ubuntu distribution for D02 platform
+#Author: Justin Zhao
+#Date: August 7, 2015
 
+###################################################################################
+############################# Variables definition         ########################
+###################################################################################
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
@@ -14,6 +20,9 @@ PATH_FEDORA64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
 PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.2/appliances/openSUSE-13.2-ARM-XFCE.armv7-rootfs.armv7l-1.12.1-Build33.7.tbz
 PATH_UBUNTU32=http://releases.linaro.org/15.02/ubuntu/lt-d01/linaro-utopic-server-20150220-698.tar.gz
 
+###################################################################################
+############################# Print help information       ########################
+###################################################################################
 usage()
 {
 	echo "usage:"
@@ -30,7 +39,9 @@ usage()
 	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
 }
 
-# identify the distro
+###################################################################################
+############################# Check distribution parameter ########################
+###################################################################################
 check_distro()
 {
 	if [ x"QEMU" = x"$PLATFORM" ]; then
@@ -61,6 +72,9 @@ check_distro()
 	exit 1
 }
 
+###################################################################################
+############################# Check platform parameter  ###########################
+###################################################################################
 check_platform()
 {
 	for plat in ${platforms[@]}; do
@@ -74,6 +88,9 @@ check_platform()
 	exit 1
 }
 
+###################################################################################
+############################# Check all parameters     ############################
+###################################################################################
 while [ x"$1" != x"" ]; do 
     case $1 in 
         "-h" | "--help" )
@@ -104,7 +121,9 @@ if [ x"$PLATFORM" = x"" -o x"$DISTRO" = x"" ]; then
     exit 1
 fi
 
-# Setup host environment
+###################################################################################
+############################# Setup host environmenta #############################
+###################################################################################
 automake --version | grep 'automake (GNU automake) 1.11' > /dev/null
 if [ x"$?" = x"1" ]; then
   sudo apt-get update
@@ -133,7 +152,9 @@ else
 	cross_prefix=aarch64-linux-gnu
 fi
 
-# Download & uncompress the cross-compile-chain
+###################################################################################
+###################### Download & uncompress toochain #############################
+###################################################################################
 TOOLCHAIN_DIR=toolchain
 toolchain_dir=$build_dir/toolchain
 GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
@@ -143,26 +164,28 @@ if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 fi
 
+# Download firstly
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
-
 cd $TOOLCHAIN_DIR
 
 wget -c $TOOLCHAIN_SOURCE/toolchain.sum
 md5sum --quiet --check toolchain.sum 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
-	wget -c $TOOLCHAIN_SOURCE/$LINE
 do
+	wget -c $TOOLCHAIN_SOURCE/$LINE
 done  < $TEMPFILE
 rm $TEMPFILE
 
 cd-
 
+# Copy to build target directory
 if [ ! -d "$toolchain_dir" ] ; then
 	mkdir -p "$toolchain_dir" 2> /dev/null
     cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
     cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
 fi
 
+# Uncompress the toolchain
 arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc"`
 if [ x"" = x"$arm_gcc" ]; then 
 	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
@@ -174,12 +197,15 @@ CROSS=`pwd`/${arm_gcc%g*}
 export PATH=${CROSS%/*}:$PATH
 echo "Cross compiler is $CROSS"
 
-#Download distribution according to special PLATFORM and DISTRO
+###################################################################################
+######## Download distribution according to special PLATFORM and DISTRO ###########
+###################################################################################
 DISTRO_DIR=distro
 if [ ! -d "$DISTRO_DIR" ] ; then
 	mkdir -p "$DISTRO_DIR" 2> /dev/null
 fi
 
+# Determine the source file
 if [ x"$TARGETARCH" = x"ARM32" ] ; then
 	case $DISTRO in
 		"OpenSuse" )
@@ -214,6 +240,7 @@ if [ x"$DISTRO_SOURCE" = x"none" ]; then
 	exit 1
 fi
 
+# Check the postfix name
 postfix=${DISTRO_SOURCE#*.tar} 
 if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
     postfix=${DISTRO_SOURCE##*.} 
@@ -227,6 +254,7 @@ fi
 
 cd $DISTRO_DIR
 
+# Download it based on md5 checksum file
 SUMFILE="$DISTRO"_"$TARGETARCH"."sum"
 #echo "$DISTRO_SOURCE"": FAILED" > $SUMFILE
 wget -c "$DISTRO_SOURCE"."sum" -O $SUMFILE
@@ -239,7 +267,9 @@ rm $SUMFILE
 
 cd -
 
-#Download binary files
+###################################################################################
+######## Download all prebuilt binaries based on md5 checksum file      ###########
+###################################################################################
 binary_dir=$build_dir/binary
 BINARY_DIR=binary
 BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
@@ -248,27 +278,29 @@ if [ ! -d "$BINARY_DIR" ] ; then
 fi
 
 cd $BINARY_DIR/
-
 TEMPFILE="temp"
 wget -c $BINARY_SOURCE/checksum.txt
 md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
-	wget -c $BINARY_SOURCE/$LINE
 do
+	wget -c $BINARY_SOURCE/$LINE
 done  < $TEMPFILE
 rm $TEMPFILE
-
 cd -
 
+# Copy to build target directory
 if [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
 	cp $BINARY_DIR/* $binary_dir/
 fi
 
+###################################################################################
+################## Build grub binary from grub source code      ###################
+###################################################################################
 grub_dir=$build_dir/grub
 grubimg=`find $grub_dir -name *.efi`
 
-#Prepare tools for D01's UEFI
+# Build grub and UEFI for D01 platform
 if [ x"ARM32" = x"$TARGETARCH" ]; then
 	if [ x"" = x"$grubimg" ]; then
     	# use uefi_tools to compile
@@ -320,6 +352,7 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 	fi
 #    cp $grub_dir/grub.efi $binary_dir/
 else
+# Build grub for D02 platform
 	if [ x"" = x"$grubimg" ]; then
     	# compile the grub for aarch64
     	grub_dir=$build_dir/grub
@@ -345,7 +378,9 @@ else
 #	cp $grub_dir/grubaa64.efi $binary_dir/
 fi
 
-# compile the kernel
+###################################################################################
+##################### Build kernel from kernel source code      ###################
+###################################################################################
 # preprocess for kernel building
 kernel_dir=$build_dir/kernel
 mkdir -p "$kernel_dir" 2> /dev/null
@@ -433,7 +468,9 @@ if [ x"QEMU" != x"$PLATFORM" ]; then
     cp $DTB $binary_dir/
 fi
 
-# Uncompress the distribution
+###################################################################################
+######################### Uncompress the distribution   ###########################
+###################################################################################
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 if [ ! -d "$distro_dir" ] ; then
     mkdir -p "$distro_dir" 2> /dev/null
@@ -481,9 +518,11 @@ if [ ! -d "$distro_dir" ] ; then
     fi
 fi
 
-# Build Qemu and start it
+###################################################################################
+################ Build QEMU and start it if platform is QEMU   ####################
+###################################################################################
 if [ x"QEMU" = x"$PLATFORM" ]; then
-#Find the image file's name
+# Find the image file's name
 	rootfs=`ls $distro_dir/*.img 2>/dev/null`
 	if [ x"" = x"$rootfs" ]; then
 		rootfs=`ls $distro_dir/*.raw`
@@ -495,6 +534,8 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
     fi
 	
 	rootfs=`pwd`/$rootfs
+
+# Find the vda device
 	case $DISTRO in 
 		OpenEmbedded | OpenSuse)
 			partition=2
@@ -509,7 +550,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 # Temporarily use fixed vda
 	CMDLINE="console=ttyAMA0 root=/dev/vda rw"
 
-#Compile qemu
+# Compile qemu
 	qemu_dir=`pwd`/$build_dir/qemu
 	mkdir -p $qemu_dir 2> /dev/null
 
@@ -524,7 +565,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	    QEMU=`find $qemu_dir -name qemu-system-aarch64`
 	fi
 	
-# run the qemu
+# Run the qemu
 	$QEMU -machine virt -cpu cortex-a57 \
 	    -kernel $KERNEL \
 	    -drive if=none,file=$rootfs,id=fs \
