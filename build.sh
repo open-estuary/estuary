@@ -349,7 +349,7 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
     	make distclean
     	./autogen.sh
     	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
-    	make -j8 
+    	make -j14 
     	make install
     	popd
     	# TODO -- check whether it is useful
@@ -373,7 +373,7 @@ else
 #        git checkout grub-2.02-beta2
     	./autogen.sh
     	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
-    	make -j8
+    	make -j14
     	make  install
     	popd
     	# TODO -- check whether it is useful
@@ -433,7 +433,7 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
 
-		make O=../$kernel_dir -j8 zImage
+		make O=../$kernel_dir -j14 zImage
 		make O=../$kernel_dir hip04-d01.dtb
 	fi
 	DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
@@ -450,7 +450,7 @@ else
     		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
         fi
-		make O=../$kernel_dir -j8 Image
+		make O=../$kernel_dir -j14 Image
 
 	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
 		make O=../$kernel_dir hisilicon/hip05-d02.dtb
@@ -461,9 +461,9 @@ fi
 # postprocess for kernel building
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
-		make O=../$kernel_dir -j8 modules
-		make O=../$kernel_dir -j8 modules_install
-		make O=../$kernel_dir -j8 firmware_install
+		make O=../$kernel_dir -j14 modules
+		make O=../$kernel_dir -j14 modules_install
+		make O=../$kernel_dir -j14 firmware_install
 	fi
 
 	popd
@@ -595,7 +595,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
         sudo apt-get install -y zlib1g-dev libperl-dev libgtk2.0-dev
 		pushd qemu/
 		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
-		make -j8
+		make -j14
 		make install
 		popd
 	    QEMU=`find $qemu_dir -name qemu-system-aarch64`
