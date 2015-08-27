@@ -1,5 +1,7 @@
 Change list for Estuary V2.0:
 1. Upgrade kernel to v4.1
-2. Integrated latest drivers: PCIE, XGE, SAS.
-3. Move all git repository and documentation to new place.
-4. Validated & supported more distributions.
+2. Enable Quick Start solution by USB disk.
+3. Integrated latest drivers: PCIE, XGE, SAS.
+4. Move all git repository and documentation to new position.
+5. Validated & supported more distributions: OpenSuse, Debian.
+6. Improved Ubuntu distribution to be more stable.
