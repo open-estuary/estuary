@@ -168,6 +168,7 @@ fi
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
 cd $TOOLCHAIN_DIR
 
+TEMPFILE=tempfile
 wget -c $TOOLCHAIN_SOURCE/toolchain.sum
 md5sum --quiet --check toolchain.sum 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
@@ -176,7 +177,7 @@ do
 done  < $TEMPFILE
 rm $TEMPFILE
 
-cd-
+cd -
 
 # Copy to build target directory
 if [ ! -d "$toolchain_dir" ] ; then
@@ -278,7 +279,7 @@ if [ ! -d "$BINARY_DIR" ] ; then
 fi
 
 cd $BINARY_DIR/
-TEMPFILE="temp"
+TEMPFILE=tempfile
 wget -c $BINARY_SOURCE/checksum.txt
 md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
