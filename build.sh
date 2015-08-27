@@ -550,7 +550,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                     
                     IMAGEFILE="$DISTRO"_"$TARGETARCH"."img"
                     dd if=/dev/zero of=../$IMAGEFILE bs=1M count=10240
-                    mkfs.ext4 ../$IMAGEFILE
+                    mkfs.ext4 ../$IMAGEFILE -F
                     mkdir ../tempdir
                     sudo mount ../$IMAGEFILE ../tempdir
                     sudo cp -a * ../tempdir/
