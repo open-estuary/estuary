@@ -129,7 +129,7 @@ if [ x"$?" = x"1" ]; then
   sudo apt-get update
   sudo apt-get remove -y --purge automake*
 fi
-sudo apt-get install -y automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1
+sudo apt-get install -y automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex
 
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
