@@ -482,7 +482,7 @@ distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 if [ ! -d "$distro_dir" ] ; then
     mkdir -p "$distro_dir" 2> /dev/null
     
-    image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH"`
+    image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
     echo "uncompress the distribution($DISTRO) ......"
     if [ x"${image##*.}" = x"bz2" ] ; then
     	TEMP=${image%.*}
