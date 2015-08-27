@@ -169,6 +169,7 @@ TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
 cd $TOOLCHAIN_DIR
 
 TEMPFILE=tempfile
+rm -rf toolchain.sum
 wget -c $TOOLCHAIN_SOURCE/toolchain.sum
 md5sum --quiet --check toolchain.sum 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
@@ -260,6 +261,7 @@ cd $DISTRO_DIR
 # Download it based on md5 checksum file
 SUMFILE="$DISTRO"_"$TARGETARCH"."sum"
 #echo "$DISTRO_SOURCE"": FAILED" > $SUMFILE
+rm -rf $SUMFILE
 wget -c "$DISTRO_SOURCE"."sum" -O $SUMFILE
 md5sum --quiet --check $SUMFILE | grep 'FAILED'
 if [ x"$?" = x"0" ]; then
@@ -281,6 +283,7 @@ fi
 
 cd $BINARY_DIR/
 TEMPFILE=tempfile
+rm -rf checksum.txt
 wget -c $BINARY_SOURCE/checksum.txt
 md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
