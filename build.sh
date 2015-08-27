@@ -171,7 +171,7 @@ cd $TOOLCHAIN_DIR
 TEMPFILE=tempfile
 rm -rf toolchain.sum
 wget -c $TOOLCHAIN_SOURCE/toolchain.sum
-md5sum --quiet --check toolchain.sum 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+md5sum --quiet --check toolchain.sum 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
     if [ x"$LINE" != x"" ]; then
@@ -285,7 +285,7 @@ cd $BINARY_DIR/
 TEMPFILE=tempfile
 rm -rf checksum.txt
 wget -c $BINARY_SOURCE/checksum.txt
-md5sum --quiet --check checksum.txt 2>/dev/zero | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+md5sum --quiet --check checksum.txt 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
     if [ x"$LINE" != x"" ]; then
@@ -535,7 +535,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
     do
     	rootfs=`ls $distro_dir/*.img 2>/dev/null`
     	if [ x"" = x"$rootfs" ]; then
-    		rootfs=`ls $distro_dir/*.raw`
+    		rootfs=`ls $distro_dir/*.raw 2>/dev/null`
     	fi
     
     	if [ x"" != x"$rootfs" ]; then
@@ -546,15 +546,17 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                 # Create a new image file from rootfs directory for QEMU
                 sudo find . -name etc | grep --quiet "etc"
                 if [ x"$?" = x"0" ]; then
+        	        echo "Create a new rootfs image file for QEMU..."
                     cd $distro_dir
                     
                     IMAGEFILE="$DISTRO"_"$TARGETARCH"."img"
                     dd if=/dev/zero of=../$IMAGEFILE bs=1M count=10240
                     mkfs.ext4 ../$IMAGEFILE -F
-                    mkdir ../tempdir
+                    mkdir -p ../tempdir 2>/dev/null
                     sudo mount ../$IMAGEFILE ../tempdir
                     sudo cp -a * ../tempdir/
                     sudo umount ../tempdir
+                    rm -rf ../tempdir
                     mv ../$IMAGEFILE ./
 
                     cd -
