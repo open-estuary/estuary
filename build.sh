@@ -372,7 +372,7 @@ else
 #        git reset --hard
 #        git checkout grub-2.02-beta2
     	./autogen.sh
-    	./configure --prefix="$absolute_dir" --target=aarch64-linux-gnu 
+    	./configure --prefix="$absolute_dir" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
     	make -j14
     	make  install
     	popd
