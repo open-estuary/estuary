@@ -7,131 +7,26 @@ These are the release notes for the Estuary new version. Please read them carefu
 =================
 
   Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
-  You need do some preparation to get all target binaries before you booting system, and you are supposedly using Ubunt newer than 12.04 as your host OS. (But only Ubuntu 12.04 is validated)
+  More detail information about Estuary, please refer to http://open-estuary.com/estuary.
 
-2. Components
+2. Obtain and Build
 ================
+  How to obtain the whole solution and how to use it, please refer to http://open-estuary.com/estuary-download.
 
-- Toolchain
-  This part is about the cross compiler for the arm platform. Now we directly use the binary downloaded from the Linaro as follow.
-
-  URL: http://www.linaro.org/downloads/
-
-- UEFI
-  This part is about the boot loader, now we use the UEFI as the bootloader. 
-  The UEFI source code for D02 is not public currently, maybe we will publish it later, but now we can only provide binaries for D02.
-  
-  The source code for D01, you can get it by following commands:
-  	$git clone http://git.linaro.org/git/uefi/linaro-edk2.git
-  ...or
-  	$git clone https://github.com/open-estuary/uefi.git
-
-- Grub
-  This part is also about the boot loader. Grub can run in the UEFI, and supply some advanced function. We get the source code from the community.
-  You can get it by following command:
-  	$git clone git://git.savannah.gnu.org/grub.git
-
-- Linux Kernel
-  This part is about the OS kernel, the latest version can support D01 or D02 boards, etc. 
-  
-  The latest avaible Kernel source code for estuary project is provided in following git repository by a branch named "estuary":
-  github: https://github.com/open-estuary/kernel.git  
-  
-  You can always get the latest version by following command:
-	$git clone https://github.com/open-estuary/kernel.git
-  ...or get it with a special tag by following command:
-	$git clone https://github.com/open-estuary/kernel.git -b refs/tags/estuary-vx.x
-
-- Distributions
-  This part is about the rootfs of several distibutions (OpenEmbedded, Debian, Ubuntu, OpenSuse and Fedora). All of them can be downloaded from their official website.
-
-- QEMU
-  This part is about the virtual platform. The QEMU (Quick EMUlater) can
-  emulate the ARMv8 virtual machine on the x86 host machine, so we can use the
-  virtual platform to do the validation of the common part for the whole
-  software solution. We now get the source code from the community. You can get
-  it by following command:
-  	$git clone git://git.qemu-project.org/qemu.git
-
-- Binaries
-  You can get most binary files of above components from this project's release as follow, apart from tool chain, distributions and qemu.
-    https://github.com/open-estuary/estuary/releases
-  
-For more detail information about all components mentioned above, please refer to http://hisilicon.github.com. 
-
-3. Status
+3. Deployment
 ================
+  How to qucikly deploy and try it, please refer to http://open-estuary.com/quick-start.
+  How to completely deploy the system into target boards, please refer to http://open-estuary.com/estuary-setup-guide.
 
-  In this version, the software solution are validated with the D01 boards,
-  QEMU ARMv8 platform, the P660 EVB board and D02 board.
-  Now the validated components are as following:
-	- Toolchain
-	- UEFI (only for D01)
-	- UEFI\trust fw (only for D02)
-	- GRUB2 (for D01, D02)
-	- Linux Kernel
-	- Distributions
-	- QEMU
-
-
-4. Fetching and Building
+4. Contact us
 ================
-  How to fetch our whole solution and how to use it? This part will answer
-  these questions.
+  About the technical support, you can contact us by http://open-estuary.com/contact-us.
 
- 4.1 Preparation
-  You need download repo by following commands:
-	$mkdir -p ~/bin
-	$curl "https://android-git.linaro.org/gitweb?p=tools/repo.git;a=blob_plain;f=repo;hb=refs/heads/stable" > ~/bin/repo
-	$chmod a+x ~/bin/repo
-	$echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
-	$export PATH=~/bin:$PATH
-
- 4.2 Obtain whole project
-  Create a work directory by following commands:
-	$mkdir workdir
-	$cd workdir
-
-  Download the whole project resource by following commands:
-  	$repo init -u https://github.com/open-estuary/estuary.git --no-repo-verify --repo-url=git://android.git.linaro.org/tools/repo
- 	$repo sync
-	If it fails during repo sync, you can just try to do 'repo sync' again.
-
- 4.3 Build it
-  Finally, build the estuary and run it on QEMU, D01, D02 or P660 EVB board. The
-  build.sh is used to do it. 
-
-  If want to read the help message, can type this commond:
-  	$./estuary/build.sh -h
-  
-  Here is the example for running the Ubuntu with ARMv8 QEMU platform:
-	$./estuary/build.sh -p QEMU -d Ubuntu
-
-  Here is the example for building the Ubuntu target system for D01 board:
-	$./estuary/build.sh -p D01 -d Ubuntu
-
-  Here is the example for building the Ubuntu target system for D02 board:
-	$./estuary/build.sh -p D02 -d Ubuntu
-
-  Here is the example for building the Fedora target system for D02 board:
-	$./estuary/build.sh -p D02 -d Fedora
-
-  After building, you will find all target files in 'build' directory.
-
-5. Deployment
-================
-  How to deploy the system into our board, please refer to "Go Through" at http://hisilicon.github.io/tags/Go-Through/.
-
-6. Contact us
-================
-  About the technical support, you can contact with justin-zhao@qq.com.
-  About how to apply to use our device boards, please contact with justin-zhao@qq.com.
-
-7.Changes compared with last version
+5.Change list compared with previous version
   Please refer to "changelist.txt" in this project.
 
-8. TODO
+6. TODO
 ================
   Further more platforms will be supported in the esturay.
   More detail information about estuary, please refer to
-  http://hisilicon.github.com
+  http://open-estuary.com
