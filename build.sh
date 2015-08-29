@@ -166,7 +166,8 @@ if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 fi
 
 # Download firstly
-TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
+#TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
+TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 
 TEMPFILE=tempfile
