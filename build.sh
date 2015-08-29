@@ -178,12 +178,13 @@ TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 
 TEMPFILE=tempfile
-rm -rf toolchain.sum
+rm -rf toolchain.sum 2>/dev/null
 wget -c $TOOLCHAIN_SOURCE/toolchain.sum
 md5sum --quiet --check toolchain.sum 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
     if [ x"$LINE" != x"" ]; then
+		rm -rf $TOOLCHAIN_SOURCE/$LINE 2>/dev/null
 	    wget -c $TOOLCHAIN_SOURCE/$LINE
     fi
 done  < $TEMPFILE
@@ -275,10 +276,11 @@ cd $DISTRO_DIR
 # Download it based on md5 checksum file
 SUMFILE="$DISTRO"_"$TARGETARCH"."sum"
 #echo "$DISTRO_SOURCE"": FAILED" > $SUMFILE
-rm -rf $SUMFILE
+rm -rf $SUMFILE 2>/dev/null
 wget -c "$DISTRO_SOURCE"."sum" -O $SUMFILE
 md5sum --quiet --check $SUMFILE | grep 'FAILED'
 if [ x"$?" = x"0" ]; then
+	rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
     wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
     chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
 fi
@@ -298,11 +300,12 @@ fi
 cd $BINARY_DIR/
 TEMPFILE=tempfile
 rm -rf checksum.txt
-wget -c $BINARY_SOURCE/checksum.txt
+wget -c $BINARY_SOURCE/checksum.txt 2>/dev/null
 md5sum --quiet --check checksum.txt 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
     if [ x"$LINE" != x"" ]; then
+	    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
 	    wget -c $BINARY_SOURCE/$LINE
     fi
 done  < $TEMPFILE
