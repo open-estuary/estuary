@@ -386,7 +386,13 @@ else
     	absolute_dir=`pwd`
     	cd -
     	pushd grub/
-#        git reset --hard
+# Apply patch for boot from inidcated MAC address
+        git reset --hard
+		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
+		git pull
+		git am ../patches/001-Search-for-specific-config-file-for-netboot.patch
+		git checkout master
+		git pull
 #        git checkout grub-2.02-beta2
     	./autogen.sh
     	./configure --prefix="$absolute_dir" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
