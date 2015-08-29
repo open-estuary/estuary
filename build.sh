@@ -15,11 +15,18 @@ distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
 platforms=(QEMU D01 D02)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
-PATH_OPENSUSE64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse.img.tar.gz
-PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
-PATH_FEDORA64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
-PATH_OPENSUSE32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse32.img.tar.gz
-PATH_UBUNTU32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu32.img.tar.gz
+#arm64 distributions
+#PATH_OPENSUSE64=http://download.opensuse.org/ports/aarch64/distribution/13.2/appliances/openSUSE-13.2-ARM-JeOS.aarch64-rootfs.aarch64-Current.tbz
+#PATH_UBUNTU64=https://cloud-images.ubuntu.com/vivid/current/vivid-server-cloudimg-arm64.tar.gz
+#PATH_FEDORA64=http://dmarlin.fedorapeople.org/fedora-arm/aarch64/F21-20140407-foundation-v8.tar.xz
+PATH_OPENSUSE64=default
+PATH_UBUNTU64=default
+PATH_FEDORA64=default
+#arm32 distributions
+PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.2/appliances/openSUSE-13.2-ARM-XFCE.armv7-rootfs.armv7l-1.12.1-Build33.7.tbz
+PATH_UBUNTU32=http://releases.linaro.org/15.02/ubuntu/lt-d01/linaro-utopic-server-20150220-698.tar.gz
+#PATH_OPENSUSE32=default
+#PATH_UBUNTU32=default
 
 ###################################################################################
 ############################# Print help information       ########################
@@ -239,7 +246,7 @@ else
 			;;
 	esac
 fi
-DISTRO_SOURCE="default"
+#DISTRO_SOURCE="default"
 
 if [ x"$DISTRO_SOURCE" = x"none" ]; then
 	echo "The distributions [$DISTRO] can not be supported on $PLATFORM now!"
