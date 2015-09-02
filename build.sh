@@ -621,8 +621,13 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 
 	QEMU=`find $qemu_dir -name qemu-system-aarch64`
 	if [ x"" = x"$QEMU" ]; then
-        sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
 		pushd qemu/
+        if [ ! -f ".initilized" ]; then
+            sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
+            if [ x"$?" = x"0" ]; then
+                touch ".initilized"
+            fi
+        fi
 		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
 		make -j14
 		make install
