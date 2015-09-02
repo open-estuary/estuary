@@ -98,6 +98,30 @@ check_platform()
 }
 
 ###################################################################################
+############################# Check the checksum file   ###########################
+###################################################################################
+checksum_result=0
+checksum_source=
+check_sum()
+{
+    if [ x"$checksum_source" = x"" ]; then
+        echo "Invalidate checksum file!"
+        checksum_result=1
+        exit 1
+    fi
+
+    checksum_file=${checksum_source##*/}
+
+    touch $checksum_file
+    mv $checksum_file $checksum_file".bak"
+
+    wget -c $checksum_source
+    diff $checksum_file $checksum_file".bak"
+
+    checksum_result=$?
+}
+
+###################################################################################
 ############################# Check all parameters     ############################
 ###################################################################################
 while [ x"$1" != x"" ]; do 
