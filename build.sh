@@ -11,7 +11,7 @@
 ###################################################################################
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse)
-distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora)
+distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -22,6 +22,7 @@ PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
 PATH_OPENSUSE64=default
 PATH_UBUNTU64=default
 PATH_FEDORA64=default
+PATH_DEBIAN64=default
 #arm32 distributions
 PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.2/appliances/openSUSE-13.2-ARM-XFCE.armv7-rootfs.armv7l-1.12.1-Build33.7.tbz
 PATH_UBUNTU32=http://releases.linaro.org/15.02/ubuntu/lt-d01/linaro-utopic-server-20150220-698.tar.gz
@@ -245,10 +246,14 @@ else
 			;;
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU64
-			;;	"Fedora" )
+			;;	
+        "Fedora" )
 			DISTRO_SOURCE=$PATH_FEDORA64
 			;;	
-			* )
+        "Debian" )
+			DISTRO_SOURCE=$PATH_DEBIAN64
+			;;	
+		* )
 			DISTRO_SOURCE="none"
 			;;
 	esac
