@@ -340,7 +340,7 @@ cd $BINARY_DIR/
 echo "Check the checksum for binaries..."
 TEMPFILE=tempfile
 rm -rf checksum.txt
-wget -c $BINARY_SOURCE/checksum.txt 2>/dev/null
+wget -c $BINARY_SOURCE/checksum.txt
 md5sum --quiet --check checksum.txt 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 while read LINE
 do
