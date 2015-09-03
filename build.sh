@@ -384,10 +384,12 @@ fi
 UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
-uefiimg=`find $uefi_dir -name *.fd`
+
+mkdir -p "$uefi_dir" 2> /dev/null
+UEFI_BIN=`find $uefi_dir -name *.fd`
 
 # Build UEFI for D01 platform
-if [ x"" = x"$uefiimg" ]; then
+if [ x"" = x"$UEFI_BIN" ]; then
     # use uefi_tools to compile
     if [ ! -d "$UEFI_TOOLS" ] ; then 
         echo "Do not find uefi-tools!"
@@ -431,9 +433,10 @@ if [ x"" = x"$uefiimg" ]; then
     	popd
     fi
     UEFI_BIN=`find "$UEFI_DIR" -name "*.fd"`
-    mkdir -p "$uefi_dir" 2> /dev/null
-    cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
-    cp $UEFI_BIN $binary_dir/UEFI_Release.bin
+	if [ x"$UEFI_BIN" != x"" ]; then
+    	cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
+    	cp $UEFI_BIN $binary_dir/UEFI_Release.bin
+	fi
 fi
 
 ###################################################################################
