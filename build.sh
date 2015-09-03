@@ -632,6 +632,8 @@ if [ ! -d "$distro_dir" ] ; then
     fi
 fi
 
+echo "Build sucessfully! All binaries can be found in 'build' direcory."
+
 ###################################################################################
 ################ Build QEMU and start it if platform is QEMU   ####################
 ###################################################################################
