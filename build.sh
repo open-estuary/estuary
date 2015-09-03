@@ -342,7 +342,7 @@ cd -
 binary_dir=$build_dir/binary
 BINARY_DIR=binary
 BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
-binarysum_file="checksum.txt"
+binarysum_file="binaries.sum"
 
 if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
@@ -350,7 +350,7 @@ fi
 
 cd $BINARY_DIR/
 echo "Check the checksum for binaries..."
-checksum_source=$BINARY_SOURCE/$binarysum_file
+checksum_source=http://7xjz0v.com1.z0.glb.clouddn.com/tools/$binarysum_file
 check_sum
 if [ x"$checksum_result" != x"0" ]; then
 	TEMPFILE=tempfile
