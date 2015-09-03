@@ -379,23 +379,25 @@ if [ ! -d "$binary_dir" ] ; then
 fi
 
 ###################################################################################
-################## Build grub binary from grub source code      ###################
+########################### Build UEFI from source code   #########################
 ###################################################################################
-grub_dir=$build_dir/grub
-grubimg=`find $grub_dir -name *.efi`
+UEFI_TOOLS=tools/uefi-tools
+UEFI_DIR=uefi
+uefi_dir=$build_dir/$UEFI_DIR
+uefiimg=`find $uefi_dir -name *.fd`
 
-# Build grub and UEFI for D01 platform
-if [ x"ARM32" = x"$TARGETARCH" ]; then
-	if [ x"" = x"$grubimg" ]; then
-    	# use uefi_tools to compile
-        UEFI_TOOLS=tools/uefi-tools
-        UEFI_DIR=uefi
+# Build UEFI for D01 platform
+if [ x"" = x"$uefiimg" ]; then
+    # use uefi_tools to compile
+    if [ ! -d "$UEFI_TOOLS" ] ; then 
+        echo "Do not find uefi-tools!"
+        exit 1
+    fi
+    export PATH=$PATH:`pwd`/$UEFI_TOOLS
 
-    	if [ ! -d "$UEFI_TOOLS" ] ; then 
-            echo "Do not find uefi-tools!"
-            exit 1
-        fi
+	echo "Build UEFI..."
 
+	if [ x"ARM32" = x"$TARGETARCH" ]; then
      	pushd $UEFI_TOOLS/
      	echo "[d01]" >> platforms.config 
      	echo "LONGNAME=HiSilicon D01 Cortex-A15 16-cores" >> platforms.config
@@ -403,26 +405,54 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
      	echo "DSC=HisiPkg/D01BoardPkg/D01BoardPkg.dsc" >> platforms.config
      	echo "ARCH=ARM" >> platforms.config
      	popd
-    
-    	export PATH=$PATH:`pwd`/uefi-tools/
-    	# compile uefi for d01
+
+    	# compile uefi for D01
     	pushd $UEFI_DIR/
+		# roll back to special version for D01
+		git reset --hard
+		git checkout open-estuary old
+
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
-    	uefi_dir=$build_dir/uefi
-    	mkdir -p "$uefi_dir" 2> /dev/null
-        UEFI_BIN=`find "$UEFI_DIR" -name "D01.fd"`
-    	cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
-    	cp $UEFI_BIN $binary_dir/UEFI_Release.bin
-    
-    	# compile the grub
-    	mkdir -p "$grub_dir" 2> /dev/null
-    	echo path:`pwd`
-    	cd $grub_dir
-    	absolute_dir=`pwd`
-    	cd -
-    	pushd grub/
+	else
+# Build UEFI for D02 platform
+     	pushd $UEFI_TOOLS/
+     	popd
+
+    	# compile uefi for D02 
+    	pushd $UEFI_DIR/
+		# roll back to special version for D02
+		git reset --hard
+		git checkout open-estuary master
+
+    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
+    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
+    	popd
+    fi
+    UEFI_BIN=`find "$UEFI_DIR" -name "*.fd"`
+    mkdir -p "$uefi_dir" 2> /dev/null
+    cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
+    cp $UEFI_BIN $binary_dir/UEFI_Release.bin
+fi
+
+###################################################################################
+################## Build grub binary from grub source code      ###################
+###################################################################################
+GRUB_DIR=grub
+grub_dir=$build_dir/$GRUB_DIR
+grubimg=`find $grub_dir -name *.efi`
+
+# Build grub for D01 platform
+if [ x"" = x"$grubimg" ]; then
+    mkdir -p "$grub_dir" 2> /dev/null
+    echo path:`pwd`
+    cd $grub_dir
+    absolute_dir=`pwd`
+    cd -
+
+	if [ x"ARM32" = x"$TARGETARCH" ]; then
+    	pushd $GRUB_DIR/
     	make distclean
     	./autogen.sh
     	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
@@ -433,19 +463,9 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
     	cd $grub_dir
     	./bin/grub-mkimage -v -o grub.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	cd -
-	fi
-#    cp $grub_dir/grub.efi $binary_dir/
 else
 # Build grub for D02 platform
-	if [ x"" = x"$grubimg" ]; then
-    	# compile the grub for aarch64
-    	grub_dir=$build_dir/grub
-    	mkdir -p "$grub_dir" 2> /dev/null
-    	echo path:`pwd`
-    	cd $grub_dir
-    	absolute_dir=`pwd`
-    	cd -
-    	pushd grub/
+    	pushd $GRUB_DIR/
 # Apply patch for boot from inidcated MAC address
         git reset --hard
 		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
@@ -465,24 +485,26 @@ else
     	echo $PATH
     	cd -
     fi
-#	cp $grub_dir/grubaa64.efi $binary_dir/
+    GRUB_BIN=`find "$grub_dir" -name "*.efi"`
+	cp $GRUB_BIN $binary_dir/
 fi
 
 ###################################################################################
 ##################### Build kernel from kernel source code      ###################
 ###################################################################################
 # preprocess for kernel building
-kernel_dir=$build_dir/kernel
+KERNEL_DIR=kernel
+kernel_dir=$build_dir/$KERNEL_DIR
 mkdir -p "$kernel_dir" 2> /dev/null
 if [ x"ARM32" = x"$TARGETARCH" ]; then
-	KERNEL=`pwd`/$kernel_dir/arch/arm/boot/zImage
+	KERNEL_BIN=`pwd`/$kernel_dir/arch/arm/boot/zImage
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
 		BUILDFLAG=TRUE
 
 		export ARCH=arm
 	fi
 else
-	KERNEL=`pwd`/$kernel_dir/arch/arm64/boot/Image
+	KERNEL_BIN=`pwd`/$kernel_dir/arch/arm64/boot/Image
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
 		BUILDFLAG=TRUE
 
@@ -495,7 +517,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		export CROSS_COMPILE=$CROSS 
 	fi
 
-	pushd kernel/
+	pushd $KERNEL_DIR/
 	
 	make mrproper
 	make O=../$kernel_dir mrproper
@@ -552,8 +574,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	popd
 fi
 DTB=`pwd`/$DTB
-#cat $KERNEL $DTB > $build_dir/kernel/.kernel
-cp $KERNEL $binary_dir/
+cp $KERNEL_BIN $binary_dir/
 if [ x"QEMU" != x"$PLATFORM" ]; then
     cp $DTB $binary_dir/
 fi
