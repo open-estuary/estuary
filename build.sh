@@ -412,7 +412,7 @@ if [ x"" = x"$UEFI_BIN" ]; then
     	pushd $UEFI_DIR/
 		# roll back to special version for D01
 		git reset --hard
-		git checkout open-estuary old
+		git checkout open-estuary/old
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
@@ -426,7 +426,7 @@ if [ x"" = x"$UEFI_BIN" ]; then
     	pushd $UEFI_DIR/
 		# roll back to special version for D02
 		git reset --hard
-		git checkout open-estuary master
+		git checkout open-estuary/master
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
     	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
