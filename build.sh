@@ -386,7 +386,7 @@ UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
 mkdir -p "$uefi_dir" 2> /dev/null
-UEFI_BIN=`find $uefi_dir -name *.fd`
+UEFI_BIN=`find $uefi_dir -name *.bin`
 
 # Build UEFI for D01 platform
 if [ x"" = x"$UEFI_BIN" ]; then
