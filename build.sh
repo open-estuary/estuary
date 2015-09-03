@@ -116,9 +116,10 @@ check_sum()
     mv $checksum_file $checksum_file".bak"
 
     wget -c $checksum_source
-    diff $checksum_file $checksum_file".bak"
+    diff $checksum_file $checksum_file".bak" >/dev/null
 
     checksum_result=$?
+	rm -rf $checksum_file".bak" 2>/dev/null
 }
 
 ###################################################################################
@@ -198,31 +199,36 @@ TOOLCHAIN_DIR=toolchain
 toolchain_dir=$build_dir/toolchain
 GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
+toolchainsum_file="toolchain.sum"
 
 if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 fi
 
 # Download firstly
-#TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/toolchain
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
-
-TEMPFILE=tempfile
 echo "Check the checksum for toolchain..."
-rm -rf toolchain.sum 2>/dev/null
-wget -c $TOOLCHAIN_SOURCE/toolchain.sum
-md5sum --quiet --check toolchain.sum 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
-while read LINE
-do
-    if [ x"$LINE" != x"" ]; then
-		rm -rf $TOOLCHAIN_SOURCE/$LINE 2>/dev/null
-        echo "Download the toolchain..."
-	    wget -c $TOOLCHAIN_SOURCE/$LINE
-    fi
-done  < $TEMPFILE
-rm $TEMPFILE
-
+checksum_source=$TOOLCHAIN_SOURCE/$toolchainsum_file
+check_sum
+if [ x"$checksum_result" != x"0" ]; then
+	TEMPFILE=tempfile
+	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	while read LINE
+	do
+	    if [ x"$LINE" != x"" ]; then
+	        echo "Download the toolchain..."
+			rm -rf $TOOLCHAIN_SOURCE/$LINE 2>/dev/null
+		    wget -c $TOOLCHAIN_SOURCE/$LINE
+			if [ x"$?" != x"0" ]; then
+				rm -rf $toolchainsum_file $LINE 2>/dev/null
+				echo "Download toolchain($LINE) failed!"
+				exit 1
+			fi
+	    fi
+	done  < $TEMPFILE
+	rm $TEMPFILE
+fi
 cd -
 
 # Copy to build target directory
@@ -255,9 +261,9 @@ fi
 # Determine the source file
 if [ x"$TARGETARCH" = x"ARM32" ] ; then
 	case $DISTRO in
-		"OpenSuse" )
-			DISTRO_SOURCE=$PATH_OPENSUSE32
-			;;
+#		"OpenSuse" )
+#			DISTRO_SOURCE=$PATH_OPENSUSE32
+#			;;
 		"Ubuntu" )
 			DISTRO_SOURCE=$PATH_UBUNTU32
 			;;	
@@ -309,21 +315,25 @@ else
 fi
 
 cd $DISTRO_DIR
-
 # Download it based on md5 checksum file
 echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
-SUMFILE="$DISTRO"_"$TARGETARCH"."sum"
-#echo "$DISTRO_SOURCE"": FAILED" > $SUMFILE
-rm -rf $SUMFILE 2>/dev/null
-wget -c "$DISTRO_SOURCE"."sum" -O $SUMFILE
-md5sum --quiet --check $SUMFILE | grep 'FAILED'
-if [ x"$?" = x"0" ]; then
-    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
-	rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
-    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
-    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
+checksum_source="$DISTRO_SOURCE"."sum"
+check_sum
+if [ x"$checksum_result" != x"0" ]; then
+	distrosum_file=${checksum_source##*/}
+	md5sum --quiet --check $distrosum_file | grep 'FAILED'
+	if [ x"$?" = x"0" ]; then
+	    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
+		rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
+	    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
+		if [ x"$?" != x"0" ]; then
+			rm -rf $distrosum_file "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
+			echo "Download distributions("$DISTRO"_"$TARGETARCH"."$postfix") failed!"
+			exit 1
+		fi
+	    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
+	fi
 fi
-
 cd -
 
 ###################################################################################
@@ -332,25 +342,34 @@ cd -
 binary_dir=$build_dir/binary
 BINARY_DIR=binary
 BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
+binarysum_file="checksum.txt"
+
 if [ ! -d "$BINARY_DIR" ] ; then
 	mkdir -p "$BINARY_DIR" 2> /dev/null
 fi
 
 cd $BINARY_DIR/
 echo "Check the checksum for binaries..."
-TEMPFILE=tempfile
-rm -rf checksum.txt
-wget -c $BINARY_SOURCE/checksum.txt
-md5sum --quiet --check checksum.txt 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
-while read LINE
-do
-    if [ x"$LINE" != x"" ]; then
-        echo "Download "$LINE"..."
-	    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
-	    wget -c $BINARY_SOURCE/$LINE
-    fi
-done  < $TEMPFILE
-rm $TEMPFILE
+checksum_source=$BINARY_SOURCE/$binarysum_file
+check_sum
+if [ x"$checksum_result" != x"0" ]; then
+	TEMPFILE=tempfile
+	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	while read LINE
+	do
+	    if [ x"$LINE" != x"" ]; then
+	        echo "Download "$LINE"..."
+		    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
+		    wget -c $BINARY_SOURCE/$LINE
+			if [ x"$?" != x"0" ]; then
+				rm -rf $binarysum_file $LINE 2>/dev/null
+				echo "Download binaries($LINE) failed!"
+				exit 1
+			fi
+	    fi
+	done  < $TEMPFILE
+	rm $TEMPFILE
+fi
 cd -
 
 # Copy to build target directory
