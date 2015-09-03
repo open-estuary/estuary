@@ -209,6 +209,7 @@ TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 
 TEMPFILE=tempfile
+echo "Check the checksum for toolchain..."
 rm -rf toolchain.sum 2>/dev/null
 wget -c $TOOLCHAIN_SOURCE/toolchain.sum
 md5sum --quiet --check toolchain.sum 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
@@ -216,6 +217,7 @@ while read LINE
 do
     if [ x"$LINE" != x"" ]; then
 		rm -rf $TOOLCHAIN_SOURCE/$LINE 2>/dev/null
+        echo "Download the toolchain..."
 	    wget -c $TOOLCHAIN_SOURCE/$LINE
     fi
 done  < $TEMPFILE
@@ -234,7 +236,7 @@ fi
 arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc"`
 if [ x"" = x"$arm_gcc" ]; then 
 	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
-	echo "uncompress the toolchain......"
+	echo "Uncompress the toolchain......"
 	tar Jxf $package -C $TOOLCHAIN_DIR
 	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc`
 fi
@@ -309,12 +311,14 @@ fi
 cd $DISTRO_DIR
 
 # Download it based on md5 checksum file
+echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
 SUMFILE="$DISTRO"_"$TARGETARCH"."sum"
 #echo "$DISTRO_SOURCE"": FAILED" > $SUMFILE
 rm -rf $SUMFILE 2>/dev/null
 wget -c "$DISTRO_SOURCE"."sum" -O $SUMFILE
 md5sum --quiet --check $SUMFILE | grep 'FAILED'
 if [ x"$?" = x"0" ]; then
+    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
 	rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
     wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
     chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
@@ -333,6 +337,7 @@ if [ ! -d "$BINARY_DIR" ] ; then
 fi
 
 cd $BINARY_DIR/
+echo "Check the checksum for binaries..."
 TEMPFILE=tempfile
 rm -rf checksum.txt
 wget -c $BINARY_SOURCE/checksum.txt 2>/dev/null
@@ -340,6 +345,7 @@ md5sum --quiet --check checksum.txt 2>/dev/null | grep ': FAILED' | cut -d : -f 
 while read LINE
 do
     if [ x"$LINE" != x"" ]; then
+        echo "Download "$LINE"..."
 	    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
 	    wget -c $BINARY_SOURCE/$LINE
     fi
@@ -541,33 +547,33 @@ if [ ! -d "$distro_dir" ] ; then
     mkdir -p "$distro_dir" 2> /dev/null
     
     image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
-    echo "uncompress the distribution($DISTRO) ......"
+    echo "Uncompress the distribution($DISTRO) ......"
     if [ x"${image##*.}" = x"bz2" ] ; then
     	TEMP=${image%.*}
     	if [ x"${TEMP##*.}" = x"tar" ] ; then
     		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo This is a tar.bz2 package
+    		echo "This is a tar.bz2 package"
     	else
     		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo This is a bz2 package
+    		echo "This is a bz2 package"
     	fi
     fi
     if [ x"${image##*.}" = x"gz" ] ; then
     	TEMP=${image%.*}
     	if [ x"${TEMP##*.}" = x"tar" ] ; then
     		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo This is a tar.gz package
+    		echo "This is a tar.gz package"
     	else
     		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo This is a gz package
+    		echo "This is a gz package"
     	fi
     fi
     if [ x"${image##*.}" = x"tar" ] ; then 
     	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    	echo This is a tar package
+    	echo "This is a tar package"
     fi
     if [ x"${image##*.}" = x"xz" ] ; then 
-    #	echo This is a xz package
+    #	echo "This is a xz package"
     	TEMP=${image%.*}
     	if [ x"${TEMP##*.}" = x"tar" ] ; then
     		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
@@ -657,6 +663,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                 touch ".initilized"
             fi
         fi
+        echo "Build the QEMU..."
 		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
 		make -j14
 		make install
@@ -665,6 +672,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	fi
 	
 # Run the qemu
+    echo "Start QEMU..."
 	$QEMU -machine virt -cpu cortex-a57 \
 	    -kernel $KERNEL \
 	    -drive if=none,file=$rootfs,id=fs \
