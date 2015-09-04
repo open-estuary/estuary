@@ -516,6 +516,8 @@ else
 fi
 
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
+    echo "Build kernel..."
+
 	if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
 		export CROSS_COMPILE=$CROSS 
 	fi
@@ -524,11 +526,9 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	
 	make mrproper
 	make O=../$kernel_dir mrproper
-fi
 
-# kernel building
-if [ x"ARM32" = x"$TARGETARCH" ]; then
-	if [ x"$BUILDFLAG" = x"TRUE" ]; then
+    # kernel building
+    if [ x"ARM32" = x"$TARGETARCH" ]; then
 		make O=../$kernel_dir hisi_defconfig
 
 		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
@@ -543,10 +543,8 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 
 		make O=../$kernel_dir -j14 zImage
 		make O=../$kernel_dir hip04-d01.dtb
-	fi
-	DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
-else
-	if [ x"$BUILDFLAG" = x"TRUE" ]; then
+	    DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+    else
 		make O=../$kernel_dir defconfig
         if [ x"QEMU" = x"$PLATFORM" ]; then
     		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
@@ -562,12 +560,10 @@ else
 
 	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
 		make O=../$kernel_dir hisilicon/hip05-d02.dtb
-	fi
-	DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
-fi
+	    DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
+    fi
 
-# postprocess for kernel building
-if [ x"$BUILDFLAG" = x"TRUE" ]; then
+    # postprocess for kernel building
 	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
 		make O=../$kernel_dir -j14 modules
 		make O=../$kernel_dir -j14 modules_install
@@ -576,6 +572,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
 	popd
 fi
+
 DTB=`pwd`/$DTB
 cp $KERNEL_BIN $binary_dir/
 if [ x"QEMU" != x"$PLATFORM" ]; then
