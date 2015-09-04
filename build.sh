@@ -632,6 +632,7 @@ if [ ! -d "$distro_dir" ] ; then
     fi
 fi
 
+echo ""
 echo "Build sucessfully! All binaries can be found in 'build' direcory."
 
 ###################################################################################
