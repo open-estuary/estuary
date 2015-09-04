@@ -320,6 +320,7 @@ echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
 checksum_source="$DISTRO_SOURCE"."sum"
 check_sum
 if [ x"$checksum_result" != x"0" ]; then
+    echo "Check the checksum for distribution..."
 	distrosum_file=${checksum_source##*/}
 	md5sum --quiet --check $distrosum_file | grep 'FAILED'
 	if [ x"$?" = x"0" ]; then
@@ -501,6 +502,8 @@ kernel_dir=$build_dir/$KERNEL_DIR
 mkdir -p "$kernel_dir" 2> /dev/null
 if [ x"ARM32" = x"$TARGETARCH" ]; then
 	KERNEL_BIN=`pwd`/$kernel_dir/arch/arm/boot/zImage
+    DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
 		BUILDFLAG=TRUE
 
@@ -508,6 +511,12 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 	fi
 else
 	KERNEL_BIN=`pwd`/$kernel_dir/arch/arm64/boot/Image
+    if [ x"QEMU" = x"$PLATFORM" ]; then
+        DTB=""
+    else
+	    DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
+    fi
+
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
 		BUILDFLAG=TRUE
 
@@ -543,7 +552,6 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
 		make O=../$kernel_dir -j14 zImage
 		make O=../$kernel_dir hip04-d01.dtb
-	    DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
     else
 		make O=../$kernel_dir defconfig
         if [ x"QEMU" = x"$PLATFORM" ]; then
@@ -560,7 +568,6 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
 	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
 		make O=../$kernel_dir hisilicon/hip05-d02.dtb
-	    DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
     fi
 
     # postprocess for kernel building
@@ -573,9 +580,9 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	popd
 fi
 
-DTB=`pwd`/$DTB
 cp $KERNEL_BIN $binary_dir/
-if [ x"QEMU" != x"$PLATFORM" ]; then
+if [ x"" != x"$DTB" ]; then
+    DTB=`pwd`/$DTB
     cp $DTB $binary_dir/
 fi
 
