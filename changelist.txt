@@ -1,7 +1,10 @@
 Change list for Estuary V2.0:
-1. Upgrade kernel to v4.1
-2. Enable Quick Start solution by USB disk.
+1. Upgrade kernel to v4.1.6
+2. Enable Quick Start Deployment solution by USB disk.
 3. Integrated latest drivers: PCIE, XGE, SAS.
-4. Move all git repository and documentation to new position.
+4. Move all git repositories and documentations to new position.
 5. Validated & supported more distributions: OpenSuse, Debian.
 6. Improved Ubuntu distribution to be more stable.
+7. Improved the efficiency of build.sh largely.
+8. Enabled building grub from source code directly.
+9. Pubished the latest UEFI source code and eanbled building UEFI from source code directly.
