@@ -233,6 +233,7 @@ cd -
 
 # Copy to build target directory
 if [ ! -d "$toolchain_dir" ] ; then
+    echo "Copy toolchain to 'build' directory..."
 	mkdir -p "$toolchain_dir" 2> /dev/null
     cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
     cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
