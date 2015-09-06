@@ -724,7 +724,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 # Run the qemu
     echo "Start QEMU..."
 	$QEMU -machine virt -cpu cortex-a57 \
-	    -kernel $KERNEL \
+	    -kernel $KERNEL_BIN \
 	    -drive if=none,file=$rootfs,id=fs \
 	    -device virtio-blk-device,drive=fs \
 	    -append "$CMDLINE" \
