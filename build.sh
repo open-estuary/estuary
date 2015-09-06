@@ -388,7 +388,7 @@ UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
 if [ ! -d "$uefi_dir" ] ; then
-	mkdir -p "$uefi_dir" 2> /dev/null
+	mkdir -p "$uefi_dir" 2>/dev/null
 fi
 UEFI_BIN=`find $uefi_dir -name *.bin`
 
@@ -421,7 +421,7 @@ if [ x"" = x"$UEFI_BIN" ]; then
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
-    	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd"`
+    	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
 	else
 		if [ x"QEMU" != x"$PLATFORM" ]; then
 		# Build UEFI for D02 platform
@@ -439,7 +439,7 @@ if [ x"" = x"$UEFI_BIN" ]; then
 	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
 	    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
 	    	popd
-	    	UEFI_BIN=`find "$UEFI_DIR/Build/D02" -name "*.fd"`
+	    	UEFI_BIN=`find "$UEFI_DIR/Build/D02" -name "*.fd" 2>/dev/null`
 		fi
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
@@ -457,7 +457,9 @@ grubimg=`find $grub_dir -name *.efi`
 
 # Build grub for D01 platform
 if [ x"" = x"$grubimg" ]; then
-    mkdir -p "$grub_dir" 2> /dev/null
+    if [ ! -d "$grub_dir" ] ; then 
+    	mkdir -p "$grub_dir" 2> /dev/null
+	fi
     echo path:`pwd`
     cd $grub_dir
     absolute_dir=`pwd`
