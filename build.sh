@@ -421,24 +421,27 @@ if [ x"" = x"$UEFI_BIN" ]; then
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
+    	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd"`
 	else
-# Build UEFI for D02 platform
-     	pushd $UEFI_TOOLS/
-     	popd
-
-    	# compile uefi for D02 
-    	pushd $UEFI_DIR/
-		# roll back to special version for D02
-		git reset --hard
-		git checkout open-estuary/master
-		git apply HwPkg/Patch/*.patch
-#		export LC_CTYPE=C make -C BaseTools source edksetup.sh build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
-
-    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
-    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
-    	popd
+		if [ x"QEMU" != x"$PLATFORM" ]; then
+		# Build UEFI for D02 platform
+	     	pushd $UEFI_TOOLS/
+	     	popd
+	
+	    	# compile uefi for D02 
+	    	pushd $UEFI_DIR/
+			# roll back to special version for D02
+			git reset --hard
+			git checkout open-estuary/master
+			git apply HwPkg/Patch/*.patch
+			#export LC_CTYPE=C make -C BaseTools source edksetup.sh build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
+	
+	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
+	    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
+	    	popd
+	    	UEFI_BIN=`find "$UEFI_DIR/Build/D02" -name "*.fd"`
+		fi
     fi
-    UEFI_BIN=`find "$UEFI_DIR" -name "*.fd"`
 	if [ x"$UEFI_BIN" != x"" ]; then
     	cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
     	cp $UEFI_BIN $binary_dir/UEFI_Release.bin
