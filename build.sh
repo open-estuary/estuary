@@ -387,7 +387,9 @@ UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
-mkdir -p "$uefi_dir" 2> /dev/null
+if [ ! -d "$uefi_dir" ] ; then
+	mkdir -p "$uefi_dir" 2> /dev/null
+fi
 UEFI_BIN=`find $uefi_dir -name *.bin`
 
 # Build UEFI for D01 platform
@@ -429,6 +431,8 @@ if [ x"" = x"$UEFI_BIN" ]; then
 		# roll back to special version for D02
 		git reset --hard
 		git checkout open-estuary/master
+		git apply HwPkg/Patch/*.patch
+#		export LC_CTYPE=C make -C BaseTools source edksetup.sh build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
     	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
