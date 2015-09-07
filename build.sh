@@ -517,6 +517,11 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 
 	if [ x"ARM32" = x"$TARGETARCH" ]; then
     	pushd $GRUB_DIR/
+# Rollbak the grub master
+        git reset --hard
+		git checkout grub/master
+		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
+
     	make distclean
     	./autogen.sh
     	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
