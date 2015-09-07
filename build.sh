@@ -80,7 +80,11 @@ check_distro()
 		done
 	fi
 
-	echo -e "\033[31mMust specify a platform(-p) before distribution(-d) or error distribution!\033[0m"
+	if [ x"" = x"$PLATFORM" ]; then
+		echo -e "\033[31mMust specify a platform(-p) before distribution(-d).\033[0m"
+	else
+		echo -e "\033[31mError distribution!\033[0m"
+	fi
     usage
 	exit 1
 }
@@ -96,7 +100,7 @@ check_platform()
 			return
 		fi
 	done
-	echo "Error platform!"
+	echo -e "\033[31mError platform!\033[0m"
     usage
 	exit 1
 }
@@ -112,7 +116,7 @@ check_install()
 			return
 		fi
 	done
-	echo "Error install target!"
+	echo -e "\033[31mError install target!\033[0m"
     usage
 	exit 1
 }
@@ -274,18 +278,18 @@ cd -
 # Copy to build target directory
 if [ ! -d "$toolchain_dir" ] ; then
     echo "Copy toolchain to 'build' directory..."
-	mkdir -p "$toolchain_dir" 2> /dev/null
+	mkdir -p "$toolchain_dir" 2>/dev/null
     cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
     cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
 fi
 
 # Uncompress the toolchain
-arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc"`
+arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc" 2>/dev/null`
 if [ x"" = x"$arm_gcc" ]; then 
 	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
 	echo "Uncompress the toolchain......"
 	tar Jxf $package -C $TOOLCHAIN_DIR
-	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc`
+	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc 2>/dev/null`
 fi
 CROSS=`pwd`/${arm_gcc%g*}
 export PATH=${CROSS%/*}:$PATH
@@ -425,7 +429,7 @@ UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
-uefi_bin=`find $uefi_dir -name UEFI_Release.bin`
+uefi_bin=`find $uefi_dir -name UEFI_Release.bin 2>/dev/null`
 
 # Build UEFI for D01 platform
 if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
@@ -434,7 +438,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	fi
     # use uefi_tools to compile
     if [ ! -d "$UEFI_TOOLS" ] ; then 
-        echo "Do not find uefi-tools!"
+        echo "Can not find uefi-tools!"
         exit 1
     fi
     export PATH=$PATH:`pwd`/$UEFI_TOOLS
@@ -490,7 +494,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	cp $UEFI_BIN $uefi_bin
 	fi
 fi
-if [ -f $uefi_bin ]; then
+if [ x"" != x"$PLATFORM" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
 fi
 
@@ -499,7 +503,7 @@ fi
 ###################################################################################
 GRUB_DIR=grub
 grub_dir=$build_dir/$GRUB_DIR
-GRUB_BIN=`find $grub_dir -name *.efi`
+GRUB_BIN=`find $grub_dir -name *.efi 2>/dev/null`
 
 # Build grub for D01 platform
 if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
@@ -545,10 +549,10 @@ else
     	echo $PATH
     	cd -
     fi
-    GRUB_BIN=`find "$grub_dir" -name "*.efi"`
+    GRUB_BIN=`find "$grub_dir" -name "*.efi" 2>/dev/null`
 fi
 
-if [ x"" != x"GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
+if [ x"" != x"$PLATFORM" ] && [ x"" != x"GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
 	cp $GRUB_BIN $binary_dir/
 fi
 
@@ -564,7 +568,7 @@ DTB_BIN=
 
 if [ x"" = x"$PLATFORM" ]; then
     #do nothing
-	echo "Don\'t build kernel."
+	echo "Do not build kernel."
 elif [ x"ARM32" = x"$TARGETARCH" ]; then
 	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
     DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
@@ -698,7 +702,7 @@ if [ x"" != x"$DISTRO" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
     	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
     fi
     if [ x"${image}" = x"" ] ; then
-    	echo "Do not find the suitable root filesystem!"
+    	echo "Can not find the suitable root filesystem!"
         exit 1
     fi
 fi
@@ -718,7 +722,7 @@ if [ x"" != x"$PLATFORM" ]; then
     	if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
     		echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
     	else
-    		echo -e "\033[31mFailed! UEFI         can\'t be found!\033[0m"
+    		echo -e "\033[31mFailed! UEFI         can not be found!\033[0m"
     	fi
     fi
     
@@ -728,14 +732,14 @@ if [ x"" != x"$PLATFORM" ]; then
     	if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
     		echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
     	else
-    		echo -e "\033[31mFailed! grub         can\'t be found!\033[0m"
+    		echo -e "\033[31mFailed! grub         can not be found!\033[0m"
     	fi
     fi
     
     if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
     	echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
     else
-    	echo -e "\033[31mFailed! kernel       can\'t be found!\033[0m"
+    	echo -e "\033[31mFailed! kernel       can not be found!\033[0m"
     fi
     
     if [ x"QEMU" = x"$PLATFORM" ]; then
@@ -744,7 +748,7 @@ if [ x"" != x"$PLATFORM" ]; then
     	if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
     		echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
     	else
-    		echo -e "\033[31mFailed! dtb          can\'t be found!\033[0m"
+    		echo -e "\033[31mFailed! dtb          can not be found!\033[0m"
     	fi
     fi
     
@@ -752,15 +756,32 @@ if [ x"" != x"$PLATFORM" ]; then
 		if [ -f $DISTRO_DIR/$image ]; then
     		echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
     	else
-    		echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
+    		echo -e "\033[31mFailed! Distribution can not be found!\033[0m"
     	fi
 	fi
     
     if [ -f $toolchain_dir/$GCC64 ]; then
     	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
     else
-    	echo -e "\033[31mFailed! toolchain    can\'t be found!\033[0m"
+    	echo -e "\033[31mFailed! toolchain    can not be found!\033[0m"
     fi
+fi
+
+###################################################################################
+########################## Install Caliper for Estuary     ########################
+###################################################################################
+if [ x"Caliper" = x"$INSTALL" ]; then
+	pushd caliper
+	echo "Start to install Caliper..."
+	sudo python setup.py install
+	result=$?
+	popd
+	if [ x"0" = x"$result" ]; then
+    	echo -e "\033[32mInstalled Caliper successfully.\033[0m"
+		echo "Please edit /etc/caliper/config/client_config.cfg to config target board."
+    else
+    	echo -e "\033[31mCaliper install failed!\033[0m"
+	fi
 fi
 
 ###################################################################################
@@ -829,7 +850,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	qemu_dir=`pwd`/$build_dir/qemu
 	mkdir -p $qemu_dir 2> /dev/null
 
-	QEMU=`find $qemu_dir -name qemu-system-aarch64`
+	QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
 	if [ x"" = x"$QEMU" ]; then
 		pushd qemu/
         if [ ! -f ".initilized" ]; then
@@ -843,7 +864,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 		make -j14
 		make install
 		popd
-	    QEMU=`find $qemu_dir -name qemu-system-aarch64`
+	    QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
 	fi
 	
 # Run the qemu
