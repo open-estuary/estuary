@@ -333,50 +333,47 @@ else
 fi
 #DISTRO_SOURCE="default"
 
-if [ x"$DISTRO_SOURCE" = x"none" ]; then
-	echo "The distributions [$DISTRO] can not be supported on $PLATFORM now!"
-    usage
-	exit 1
-fi
+if [ x"$DISTRO_SOURCE" != x"none" ]; then
 
-if [ x"$DISTRO_SOURCE" = x"default" ]; then
-    DISTRO_SOURCE=$PATH_DISTRO/"$DISTRO"_"$TARGETARCH"."tar.gz"
-fi
-
-# Check the postfix name
-postfix=${DISTRO_SOURCE#*.tar} 
-if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
-    postfix=${DISTRO_SOURCE##*.} 
-else
-	if [ x"$postfix" = x"" ]; then
-		postfix=".tar"
+	if [ x"$DISTRO_SOURCE" = x"default" ]; then
+	    DISTRO_SOURCE=$PATH_DISTRO/"$DISTRO"_"$TARGETARCH"."tar.gz"
+	fi
+	
+	# Check the postfix name
+	postfix=${DISTRO_SOURCE#*.tar} 
+	if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
+	    postfix=${DISTRO_SOURCE##*.} 
 	else
-		postfix="tar"$postfix	
-	fi
-fi
-
-cd $DISTRO_DIR
-# Download it based on md5 checksum file
-echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
-checksum_source="$DISTRO_SOURCE"."sum"
-check_sum
-if [ x"$checksum_result" != x"0" ]; then
-    echo "Check the checksum for distribution..."
-	distrosum_file=${checksum_source##*/}
-	md5sum --quiet --check $distrosum_file | grep 'FAILED'
-	if [ x"$?" = x"0" ]; then
-	    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
-		rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
-	    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
-		if [ x"$?" != x"0" ]; then
-			rm -rf $distrosum_file "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
-			echo "Download distributions("$DISTRO"_"$TARGETARCH"."$postfix") failed!"
-			exit 1
+		if [ x"$postfix" = x"" ]; then
+			postfix=".tar"
+		else
+			postfix="tar"$postfix	
 		fi
-	    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
 	fi
+	
+	cd $DISTRO_DIR
+	# Download it based on md5 checksum file
+	echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
+	checksum_source="$DISTRO_SOURCE"."sum"
+	check_sum
+	if [ x"$checksum_result" != x"0" ]; then
+	    echo "Check the checksum for distribution..."
+		distrosum_file=${checksum_source##*/}
+		md5sum --quiet --check $distrosum_file | grep 'FAILED'
+		if [ x"$?" = x"0" ]; then
+		    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
+			rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
+		    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
+			if [ x"$?" != x"0" ]; then
+				rm -rf $distrosum_file "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
+				echo "Download distributions("$DISTRO"_"$TARGETARCH"."$postfix") failed!"
+				exit 1
+			fi
+		    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
+		fi
+	fi
+	cd -
 fi
-cd -
 
 ###################################################################################
 ######## Download all prebuilt binaries based on md5 checksum file      ###########
@@ -567,6 +564,7 @@ DTB_BIN=
 
 if [ x"" = x"$PLATFORM" ]; then
     #do nothing
+	echo "Don\'t build kernel."
 elif [ x"ARM32" = x"$TARGETARCH" ]; then
 	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
     DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
@@ -648,7 +646,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	popd
 fi
 
-if [ x"" != x"$KERNEL_BIN"] && [ -f $KERNEL_BIN ]; then
+if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
 	cp $KERNEL_BIN $binary_dir/
 fi
 if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
@@ -750,11 +748,13 @@ if [ x"" != x"$PLATFORM" ]; then
     	fi
     fi
     
-    if [ -f $DISTRO_DIR/$image ]; then
-    	echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
-    else
-    	echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
-    fi
+    if [ x"" != x"$DISTRO" ]; then
+		if [ -f $DISTRO_DIR/$image ]; then
+    		echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
+    	else
+    		echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
+    	fi
+	fi
     
     if [ -f $toolchain_dir/$GCC64 ]; then
     	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
