@@ -1,0 +1,9 @@
+909f8bc99ff587bbecc2c8c6096b288b  bl1.bin
+fb9e2cba06ac589a3963eb6d1a3ae223  CH02TEVBC_V03.bin
+00f05682cd937c5fe741c81bbf3c3b71  fip.bin
+08bbd3ccc181350254d6f915b2040edc  grubaa64.efi
+3da9a824181f4853e4d64c5226c388b2  grub.cfg
+871837d35e2ebd2e95a3f07ed0e81eb0  hip05-d02.dtb
+7e6491fc899e58b48944020d8aedd477  hulk-hip05.cpio.gz
+2ed5c7f7641792aef9d522a5d7dc818f  Image
+6a55b396f3fbbda337d58a65cea965c5  UEFI_Release.bin
