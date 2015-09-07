@@ -785,6 +785,30 @@ if [ x"Caliper" = x"$INSTALL" ]; then
 fi
 
 ###################################################################################
+########################## Install toolchain for Estuary     ########################
+###################################################################################
+if [ x"toolchain" = x"$INSTALL" ]; then
+	for compiler in $GCC32 $GCC64
+	do
+		compiler=${compiler%%.tar.xz}
+		if [ ! -d "/opt/$compiler" ]; then
+			sudo mkdir -p /opt 2>/dev/null
+			sudo cp -r $TOOLCHAIN_DIR/$compiler /opt/
+			if [ x"$?" != x"0" ]; then
+    			echo -e "\033[31mToolchain install failed!\033[0m"
+				exit 1
+			fi
+			grep "export PATH=$PATH:/opt/$compiler/bin" ~/.bashrc >/dev/null
+			if [ x"$?" != x"0" ]; then
+				echo 'export PATH=$PATH:/opt/'$compiler'/bin' >> ~/.bashrc
+			fi
+		fi
+	done
+	
+   	echo -e "\033[32mInstalled toolchain successfully.\033[0m"
+fi
+
+###################################################################################
 ################ Build QEMU and start it if platform is QEMU   ####################
 ###################################################################################
 if [ x"QEMU" = x"$PLATFORM" ]; then
