@@ -388,13 +388,13 @@ UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
-if [ ! -d "$uefi_dir" ] ; then
-	mkdir -p "$uefi_dir" 2>/dev/null
-fi
 uefi_bin=`find $uefi_dir -name UEFI_Release.bin`
 
 # Build UEFI for D01 platform
-if [ x"" = x"$uefi_bin" ]; then
+if [ x"" = x"$uefi_bin" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+	if [ ! -d "$uefi_dir" ] ; then
+		mkdir -p "$uefi_dir" 2>/dev/null
+	fi
     # use uefi_tools to compile
     if [ ! -d "$UEFI_TOOLS" ] ; then 
         echo "Do not find uefi-tools!"
@@ -465,7 +465,7 @@ grub_dir=$build_dir/$GRUB_DIR
 GRUB_BIN=`find $grub_dir -name *.efi`
 
 # Build grub for D01 platform
-if [ x"" = x"$GRUB_BIN" ]; then
+if [ x"" = x"$GRUB_BIN" ] && [ x"QEMU" != x"$PLATFORM" ]; then
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
@@ -511,7 +511,7 @@ else
     GRUB_BIN=`find "$grub_dir" -name "*.efi"`
 fi
 
-if [ -f $GRUB_BIN ]; then
+if [ x"" != x"GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
 	cp $GRUB_BIN $binary_dir/
 fi
 
@@ -654,38 +654,53 @@ if [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
     	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
     fi
     if [ x"${image}" = x"" ] ; then
-    	echo "Do not found suitable root filesystem!"
+    	echo "Do not find the suitable root filesystem!"
         exit 1
     fi
 fi
 
+###################################################################################
+########################## Check and report build resutl   ########################
+###################################################################################
 echo ""
 echo -e "\033[32m==========================================================================\033[0m"
 echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
 echo "Of course, you can also find all original binaries in follows:"
 
-echo $uefi_bin
-if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
-	echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
+if [ x"QEMU" = x"$PLATFORM" ]; then
+	echo "UEFI is not necessary for QEMU."
 else
-	echo -e "\033[31mFailed! UEFI         can\'t be found!\033[0m"
+	if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
+		echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
+	else
+		echo -e "\033[31mFailed! UEFI         can\'t be found!\033[0m"
+	fi
 fi
 
-if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
-	echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
+if [ x"QEMU" = x"$PLATFORM" ]; then
+	echo "grub is not necessary for QEMU."
 else
-	echo -e "\033[31mFailed! grub         can\'t be found!\033[0m"
+	if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
+		echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
+	else
+		echo -e "\033[31mFailed! grub         can\'t be found!\033[0m"
+	fi
 fi
+
 if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
 	echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
 else
 	echo -e "\033[31mFailed! kernel       can\'t be found!\033[0m"
 fi
 
-if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
-	echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
+if [ x"QEMU" = x"$PLATFORM" ]; then
+	echo "dtb is not necessary for QEMU."
 else
-	echo -e "\033[31mFailed! dtb          can\'t be found!\033[0m"
+	if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
+		echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
+	else
+		echo -e "\033[31mFailed! dtb          can\'t be found!\033[0m"
+	fi
 fi
 
 if [ -f $toolchain_dir/$GCC64 ]; then
@@ -728,6 +743,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                     mkfs.ext4 ../$IMAGEFILE -F
                     mkdir -p ../tempdir 2>/dev/null
                     sudo mount ../$IMAGEFILE ../tempdir
+					echo "Produce the rootfs image file for QEMU..."
                     sudo cp -a * ../tempdir/
                     sudo umount ../tempdir
                     rm -rf ../tempdir
