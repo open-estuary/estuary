@@ -703,15 +703,16 @@ else
 	fi
 fi
 
+if [ -f $DISTRO_DIR/$image ]; then
+	echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
+else
+	echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
+fi
+
 if [ -f $toolchain_dir/$GCC64 ]; then
 	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
 else
 	echo -e "\033[31mFailed! toolchain    can\'t be found!\033[0m"
-fi
-if [ -f $DISTRO_DIR/$image ]; then
-	echo -e "\033[32mDistribution is in $DISTRO_DIR.\033[0m"
-else
-	echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
 fi
 
 ###################################################################################
