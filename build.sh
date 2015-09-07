@@ -13,6 +13,7 @@ distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02)
+installs=(Caliper toolchain)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
 #arm64 distributions
@@ -39,13 +40,16 @@ usage()
 	echo -n ${platforms[*]} | sed "s/ / | /g"
 	echo -n " ] [ -d "
 	echo -n ${distros[*]} | sed "s/ / | /g"
+	echo -n " ] [ -i "
+	echo -n ${installs[*]} | sed "s/ / | /g"
 	echo " ] "
 
 	echo -e "\n -h,--help	print this message"
-	echo " -p,--platform	platform"
-	echo " -d,--distro	distribuation"
+	echo " -p,--platform	platform, the -d musb be specified if platform is QEMU"
+	echo " -d,--distro	distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
 	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
+    echo " -i,--install to install target"
 }
 
 ###################################################################################
@@ -76,7 +80,7 @@ check_distro()
 		done
 	fi
 
-	echo "Error distribution!"
+	echo -e "\033[31mMust specify a platform(-p) before distribution(-d) or error distribution!\033[0m"
     usage
 	exit 1
 }
@@ -93,6 +97,22 @@ check_platform()
 		fi
 	done
 	echo "Error platform!"
+    usage
+	exit 1
+}
+
+###################################################################################
+############################# Check install parameter  ###########################
+###################################################################################
+check_install()
+{
+	for inst in ${installs[@]}; do
+		if [ x"$inst" = x"$1" ]; then 
+			INSTALL=$1
+			return
+		fi
+	done
+	echo "Error install target!"
     usage
 	exit 1
 }
@@ -125,6 +145,9 @@ check_sum()
 ###################################################################################
 ############################# Check all parameters     ############################
 ###################################################################################
+PLATFORM=
+DISTRO=
+INSTALL=
 while [ x"$1" != x"" ]; do 
     case $1 in 
         "-h" | "--help" )
@@ -141,6 +164,11 @@ while [ x"$1" != x"" ]; do
 			check_distro $1
 			echo "Distro: $1"
 			;;
+		"-i" | "--install" )
+			shift
+			check_install $1
+			echo "Install: $1"
+			;;
 		* )
 			echo "unknown arg $1"
 			usage
@@ -150,8 +178,20 @@ while [ x"$1" != x"" ]; do
 	shift
 done
 
-if [ x"$PLATFORM" = x"" -o x"$DISTRO" = x"" ]; then
+if [ x"$PLATFORM" = x"" -a x"$DISTRO" != x"" ]; then
+	echo -e "\033[31m-p must be specified with a determined -d parameter.\033[0m"
+    useage
+    exit 1
+fi
+
+if [ x"$PLATFORM" = x"QEMU" -a x"$DISTRO" = x"" ]; then
+	echo -e "\033[31m-d must be specified with QEMU as platform.\033[0m"
 	usage
+    exit 1
+fi
+
+if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
+    usage
     exit 1
 fi
 
@@ -391,7 +431,7 @@ uefi_dir=$build_dir/$UEFI_DIR
 uefi_bin=`find $uefi_dir -name UEFI_Release.bin`
 
 # Build UEFI for D01 platform
-if [ x"" = x"$uefi_bin" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
 	if [ ! -d "$uefi_dir" ] ; then
 		mkdir -p "$uefi_dir" 2>/dev/null
 	fi
@@ -465,7 +505,7 @@ grub_dir=$build_dir/$GRUB_DIR
 GRUB_BIN=`find $grub_dir -name *.efi`
 
 # Build grub for D01 platform
-if [ x"" = x"$GRUB_BIN" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
@@ -519,10 +559,15 @@ fi
 ##################### Build kernel from kernel source code      ###################
 ###################################################################################
 # preprocess for kernel building
+BUILDFLAG=FALSE
 KERNEL_DIR=kernel
 kernel_dir=$build_dir/$KERNEL_DIR
-mkdir -p "$kernel_dir" 2> /dev/null
-if [ x"ARM32" = x"$TARGETARCH" ]; then
+KERNEL_BIN=
+DTB_BIN=
+
+if [ x"" = x"$PLATFORM" ]; then
+    #do nothing
+elif [ x"ARM32" = x"$TARGETARCH" ]; then
 	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
     DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
 
@@ -548,6 +593,7 @@ fi
 
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
     echo "Build kernel..."
+    mkdir -p "$kernel_dir" 2> /dev/null
 
 	if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
 		export CROSS_COMPILE=$CROSS 
@@ -602,7 +648,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	popd
 fi
 
-if [ -f $KERNEL_BIN ]; then
+if [ x"" != x"$KERNEL_BIN"] && [ -f $KERNEL_BIN ]; then
 	cp $KERNEL_BIN $binary_dir/
 fi
 if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
@@ -614,7 +660,7 @@ fi
 ###################################################################################
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
 image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
-if [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
+if [ x"" != x"$DISTRO" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
     mkdir -p "$distro_dir" 2> /dev/null
     
     echo "Uncompress the distribution($DISTRO) ......"
@@ -664,55 +710,57 @@ fi
 ###################################################################################
 echo ""
 echo -e "\033[32m==========================================================================\033[0m"
-echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
-echo "Of course, you can also find all original binaries in follows:"
-
-if [ x"QEMU" = x"$PLATFORM" ]; then
-	echo "UEFI is not necessary for QEMU."
-else
-	if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
-		echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
-	else
-		echo -e "\033[31mFailed! UEFI         can\'t be found!\033[0m"
-	fi
-fi
-
-if [ x"QEMU" = x"$PLATFORM" ]; then
-	echo "grub is not necessary for QEMU."
-else
-	if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
-		echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
-	else
-		echo -e "\033[31mFailed! grub         can\'t be found!\033[0m"
-	fi
-fi
-
-if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
-	echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
-else
-	echo -e "\033[31mFailed! kernel       can\'t be found!\033[0m"
-fi
-
-if [ x"QEMU" = x"$PLATFORM" ]; then
-	echo "dtb is not necessary for QEMU."
-else
-	if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
-		echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
-	else
-		echo -e "\033[31mFailed! dtb          can\'t be found!\033[0m"
-	fi
-fi
-
-if [ -f $DISTRO_DIR/$image ]; then
-	echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
-else
-	echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
-fi
-
-if [ -f $toolchain_dir/$GCC64 ]; then
-	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
-else
-	echo -e "\033[31mFailed! toolchain    can\'t be found!\033[0m"
+if [ x"" != x"$PLATFORM" ]; then
+    echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
+    echo "Of course, you can also find all original binaries in follows:"
+    
+    if [ x"QEMU" = x"$PLATFORM" ]; then
+    	echo "UEFI is not necessary for QEMU."
+    else
+    	if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
+    		echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
+    	else
+    		echo -e "\033[31mFailed! UEFI         can\'t be found!\033[0m"
+    	fi
+    fi
+    
+    if [ x"QEMU" = x"$PLATFORM" ]; then
+    	echo "grub is not necessary for QEMU."
+    else
+    	if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
+    		echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
+    	else
+    		echo -e "\033[31mFailed! grub         can\'t be found!\033[0m"
+    	fi
+    fi
+    
+    if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
+    	echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
+    else
+    	echo -e "\033[31mFailed! kernel       can\'t be found!\033[0m"
+    fi
+    
+    if [ x"QEMU" = x"$PLATFORM" ]; then
+    	echo "dtb is not necessary for QEMU."
+    else
+    	if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
+    		echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
+    	else
+    		echo -e "\033[31mFailed! dtb          can\'t be found!\033[0m"
+    	fi
+    fi
+    
+    if [ -f $DISTRO_DIR/$image ]; then
+    	echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
+    else
+    	echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
+    fi
+    
+    if [ -f $toolchain_dir/$GCC64 ]; then
+    	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
+    else
+    	echo -e "\033[31mFailed! toolchain    can\'t be found!\033[0m"
+    fi
 fi
 
 ###################################################################################
