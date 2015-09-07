@@ -9,6 +9,7 @@ Change list for Estuary V2.0:
 6. Improved Ubuntu distribution to be more stable.
 7. Largely improved the efficiency of build.sh 
 8. Enabled building grub from source code directly.
+	Must mv grub.cfg file to root directory in boot partition on SATA.
 9. Pubished the latest UEFI source code for D02 and eanbled building UEFI from source code directly.
 10. Add functionality test in Caliper.
 11. Upgraded UEFI to add PCIE scaning.
