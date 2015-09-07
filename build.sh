@@ -434,7 +434,7 @@ if [ x"" = x"$uefi_bin" ]; then
 			git reset --hard
 			git checkout open-estuary/master
 			git apply HwPkg/Patch/*.patch
-			#export LC_CTYPE=C make -C BaseTools source edksetup.sh build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
+			export LC_CTYPE=C make -C BaseTools source edksetup.sh build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 	
 	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
 	    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
@@ -648,7 +648,7 @@ fi
 
 echo ""
 echo -e "\033[32m==========================================================================\033[0m"
-echo -e "\033[32mBuilding completed! All binaries can be found in $binary_dir direcory.\033[0m"
+echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
 echo "Of course, you can also find all original binaries in follows:"
 
 if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
