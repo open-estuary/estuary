@@ -429,7 +429,7 @@ UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
-uefi_bin=`find $uefi_dir -name UEFI_Release.bin 2>/dev/null`
+uefi_bin=`find $uefi_dir -name *.fd 2>/dev/null`
 
 # Build UEFI for D01 platform
 if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
@@ -490,7 +490,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		fi
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
-		uefi_bin=$uefi_dir/UEFI_Release.bin
+		uefi_bin=$uefi_dir"/UEFI_"$PLATFORM".fd"
     	cp $UEFI_BIN $uefi_bin
 	fi
 fi
@@ -530,7 +530,7 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	popd
     	# TODO -- check whether it is useful
     	cd $grub_dir
-    	./bin/grub-mkimage -v -o grubarm32.efi -O arm-efi -p "efi" boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
+    	./bin/grub-mkimage -v -o grubarm32.efi -O arm-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	cd -
 else
 # Build grub for D02 platform
