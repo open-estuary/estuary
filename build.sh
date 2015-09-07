@@ -390,10 +390,10 @@ uefi_dir=$build_dir/$UEFI_DIR
 if [ ! -d "$uefi_dir" ] ; then
 	mkdir -p "$uefi_dir" 2>/dev/null
 fi
-UEFI_BIN=`find $uefi_dir -name *.bin`
+uefi_bin=`find $uefi_dir -name *.bin`
 
 # Build UEFI for D01 platform
-if [ x"" = x"$UEFI_BIN" ]; then
+if [ x"" = x"$uefi_bin" ]; then
     # use uefi_tools to compile
     if [ ! -d "$UEFI_TOOLS" ] ; then 
         echo "Do not find uefi-tools!"
@@ -443,8 +443,9 @@ if [ x"" = x"$UEFI_BIN" ]; then
 		fi
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
-    	cp $UEFI_BIN $uefi_dir/UEFI_Release.bin
-    	cp $UEFI_BIN $binary_dir/UEFI_Release.bin
+		uefi_bin=$uefi_dir/UEFI_Release.bin
+    	cp $UEFI_BIN $uefi_bin
+    	cp $UEFI_BIN $binary_dir/${uefi_bin##*/}
 	fi
 fi
 
@@ -453,10 +454,10 @@ fi
 ###################################################################################
 GRUB_DIR=grub
 grub_dir=$build_dir/$GRUB_DIR
-grubimg=`find $grub_dir -name *.efi`
+GRUB_BIN=`find $grub_dir -name *.efi`
 
 # Build grub for D01 platform
-if [ x"" = x"$grubimg" ]; then
+if [ x"" = x"$GRUB_BIN" ]; then
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
@@ -511,8 +512,8 @@ KERNEL_DIR=kernel
 kernel_dir=$build_dir/$KERNEL_DIR
 mkdir -p "$kernel_dir" 2> /dev/null
 if [ x"ARM32" = x"$TARGETARCH" ]; then
-	KERNEL_BIN=`pwd`/$kernel_dir/arch/arm/boot/zImage
-    DTB=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
+    DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
 
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
 		BUILDFLAG=TRUE
@@ -520,11 +521,11 @@ if [ x"ARM32" = x"$TARGETARCH" ]; then
 		export ARCH=arm
 	fi
 else
-	KERNEL_BIN=`pwd`/$kernel_dir/arch/arm64/boot/Image
+	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
     if [ x"QEMU" = x"$PLATFORM" ]; then
-        DTB=""
+        DTB_BIN=""
     else
-	    DTB=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
     fi
 
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
@@ -591,19 +592,18 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 fi
 
 cp $KERNEL_BIN $binary_dir/
-if [ x"" != x"$DTB" ]; then
-    DTB=`pwd`/$DTB
-    cp $DTB $binary_dir/
+if [ x"" != x"$DTB_BIN" ]; then
+    cp $DTB_BIN $binary_dir/
 fi
 
 ###################################################################################
 ######################### Uncompress the distribution   ###########################
 ###################################################################################
 distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
-if [ ! -d "$distro_dir" ] ; then
+image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
+if [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
     mkdir -p "$distro_dir" 2> /dev/null
     
-    image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
     echo "Uncompress the distribution($DISTRO) ......"
     if [ x"${image##*.}" = x"bz2" ] ; then
     	TEMP=${image%.*}
@@ -647,7 +647,43 @@ if [ ! -d "$distro_dir" ] ; then
 fi
 
 echo ""
-echo "Build sucessfully! All binaries can be found in 'build' direcory."
+echo -e "\033[32m==========================================================================\033[0m"
+echo -e "\033[32mBuilding completed! All binaries can be found in $binary_dir direcory.\033[0m"
+echo "Of course, you can also find all original binaries in follows:"
+
+if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
+	echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
+else
+	echo -e "\033[31mFailed! UEFI         can\'t be found!\033[0m"
+fi
+
+if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
+	echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
+else
+	echo -e "\033[31mFailed! grub         can\'t be found!\033[0m"
+fi
+if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
+	echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
+else
+	echo -e "\033[31mFailed! kernel       can\'t be found!\033[0m"
+fi
+
+if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
+	echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
+else
+	echo -e "\033[31mFailed! dtb          can\'t be found!\033[0m"
+fi
+
+if [ -f $toolchain_dir/$GCC64 ]; then
+	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
+else
+	echo -e "\033[31mFailed! toolchain    can\'t be found!\033[0m"
+fi
+if [ -f $DISTRO_DIR/$image ]; then
+	echo -e "\033[32mDistribution is in $DISTRO_DIR.\033[0m"
+else
+	echo -e "\033[31mFailed! Distribution can\'t be found!\033[0m"
+fi
 
 ###################################################################################
 ################ Build QEMU and start it if platform is QEMU   ####################
@@ -734,7 +770,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 # Run the qemu
     echo "Start QEMU..."
 	$QEMU -machine virt -cpu cortex-a57 \
-	    -kernel $KERNEL_BIN \
+	    -kernel `pwd`/$KERNEL_BIN \
 	    -drive if=none,file=$rootfs,id=fs \
 	    -device virtio-blk-device,drive=fs \
 	    -append "$CMDLINE" \
