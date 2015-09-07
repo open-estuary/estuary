@@ -788,19 +788,21 @@ fi
 ########################## Install toolchain for Estuary     ########################
 ###################################################################################
 if [ x"toolchain" = x"$INSTALL" ]; then
+	sudo mkdir -p /opt 2>/dev/null
 	for compiler in $GCC32 $GCC64
 	do
 		compiler=${compiler%%.tar.xz}
+		echo "Installing $compiler..."
 		if [ ! -d "/opt/$compiler" ]; then
-			sudo mkdir -p /opt 2>/dev/null
 			sudo cp -r $TOOLCHAIN_DIR/$compiler /opt/
 			if [ x"$?" != x"0" ]; then
     			echo -e "\033[31mToolchain install failed!\033[0m"
 				exit 1
 			fi
-			grep "export PATH=$PATH:/opt/$compiler/bin" ~/.bashrc >/dev/null
+			str='export PATH=$PATH:/opt/'$compiler'/bin' 
+			grep "$str" ~/.bashrc >/dev/null
 			if [ x"$?" != x"0" ]; then
-				echo 'export PATH=$PATH:/opt/'$compiler'/bin' >> ~/.bashrc
+				echo "$str">> ~/.bashrc
 			fi
 		fi
 	done
