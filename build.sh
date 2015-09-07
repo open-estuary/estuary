@@ -378,6 +378,7 @@ cd -
 if [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
 	cp $BINARY_DIR/* $binary_dir/
+	rm -rf $binary_dir/*.sum
 fi
 
 ###################################################################################
@@ -390,7 +391,7 @@ uefi_dir=$build_dir/$UEFI_DIR
 if [ ! -d "$uefi_dir" ] ; then
 	mkdir -p "$uefi_dir" 2>/dev/null
 fi
-uefi_bin=`find $uefi_dir -name *.bin`
+uefi_bin=`find $uefi_dir -name UEFI_Release.bin`
 
 # Build UEFI for D01 platform
 if [ x"" = x"$uefi_bin" ]; then
@@ -404,6 +405,7 @@ if [ x"" = x"$uefi_bin" ]; then
 	echo "Build UEFI..."
 
 	if [ x"ARM32" = x"$TARGETARCH" ]; then
+		# Build UEFI for D01 platform
      	pushd $UEFI_TOOLS/
      	echo "[d01]" >> platforms.config 
      	echo "LONGNAME=HiSilicon D01 Cortex-A15 16-cores" >> platforms.config
@@ -424,29 +426,35 @@ if [ x"" = x"$uefi_bin" ]; then
     	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
 	else
 		if [ x"QEMU" != x"$PLATFORM" ]; then
-		# Build UEFI for D02 platform
-	     	pushd $UEFI_TOOLS/
-	     	popd
-	
-	    	# compile uefi for D02 
+			# Build UEFI for D02 platform
 	    	pushd $UEFI_DIR/
 			# roll back to special version for D02
 			git reset --hard
 			git checkout open-estuary/master
 			git apply HwPkg/Patch/*.patch
-			export LC_CTYPE=C make -C BaseTools source edksetup.sh build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
+			export LC_CTYPE=C 
+			make -C BaseTools 
+			source edksetup.sh 
+			build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 	
 	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
 	    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
 	    	popd
-	    	UEFI_BIN=`find "$UEFI_DIR/Build/D02" -name "*.fd" 2>/dev/null`
+	    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+
+			if [ x"$UEFI_BIN" != x"" ]; then
+				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
+				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
+			fi
 		fi
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
 		uefi_bin=$uefi_dir/UEFI_Release.bin
     	cp $UEFI_BIN $uefi_bin
-    	cp $UEFI_BIN $binary_dir/${uefi_bin##*/}
 	fi
+fi
+if [ -f $uefi_bin ]; then
+    cp $uefi_dir/* $binary_dir/
 fi
 
 ###################################################################################
@@ -501,6 +509,9 @@ else
     	cd -
     fi
     GRUB_BIN=`find "$grub_dir" -name "*.efi"`
+fi
+
+if [ -f $GRUB_BIN ]; then
 	cp $GRUB_BIN $binary_dir/
 fi
 
@@ -591,8 +602,10 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	popd
 fi
 
-cp $KERNEL_BIN $binary_dir/
-if [ x"" != x"$DTB_BIN" ]; then
+if [ -f $KERNEL_BIN ]; then
+	cp $KERNEL_BIN $binary_dir/
+fi
+if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
     cp $DTB_BIN $binary_dir/
 fi
 
@@ -651,6 +664,7 @@ echo -e "\033[32m===============================================================
 echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
 echo "Of course, you can also find all original binaries in follows:"
 
+echo $uefi_bin
 if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
 	echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
 else
