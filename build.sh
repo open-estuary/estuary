@@ -707,6 +707,41 @@ if [ x"" != x"$DISTRO" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
     fi
 fi
 
+installresult=0
+###################################################################################
+########################## Install Caliper for Estuary     ########################
+###################################################################################
+if [ x"Caliper" = x"$INSTALL" ]; then
+	pushd caliper
+	echo "Start to install Caliper..."
+	sudo python setup.py install
+	installresult=$?
+	popd
+fi
+
+###################################################################################
+########################## Install toolchain for Estuary     ########################
+###################################################################################
+if [ x"toolchain" = x"$INSTALL" ]; then
+	sudo mkdir -p /opt 2>/dev/null
+	for compiler in $GCC32 $GCC64
+	do
+		compiler=${compiler%%.tar.xz}
+		echo "Installing $compiler..."
+		if [ ! -d "/opt/$compiler" ]; then
+			sudo cp -r $TOOLCHAIN_DIR/$compiler /opt/
+			if [ x"$?" != x"0" ]; then
+				installresult=1
+			fi
+			str='export PATH=$PATH:/opt/'$compiler'/bin' 
+			grep "$str" ~/.bashrc >/dev/null
+			if [ x"$?" != x"0" ]; then
+				echo "$str">> ~/.bashrc
+			fi
+		fi
+	done
+fi
+
 ###################################################################################
 ########################## Check and report build resutl   ########################
 ###################################################################################
@@ -767,16 +802,9 @@ if [ x"" != x"$PLATFORM" ]; then
     fi
 fi
 
-###################################################################################
-########################## Install Caliper for Estuary     ########################
-###################################################################################
+# report install caliper
 if [ x"Caliper" = x"$INSTALL" ]; then
-	pushd caliper
-	echo "Start to install Caliper..."
-	sudo python setup.py install
-	result=$?
-	popd
-	if [ x"0" = x"$result" ]; then
+	if [ x"0" = x"$installresult" ]; then
     	echo -e "\033[32mInstalled Caliper successfully.\033[0m"
 		echo "Please edit /etc/caliper/config/client_config.cfg to config target board."
     else
@@ -784,30 +812,13 @@ if [ x"Caliper" = x"$INSTALL" ]; then
 	fi
 fi
 
-###################################################################################
-########################## Install toolchain for Estuary     ########################
-###################################################################################
+# report install toolchain
 if [ x"toolchain" = x"$INSTALL" ]; then
-	sudo mkdir -p /opt 2>/dev/null
-	for compiler in $GCC32 $GCC64
-	do
-		compiler=${compiler%%.tar.xz}
-		echo "Installing $compiler..."
-		if [ ! -d "/opt/$compiler" ]; then
-			sudo cp -r $TOOLCHAIN_DIR/$compiler /opt/
-			if [ x"$?" != x"0" ]; then
-    			echo -e "\033[31mToolchain install failed!\033[0m"
-				exit 1
-			fi
-			str='export PATH=$PATH:/opt/'$compiler'/bin' 
-			grep "$str" ~/.bashrc >/dev/null
-			if [ x"$?" != x"0" ]; then
-				echo "$str">> ~/.bashrc
-			fi
-		fi
-	done
-	
-   	echo -e "\033[32mInstalled toolchain successfully.\033[0m"
+	if [ x"0" = x"$installresult" ]; then
+   		echo -e "\033[32mInstalled toolchain successfully.\033[0m"
+	else
+    	echo -e "\033[31mToolchain install failed!\033[0m"
+	fi
 fi
 
 ###################################################################################
