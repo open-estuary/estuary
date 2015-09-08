@@ -245,7 +245,7 @@ if [ ! -d "$build_dir" ] ; then
 fi
 
 binary_dir=$build_dir/binary
-if [ ! -d "$binary_dir" ] ; then
+if [ x"" != x"$PLATFORM" ] && [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
 fi
 
@@ -297,7 +297,7 @@ fi
 cd -
 
 # Copy to build target directory
-if [ ! -d "$toolchain_dir" ] ; then
+if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
     echo "Copy toolchain to 'build' directory..."
 	mkdir -p "$toolchain_dir" 2>/dev/null
     cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
@@ -760,8 +760,10 @@ if [ x"Binary" = x"$INSTALL" ]; then
 		rm $TEMPFILE
 	fi
 	cd -
-	
-	# Copy mini-rootfs to build target directory
+fi
+
+# Copy mini-rootfs to build target directory
+if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ] && [ -d $binary_dir ]; then
 	cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
 fi
 
