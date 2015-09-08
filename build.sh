@@ -265,7 +265,7 @@ if [ x"$checksum_result" != x"0" ]; then
 			rm -rf $TOOLCHAIN_SOURCE/$LINE 2>/dev/null
 		    wget -c $TOOLCHAIN_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
-				rm -rf $toolchainsum_file $LINE 2>/dev/null
+				rm -rf $toolchainsum_file $LINE $TEMPFILE 2>/dev/null
 				echo "Download toolchain($LINE) failed!"
 				exit 1
 			fi
@@ -405,7 +405,7 @@ if [ x"$checksum_result" != x"0" ]; then
 		    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
 		    wget -c $BINARY_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
-				rm -rf $binarysum_file $LINE 2>/dev/null
+				rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
 				echo "Download binaries($LINE) failed!"
 				exit 1
 			fi
