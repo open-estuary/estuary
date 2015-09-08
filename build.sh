@@ -143,7 +143,7 @@ check_sum()
 
     rm -rf $checksum_file
     wget -c $checksum_source
-	md5sum --quiet --check $checksum_file | grep 'FAILED'
+	md5sum --quiet --check $checksum_file 2>/dev/null | grep 'FAILED' >/dev/null
 	if [ x"$?" = x"0" ]; then
 		checksum_result=1
 	else
@@ -369,7 +369,7 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 	if [ x"$checksum_result" != x"0" ]; then
 	    echo "Check the checksum for distribution..."
 		distrosum_file=${checksum_source##*/}
-		md5sum --quiet --check $distrosum_file | grep 'FAILED'
+		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
 		if [ x"$?" = x"0" ]; then
 		    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
 			rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
@@ -410,7 +410,6 @@ if [ x"$checksum_result" != x"0" ]; then
 	        echo "Download "$LINE"..."
 		    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
 		    wget -c $BINARY_SOURCE/$LINE
-			echo $?
 			if [ x"$?" != x"0" ]; then
 				rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
 				echo "Download binaries($LINE) failed!"
