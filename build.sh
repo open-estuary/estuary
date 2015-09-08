@@ -13,7 +13,7 @@ distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02)
-installs=(Caliper toolchain)
+installs=(Caliper toolchain Binary)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
 #arm64 distributions
@@ -44,12 +44,15 @@ usage()
 	echo -n ${installs[*]} | sed "s/ / | /g"
 	echo " ] "
 
-	echo -e "\n -h,--help	print this message"
-	echo " -p,--platform	platform, the -d musb be specified if platform is QEMU"
-	echo " -d,--distro	distribuation, the -p must be specified if -d is specified"
+	echo -e "\n -h,--help: to print this message"
+	echo " -p,--platform: the target platform, the -d musb be specified if platform is QEMU"
+	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
 	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
-    echo " -i,--install to install target"
+    echo " -i,--install: to install target into local host machine"
+	echo "		*for Caliper, to install Caliper as the benchmark tools"
+	echo "		*for toolchain, to install ARM cross compiler"
+	echo "		*for Binary, to install all prebuilt binaries into binary directory, they can be used directly"
 }
 
 ###################################################################################
@@ -237,7 +240,14 @@ fi
 
 cd $TOOLS_DIR/../
 build_dir=build/$PLATFORM
-mkdir -p "$build_dir" 2> /dev/null
+if [ ! -d "$build_dir" ] ; then
+	mkdir -p "$build_dir" 2> /dev/null
+fi
+
+binary_dir=$build_dir/binary
+if [ ! -d "$binary_dir" ] ; then
+	mkdir -p "$binary_dir" 2> /dev/null
+fi
 
 if [ x"$TARGETARCH" = x"ARM32" ]; then
 	cross_gcc=arm-linux-gnueabihf-gcc
@@ -388,49 +398,6 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 		fi
 	fi
 	cd -
-fi
-
-###################################################################################
-######## Download all prebuilt binaries based on md5 checksum file      ###########
-###################################################################################
-binary_dir=$build_dir/binary
-BINARY_DIR=binary
-BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
-binarysum_file="binaries.sum"
-
-if [ ! -d "$BINARY_DIR" ] ; then
-	mkdir -p "$BINARY_DIR" 2> /dev/null
-fi
-
-cd $BINARY_DIR/
-echo "Check the checksum for binaries..."
-checksum_source="../estuary/checksum/$binarysum_file"
-check_sum
-if [ x"$checksum_result" != x"0" ]; then
-	TEMPFILE=tempfile
-	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
-	while read LINE
-	do
-	    if [ x"$LINE" != x"" ]; then
-	        echo "Download "$LINE"..."
-		    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
-		    wget -c $BINARY_SOURCE/$LINE
-			if [ x"$?" != x"0" ]; then
-				rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
-				echo "Download binaries($LINE) failed!"
-				exit 1
-			fi
-	    fi
-	done  < $TEMPFILE
-	rm $TEMPFILE
-fi
-cd -
-
-# Copy to build target directory
-if [ ! -d "$binary_dir" ] ; then
-	mkdir -p "$binary_dir" 2> /dev/null
-#	cp $BINARY_DIR/* $binary_dir/
-#	rm -rf $binary_dir/*.sum
 fi
 
 ###################################################################################
@@ -760,6 +727,45 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 fi
 
 ###################################################################################
+########  Install all prebuilt binaries based on md5 checksum file      ###########
+###################################################################################
+if [ x"Binary" = x"$INSTALL" ]; then
+	BINARY_DIR=binary
+	BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
+	binarysum_file="binaries.sum"
+	
+	if [ ! -d "$BINARY_DIR" ] ; then
+		mkdir -p "$BINARY_DIR" 2> /dev/null
+	fi
+	
+	cd $BINARY_DIR/
+	echo "Check the checksum for binaries..."
+	checksum_source="../estuary/checksum/$binarysum_file"
+	check_sum
+	if [ x"$checksum_result" != x"0" ]; then
+		TEMPFILE=tempfile
+		md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+		while read LINE
+		do
+		    if [ x"$LINE" != x"" ]; then
+		        echo "Download "$LINE"..."
+			    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
+			    wget -c $BINARY_SOURCE/$LINE
+				if [ x"$?" != x"0" ]; then
+					installresult=1
+					rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
+				fi
+		    fi
+		done  < $TEMPFILE
+		rm $TEMPFILE
+	fi
+	cd -
+	
+	# Copy mini-rootfs to build target directory
+	cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+fi
+
+###################################################################################
 ########################## Check and report build resutl   ########################
 ###################################################################################
 echo ""
@@ -819,22 +825,33 @@ if [ x"" != x"$PLATFORM" ]; then
     fi
 fi
 
-# report install caliper
+# Install Caliper report
 if [ x"Caliper" = x"$INSTALL" ]; then
 	if [ x"0" = x"$installresult" ]; then
     	echo -e "\033[32mInstalled Caliper successfully.\033[0m"
 		echo "Please edit /etc/caliper/config/client_config.cfg to config target board."
     else
-    	echo -e "\033[31mCaliper install failed!\033[0m"
+    	echo -e "\033[31mCaliper installing failed!\033[0m"
 	fi
 fi
 
-# report install toolchain
+# Install toolchain report
 if [ x"toolchain" = x"$INSTALL" ]; then
 	if [ x"0" = x"$installresult" ]; then
    		echo -e "\033[32mInstalled toolchain successfully.\033[0m"
+		echo "The toolchain is installed into /opt directory"
 	else
-    	echo -e "\033[31mToolchain install failed!\033[0m"
+    	echo -e "\033[31mToolchain installing failed!\033[0m"
+	fi
+fi
+
+# Install binary report
+if [ x"Binary" = x"$INSTALL" ]; then
+	if [ x"0" = x"$installresult" ]; then
+   		echo -e "\033[32mInstalled Binary successfully.\033[0m"
+		echo "All prebuilt Binary is installed into binary directory"
+	else
+    	echo -e "\033[31mSome Binaries installing failed!\033[0m"
 	fi
 fi
 
