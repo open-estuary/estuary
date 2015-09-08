@@ -215,11 +215,11 @@ fi
 ###################################################################################
 automake --version | grep 'automake (GNU automake) 1.11' > /dev/null
 if [ x"$?" = x"1" ]; then
-  sudo apt-get update
-  sudo apt-get remove -y --purge automake*
+	sudo apt-get remove -y --purge automake*
 fi
 
 if [ ! -f ".initilized" ]; then
+	sudo apt-get update
     sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex
     if [ x"$?" = x"0" ]; then
         touch ".initilized"
