@@ -136,13 +136,18 @@ check_sum()
 
     checksum_file=${checksum_source##*/}
 
+	touch $checksum_file
+	diff $checksum_source $checksum_file >/dev/null
+	if [ x"0" != x"$?" ]; then
+		rm -rf ".$checksum_file" >/dev/null
+		cp $checksum_source ./
+	fi
+
 	if [ -f ".$checksum_file" ]; then
 		checksum_result=0
 		return
 	fi
 
-    rm -rf $checksum_file
-    wget -c $checksum_source
 	md5sum --quiet --check $checksum_file 2>/dev/null | grep 'FAILED' >/dev/null
 	if [ x"$?" = x"0" ]; then
 		checksum_result=1
@@ -259,7 +264,7 @@ fi
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 echo "Check the checksum for toolchain..."
-checksum_source=$TOOLCHAIN_SOURCE/$toolchainsum_file
+checksum_source="../estuary/checksum/$toolchainsum_file"
 check_sum
 if [ x"$checksum_result" != x"0" ]; then
 	TEMPFILE=tempfile
@@ -364,7 +369,7 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 	cd $DISTRO_DIR
 	# Download it based on md5 checksum file
 	echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
-	checksum_source="$DISTRO_SOURCE"."sum"
+	checksum_source="../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
 	check_sum
 	if [ x"$checksum_result" != x"0" ]; then
 	    echo "Check the checksum for distribution..."
@@ -399,7 +404,7 @@ fi
 
 cd $BINARY_DIR/
 echo "Check the checksum for binaries..."
-checksum_source=http://7xjz0v.com1.z0.glb.clouddn.com/tools/$binarysum_file
+checksum_source="../estuary/checksum/$binarysum_file"
 check_sum
 if [ x"$checksum_result" != x"0" ]; then
 	TEMPFILE=tempfile
