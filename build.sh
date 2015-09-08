@@ -657,7 +657,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 fi
 
 if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
-	cp $KERNEL_BIN $binary_dir/
+	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
 fi
 if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
     cp $DTB_BIN $binary_dir/
