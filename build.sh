@@ -418,8 +418,8 @@ cd -
 # Copy to build target directory
 if [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
-	cp $BINARY_DIR/* $binary_dir/
-	rm -rf $binary_dir/*.sum
+#	cp $BINARY_DIR/* $binary_dir/
+#	rm -rf $binary_dir/*.sum
 fi
 
 ###################################################################################
