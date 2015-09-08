@@ -136,14 +136,20 @@ check_sum()
 
     checksum_file=${checksum_source##*/}
 
-    touch $checksum_file
-    mv $checksum_file $checksum_file".bak"
+	if [ -f ".$checksum_file" ]; then
+		checksum_result=0
+		return
+	fi
 
+    rm -rf $checksum_file
     wget -c $checksum_source
-    diff $checksum_file $checksum_file".bak" >/dev/null
-
-    checksum_result=$?
-	rm -rf $checksum_file".bak" 2>/dev/null
+	md5sum --quiet --check $checksum_file | grep 'FAILED'
+	if [ x"$?" = x"0" ]; then
+		checksum_result=1
+	else
+		checksum_result=0
+		touch ".$checksum_file"
+	fi
 }
 
 ###################################################################################
@@ -266,7 +272,7 @@ if [ x"$checksum_result" != x"0" ]; then
 		    wget -c $TOOLCHAIN_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
 				rm -rf $toolchainsum_file $LINE $TEMPFILE 2>/dev/null
-				echo "Download toolchain($LINE) failed!"
+				echo "Download toolchain $LINE failed!"
 				exit 1
 			fi
 	    fi
@@ -369,8 +375,8 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 			rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
 		    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
 			if [ x"$?" != x"0" ]; then
-				rm -rf $distrosum_file "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
-				echo "Download distributions("$DISTRO"_"$TARGETARCH"."$postfix") failed!"
+				rm -rf $distrosum_file $DISTRO"_"$TARGETARCH"."$postfix 2>/dev/null
+				echo "Download distributions "$DISTRO"_"$TARGETARCH"."$postfix" failed!"
 				exit 1
 			fi
 		    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
@@ -404,6 +410,7 @@ if [ x"$checksum_result" != x"0" ]; then
 	        echo "Download "$LINE"..."
 		    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
 		    wget -c $BINARY_SOURCE/$LINE
+			echo $?
 			if [ x"$?" != x"0" ]; then
 				rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
 				echo "Download binaries($LINE) failed!"
