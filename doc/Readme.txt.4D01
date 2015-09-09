@@ -59,9 +59,14 @@ build commands(supposedly, you are in <project root> currently:
 
 ### zImage ###
 ### hip04-d01.dtb ###
-descriptions: zImage is the compressed kernel executable program, and hip04-d01.dtb is the device tree binary.
+### .kernel ###
+descriptions:
+    zImage is the compressed kernel executable program.
+    hip04-d01.dtb is the device tree binary.
+    .kernel is the file combining zImage and hip04-d01.dtb.
 target: zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
         hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
+        .kernel in <project root>/build/D01/kernel/.kernel
 source: <project root>/kernel
 build commands(supposedly, you are in <project root> currently:
     export ARCH=arm
@@ -84,8 +89,11 @@ build commands(supposedly, you are in <project root> currently:
     make zImage
     make hip04-d01.dtb
 
+    cat arch/arm/boot/zImage arch/arm/boot/dts/hip04-d01.dtb > .kernel
+
     cp arch/arm/boot/zImage ../build/D01/binary/zImage_D01
     cp arch/arm/boot/dts/hip04-d01.dtb ../build/D01/binary/
+    cp .kernel ../build/D01/binary/
     popd
 
 More detail information about distributions, please refer to Distributions_Guider.txt

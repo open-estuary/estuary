@@ -693,6 +693,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
 		make O=../$kernel_dir -j14 zImage
 		make O=../$kernel_dir hip04-d01.dtb
+        cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
 		make O=../$kernel_dir defconfig
         if [ x"QEMU" = x"$PLATFORM" ]; then
@@ -723,6 +724,10 @@ fi
 
 if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
 	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
+
+    if [ x"D01" = x"$PLATFORM" ]; then
+        cp ../$kernel_dir/.kernel $binary_dir/
+    fi
 fi
 if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
     cp $DTB_BIN $binary_dir/

@@ -12,7 +12,8 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 
     sudo apt-get install -y isc-dhcp-server syslinux
 
-# Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.Make sure filename is “grub2.efi”. Here is an example:
+# Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
+    Make sure filename is “grubaa64.efi”. Here is an example:
 
     $ cat /etc/dhcp/dhcpd.conf
     # Sample /etc/dhcpd.conf
@@ -27,6 +28,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
         option subnet-mask 255.255.255.0;
         option broadcast-address 192.168.1.255;
         filename "grubaa64.efi";
+        #filename "grubarm32.efi";
         #next-server 192.168.1.107
     }
     #
@@ -90,9 +92,10 @@ The files include: grub binary file, grub configure file, kernel Image and dtb f
 In my case, they are grubaa64.efi, Image_D02 and grub.cfg-01-xx-xx-xx-xx-xx-xx, hip05-d02.dtb.
 
 Note: 
-    1. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.
-    2. The gurb binary and grub.cfg files must be placed in the TFTP root directory.
-    3. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
+    1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in /etc/dhcp/dhcpd.conf.
+    2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.
+    3. The gurb binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.
+    4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
 
 To get and config grub and grub config files, please refer to Grub_Manual.txt.
 To get kernel and dtb file, please refer to Readme.txt

@@ -1,4 +1,4 @@
-Deploy Estuary into D02 board
+Deploy Estuary into D01 board
 
 Table of Contents:
 Introduction
@@ -19,7 +19,7 @@ Bring up System
 
 This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
 
-All following sections will take the D02 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
+All following sections will take the D01 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
  
 ### Preparation ###
 
@@ -31,12 +31,11 @@ All following sections will take the D02 board as example, other boards have the
 
 # Check the hardware board
 
-    Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d02-2/.
+    Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d01-2/.
 
 # Upgrade UEFI and trust firmware
 
     You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to UEFI_Manual.txt.
-
 
 ### Bring up System ###
 
@@ -44,46 +43,48 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via NORFLASH
     
-    Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+    Boot D01 to UEFI SHELL, and type the follow commands in EBL:
     1. IP address config
     
     # Config board's IP address
     ifconfig -s eth0 <IP address> <mask> <gateway>
     e.g.: ifconfig -s eth0 192.168.1.4 255.255.255.0 192.168.1.1
     
-    2. Download Image binary file from FTP
+    2. Download .kernel binary file from FTP
     
-    # Download fiel from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
+    # Download fiel from FTP server to target board's Flash
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <.kernel image file>
     # Write data into NORFLASH
     norwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 100000
-          norwfmem 100000 100000 1f00000
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f .kernel 
     
-    3. Download dtb file from FTP
+    3. Download rootfs file from FTP
     
-    # Download fiel from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
-    # Write data into FLASH
-    spiwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 100000
-          spiwfmem 100000 300000 100000
+    # Download fiel from FTP server to target board's Flash
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz
     
-    4. Download rootfs file from FTP
+    4. Reboot D01 and select "FLASH Start OS" boot option.
     
-    # Download fiel from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image> -a <download target address>
-    # Write data into NORFLASH
-    norwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz -a 100000
-          norwfmem 100000 2000000 4000000
-    
-    5. Reboot D02 and press anykey to enter UEFI Boot Menu
-    
-    6. Select "FLASH Start OS" boot option.
-
     To get all binaries mentioned above, please refer to Readme.txt.
-    
+
+# Show & change kernel command line in UEFI
+
+    1. Boot D01 and enter EBL (UEFI shell).
+
+    2. Use getlinuxatag to see current kernel parameter
+        > getlinuxatag
+
+    3. Use changelinuxatag to change kernel cmdline to this
+        >  changelinuxatag
+           ...
+           console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
+           ...
+    4. Use setlinuxatag to save comandline to FLASH
+        > setlinuxatag
+
+    5. Reboot board.
+
 # Boot via PXE
     
     1. Setup PXE environment on host
@@ -94,13 +95,13 @@ There are several methods to bring up system, you can select following anyone fi
     
     3. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.
     
-    4. After several seconds, D02 will boot by PXE automatically.
+    4. After several seconds, D01 will boot by PXE automatically.
     
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
 # Boot via SATA
     
-    This part will tell you how to boot D02 via SATA disk with kernel image, dtb file, grub in it.
+    This part will tell you how to boot D01 via SATA disk with kernel image, dtb file, grub in it.
     In my case, my SATA disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
     
     1. Boot by NORFLASH or PXE as description above.
@@ -124,7 +125,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     *** Preprocess when the disk can’t be identified ***
     
-        When the disk is not identified by D02, you can try the following step to process the disk. (for some specfic disk eg seagate disk made by samsung, it can be useful)
+        When the disk is not identified by D01, you can try the following step to process the disk. (for some specfic disk eg seagate disk made by samsung, it can be useful)
         
         a. Find a PC or another board which can identify this disk
         You should find a PC or another board which can identify this disk, and the system of PC or board should be linux system. For us,we can use D01 board.
@@ -146,7 +147,7 @@ There are several methods to bring up system, you can select following anyone fi
         save the change           : w
         formate EFI partition  : mkfs.vfat /dev/sda1
         
-        Then this disk can be identified by D02 board.
+        Then this disk can be identified by D01 board.
     
     3. Download files and store them into SATA as below.
         sda1: -------EFI
@@ -155,7 +156,7 @@ There are several methods to bring up system, you can select following anyone fi
               |
               |-------------grub.cfg           //grub config file
               |
-              |-------------Image_D02          //kernel binary Image
+              |-------------Image_D01          //kernel binary Image
               |
               |-------------hip05-d02.dtb      //device tree binary
         sda2: Ubuntu distribution
@@ -165,6 +166,8 @@ There are several methods to bring up system, you can select following anyone fi
     How to get and config grub file to support SATA boot, please refer to Grub_Manual.txt.
     How to get different distributions, please refer to Distributions_Guider.txt.
     
+    Note: The name of grub binary "grubaa64.efi" must be as same as the DHCP configure file in /etc/dhcp/dhcpd.conf.
+    
     4. Reboot and press anykey to enter UEFI Boot Menu.
 
     5. Select boot from hardware disk
@@ -173,7 +176,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via ACPI
     
-    D02 also supports booting via ACPI, and the steps are as follows:
+    D01 also supports booting via ACPI, and the steps are as follows:
 
     1. Power on and enter UEFI SHELL
 
@@ -186,8 +189,8 @@ There are several methods to bring up system, you can select following anyone fi
     
     provision <server address> -u <ftp user name> -p <ftp password> -f <kernel image> -a <download target address>
     mdfile \<kernel image> <source address> <imagesize>
-    e.g.: provision 192.168.1.107 -u d02 -p 123456 -f Image_D02 -a 0x80000
-          mdfile \Image_D02 0x80000 0x82A000
+    e.g.: provision 192.168.1.107 -u d02 -p 123456 -f Image_D01 -a 0x80000
+          mdfile \Image_D01 0x80000 0x82A000
     
     Note: imagesize must be the real Image size which can be gotten from previous command.
     
@@ -207,16 +210,33 @@ There are several methods to bring up system, you can select following anyone fi
     
     6. Set the parameters of booting via ACPI
     
-        start Image_D02 "acpi=fore console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 initrd=mini-rootfs.cpio.gz"
+        start Image_D01 "acpi=fore console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 initrd=mini-rootfs.cpio.gz"
     
 # Boot via NFS
     
-    D02 supports booting via NFS, you can try it as following steps:
+    D01 supports booting via NFS, you can try it as following steps:
 
     1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
 
+    2. Change command line as description in above "Show & change kernel command line in UEFI"
+
+        Change kernel cmdline to:
+
+            console=ttyS0,115200 earlyprintk rootfstype=nfsroot root=/dev/nfs rw nfsroot=<NFS-server-ip>:<path-to-exported-NFS-files> ip=<client-ip>:<NFS-server-ip>:<gw-ip>:<netmask>::eth0:on:<dns0-ip>:<dns1-ip> user_debug=31 nfsrootdebug
+
+                Here is an example:
+
+                    console=ttyS0,115200 earlyprintk rootfstype=nfsroot root=/dev/nfs rw nfsroot=192.168.0.108:/Users/docularxu/Downloads/mnt ip=192.168.0.150:192.168.0.108:192.168.0.1:255.255.255.0::eth0:on:192.168.0.1:8.8.8.8 user_debug=31 nfsrootdebug
+
+                        Note, this is an example. Please change the values according to your
+                            local environment. Explanation of each parameter can be found in kernel
+                                source Documentations. Like:
+
+                                        ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>:<dns0-ip>:<dns1-ip>
+
+                                            Reboot the board.
     2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
 
-    3. Reboot D02 and press anyke to enter UEFI Boot Menu
+    3. Reboot D01 and press anyke to enter UEFI Boot Menu
 
     4. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.

@@ -10,6 +10,9 @@
   <remote  name="grub"
            fetch="git://git.savannah.gnu.org/" />
 
+  <remote  name="boot-wrapper"
+           fetch="https://github.com/virtualopensystems/" />
+
   <default revision="master"
            remote="open-estuary"
            sync-j="4" />
@@ -25,6 +28,9 @@
 
   <!-- grub -->
   <project name="grub" remote="grub" />
+
+  <!-- boot-wrapper -->
+  <project name="boot-wrapper" remote="boot-wrapper" />
 
   <!-- caliper -->
   <project name="caliper" />

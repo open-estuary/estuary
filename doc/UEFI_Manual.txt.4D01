@@ -19,7 +19,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
 #2. Boot board into UEFI SHELL
 
-    Follow below steps to UEFI SHELL:
+    Follow below steps to enter UEFI SHELL:
     
         a. Make sure Jumper J39 is in position 1 and 2.
             This means to use custom UEFI, If position 2 and 3 are connected, it will boot with the default UEFI, which could never be flashed.
@@ -35,6 +35,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
 #3. Update UEFI files
     a. IP address config:
 
+	# Config IP address
     ifconfig -s eth0 <IP address> <mask> <gateway>
     eg. ifconfig -s eth0 192.168.10.155 255.255.255.0 192.168.10.1
 
