@@ -128,9 +128,9 @@ check_install()
 ############################# Check the checksum file   ###########################
 ###################################################################################
 checksum_result=0
-checksum_source=
 check_sum()
 {
+    checksum_source=$1
     if [ x"$checksum_source" = x"" ]; then
         echo "Invalidate checksum file!"
         checksum_result=1
@@ -274,8 +274,7 @@ fi
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 echo "Check the checksum for toolchain..."
-checksum_source="../estuary/checksum/$toolchainsum_file"
-check_sum
+check_sum "../estuary/checksum/$toolchainsum_file"
 if [ x"$checksum_result" != x"0" ]; then
 	TEMPFILE=tempfile
 	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
@@ -379,11 +378,10 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 	cd $DISTRO_DIR
 	# Download it based on md5 checksum file
 	echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
-	checksum_source="../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
-	check_sum
+	check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
 	if [ x"$checksum_result" != x"0" ]; then
 	    echo "Check the checksum for distribution..."
-		distrosum_file=${checksum_source##*/}
+		distrosum_file=${DISTRO_SOURCE##*/}".sum"
 		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
 		if [ x"$?" = x"0" ]; then
 		    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
@@ -398,6 +396,37 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 		fi
 	fi
 	cd -
+fi
+
+###################################################################################
+########################### Produce documentation for building ####################
+###################################################################################
+DOC_DIR=estuary/doc
+doc_dir=$build_dir/doc
+TEMPFILE=.tempfile
+
+copy_doc()
+{
+    postfix=$1
+
+    find $DOC_DIR/*$postfix > $TEMPFILE
+
+	while read LINE
+	do
+	    if [ x"$LINE" != x"" ]; then
+            filename=${LINE##*/}
+            filename=${filename%.txt.*}".txt"
+            cp $LINE $doc_dir/$filename
+	    fi
+	done  < $TEMPFILE
+	rm $TEMPFILE
+}
+if [ x"" != x"$PLATFORM" ]; then
+    if [ ! -d "$doc_dir" ] ; then
+        mkdir -p "$doc_dir" 2>/dev/null
+    fi
+    copy_doc ".4All"
+    copy_doc ".4$PLATFORM"
 fi
 
 ###################################################################################
@@ -749,8 +778,7 @@ if [ x"Binary" = x"$INSTALL" ]; then
 	
 	cd $BINARY_DIR/
 	echo "Check the checksum for binaries..."
-	checksum_source="../estuary/checksum/$binarysum_file"
-	check_sum
+	check_sum "../estuary/checksum/$binarysum_file"
 	if [ x"$checksum_result" != x"0" ]; then
 		TEMPFILE=tempfile
 		md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
@@ -833,6 +861,19 @@ if [ x"" != x"$PLATFORM" ]; then
     	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
     else
     	echo -e "\033[31mFailed! toolchain    can not be found!\033[0m"
+    fi
+
+    if [ -d $docdir ]; then    
+        grep -R "readme" $doc_dir > /dev/null
+        doc_result=$?
+    else
+        doc_result=1
+    fi
+
+    if [ x"0" = x"$doc_result" ]; then
+    	echo -e "\033[32mDocuments    is in $doc_dir.\033[0m"
+    else
+    	echo -e "\033[31mFailed! Documents    can not be found!\033[0m"
     fi
 fi
 
