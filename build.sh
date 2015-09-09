@@ -13,7 +13,7 @@ distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu OpenSuse)
 distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02)
-installs=(Caliper toolchain Binary)
+installs=(Caliper toolchain)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
 #arm64 distributions
@@ -52,7 +52,6 @@ usage()
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
-	echo "		*for Binary, to install all prebuilt binaries into binary directory, they can be used directly"
 }
 
 ###################################################################################
@@ -282,7 +281,7 @@ if [ x"$checksum_result" != x"0" ]; then
 	do
 	    if [ x"$LINE" != x"" ]; then
 	        echo "Download the toolchain..."
-			rm -rf $TOOLCHAIN_SOURCE/$LINE 2>/dev/null
+			rm -rf $LINE 2>/dev/null
 		    wget -c $TOOLCHAIN_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
 				rm -rf $toolchainsum_file $LINE $TEMPFILE 2>/dev/null
@@ -396,6 +395,51 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 		fi
 	fi
 	cd -
+fi
+
+###################################################################################
+##########  Download prebuilt binaries based on md5 checksum file    ##############
+###################################################################################
+BINARY_DIR=binary
+BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
+binarysum_file="binaries.sum"
+binarydl_result=0
+
+if [ ! -d "$BINARY_DIR" ] ; then
+	mkdir -p "$BINARY_DIR" 2> /dev/null
+fi
+
+cd $BINARY_DIR/
+echo "Check the checksum for binaries..."
+check_sum "../estuary/checksum/$binarysum_file"
+if [ x"$checksum_result" != x"0" ]; then
+	TEMPFILE=tempfile
+	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	while read LINE
+	do
+	    if [ x"$LINE" != x"" ]; then
+	        echo "Download "$LINE"..."
+		    rm -rf $LINE 2>/dev/null
+		    wget -c $BINARY_SOURCE/$LINE
+			if [ x"$?" != x"0" ]; then
+                binarydl_result=1
+				rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
+			fi
+	    fi
+	done  < $TEMPFILE
+	rm $TEMPFILE
+fi
+cd -
+
+# Copy some common to build target directory
+if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
+    if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ]; then
+        cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+    fi
+
+    if [ x"D02" = x"$PLATFORM" ] && [ -f $BINARY_DIR/CH02TEVBC_V03.bin ]; then
+        cp $BINARY_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
+    fi
 fi
 
 ###################################################################################
@@ -769,51 +813,6 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	done
 fi
 
-###################################################################################
-########  Install all prebuilt binaries based on md5 checksum file      ###########
-###################################################################################
-if [ x"Binary" = x"$INSTALL" ]; then
-	BINARY_DIR=binary
-	BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
-	binarysum_file="binaries.sum"
-	
-	if [ ! -d "$BINARY_DIR" ] ; then
-		mkdir -p "$BINARY_DIR" 2> /dev/null
-	fi
-	
-	cd $BINARY_DIR/
-	echo "Check the checksum for binaries..."
-	check_sum "../estuary/checksum/$binarysum_file"
-	if [ x"$checksum_result" != x"0" ]; then
-		TEMPFILE=tempfile
-		md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
-		while read LINE
-		do
-		    if [ x"$LINE" != x"" ]; then
-		        echo "Download "$LINE"..."
-			    rm -rf $BINARY_SOURCE/$LINE 2>/dev/null
-			    wget -c $BINARY_SOURCE/$LINE
-				if [ x"$?" != x"0" ]; then
-					installresult=1
-					rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
-				fi
-		    fi
-		done  < $TEMPFILE
-		rm $TEMPFILE
-	fi
-	cd -
-fi
-
-# Copy mini-rootfs to build target directory
-if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
-    if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ]; then
-        cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
-    fi
-
-    if [ x"D02" = x"$PLATFORM" ] && [ -f $BINARY_DIR/CH02TEVBC_V03.bin ]; then
-        cp $BINARY_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
-    fi
-fi
 
 ###################################################################################
 ########################## Check and report build resutl   ########################
@@ -888,6 +887,13 @@ if [ x"" != x"$PLATFORM" ]; then
     fi
 fi
 
+# Binaries download report
+if [ x"0" = x"$binarydl_result" ]; then
+	echo -e "\033[32mPrebuilt Binaries are in $BINARY_DIR.\033[0m"
+else
+	echo -e "\033[31mFailed! Some Binaries    can not be found!\033[0m"
+fi
+
 # Install Caliper report
 if [ x"Caliper" = x"$INSTALL" ]; then
 	if [ x"0" = x"$installresult" ]; then
@@ -905,16 +911,6 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 		echo "The toolchain is installed into /opt directory"
 	else
     	echo -e "\033[31mToolchain installing failed!\033[0m"
-	fi
-fi
-
-# Install binary report
-if [ x"Binary" = x"$INSTALL" ]; then
-	if [ x"0" = x"$installresult" ]; then
-   		echo -e "\033[32mInstalled Binary successfully.\033[0m"
-		echo "All prebuilt Binary is installed into binary directory"
-	else
-    	echo -e "\033[31mSome Binaries installing failed!\033[0m"
 	fi
 fi
 
