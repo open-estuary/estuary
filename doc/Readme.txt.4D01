@@ -7,6 +7,7 @@ description: UEFI_D01.fd is the UEFI bios for D01 platform.
 target: <project root>/build/D01/binary/
 source: <project root>/uefi
 build commands(supposedly, you are in <project root> currently:
+    export ARCH=arm
     export CROSS_COMPILE=arm-linux-gnueabihf-
     # prepare uefi-tools
     pushd tools/uefi/uefi-tools
@@ -36,6 +37,7 @@ description:
 target: <project root>/build/D01/grub/
 source: <project root>/grub
 build commands(supposedly, you are in <project root> currently:
+    export ARCH=arm
     export CROSS_COMPILE=arm-linux-gnueabihf-
     pushd grub
     # rollbak the grub master

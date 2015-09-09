@@ -12,7 +12,7 @@ Where to get them, please refer to Readme.txt.
 
 ### Upgrade UEFI ###
 
-Note: This is not necessary unless you want to upgrade UEFI
+Note: This is not necessary unless you want to upgrade UEFI really.
 
 FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
 
