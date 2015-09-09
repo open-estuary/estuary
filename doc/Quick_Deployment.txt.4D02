@@ -1,0 +1,26 @@
+
+Quick Deployment Manual
+
+Above all, prepare hardware boards with hard disk and download Estuary source code from GitHub.
+About how to do them, please refer to ‘Get\Build Estuary yourself’ in Setup Guide.
+Then create USB installation disk and deploy Linux system into hard disk of target board as following steps.
+
+1. Plug USB Disk into host PC machine with Ubuntu 12.04
+
+Prepare a USB Disk with at least space larger than 8G bytes and do following commands:
+
+$cd ~/workdir/estuary
+$./create-udisk.sh 
+
+Afterwards, make selection according to prompt information.
+At last, USB intallation disk may be created successfully.
+
+2. Plug USB Disk to target board
+
+Power on the target board after plugging USB disk built before, and select USB startup option in UEFI shell, and sys_setup.sh will be execute after ubuntu is started up.
+Afterwards, make selection according to prompt information.
+At last, the Hard Disk of target board will be deployed with a Linux system selected before by user successfully.
+
+3. Reboot the target board again
+Unplug USB Disk after power off, and power on it again, then select Hard Disk startup selection in UEFI shell, and Linux system will boot up from hard disk.
+

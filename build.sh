@@ -407,7 +407,11 @@ UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
 
-uefi_bin=`find $uefi_dir -name *.fd 2>/dev/null`
+if [ x"QEMU" = x"$PLATFORM" ]; then
+    uefi_bin=
+else
+    uefi_bin=`find $uefi_dir -name *.fd 2>/dev/null`
+fi
 
 # Build UEFI for D01 platform
 if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
@@ -472,7 +476,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	cp $UEFI_BIN $uefi_bin
 	fi
 fi
-if [ x"" != x"$PLATFORM" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
+if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
 fi
 
@@ -481,7 +485,12 @@ fi
 ###################################################################################
 GRUB_DIR=grub
 grub_dir=$build_dir/$GRUB_DIR
-GRUB_BIN=`find $grub_dir -name *.efi 2>/dev/null`
+
+if [ x"QEMU" = x"$PLATFORM" ]; then
+    GRUB_BIN=
+else
+    GRUB_BIN=`find $grub_dir -name *.efi 2>/dev/null`
+fi
 
 # Build grub for D01 platform
 if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
@@ -536,7 +545,7 @@ else
     GRUB_BIN=`find "$grub_dir" -name "*.efi" 2>/dev/null`
 fi
 
-if [ x"" != x"$PLATFORM" ] && [ x"" != x"GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
+if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
 	cp $GRUB_BIN $binary_dir/
 fi
 
@@ -763,7 +772,7 @@ if [ x"Binary" = x"$INSTALL" ]; then
 fi
 
 # Copy mini-rootfs to build target directory
-if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ] && [ -d $binary_dir ]; then
+if [ x"QEMU" != x"$PLATFORM" ] && [ -f $BINARY_DIR/mini-rootfs.cpio.gz ] && [ -d $binary_dir ]; then
 	cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
 fi
 

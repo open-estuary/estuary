@@ -1,0 +1,31 @@
+This is the guide for distributions
+
+Distribution indicates a specially total rootfs for linux kernel.
+After you run ./estuary/build.sh -d <Platform Name> -p <Distribution Name>, the corresponding distribution tarball will be downloaded into <project root>/distro directory.
+By default, it's named as <Distribution Name>_<ARM arch>.tar.gz
+
+You can do following commands to uncompress the tarball into any special block device's partition, e.g.: SATA, SAS or USB disk.
+    mkdir tempdir
+    sudo mount /dev/<block device name> tempdir
+    sudo tar -xzf <Distribution Name>_<Arm arch>.tar.gz -C tempdir 
+
+You can also simply uncompress the tarball into a special directory as follows, and use the directory as the NFS's rootfs.
+    mkdir nfsdir
+    sudo tar -xzf <Distribution Name>_<Arm arch>.tar.gz -C nfsdir 
+
+If you want to produce a rootfs image file for QEMU, you can try as belows
+    mkdir tempdir
+    sudo tar -xzf <Distribution Name>_<Arm arch>.tar.gz -C tempdir 
+
+    pushd tempdir
+    dd if=/dev/zero of=../rootfs.img bs=1M count=10240
+    mkfs.ext4 ../rootfs.img -F
+    mkdir -p ../tempdir 2>/dev/null
+    sudo mount ../rootfs.img ../tempdir
+    sudo cp -a * ../tempdir/
+    sudo umount ../tempdir
+    rm -rf ../tempdir
+    popd
+Then you will get the rootfs image file as rootfs.img
+
+More detail information about how to deploy target system into D02 board, please refer to Deployment_Manual.txt.

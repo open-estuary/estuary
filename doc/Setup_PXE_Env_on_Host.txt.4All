@@ -1,0 +1,90 @@
+This is a guide to setup a PXE environment on host machine.
+
+PXE boot depends on DHCP and TFTP services.So before verifing PXE, you need to setup a working DHCP server and TFTP server on your local network. In this case, my case is on ubuntu.
+
+1.Setup DHCP server on ubuntu
+Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified direction, try these steps:
+a.Install DHCP server package
+
+sudo apt-get install -y isc-dhcp-server syslinux
+
+b.Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.Make sure filename is “grub2.efi”. Here is an example:
+
+$ cat /etc/dhcp/dhcpd.conf
+# Sample /etc/dhcpd.conf
+# (add your comments here)
+default-lease-time 600;
+max-lease-time 7200;
+subnet 192.168.1.0 netmask 255.255.255.0 {
+    range 192.168.1.210 192.168.1.250;
+    option subnet-mask 255.255.255.0;
+    option domain-name-servers 192.168.1.1;
+    option routers 192.168.1.1;
+    option subnet-mask 255.255.255.0;
+    option broadcast-address 192.168.1.255;
+    filename "grubaa64.efi";
+    #next-server 192.168.1.107
+}
+#
+
+c.Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd should listen to. By default it listens to eth0.
+
+INTERFACES=""
+
+d.Use these commands to start or check dhcp service
+
+sudo service isc-dhcp-server restart
+
+Check status
+
+netstat -lu
+
+Output
+
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+udp        0      0 *:bootpc                *:*                                
+
+2.Setup TFTP server on ubuntu
+a.Install TFTP server and TFTP client(optional, tftp-hpa is the client package)
+
+sudo apt-get install -y topenbsd-inetd ftpd-hpa tftp-hpa lftp
+
+b.Edit /etc/inetd.conf, remove “#” from the beginning of tftp line or add if it’s not there under “#:BOOT:” comment.
+
+tftp    dgram   udp wait    root    /usr/sbin/in.tftpd  /usr/sbin/in.tftpd -s /var/lib/tftpboot
+
+c.Enable boot service for inetd
+
+sudo update-inetd --enable BOOT
+
+d.Configure the TFTP server, update /etc/default/tftpd-hpa like following:
+
+TFTP_USERNAME="tftp"
+TFTP_ADDRESS="0.0.0.0:69"
+TFTP_DIRECTORY="/var/lib/tftpboot"
+TFTP_OPTIONS="-l -c -s"
+
+e.Set up TFTP server directory
+
+sudo mkdir /var/lib/tftpboot
+sudo chmod -R 777 /var/lib/tftpboot/
+
+f.Restart inet & TFTP server
+
+sudo service openbsd-inetd restart
+sudo service tftpd-hpa restart
+
+Check status
+
+netstat -lu
+
+Output
+
+Proto Recv-Q Send-Q Local Address           Foreign Address         State 
+udp        0      0 *:tftp                  *:*                          
+
+3.Prepare some files on the TFTP root path
+
+The files include: grub binary file, grub configure file, kernel Image and dtb file. In my case, they are grubaa64_linux.efi, grub.cfg-01-xx-xx-xx-xx-xx-xx, hip05-d02.dtb and Image.
+
+Note: The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with grub.cfg-01 and ends with board’s mac address.
