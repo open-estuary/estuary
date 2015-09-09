@@ -1,165 +1,75 @@
-UEFI and Grub
+Grub manual
 
-Table of Contents
+### Introduction ###
 
-    Introduction
-    Get them
-    Upgrade UEFI
-        1. Prepare files about UEFI on local computer
-        2. Boot board into UEFI SHELL
-        3. Update UEFI files
-    Recover the UEFI when it doesn’t work
-    Config Grub file
+Grub is a kind of boot loader to load kernel\OS into RAM and run it, they include:
+    grubaa64.efi    # The grub binary executable program for ARM64 architecture
+    grubarm32.efi   # The grub binary executable program for ARM32 architecture
+    grub.cfg        # The grub config file which will be used by grub binary
 
-Introduction
-
-Grub is a kind of boot loader to load kernel\OS into RAM and run it, meanwhile UEFI is a kind of BIOS to provide runtime service to OS which can do some basic IO operation with the runtime service, e.g.: reboot, power off and etc.
-
+Where to get them, please refer to Readme.txt.
  
-Get them
+### Grub config file ###
 
-For the source code of Grub, you can get it by follow:
+You can edit a grub.cfg file to support various boot mode or multi boot partitions, follow is an example
+    
+    #
+    # Sample GRUB configuration file
+    #
+    
+    # Boot automatically after 0 secs.
+    set timeout=5
+    
+    # By default, boot the Euler/Linux
+    set default=ubuntu_sata
+    
+    # Booting from ramdisk rootfs by PXE
+    menuentry "minilinux" --id minilinux {
+        set root=(tftp,192.168.1.107)
+        linux /Image_D02 rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        initrd /hulk-hip05.cpio.gz
+        devicetree /hip05-d02.dtb
+    }
+    
+    # Booting from NFS rootfs by PXE
+    menuentry "Ubuntu NFS" --id ubuntu_nfs {
+        set root=(tftp,192.168.1.107)
+        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+        devicetree /hip05-d02.dtb
+    }
+    
+    # Booting from SATA with Ubuntu rootfs in /dev/sda2
+    menuentry "Ubuntu SATA" --id ubuntu_sata {
+        set root=(hd1,gpt1)
+        linux /Image_D02 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        devicetree /hip05-d02.dtb
+    }
 
-git clone git://git.savannah.gnu.org/grub.git
+    # Booting from SATA with Ubuntu rootfs in /dev/sda3
+    menuentry "Fedora SATA" --id fedora_sata {
+        set root=(hd1,gpt1)
+        linux /Image_D02 rdinit=/init root=/dev/sda3 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        devicetree /hip05-d02.dtb
+    }
 
-For the source code of UEFI, you can get it by follow:
+Note: the Image_D02 can be changed to any other kernel Image, e.g.: Image_D01, the hip05-d02.dtb can be changed to any other dtb file, e.g.: hip04-d01.dtb.
 
-git clone https://github.com/open-estuary/uefi.git
+### files structure bootable partition ###
 
-For binaries mentioned above, you can get them by follows, more introduction to these binaries, please refer to Getting the Binary Files
-
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/CH02_TEVBC_V03.bin
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/bl1.bin 
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/fip.bin
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/UEFI_D01.fd
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/UEFI_D02.fd 
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/grub.cfg 
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/grubarm32.efi
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/grubaa64.efi 
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/hip04-d01.dtb
-wget -c https://github.com/open-estuary/estuary/releases/download/bin-v1.2/hip05-d02.dtb
-
- 
-
-Upgrade UEFI
-
-Note: This is not necessary unless you want to upgrade UEFI
-
-FTP protocol is used for downloading between hardware boards and local network. So before this step, please make sure you have a working FTP server in local network, so that board could get files from network using FTP.
-1. Prepare files about UEFI on local computer
-
-There are several files which should be prepared before hacking UEFI: UEFI_D01.fd\UEFI_D02.fd for D01\D02 board BIOS, bl1.bin and fip.bin for Trust Fireware, CH02_TVBC_V03.bin for power control CPLD. Then put them on the root directory of FTP.
-2. Boot board into UEFI SHELL
-
-Follow these steps to UEFI SHELL:
-
- a.Serial port setting:115200/8/N/1;
- b.Press any key to enter default Boot Option Menu;
- c.Select EBL boot option;
-
-Then the board will enter the UEFI SHELL.
-3. Update UEFI files
-
-1. IP address config
-
-ifconfig -s eth0 <IP address> <mask> <gateway>
-e.g.: ifconfig -s eth0  192.168.1.4 255.255.255.0 192.168.1.1
-
-2. Burn BIOS file
-
-provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
-spiwfmem <source address> <target address> <data length>
-e.g.: provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.bin -a 100000
-      spiwfmem 100000 0000000 300000
-
-3. Burn CPLD file
-
-provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
-updatecpld <target address>
-e.g.: provision 192.168.1.107 -u sch -p aaa -f CH02_TEVBC_V03.bin -a 100000
-      updatecpld 100000
-
-4. Burn files for Trust Firmware
-
-This step is not necessary when the format of UEFI is end of fd which is consist of trusted firmware and uefi.
-
-provision <server IP> -u <ftp user name> -p <ftp password> -f <bl1 bin> -a <download target address>
-spiwfmem <source address> <target address> <data length>
-provision <server IP> -u <ftp user name> -p <ftp password> -f <fip bin> -a <download target address>
-spiwfmem <source address> <target address> <data length>
-e.g.: provision 192.168.1.107 -u sch -p aaa -f bl1.bin -a 100000
-      spiwfmem 100000 200000 10000
-      provision 192.168.1.107 -u sch -p aaa -f fip.bin -a 100000
-      spiwfmem 100000 220000 10000
-
-5. Power off and reboot board again
-Recover the UEFI when it doesn’t work
-
-Actually the board can restore two UEFI in case of failure in the default UEFI.you can resore UEFI in the follow way:
-
-    Power off the board and disconnect power supply.
-    Push the dial switch s3 to the side that has silk screen ‘3’, please checkHardware Boards to find where it is.
-    Power on and enter UEFI SHELL again.
-
-    IP address config
-
-    ifconfig -s eth0 <IP address> <mask> <gateway>
-    e.g.: ifconfig -s eth0 192.168.1.4 255.255.255.0 192.168.1.1
-
-    Push the dial swift s3 to the other side that has no silk screen ‘s’
-    Burn UEFI file for BIOS as above step3.
-    Reset the system again.
-
-Now you have already updated your failed BIOS, and the board will enter the UEFI SHELL.
-
- 
-Config Grub file
-
-Grub is used to load the kernel into RAM and start it, normally they are place into bootable partition as following structure.
+Normally they are placed into bootable partition as following structure.
 
 -------EFI
 |       |
-|       GRUB2------grubaa64.efi #grub binary file
+|       GRUB2------grubaa64.efi # grub binary file for ARM64
 |
-|-------------grub.cfg          #grub config file
+|-------------grubarm32.efi     # grub binary file for ARM32
 |
-|-------------Image             #kernel Image file
+|-------------grub.cfg          # grub config file
 |
-|-------------hip05-d02.dtb     #kernel data tree binary file
+|-------------Image_D02         # kernel Image file for D02 platform
+|
+|-------------hip05-d02.dtb     # kernel data tree binary file
 
-You can edit the grub.cfg to support various boot mode, follow is an example
-
-#
-# Sample GRUB configuration file
-#
-
-# Boot automatically after 0 secs.
-set timeout=5
-
-# By default, boot the Euler/Linux
-set default=ubuntu_nfs
-
-# Booting with ramdisk rootfs by PXE
-menuentry "minilinux" --id minilinux {
-    set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-    initrd /hulk-hip05.cpio.gz
-    devicetree /hip05-d02.dtb
-}
-
-# Booting with NFS rootfs by PXE
-menuentry "Ubuntu NFS" --id ubuntu_nfs {
-    set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
-    devicetree /hip05-d02.dtb
-}
-
-# Booting with SATA rootfs
-menuentry "Ubuntu SATA" --id ubuntu_sata {
-    set root=(hd1,gpt1)
-    linux /Image rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-    devicetree /hip05-d02.dtb
-}
-
-Note: —id is the name of boot options, Image indicates the name of kernel image, hip05-d02.dtb indicates the name of data tree binary file, hulk-hip05.cpio.gz indicates the name of ramdisk rootfs. You can change their names and locations.
-
+In case of booting by PXE mode:
+    1. The gurb binary and grub.cfg files must be placed in the TFTP root directory.
+    2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.

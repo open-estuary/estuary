@@ -5,7 +5,8 @@ After you do "./estuary/build.sh -p D02 -d Ubuntu", all targets files will be pr
 ### UEFI_D02.fd ###
 ### bl1.bin ###
 ### fip.bin ###
-description: UEFI_D02.fd is the UEFI bios for D02 platform, the others are binaries for trust firmware.
+### CH02TEVBC_V03.bin ###
+description: UEFI_D02.fd is the UEFI bios for D02 platform, CH02TEVBC_V03.bin is the CPLD binary for D02 board, the others are binaries for trust firmware.
 target: <project root>/build/D02/binary/
 source: <project root>/uefi
 build commands(supposedly, you are in <project root> currently:
@@ -28,7 +29,11 @@ build commands(supposedly, you are in <project root> currently:
 Then you will find *.fd in <project root>/uefi/Build and the other trust firmware binaries in <project root>/HwProductsPkg.
 
 ### grubaa64.efi ###
-description: to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+### grub.cfg ###
+description: 
+    grubaa64.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+    grub.cfg is used by grubaa64.efi to config boot options.
+    More detail about them, please refer to Grub_Manual.txt.
 target: <project root>/build/D02/grub/
 source: <project root>/grub
 build commands(supposedly, you are in <project root> currently:

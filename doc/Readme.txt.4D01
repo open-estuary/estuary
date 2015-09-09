@@ -28,7 +28,11 @@ build commands(supposedly, you are in <project root> currently:
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
 
 ### grubarm32.efi ###
-description: to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+### grub.cfg ###
+description:
+    grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+    grub.cfg is used by grubaa64.efi to config boot options.
+    More detail about them, please refer to Grub_Manual.txt.
 target: <project root>/build/D01/grub/
 source: <project root>/grub
 build commands(supposedly, you are in <project root> currently:
