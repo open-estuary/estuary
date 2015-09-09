@@ -576,6 +576,11 @@ fi
 
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
 	cp $GRUB_BIN $binary_dir/
+
+    if [ -f $BINARY_DIR/grub.cfg ]; then
+        cp $BINARY_DIR/grub.cfg $grub_dir/ 2>/dev/null
+        cp $BINARY_DIR/grub.cfg $binary_dir/ 2>/dev/null
+    fi
 fi
 
 ###################################################################################
@@ -800,8 +805,14 @@ if [ x"Binary" = x"$INSTALL" ]; then
 fi
 
 # Copy mini-rootfs to build target directory
-if [ x"QEMU" != x"$PLATFORM" ] && [ -f $BINARY_DIR/mini-rootfs.cpio.gz ] && [ -d $binary_dir ]; then
-	cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
+    if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ]; then
+        cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+    fi
+
+    if [ x"D02" = x"$PLATFORM" ] && [ -f $BINARY_DIR/CH02TEVBC_V03.bin ]; then
+        cp $BINARY_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
+    fi
 fi
 
 ###################################################################################
