@@ -10,8 +10,8 @@
 ############################# Variables definition         ########################
 ###################################################################################
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
-distros_d01=(Ubuntu OpenSuse)
-distros_d02=(OpenEmbedded Ubuntu OpenSuse Fedora Debian)
+distros_d01=(Ubuntu)
+distros_d02=(Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02)
 installs=(Caliper toolchain)
 
@@ -25,7 +25,7 @@ PATH_UBUNTU64=default
 PATH_FEDORA64=default
 PATH_DEBIAN64=default
 #arm32 distributions
-PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.2/appliances/openSUSE-13.2-ARM-XFCE.armv7-rootfs.armv7l-1.12.1-Build33.7.tbz
+#PATH_OPENSUSE32=http://download.opensuse.org/ports/armv7hl/distribution/13.2/appliances/openSUSE-13.2-ARM-XFCE.armv7-rootfs.armv7l-1.12.1-Build33.7.tbz
 #PATH_UBUNTU32=http://releases.linaro.org/15.02/ubuntu/lt-d01/linaro-utopic-server-20150220-698.tar.gz
 #PATH_OPENSUSE32=default
 PATH_UBUNTU32=default
@@ -381,8 +381,8 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 	if [ x"$checksum_result" != x"0" ]; then
 	    echo "Check the checksum for distribution..."
 		distrosum_file=${DISTRO_SOURCE##*/}".sum"
-		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
-		if [ x"$?" = x"0" ]; then
+#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
+#		if [ x"$?" = x"0" ]; then
 		    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
 			rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
 		    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
@@ -392,7 +392,7 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 				exit 1
 			fi
 		    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
-		fi
+#		fi
 	fi
 	cd -
 fi
@@ -422,7 +422,7 @@ if [ x"$checksum_result" != x"0" ]; then
 		    rm -rf $LINE 2>/dev/null
 		    wget -c $BINARY_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
-                binarydl_result=1
+                binarydl_result=$LINE
 				rm -rf $binarysum_file $LINE $TEMPFILE 2>/dev/null
 			fi
 	    fi
@@ -469,6 +469,7 @@ copy_doc()
 	done  < $TEMPFILE
 	rm $TEMPFILE
 }
+
 if [ x"" != x"$PLATFORM" ]; then
     if [ ! -d "$doc_dir" ] ; then
         mkdir -p "$doc_dir" 2>/dev/null
@@ -917,7 +918,7 @@ fi
 if [ x"0" = x"$binarydl_result" ]; then
 	echo -e "\033[32mPrebuilt Binaries are in $BINARY_DIR.\033[0m"
 else
-	echo -e "\033[31mFailed! Some Binaries    can not be found!\033[0m"
+	echo -e "\033[31mFailed! Some Binaries ($binarydl_result) can not be found!\033[0m"
 fi
 
 # Install Caliper report
