@@ -220,11 +220,11 @@ if [ x"$?" = x"1" ]; then
 	sudo apt-get remove -y --purge automake*
 fi
 
-if [ ! -f ".initilized" ]; then
+if [ ! -f ".initialized" ]; then
 	sudo apt-get update
     sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex
     if [ x"$?" = x"0" ]; then
-        touch ".initilized"
+        touch ".initialized"
     fi
 fi
 
@@ -497,6 +497,8 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
         exit 1
     fi
     export PATH=$PATH:`pwd`/$UEFI_TOOLS
+    # Let UEFI detect the arch automatically
+    export ARCH=
 
 	echo "Build UEFI..."
 
@@ -529,8 +531,10 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 			git checkout open-estuary/master
 			git apply HwPkg/Patch/*.patch
 			export LC_CTYPE=C 
+            make -C BaseTools clean
 			make -C BaseTools 
 			source edksetup.sh 
+            build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc cleanall
 			build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 	
 	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
@@ -988,10 +992,10 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
 	if [ x"" = x"$QEMU" ]; then
 		pushd qemu/
-        if [ ! -f ".initilized" ]; then
+        if [ ! -f ".initialized" ]; then
             sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
             if [ x"$?" = x"0" ]; then
-                touch ".initilized"
+                touch ".initialized"
             fi
         fi
         echo "Build the QEMU..."
