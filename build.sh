@@ -746,10 +746,10 @@ if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
 	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
 
     if [ x"D01" = x"$PLATFORM" ] && [ -f $kernel_dir/.kernel ]; then
-            cp $kernel_dir/.kernel $binary_dir/
-        fi
+        cp $kernel_dir/.kernel $binary_dir/
     fi
 fi
+
 if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
     cp $DTB_BIN $binary_dir/
 fi
