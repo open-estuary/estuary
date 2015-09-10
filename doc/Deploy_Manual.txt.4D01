@@ -81,7 +81,7 @@ There are several methods to bring up system, you can select following anyone fi
     
     # Download fiel from FTP server to target board's Flash
     provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f .filesystem
 
     4. Change command line as follows according to "Show & change kernel cmdline in UEFI"
 
@@ -89,6 +89,7 @@ There are several methods to bring up system, you can select following anyone fi
     
     5. Reboot the board.
     
+    Note: the name of ".kernel" and ".filesystem" can not be changed!
     To get all binaries mentioned above, please refer to Readme.txt.
 
 # Boot via PXE
@@ -171,11 +172,13 @@ There are several methods to bring up system, you can select following anyone fi
 
     6. Reboot the board.
 
-# Boot via EFI-stub
+# Boot via EFI-STUB
 
-    1. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
+    1. Rebuild kernel to produce zImage_D01 with "EFI-STUB" option
 
-    2. Download the corresponding files from FTP server and store them into SATA as below.
+    2. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
+
+    3. Download the corresponding files from FTP server and store them into SATA as below.
         sda1: |-------------zImage_D01         //kernel binary Image for D01
               |
               |-------------hip04-d01.dtb      //device tree binary for D01
@@ -184,7 +187,7 @@ There are several methods to bring up system, you can select following anyone fi
     To get kernel zImage_D01 and dtb file, please refer to Readme.txt.
     To get different distributions, please refer to Distributions_Guider.txt.
 
-    2. Launch EFI-stub Kernel in the UEFI shell
+    4. Launch EFI-stub Kernel in the UEFI shell
 
         a. boot the board.
         b. Press ‘s’ to Start Boot Menu.
@@ -192,7 +195,7 @@ There are several methods to bring up system, you can select following anyone fi
         d. Shell> FS0:
         f. FS0:\> zImage_D01 dtb=hip04-d01.dtb console=ttyS0,115200 root=/dev/sda2 rw earlyprintk
 
-    Then the kernle will boot from EFI-stub.
+    Then the board will boot from kernel with EFI-stub.
 
 # Boot via GRUB
     1. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
