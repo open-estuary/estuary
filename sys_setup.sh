@@ -1,5 +1,6 @@
 #!/bin/bash
 
+wyl_debug=y
 
 LANG=C
 
@@ -130,3 +131,19 @@ pushd . >/dev/null 2>&1
 . find_disk.sh
 popd >/dev/null 2>&1
 
+#wyl debud
+if [ x"n" = x"$wyl_debug" ]
+then
+##differentiate the shell according to the root filesystem type
+pushd .
+. make_${ROOT_FS}.sh
+[ $? ] || exit
+popd
+
+pushd .
+. build_${BRD_TYPE}.sh
+[ $? ] || exit
+popd
+
+###successful... here
+fi

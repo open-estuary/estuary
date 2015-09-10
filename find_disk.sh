@@ -6,6 +6,34 @@ en_shield=y
 declare -a disk_list
 export disk_list=
 
+while read line
+do
+    name=`echo $line | awk -F '=' '{print $1}'`
+    value=`echo $line | awk -F '=' '{print $2}'`
+    case $name in
+        "arch")
+        TARGET_ARCH=$value
+        ;;
+        "platform")
+        build_PLATFORM=$value
+        ;;
+        "distro")
+        build_DISTRO=$value
+        ;;
+        "ubuntu")
+        ubuntu_en=$value
+        ;;
+        "opensuse")
+        opensuse_en=$value
+        ;;
+        "fedora")
+        fedora_en=$value
+        ;;
+        *)
+        ;;
+    esac
+done < config
+
 if [ ! -o pipefail ]; then
 	set -o pipefail
 	is_disable=1
@@ -122,13 +150,15 @@ echo "After filter..length of array ${#disk_list[@]} ${disk_list[0]}--"
 
 #The length of disk_list[] must -gt 0
 if [ ${#disk_list[@]} -le 0 ]; then
-	echo "No idle SATA hard disk. It is better to plug new one(input 'n')"
-	disk_list[0]=$(echo ${root_dev} | sed 's,[0-9]\+,,g')
-	echo "Or update " ${disk_list[0]} "have risk to demage whole disk!!"
-	read -t 20 -p "Please assert[y/n]:" assert_flag
-	if [ ! $assert_flag == "y" ]; then
-		exit
-	fi
+	echo "No idle SATA hard disk. Please plug new one"
+    exit 1
+	
+    #disk_list[0]=$(echo ${root_dev} | sed 's,[0-9]\+,,g')
+	#echo "Or update " ${disk_list[0]} "have risk to demage whole disk!!"
+	#read -t 20 -p "Please assert[y/n]:" assert_flag
+	#if [ "$assert_flag" != "y" ]; then
+	#	exit 1
+	#fi
 else
 	##when there are multiply disks,maybe it is better user decide which to be selected
 	#But how the user know which one is new plugged??
@@ -232,18 +262,15 @@ select part_tormv in "${part_name[@]}"; do
 done
 fi
 
-#only debud 
-if [ "$en_shield" == "y" ]
-then
 wait_user_choose "all partitions of this Hard Disk will be deleted?" "y|n"
 
-
-if [ "$assert_flag" == "y" ]; then
+if [ "$assert_flag" = "y" ]; then
     part_tormv=all
     sel_idx=${#part_list[@]}
+    full_intallation=yes
 else
-    exit 1
-fi
+    full_intallation=no
+    exit 0
 fi
 
 echo "sel_idx "$sel_idx "part_list count:"${#part_list[@]} "part_list[0] :"${part_list[0]}
@@ -305,6 +332,152 @@ unset part_name[i]
 (( i-- ))
 unset part_name[i]
 
+if [ "$full_intallation" = "yes" ]; then
+    #make another partition as the place where the new root filesystem locates
+    #1) ensure that the disk partition table is gpt
+    if [ "$(sudo parted /dev/${disk_list[0]} print | \
+        awk '/Partition / && /Table:/ {print $NF}')" != "gpt" ]; then
+        echo "All current partitions will be deleted"
+        if ! ( sudo parted /dev/${disk_list[0]} mklabel gpt ); then
+            echo "configure ${disk_list[0]} label as gpt FAIL"
+            exit
+        fi
+    fi
+    boot_id=$(sudo parted /dev/${disk_list[0]} print | awk '$1 ~ /[0-9]+/ && /boot/ {print $1}')
+    if [ -z "$boot_id" ]; then
+        echo -n "make boot partition"
+        ##[ ! (sudo parted /dev/${disk_list[0]} mkpart uefi 1 256) ] && ( echo "ERR"; exit ) always said too many parameters
+        if ! ( sudo parted /dev/${disk_list[0]} mkpart uefi 1 256;set 1 boot on ); then
+            echo " ERR"
+            exit
+        else
+            echo " OK"
+            ##since UEFI currently only support fat16, we need mkfs.vfat
+            sudo apt-get install dosfstools -y
+            mkfs -t vfat /dev/${disk_list[0]}1
+            #parted /dev/${disk_list[0]} mkfs 1 fat16
+            [ $? ] || { echo "ERR::mkfs for boot partition FAIL"; exit; }
+            #sudo parted /dev/${disk_list[0]} set 1 boot on
+        fi
+    else
+        echo "existed boot partition will be updated"
+    fi
+
+    rootfs_start=512
+    rootfs_end=20
+
+    if [ "$ubuntu_en" = "y" ]; then
+        cmd_str="sudo parted /dev/${disk_list[0]} mkpart ubuntu ${rootfs_start}M ${rootfs_end}G"
+        echo -n "make root partition by "$cmd_str
+        eval $cmd_str
+        [ $? ] || { echo " ERR"; exit; }
+
+        #get the device id that match with the partition just made
+        read -a cur_idx <<< $(sudo parted /dev/${disk_list[0]} print | \
+        grep "ubuntu" | awk '{print $1}' | sort)
+        echo "root cur_idx is ${cur_idx[*]}"
+        NEWRT_IDX=${cur_idx[0]}
+
+        rootfs_start=$rootfs_end
+        rootfs_end=$(( rootfs_start + 20 ))
+
+        #we always re-format the root partition
+        mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
+    
+        rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
+        rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
+        sudo mkdir $PWD/boot
+        sudo mkdir $PWD/rootfs
+        sudo mkdir $PWD/tmp
+
+        sudo mount -t vfat /dev/${disk_list[0]}1 boot
+        sudo mount -t ext3 /dev/${disk_list[0]}$NEWRT_IDX rootfs
+
+        sudo rm -rf boot/*
+        sudo rm -rf rootfs/*
+
+        sudo cp -a /sys_setup/boot/* boot/
+        rm -f boot/EFI/GRUB2/grub.cfg
+        touch tmp/grub.cfg
+cat > tmp/grub.cfg << EOM
+#
+# Sample GRUB configuration file
+#
+
+# Boot automatically after 0 secs.
+set timeout=5
+
+# By default, boot the Euler/Linux
+set default=ubuntu_sata
+
+# For booting GNU/Linux
+menuentry "Ubuntu SATA" --id ubuntu_sata {
+	set root=(hd1,gpt1)
+	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=:::::eth0:dhcp
+	devicetree /hip05-d02.dtb
+}
+EOM
+        mv tmp/grub.cfg boot/EFI/GRUB2/
+        tar -xzf /sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/Ubuntu_"$TARGET_ARCH".tar.gz -C rootfs/
+        sudo umount boot rootfs
+        sudo rm -rf boot rootfs tmp
+    fi
+    if [ "$fedora_en" = "y" ]; then
+    
+        cmd_str="sudo parted /dev/${disk_list[0]} mkpart fedora ${rootfs_start}G ${rootfs_end}G"
+        echo -n "make root partition by "$cmd_str
+        eval $cmd_str
+        [ $? ] || { echo " ERR"; exit; }
+
+        #get the device id that match with the partition just made
+        read -a cur_idx <<< $(sudo parted /dev/${disk_list[0]} print | \
+        grep "fedora" | awk '{print $1}' | sort)
+        echo "root cur_idx is ${cur_idx[*]}"
+        NEWRT_IDX=${cur_idx[0]}
+
+        rootfs_start=$rootfs_end
+        rootfs_end=$(( rootfs_start + 20 ))
+
+        #we always re-format the root partition
+        mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
+        sudo mkdir $PWD/rootfs
+
+        sudo mount -t ext3 /dev/${disk_list[0]}$NEWRT_IDX rootfs
+
+        sudo rm -rf rootfs/*
+        tar -xzf /sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH/Fedora_"$TARGET_ARCH".tar.gz -C rootfs/
+        sudo umount rootfs
+        sudo rm -rf rootfs
+    fi
+    if [ "$opensuse_en" = "y" ]; then
+    
+        cmd_str="sudo parted /dev/${disk_list[0]} mkpart opensuse ${rootfs_start}G ${rootfs_end}G"
+        echo -n "make root partition by "$cmd_str
+        eval $cmd_str
+        [ $? ] || { echo " ERR"; exit; }
+
+        #get the device id that match with the partition just made
+        read -a cur_idx <<< $(sudo parted /dev/${disk_list[0]} print | \
+        grep "opensuse" | awk '{print $1}' | sort)
+        echo "root cur_idx is ${cur_idx[*]}"
+        NEWRT_IDX=${cur_idx[0]}
+
+        rootfs_start=$rootfs_end
+        rootfs_end=$(( rootfs_start + 20 ))
+
+        #we always re-format the root partition
+        mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
+        sudo mkdir $PWD/rootfs
+
+        sudo mount -t ext3 /dev/${disk_list[0]}$NEWRT_IDX rootfs
+
+        sudo rm -rf rootfs/*
+        tar -xzf /sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH/OpenSuse_"$TARGET_ARCH".tar.gz -C rootfs/
+        sudo umount rootfs
+        sudo rm -rf rootfs
+    fi
+    exit 0
+else
 
 #make another partition as the place where the new root filesystem locates
 #1) ensure that the disk partition table is gpt
@@ -367,7 +540,7 @@ wait_user_choose "Create a new root partition?" "y|n"
 
 if [ "$assert_flag" == "y" ]; then
 	echo "Please carefully configure the start and end of root partition"
-	cmd_str="sudo parted /dev/${disk_list[0]} mkpart $ROOT_FS 512M 10G"
+	cmd_str="sudo parted /dev/${disk_list[0]} mkpart $ROOT_FS 512M 20G"
 	echo -n "make root partition by "$cmd_str
 	eval $cmd_str
 	[ $? ] || { echo " ERR"; exit; }
@@ -408,7 +581,7 @@ fi
 if [ "$assert_flag" == "y" ]; then
         #USRDEV_IDX=${cur_idx[0]}
         sudo parted /dev/${disk_list[0]} print free
-        cmd_str="sudo parted /dev/${disk_list[0]} mkpart user 10G 20G"
+        cmd_str="sudo parted /dev/${disk_list[0]} mkpart user 20G 40G"
         echo -n "make user partition by "$cmd_str
         eval $cmd_str
         [ $? ] || { echo " ERRR"; exit; }
@@ -450,9 +623,11 @@ assert_flag=""
 read -p "Do you need to create one swap partition?(y/n)" assert_flag
 if [ "$assert_flag" == "y" ]; then
 	sudo parted /dev/${disk_list[0]} print free
-	sudo parted /dev/${disk_list[0]} mkpart swap linux-swap 20G 30G
+	sudo parted /dev/${disk_list[0]} mkpart swap linux-swap 40G 50G
 
 	[ $? ] || { echo "WARNING:: create swap partition FAIL"; }
+fi
+
 fi
 
 
@@ -469,12 +644,12 @@ NEWFS_DEV=${disk_list[0]}
 export NEWRT_IDX
 export NEWFS_DEV
 
-
 rootfs_dev2=/dev/${disk_list[0]}2
 rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
 sudo mkdir $PWD/boot
 sudo mkdir $PWD/rootfs
 sudo mkdir $PWD/tmp
+
 sudo mount -t vfat /dev/${disk_list[0]}1 boot
 sudo mount -t ext3 /dev/${disk_list[0]}2 rootfs
 
@@ -503,8 +678,10 @@ menuentry "Ubuntu SATA" --id ubuntu_sata {
 }
 EOM
 mv tmp/grub.cfg boot/EFI/GRUB2/
-sudo dd if=/sys_setup/distro/ubuntu-vivid.img of=/dev/${disk_list[0]}2
-
+#sudo dd if=/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu-vivid.img of=/dev/${disk_list[0]}2
+if [ "$ubuntu_en" = "y" ]; then
+tar -xzf /sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu"$TARGET_ARCH"_"$build_PLATFORM".tar.gz -C rootfs/
+fi
 sudo umount boot rootfs
 sudo rm -rf boot rootfs tmp 
 
