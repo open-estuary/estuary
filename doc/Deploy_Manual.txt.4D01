@@ -6,14 +6,13 @@ Preparation
     Prerequisite
     Check the hardware board
     Upgrade UEFI and trust firmware
+Show & change kernel cmdline in UEFI
 Bring up System
     Boot via NORFLASH
     Boot via PXE
-    Boot via SATA
-        Preprocess when the disk can’t be identified
-    Boot via ACPI
-    Boot via NFS
-
+    Boot via NORFLASH with NFS as rootfs
+    Boot via NORFLASH with SATA as rootfs
+    KVM on D01
 
 ### Introduction ###
 
@@ -37,6 +36,25 @@ All following sections will take the D01 board as example, other boards have the
 
     You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to UEFI_Manual.txt.
 
+### Show & change kernel cmdline in UEFI ###
+
+    1. Boot D01 and enter EBL (UEFI shell).
+
+        We will often do some commands UEFI EBL after here, about how to enter it, please refer to UEFI_Manual.txt.
+
+    2. Use getlinuxatag to see current kernel parameter
+        > getlinuxatag
+
+    3. Use changelinuxatag to change kernel cmdline to this
+        >  changelinuxatag
+           ...
+           console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
+           ...
+    4. Use setlinuxatag to save comandline to FLASH
+        > setlinuxatag
+
+    5. Reboot the board.
+
 ### Bring up System ###
 
 There are several methods to bring up system, you can select following anyone fitting you to boot up.
@@ -44,6 +62,7 @@ There are several methods to bring up system, you can select following anyone fi
 # Boot via NORFLASH
     
     Boot D01 to UEFI SHELL, and type the follow commands in EBL:
+
     1. IP address config
     
     # Config board's IP address
@@ -63,27 +82,14 @@ There are several methods to bring up system, you can select following anyone fi
     # Download fiel from FTP server to target board's Flash
     provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image>
     e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz
+
+    4. Change command line as follows according to "Show & change kernel cmdline in UEFI"
+
+        console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
     
-    4. Reboot the board.
+    5. Reboot the board.
     
     To get all binaries mentioned above, please refer to Readme.txt.
-
-# Show & change kernel command line in UEFI
-
-    1. Boot D01 and enter EBL (UEFI shell).
-
-    2. Use getlinuxatag to see current kernel parameter
-        > getlinuxatag
-
-    3. Use changelinuxatag to change kernel cmdline to this
-        >  changelinuxatag
-           ...
-           console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
-           ...
-    4. Use setlinuxatag to save comandline to FLASH
-        > setlinuxatag
-
-    5. Reboot the board.
 
 # Boot via PXE
     
@@ -91,51 +97,27 @@ There are several methods to bring up system, you can select following anyone fi
 
     Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
 
-    2. Reboot and press anykey to enter UEFI Boot Menu
-    
-    3. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.
+    2. Reboot and enter UEFI EBL.
+
+    Do follows in UEF EBL:
+        2      #Boot Manager
+        1      #Add Boot Device Entry
+        3      #PXE on MAC Address:...
+        PXE    #Description for this new Entry
+        5      #Return to main menu
+        2      #Boot from PXE
     
     4. After several seconds, D01 will boot by PXE automatically.
     
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
-# Boot via SATA
-    
-    This part will tell you how to boot D01 via SATA disk with kernel image, dtb file, grub in it.
-    In my case, my SATA disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
-    
-    1. Boot by NORFLASH or PXE as description above.
-
-    2. Part and format SATA disk
-
-    Format SATA disk: mkfs -t ext4 /dev/sda1
-    Partition SATA disk as follow:
-    
-    +---------+-----------+--------------+------------------+
-    | Name    |   Size    |    Type      |   Tag            |
-    +---------+-----------+--------------+------------------+
-    | sda1    |   20G     |    ext4      | linux filesystem |
-    +---------+-----------+--------------+------------------+
-    
-    3. Download rootfs and uncompress it into SATA disk /dev/sda1.
-
-    How to get different distributions, please refer to Distributions_Guider.txt.
-    
-    4. Reboot and enter UEFI EBL Shell.
-
-    5. Change kernel cmdline as follow according to "Show & change kernel command line in UEFI"
-    
-        console=ttyS0,115200 root=/dev/sda1 rootfstype=ext4 rw earlyprintk ip=192.168.1.150:192.168.1.107:192.168.1.1:255.255.255.0::eth0:on:192.168.1.1:8.8.8.8
-
-    6. Reboot the board.
-    
-# Boot via NFS
+# Boot via NORFLASH with NFS rootfs
     
     D01 supports booting via NFS, you can try it as following steps:
 
     1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
 
-    2. Change command line as follow according in "Show & change kernel command line in UEFI"
+    2. Change command line as follow according in "Show & change kernel cmdline in UEFI"
 
     Change kernel cmdline to:
 
@@ -150,3 +132,126 @@ There are several methods to bring up system, you can select following anyone fi
         ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>:<dns0-ip>:<dns1-ip>
 
     3. Reboot the board. 
+
+# Boot via NORFLASH with SATA as rootfs
+    
+    This part will tell you how to boot D01 via SATA disk with ".kernel" image stored in NORFLASH.
+    In my case, my SATA disk only has one partition: sda1(Ubuntu rootfs).
+    
+    1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
+
+    2. Part and format SATA disk
+
+    Format SATA disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Partition SATA disk with "sudo fdisk /dev/sda" as follow:
+    
+    +---------+-----------+--------------+------------------+
+    | Name    |   Size    |    Type      |   Tag            |
+    +---------+-----------+--------------+------------------+
+    | sda1    |   200M    |  W95 FAT32   |   MBR            |
+    +---------+-----------+--------------+------------------+
+    | sda2    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    
+    Note: MBR partition must be a fat filesystem, so you should format sda1 with “sudo mkfs.vfat /dev/sda1″.
+    
+    3. Download Ubuntu distribution from FTP server and uncompress it into /dev/sda2.
+	sda1: Empty
+        sda2: Ubuntu distribution
+
+    To get different distributions, please refer to Distributions_Guider.txt.
+    
+    4. Reboot and enter UEFI EBL Shell.
+
+    5. Change kernel cmdline as follow according to "Show & change kernel cmdline in UEFI"
+    
+        console=ttyS0,115200 root=/dev/sda2 rootfstype=ext4 rw earlyprintk ip=192.168.1.150:192.168.1.107:192.168.1.1:255.255.255.0::eth0:on:192.168.1.1:8.8.8.8
+
+    This is just an example, maybe you need change above parameters according your real local environment.
+
+    6. Reboot the board.
+
+# Boot via EFI-stub
+
+    1. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
+
+    2. Download the corresponding files from FTP server and store them into SATA as below.
+        sda1: |-------------zImage_D01         //kernel binary Image for D01
+              |
+              |-------------hip04-d01.dtb      //device tree binary for D01
+        sda2: Ubuntu distribution
+
+    To get kernel zImage_D01 and dtb file, please refer to Readme.txt.
+    To get different distributions, please refer to Distributions_Guider.txt.
+
+    2. Launch EFI-stub Kernel in the UEFI shell
+
+        a. boot the board.
+        b. Press ‘s’ to Start Boot Menu.
+        c. Press ‘4’ to select "Shell" option.
+        d. Shell> FS0:
+        f. FS0:\> zImage_D01 dtb=hip04-d01.dtb console=ttyS0,115200 root=/dev/sda2 rw earlyprintk
+
+    Then the kernle will boot from EFI-stub.
+
+# Boot via GRUB
+    1. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
+
+    3. Download the corresponding files from ftp and store them into SATA as below.
+        sda1: |-------------grubarm32.efi      //grub binary file for ARM32 architecture
+              |
+              |-------------grub.cfg           //grub config file
+              |
+              |-------------zImage_D01         //kernel binary Image for D01
+              |
+              |-------------hip04-d01.dtb      //device tree binary for D01
+        sda2: Ubuntu distribution
+
+    To get kernel zImage_D01 and dtb file, please refer to Readme.txt.
+    To get and config grub and grub.cfg, please refer to Grub_Manual.txt
+    To get different distributions, please refer to Distributions_Guider.txt.
+
+    4. Reboot board and enter UEFI Shell, then input these commands in turn:
+
+        2      //Boot Manager
+        1      //Add Boot Device Entry
+        2      //Pci(0x0,0x0)/Sata(0x1,0x0,0x0)...
+        GRUB2  //File path of the EFI Application or the kernel
+        y      //Is an EFI Application? [y/n]
+        y      //Is your application is an OS loader? [y/n]
+        5      //Return to main menu
+        3      //GRUB
+
+    5. Then the board will boot according configurations in grub.cfg
+
+# KVM on D01
+
+Host Kernel on D01 is already support KVM. steps to build kernel could refer to Kernal hacking.
+
+Steps to build and run guest:
+
+    Clone the Torvalds kernel
+
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+
+    Checkout to v3.12 branch
+
+    git checkout -b linux-3.12 v3.12
+
+    Cross compile the kernel
+
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- vexpress_defconfig
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j2
+
+    Grab Pawel’s DTS tree: git://linux-arm.org/arm-dts.git
+
+    git clone git://linux-arm.org/arm-dts.git
+    git chechout -b v3_12 v3.12
+
+    From your kernel tree, run:
+
+    ./script/dtc/dtc -O dtb -o rtsm_ve-cortex_a15x4.dtb  wherever_your_arm-dts_tree_is/fast_models/rtsm_ve-cortex_a15x4.dts
+
+    Launch QEMU on D01:
+
+    qemu-system-arm -enable-kvm -kernel zImage -dtb rtsm_ve-cortex_a15x4.dtb -initrd initrd.cpio.gz -append "console=ttyAMA0 earlyprintk rdinit=/linuxrc" -nographic -machine vexpress-a15,kernel_irqchip=on -m 128 -smp 4 -cpu cortex-a15 -rtc base=localtime

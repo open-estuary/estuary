@@ -9,11 +9,10 @@ Preparation
 Bring up System
     Boot via NORFLASH
     Boot via PXE
+    Boot via NFS
     Boot via SATA
         Preprocess when the disk can’t be identified
     Boot via ACPI
-    Boot via NFS
-
 
 ### Introduction ###
 
@@ -45,6 +44,8 @@ There are several methods to bring up system, you can select following anyone fi
 # Boot via NORFLASH
     
     Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+    We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to UEFI_Manual.txt.
+
     1. IP address config
     
     # Config board's IP address
@@ -98,17 +99,29 @@ There are several methods to bring up system, you can select following anyone fi
     
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
+# Boot via NFS
+    
+    D02 supports booting via NFS, you can try it as following steps:
+
+    1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
+
+    2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
+
+    3. Reboot D02 and press anyke to enter UEFI Boot Menu
+
+    4. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.
+
 # Boot via SATA
     
     This part will tell you how to boot D02 via SATA disk with kernel image, dtb file, grub in it.
     In my case, my SATA disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
     
-    1. Boot by NORFLASH or PXE as description above.
+    1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
 
     2. Part and format SATA disk
 
-    Format SATA disk: mkfs -t ext4 /dev/sda
-    Partition SATA disk as follow:
+    Format SATA disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Partition SATA disk with "sudo fdisk /dev/sda" as follow:
     
     +---------+-----------+--------------+------------------+
     | Name    |   Size    |    Type      |   Tag            |
@@ -120,7 +133,7 @@ There are several methods to bring up system, you can select following anyone fi
     | sda3    |   10G     |    ext4      | linux filesystem |
     +---------+-----------+--------------+------------------+
     
-    Note: EFI system should have a fat filesystem, so we must format sda1 with “mkfs.vfat /dev/sda1″.
+    Note: EFI partition must be a fat filesystem, so you should format sda1 with “sudo mkfs.vfat /dev/sda1″.
 
     *** Preprocess when the disk can’t be identified ***
     
@@ -132,7 +145,7 @@ There are several methods to bring up system, you can select following anyone fi
         b. Use tool fdisk to process this disk
         
         format the disk firstly: 
-                            mkfs.ext4 /dev/sda
+                            sudo mkfs.ext4 /dev/sda
         add a gpt to this disk : 
                             fdisk /dev/sda
                             g-------add a gpt partition
@@ -144,7 +157,7 @@ There are several methods to bring up system, you can select following anyone fi
                             EFI system
         add some anther partition  ...
         save the change           : w
-        formate EFI partition  : mkfs.vfat /dev/sda1
+        formate EFI partition  : sudo mkfs.vfat /dev/sda1
         
         Then this disk can be identified by D02 board.
     
@@ -161,9 +174,9 @@ There are several methods to bring up system, you can select following anyone fi
         sda2: Ubuntu distribution
         sda3: Fedora distribution
 
-    How to get kernel image and dtb file, please refer to Readme.txt.
-    How to get and config grub file to support SATA boot, please refer to Grub_Manual.txt.
-    How to get different distributions, please refer to Distributions_Guider.txt.
+    To get kernel image and dtb file, please refer to Readme.txt.
+    To get and config grub and grub.cfg, please refer to Grub_Manual.txt.
+    To get different distributions, please refer to Distributions_Guider.txt.
     
     4. Reboot and press anykey to enter UEFI Boot Menu.
 
@@ -208,15 +221,3 @@ There are several methods to bring up system, you can select following anyone fi
     6. Set the parameters of booting via ACPI
     
         start Image_D02 "acpi=fore console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 initrd=mini-rootfs.cpio.gz"
-    
-# Boot via NFS
-    
-    D02 supports booting via NFS, you can try it as following steps:
-
-    1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
-
-    2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
-
-    3. Reboot D02 and press anyke to enter UEFI Boot Menu
-
-    4. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.

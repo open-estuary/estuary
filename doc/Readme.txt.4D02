@@ -10,7 +10,7 @@ description: UEFI_D02.fd is the UEFI bios for D02 platform, CH02TEVBC_V03.bin is
 target: <project root>/build/D02/binary/
 source: <project root>/uefi
 build commands(supposedly, you are in <project root> currently:
-    export ARCH=arm64
+    export ARCH=
     export CROSS_COMPILE=aarch64-linux-gnu-
     pushd uefi
     # roll back to special version for D02
@@ -38,7 +38,6 @@ description:
 target: <project root>/build/D02/grub/
 source: <project root>/grub
 build commands(supposedly, you are in <project root> currently:
-    export ARCH=arm64
     export CROSS_COMPILE=aarch64-linux-gnu-
     pushd grub
     # Apply patch for boot from indicated MAC address

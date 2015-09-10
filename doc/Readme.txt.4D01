@@ -7,7 +7,7 @@ description: UEFI_D01.fd is the UEFI bios for D01 platform.
 target: <project root>/build/D01/binary/
 source: <project root>/uefi
 build commands(supposedly, you are in <project root> currently:
-    export ARCH=arm
+    export ARCH=
     export CROSS_COMPILE=arm-linux-gnueabihf-
     # prepare uefi-tools
     pushd tools/uefi/uefi-tools
@@ -28,6 +28,14 @@ build commands(supposedly, you are in <project root> currently:
     
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
 
+### .text ###
+### .monitor ###
+description: boot wrapper files
+target: <project>/build/D01/boot-wrapper/
+source: <project>/boot-wrapper
+    export CROSS_COMPILE=arm-linux-gnueabihf-
+    make
+
 ### grubarm32.efi ###
 ### grub.cfg ###
 description:
@@ -37,7 +45,6 @@ description:
 target: <project root>/build/D01/grub/
 source: <project root>/grub
 build commands(supposedly, you are in <project root> currently:
-    export ARCH=arm
     export CROSS_COMPILE=arm-linux-gnueabihf-
     pushd grub
     # rollbak the grub master
