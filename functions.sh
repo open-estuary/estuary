@@ -3,11 +3,9 @@ wait_user_choose()
 {
 	exit_flag=0
 	
-	echo "wyl-trace -> wait_user_choose() -> assert_flag="$assert_flag
 
 	opt_list=$( echo "$2" | sed -e 's/[ \t\n]*|[ \t\n]*/ /g' )
 	#read -a option <<< echo $opt_list
-	echo "wyl-trace -> $opt_list"
 	assert_flag=""
 	while [ $exit_flag != 1 ]; do
 		echo "$1:($2)"
@@ -16,7 +14,6 @@ wait_user_choose()
 		done
 	done
 
-	echo "wyl-trace -> wait_user_choose() -> assert_flag="$assert_flag
 
 	echo "The choice is $assert_flag"
 }
@@ -25,7 +22,6 @@ wait_user_choose()
 para_sel()
 {
 	local arr_ref=${1}[@]
-	echo "wyl-trace -> "$arr_ref
 	#echo "local variable name is "$arr_ref $2
 
 	local arr_val=( "${!arr_ref}" )

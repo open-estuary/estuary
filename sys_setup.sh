@@ -95,11 +95,9 @@ do
     case $name in
         "platform")
         BRD_TYPE=$value
-        echo "wyl-trace -> BRD_TYPE = "$BRD_TYPE
         ;;
         "distro")
         ROOT_FS=$value
-        echo "wyl-trace -> ROOT_FS = "$ROOT_FS
         ;;
         *)
         ;;
@@ -136,7 +134,6 @@ popd >/dev/null 2>&1
 #wyl debud
 if [ x"n" = x"$wyl_debug" ]
 then
-echo "wyl-trace -> pwd = "$PWD
 ##differentiate the shell according to the root filesystem type
 pushd .
 . make_${ROOT_FS}.sh
