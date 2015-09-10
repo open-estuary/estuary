@@ -3,5 +3,9 @@
 #author: wangyanliang
 #date: August 18, 2015
 
+arch=ARM64
 platform=D02
 distro=Ubuntu
+ubuntu=y
+opensuse=n
+fedora=n
