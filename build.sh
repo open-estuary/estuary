@@ -440,6 +440,10 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
     if [ x"D02" = x"$PLATFORM" ] && [ -f $BINARY_DIR/CH02TEVBC_V03.bin ]; then
         cp $BINARY_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
     fi
+    
+    if [ x"D01" = x"$PLATFORM" ] && [ -f $BINARY_DIR/.filesystem ]; then
+        cp $BINARY_DIR/.filesystem $binary_dir/
+    fi
 fi
 
 ###################################################################################
@@ -555,6 +559,18 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 fi
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
+fi
+
+###################################################################################
+################## Build boot-wrapper binary from source code   ###################
+###################################################################################
+if [ x"D01" = x"$PLATFORM" ]; then
+    WRAPPER_DIR=boot-wrapper
+    wrapper_dir=$build_dir/$WRAPPER_DIR
+
+    pushd $WRAPPER_DIR
+	#export CROSS_COMPILE=$CROSS 
+    popd
 fi
 
 ###################################################################################
@@ -730,7 +746,8 @@ if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
 	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
 
     if [ x"D01" = x"$PLATFORM" ] && [ -f $kernel_dir/.kernel ]; then
-        cp $kernel_dir/.kernel $binary_dir/
+            cp $kernel_dir/.kernel $binary_dir/
+        fi
     fi
 fi
 if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then

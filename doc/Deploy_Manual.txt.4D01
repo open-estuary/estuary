@@ -12,6 +12,8 @@ Bring up System
     Boot via PXE
     Boot via NORFLASH with NFS as rootfs
     Boot via NORFLASH with SATA as rootfs
+    Boot via EFI-STUB
+    Boot via GRUB
     KVM on D01
 
 ### Introduction ###
@@ -38,7 +40,7 @@ All following sections will take the D01 board as example, other boards have the
 
 ### Show & change kernel cmdline in UEFI ###
 
-    1. Boot D01 and enter EBL (UEFI shell).
+    1. Boot D01 and enter UEFI EBL.
 
         We will often do some commands UEFI EBL after here, about how to enter it, please refer to UEFI_Manual.txt.
 
@@ -48,7 +50,7 @@ All following sections will take the D01 board as example, other boards have the
     3. Use changelinuxatag to change kernel cmdline to this
         >  changelinuxatag
            ...
-           console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
+           console=ttyS0,115200 initrd=0x10d00000,0x18000000 rdinit=/linuxrc earlyprintk
            ...
     4. Use setlinuxatag to save comandline to FLASH
         > setlinuxatag
@@ -61,7 +63,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via NORFLASH
     
-    Boot D01 to UEFI SHELL, and type the follow commands in EBL:
+    Boot D01 to UEFI EBL, and type the follow commands in EBL:
 
     1. IP address config
     
@@ -85,7 +87,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     4. Change command line as follows according to "Show & change kernel cmdline in UEFI"
 
-        console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
+        console=ttyS0,115200 initrd=0x10d00000,0x18000000 rdinit=/linuxrc earlyprintk
     
     5. Reboot the board.
     
