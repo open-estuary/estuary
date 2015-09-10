@@ -529,8 +529,10 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 			git checkout open-estuary/master
 			git apply HwPkg/Patch/*.patch
 			export LC_CTYPE=C 
+            make -C BaseTools clean
 			make -C BaseTools 
 			source edksetup.sh 
+            build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc cleanall
 			build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 	
 	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
