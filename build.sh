@@ -441,8 +441,8 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
         cp $BINARY_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
     fi
     
-    if [ x"D01" = x"$PLATFORM" ] && [ -f $BINARY_DIR/.filesystem ]; then
-        cp $BINARY_DIR/.filesystem $binary_dir/
+    if [ x"D01" = x"$PLATFORM" ] && [ -f $BINARY_DIR/default.filesystem ]; then
+        cp $BINARY_DIR/default.filesystem $binary_dir/.filesystem
     fi
 fi
 
