@@ -5,12 +5,22 @@
 
 export LANG=C
 
+wyl_debug=y
 en_shield=y
+
+PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
+PATH_OPENSUSE64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse.img.tar.gz
+PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
+PATH_FEDORA64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
+PATH_OPENSUSE32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse32.img.tar.gz
+PATH_UBUNTU32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu32.img.tar.gz
+
 # Determine the absolute path to the executable
 # EXE will have the PWD removed so we can concatenate with the PWD safely
 PWD=`pwd`
 EXE=$(echo $0 | sed "s/.*\///")
 EXEPATH="$PWD"/"$EXE"
+echo "wyl-trace -> $PWD $EXE $EXEPATH"
 clear
 cat << EOM
 
@@ -39,6 +49,7 @@ fi
 THEPWD=$EXEPATH
 PARSEPATH=`echo $THEPWD | grep -o -E 'estuary'`
 
+echo "wyl-trace -> PARSEPATH="$PARSEPATH
 
 if [ "$PARSEPATH" != "" ] ; then
 PATHVALID=1
@@ -54,16 +65,30 @@ do
     name=`echo $line | awk -F '=' '{print $1}'`
     value=`echo $line | awk -F '=' '{print $2}'`
     case $name in
+        "arch")
+        TARGET_ARCH=$value
+        ;;
         "platform")
         build_PLATFORM=$value
         ;;
         "distro")
         build_DISTRO=$value
         ;;
+        "ubuntu")
+        ubuntu_en=$value
+        ;;
+        "opensuse")
+        opensuse_en=$value
+        ;;
+        "fedora")
+        fedora_en=$value
+        ;;
         *)
         ;;
     esac
 done < config
+echo "wyl-trace -> platform="$build_PLATFORM
+echo "wyl-trace -> distro="$build_DISTRO
 
 #Precentage function
 untar_progress ()
@@ -108,11 +133,13 @@ check_for_udisk()
 
 populate_2_partitions() {
     ENTERCORRECTLY="0"
+    echo "wyl-trace -> build_PLATFORM=$build_PLATFORM,build_DISTRO=$build_DISTRO"
 	
     while [ $ENTERCORRECTLY -ne 1 ]
 	do
 		#read -e -p 'Enter path where USB disk tarballs were downloaded : '  TARBALLPATH
         TARBALLPATH="$PWD"/"udisk_images"
+		echo "wyl-trace -> TARBALLPATH=$TARBALLPATH"
         echo ""
 		ENTERCORRECTLY=1
 		if [ -d $TARBALLPATH ]
@@ -198,10 +225,38 @@ EOM
         cp -a ../binary/Image rootfs/sys_setup/boot
         cp -a ../binary/hip05-d02.dtb rootfs/sys_setup/boot
         
-        TOTALSIZE=`sudo du -c ../build/$build_PLATFORM/distro/$build_DISTRO/*.img | grep total | awk {'print $1'}`
-        cp -af ../build/$build_PLATFORM/distro/$build_DISTRO/*.img rootfs/sys_setup/distro &
-        cp_progress $TOTALSIZE rootfs/sys_setup/distro
-        
+        #TOTALSIZE=`sudo du -c ../distro/*.tar.gz | grep total | awk {'print $1'}`
+        #cp -af ../distro/*.tar.gz rootfs/sys_setup/distro &
+        #cp_progress $TOTALSIZE rootfs/sys_setup/distro
+
+if [ "0" = "1" ]; then
+        if [ "$ubuntu_en" = "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
+            cp -a distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
+        fi
+        if [ "$fedora_en" = "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
+            cp -a distro/$build_PLATFORM/fedora$TARGET_ARCH/fedora"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
+        fi
+        if [ "$opensuse_en" = "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
+            cp -a distro/$build_PLATFORM/opensuse$TARGET_ARCH/opensuse"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
+        fi
+fi
+
+        if [ "$ubuntu_en" = "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
+            cp -a ../distro/Ubuntu_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
+        fi
+        if [ "$fedora_en" = "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
+            cp -a ../distro/Fedora_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
+        fi
+        if [ "$opensuse_en" = "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
+            cp -a ../distro/OpenSuse_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
+        fi
+
         cp -a sys_setup.sh rootfs/sys_setup/bin
         cp -a functions.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
@@ -226,13 +281,16 @@ EOM
 
 # find the avaible SD cards
 ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-9`
+echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 if [ "$ROOTDRIVE" = "root" ]; then
     ROOTDRIVE=`readlink /dev/root | cut -c1-3`
 else
     ROOTDRIVE=`echo $ROOTDRIVE | cut -c1-3`
 fi
+echo "wyl-trace -> ROOTDRIVE = $ROOTDRIVE"
 
 PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
+echo "wyl-trace -> PARTITION_TEST = $PARTITION_TEST"
 # Check for available mounts
 check_for_udisk
 
@@ -319,6 +377,7 @@ if [ "$NUM_OF_DRIVES" != "0" ]; then
         echo "Unmounting the $DEVICEDRIVENAME drives"
 		c=`cat /proc/partitions | grep -v 'sda' | grep "$DEVICEDRIVENAME." | grep -n '' | awk '{print $5}' | cut -c4`
 		START_OF_DRIVES=$c
+		echo "wyl-trace -> c = $c"
         for ((; c<"$NUM_OF_DRIVES" + "$START_OF_DRIVES"; c++ ))
         do
                 unmounted=`df | grep '\<'$DEVICEDRIVENAME$P$c'\>' | awk '{print $1}'`
@@ -473,6 +532,7 @@ cat << EOM
 
 ################################################################################
 EOM
+echo "wyl-trace -> DEVICESIZE="$DEVICESIZE
 partition_size=$(($DEVICESIZE/1000-1024))
 cmd_str="parted $DRIVE mkpart rootfs 256M ${partition_size}M"
 echo -n "make root partition by "$cmd_str
@@ -508,7 +568,7 @@ if [ ! -d binary ]
 then
     # Make sure that the build.sh file exists
     if [ -f $PWD/estuary/build.sh ]; then
-        $PWD/estuary/build.sh -p $build_PLATFORM -d $build_DISTRO
+        $PWD/estuary/build.sh -p $build_PLATFORM -d Ubuntu
         echo "execute build.sh"
     else
         echo "build.sh does not exist in the directory"
@@ -517,6 +577,7 @@ then
 fi
 popd
 
+echo "wyl-trace -> build pwd=$PWD"
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
 do
@@ -537,7 +598,104 @@ then
     mkdir $PWD/tmp 2> /dev/null
     mkdir -p tmp/boot/EFI/GRUB2 2> /dev/null
     mkdir -p tmp/distro 2> /dev/null
+    mkdir -P $PWD/distro/$build_PLATFORM 2> /dev/null
 
+if [ "0" == "1" ]; then
+    if [ "$ubuntu_en" = "y" ]; then
+        if [ ! -d $PWD/distro/$build_PLATFORM/ubuntu$TARGET_ARCH ]; then
+            mkdir $PWD/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
+            pushd distro/$build_PLATFORM/ubuntu$TARGET_ARCH
+            # Check the postfix name
+            ubuntu_source=PATH_UBUNTU$TARGET_ARCH
+            tmp_path=${!ubuntu_source}
+            postfix=${tmp_path#*.tar} 
+            if [ x"$postfix" = x"$tmp_path" ]; then
+                postfix=${tmp_path##*.} 
+            else
+                if [ x"$postfix" = x"" ]; then
+                    postfix=".tar"
+                else
+                    postfix="tar"$postfix	
+                fi
+            fi
+            #wget -P distro/$build_PLATFORM/ubuntu -c $DISTRO_SOURCE
+            wget -O ubuntu"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
+            chmod 777 ubuntu"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
+            unset ubuntu_source
+            unset tmp_path
+            unset postfix
+            popd
+        fi
+    fi
+
+    if [ "$fedora_en" = "y" ]; then
+        if [ ! -d $PWD/distro/$build_PLATFORM/fedora$TARGET_ARCH ]; then
+            mkdir $PWD/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
+            pushd distro/$build_PLATFORM/fedora$TARGET_ARCH
+            # Check the postfix name
+            fedora_source=PATH_FEDORA$TARGET_ARCH
+            tmp_path=${!fedora_source}
+            postfix=${tmp_path#*.tar} 
+            if [ x"$postfix" = x"$tmp_path" ]; then
+                postfix=${tmp_path##*.} 
+            else
+                if [ x"$postfix" = x"" ]; then
+                    postfix=".tar"
+                else
+                    postfix="tar"$postfix	
+                fi
+            fi
+            wget -O fedora"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
+            chmod 777 fedora"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
+            unset fedora_source
+            unset tmp_path
+            unset postfix
+            popd
+        fi
+    fi
+
+    if [ "$opensuse_en" = "y" ]; then
+        if [ ! -d $PWD/distro/$build_PLATFORM/opensuse$TARGET_ARCH ]; then
+            mkdir $PWD/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
+            pushd distro/$build_PLATFORM/opensuse$TARGET_ARCH
+            # Check the postfix name
+            opensuse_source=PATH_OPENSUSE$TARGET_ARCH
+            tmp_path=${!opensuse_source}
+            postfix=${tmp_path#*.tar} 
+            if [ x"$postfix" = x"$tmp_path" ]; then
+                postfix=${tmp_path##*.} 
+            else
+                if [ x"$postfix" = x"" ]; then
+                    postfix=".tar"
+                else
+                    postfix="tar"$postfix	
+                fi
+            fi
+            wget -O opensuse"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
+            chmod 777 opensuse"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
+            unset opensuse_source
+            unset tmp_path
+            unset postfix
+            popd
+        fi
+    fi
+fi
+
+    if [ "$fedora_en" = "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+        fi
+        popd
+    fi
+
+    if [ "$opensuse_en" = "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
+        fi
+        popd
+    fi
     rootfs_dev2=${DRIVE}${P}2
     rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
     touch tmp/grub.cfg
