@@ -13,3 +13,4 @@ Change list for Estuary V2.0:
 9. Pubished the latest UEFI source code for D02 and eanbled building UEFI from source code directly.
 10. Add functionality test in Caliper.
 11. Upgraded UEFI to add PCIE scaning.
+12. Move most documents into project directly, you can get them in build/<platform>/doc directory.
