@@ -189,7 +189,7 @@ There are several methods to bring up system, you can select following anyone fi
 # Boot via USB
 
     This part will tell you how to boot D02 via GRUB on USB disk. In my case, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
-    1.Partition and format USB disk
+    1. Partition and format USB disk
     Format USB disk: mkfs -t ext4 /dev/sda
     Partition USB disk as follow:
     +---------+-----------+--------------+------------------+
@@ -221,7 +221,7 @@ There are several methods to bring up system, you can select following anyone fi
     formate EFI partition  : mkfs.vfat /dev/sda1
     formate ubuntu distribution partition: mkfs -t ext4 /dev/sda2
 
-    2.Related files are placed as follow:
+    2. Related files are placed as follow:
 
         sda1: -------EFI
               |       |
@@ -235,7 +235,7 @@ There are several methods to bring up system, you can select following anyone fi
         sda2: ubuntu distribution
     Note: The names of grub files archaa64.efi is the same name with filename item in DHCP configure file /etc/dhcp/dhcpd.conf.
 
-    3.modify grub config file
+    3. modify grub config file
     And the context of grub.cfg file is as follow:
 
     #
@@ -255,15 +255,15 @@ There are several methods to bring up system, you can select following anyone fi
 
     Note: If you want to use another linux distribution, please refer above steps.
 
-    4.Reboot and enter UEFI menu
-    5.Select boot from USB disk
-    6.select the USB selection of grub boot menu
+    4. Reboot and enter UEFI menu
+    5. Select boot from USB disk
+    6. select the USB selection of grub boot menu
 
 # Boot via SAS
 
     Note: For now, D02 board don't still support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
 
-    1.Partition SAS disk in nfs evironment
+    1. Partition SAS disk in nfs evironment
     SAS disk may be partitioned into fews parts:
     +---------+-----------+--------------+------------------+
     | Name    |   Size    |    Type      |   Tag            |
@@ -285,16 +285,16 @@ There are several methods to bring up system, you can select following anyone fi
         sda4: miniDistribution
         sda5: reserved for user
 
-    2.Build the kernel
+    2. Build the kernel
     modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
     bootargs = "rdinit=/init root=PARTUUID=XXX rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp"
     Note: XXX means the PARTUUID of that partition which your linux distribution is located in. 
     After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to Deploy_Manual.txt file.
 
-    3.start up system
+    3. start up system
     Firstly,please plug this SAS disk into D02 board.
-    (1)boot and enter UEFI menu
-    (2)Select boot from FLASH Start OS
+    (1) boot and enter UEFI menu
+    (2) Select boot from FLASH Start OS
 
 # Boot via ACPI
     
