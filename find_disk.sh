@@ -2,7 +2,6 @@
 
 #set -x
 
-wyl_debug=y
 en_shield=y
 declare -a disk_list
 export disk_list=
@@ -108,7 +107,6 @@ echo "final root device " ${root_id} ${root_dev}
 
 ##filter out the current root disk..
 CUR_RTDEV=""
-echo "wyl-trace -> root_dev = $root_dev"
 if [ "$root_dev" != "nfs" ]; then
 	CUR_RTDEV=$( echo ${root_dev} | sed 's,[0-9]\+,,g')
 	echo "root disk in using is "$CUR_RTDEV
@@ -199,22 +197,18 @@ part_list_idx=0
 #disk_list[0]=$(echo ${disk_list[0]} | sed 's/*[ \t\n]//')
 declare -a nonboot_part
 
-echo "wyl-trace -> disk_list[0] : ${disk_list[0]}"
 if [ -z "$CUR_RTDEV" ]; then
-	echo "wyl-trace -> CUR_RTDEV = $CUR_RTDEV is null"
 	read -a nonboot_part <<< $(sudo parted /dev/${disk_list[0]} print |\
 		awk '$1 ~ /[0-9]+/ {print $1}' | sort)
 else
 	#for non-nfs, only one root-disk, or not less than two disks. For one root-disk, if we choose it, then 
 	#disk_list[0] is it; for multiple disks, the root-disk will not be in disk_list[].
-	echo "wyl-trace -> CUR_RTDEV = $CUR_RTDEV is not null"
 	#read -a nonboot_part <<< $(sudo parted /dev/${disk_list[0]} print |\
 	#	awk '$1 ~ /[0-9]+/ && ! /boot/ {print $1}' | sort)
 	read -a nonboot_part <<< $(sudo parted /dev/${disk_list[0]} print |\
 		awk '$1 ~ /[0-9]+/ {print $1}' | sort)
 fi
 
-echo "wyl-trace -> nonboot_part = ${nonboot_part[*]}"
 
 for part_idx in ${nonboot_part[*]}; do
 	echo "current partition index "${part_idx}
@@ -240,7 +234,6 @@ unset part_idx
 part_name[(( part_list_idx++ ))]="all"
 part_name[part_list_idx]="exit"
 
-echo "wyl-trace -> ${part_name[*]}"
 
 assert_flag=""
 
@@ -253,7 +246,6 @@ then
 echo "Please choose the partition to be removed:"
 select part_tormv in "${part_name[@]}"; do
 	echo "select input "$part_tormv
-	echo "wyl-trace -> REPLY="$REPLY
 	if [ "$part_tormv" == "all" ]; then
 		echo "all the partitions listed above will be deleted"
 	elif [ "$part_tormv" == "exit" ]; then
@@ -283,10 +275,8 @@ fi
 
 echo "sel_idx "$sel_idx "part_list count:"${#part_list[@]} "part_list[0] :"${part_list[0]}
 ind=0
-echo "wyl-trace -> part_list[ind]"${part_list[ind]}
 if [ $sel_idx != $(( ${#part_list[@]} + 1 )) ]; then
 if [ $sel_idx == ${#part_list[@]} ]; then
-	echo "wyl-trace -> sel_idx == #part_list[@]"
 	while [ -v part_list[ind] ]; do
 		cmd_str="sudo parted "/dev/"${disk_list[0]} rm ${part_list[ind]}"
 		echo "delete $ind "$cmd_str
@@ -366,7 +356,6 @@ if [ "$full_intallation" = "yes" ]; then
             sudo apt-get install dosfstools -y
             mkfs -t vfat /dev/${disk_list[0]}1
             #parted /dev/${disk_list[0]} mkfs 1 fat16
-            echo "wyl-trace -> mkpart uefi"$?
             [ $? ] || { echo "ERR::mkfs for boot partition FAIL"; exit; }
             #sudo parted /dev/${disk_list[0]} set 1 boot on
         fi
@@ -540,7 +529,6 @@ if [ -z "$boot_id" ]; then
 		sudo apt-get install dosfstools -y
 		mkfs -t vfat /dev/${disk_list[0]}1
 		#parted /dev/${disk_list[0]} mkfs 1 fat16
-        echo "wyl-trace -> mkpart uefi"$?
 		[ $? ] || { echo "ERR::mkfs for boot partition FAIL"; exit; }
 		#sudo parted /dev/${disk_list[0]} set 1 boot on
 	fi
