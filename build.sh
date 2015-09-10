@@ -497,6 +497,8 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
         exit 1
     fi
     export PATH=$PATH:`pwd`/$UEFI_TOOLS
+    # Let UEFI detect the arch automatically
+    export ARCH=
 
 	echo "Build UEFI..."
 
