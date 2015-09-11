@@ -312,6 +312,10 @@ if [ x"" = x"$arm_gcc" ]; then
 fi
 CROSS=`pwd`/${arm_gcc%g*}
 export PATH=${CROSS%/*}:$PATH
+if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
+	export CROSS_COMPILE=$CROSS 
+fi
+
 echo "Cross compiler is $CROSS"
 
 ###################################################################################
@@ -571,6 +575,8 @@ if [ x"D01" = x"$PLATFORM" ]; then
 
     pushd $WRAPPER_DIR
 	#export CROSS_COMPILE=$CROSS 
+    #echo $CROSS_COMPILE
+    #make
     popd
 fi
 
@@ -688,10 +694,6 @@ fi
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
     echo "Build kernel..."
     mkdir -p "$kernel_dir" 2> /dev/null
-
-	if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
-		export CROSS_COMPILE=$CROSS 
-	fi
 
 	pushd $KERNEL_DIR/
 	
