@@ -261,7 +261,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via SAS
 
-    Note: For now, D02 board don't still support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
+    So far, D02 board don't still support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
 
     1. Partition SAS disk in nfs evironment
     SAS disk may be partitioned into fews parts:
@@ -286,14 +286,18 @@ There are several methods to bring up system, you can select following anyone fi
         sda5: reserved for user
 
     2. Build the kernel
-    modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
-    bootargs = "rdinit=/init root=PARTUUID=XXX rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp"
-    Note: XXX means the PARTUUID of that partition which your linux distribution is located in. 
+    (1) Modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
+        bootargs = "rdinit=/init root=PARTUUID=XXX rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp"
+        Note: XXX means the PARTUUID of that partition which your linux distribution is located in. 
+    (2) Modify defconfig file at kernel/arch/arm64/configs directory as follow:
+        CONFIG_SCSI_HISI_SAS=y
+        CONFIG_ATA=m
     After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to Deploy_Manual.txt file.
 
     3. start up system
-    Firstly,please plug this SAS disk into D02 board.
-    (1) boot and enter UEFI menu
+    Please plug this SAS disk into D02 board.
+    Note: At this time, Other Disk (eg: SATA disk, USB disk) can not be pluged into D02 board.  
+    (1) Boot and enter UEFI menu
     (2) Select boot from FLASH Start OS
 
 # Boot via ACPI
