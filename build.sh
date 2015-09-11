@@ -215,7 +215,7 @@ fi
 ###################################################################################
 ############################# Setup host environmenta #############################
 ###################################################################################
-automake --version | grep 'automake (GNU automake) 1.11' > /dev/null 2>&1
+automake --version >/dev/null 2>&1 | grep 'automake (GNU automake) 1.11' >/dev/null
 if [ x"$?" = x"1" ]; then
 	sudo apt-get remove -y --purge automake*
 fi
