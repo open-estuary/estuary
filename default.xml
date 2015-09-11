@@ -29,8 +29,8 @@
   <!-- grub -->
   <project name="grub" remote="grub" />
 
-  <!-- boot-wrapper -->
-  <project name="boot-wrapper" remote="boot-wrapper" />
+  <!-- bootwrapper -->
+  <project name="bootwrapper" remote="bootwrapper" />
 
   <!-- caliper -->
   <project name="caliper" />

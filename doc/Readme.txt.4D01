@@ -30,9 +30,9 @@ build commands(supposedly, you are in <project root> currently:
 
 ### .text ###
 ### .monitor ###
-description: boot wrapper files
-target: <project>/build/D01/boot-wrapper/
-source: <project>/boot-wrapper
+description: boot wrapper files to take responsible of switching into HYP mode.
+target: <project root>/build/D01/bootwrapper/
+source: <project root>/bootwrapper
     export CROSS_COMPILE=arm-linux-gnueabihf-
     make
 

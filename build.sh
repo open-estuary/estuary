@@ -60,7 +60,7 @@ usage()
 check_distro()
 {
 	if [ x"QEMU" = x"$PLATFORM" ]; then
-		for dis in ${distros[@]}; do
+		for dis in ${distros_d02[@]}; do
 			if [ x"$dis" = x"$1" ]; then 
 				DISTRO=$1
 				return
@@ -567,18 +567,33 @@ if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -
 fi
 
 ###################################################################################
-################## Build boot-wrapper binary from source code   ###################
+##################  Build bootwrapper binary from source code   ###################
 ###################################################################################
 if [ x"D01" = x"$PLATFORM" ]; then
-    WRAPPER_DIR=boot-wrapper
+    WRAPPER_DIR=bootwrapper
     wrapper_dir=$build_dir/$WRAPPER_DIR
 
-    pushd $WRAPPER_DIR
-	#export CROSS_COMPILE=$CROSS 
-#    echo "!!!!!!!!!!!!!!!!!!!!!!!!!"
-#    echo $CROSS_COMPILE
-#    make
-    popd
+    if [ ! -d "$wrapper_dir" ] ; then 
+    	mkdir -p "$wrapper_dir" 2> /dev/null
+	fi
+
+    if [ ! -f $wrapper_dir/.text ]; then
+        echo "Build boot wrapper..."
+        pushd $WRAPPER_DIR
+        make clean
+        make
+        popd
+    fi
+
+    if [ -f $WRAPPER_DIR/.text ]; then
+        cp $WRAPPER_DIR/.text $wrapper_dir/
+        cp $WRAPPER_DIR/.text $binary_dir/
+    fi
+
+    if [ -f $WRAPPER_DIR/.monitor ]; then
+        cp $WRAPPER_DIR/.monitor $wrapper_dir/
+        cp $WRAPPER_DIR/.monitor $binary_dir/
+    fi
 fi
 
 ###################################################################################
@@ -853,9 +868,7 @@ if [ x"" != x"$PLATFORM" ]; then
     echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
     echo "Of course, you can also find all original binaries in follows:"
     
-    if [ x"QEMU" = x"$PLATFORM" ]; then
-    	echo "UEFI is not necessary for QEMU."
-    else
+    if [ x"QEMU" != x"$PLATFORM" ]; then
     	if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
     		echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
     	else
@@ -863,14 +876,20 @@ if [ x"" != x"$PLATFORM" ]; then
     	fi
     fi
     
-    if [ x"QEMU" = x"$PLATFORM" ]; then
-    	echo "grub is not necessary for QEMU."
-    else
+    if [ x"QEMU" != x"$PLATFORM" ]; then
     	if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
     		echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
     	else
     		echo -e "\033[31mFailed! grub         can not be found!\033[0m"
     	fi
+    fi
+
+    if [ x"D01" = x"$PLATFORM" ]; then
+        if [ -f $wrapper_dir/.text ] && [ -f $wrapper_dir/.monitor ]; then
+		    echo -e "\033[32mBoot wrapper is in $wrapper_dir.\033[0m"
+	    else
+		    echo -e "\033[31mFailed! Boot wrapper can not be found!\033[0m"
+        fi
     fi
     
     if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
@@ -889,14 +908,12 @@ if [ x"" != x"$PLATFORM" ]; then
     	fi
     fi
     
-    if [ x"" != x"$DISTRO" ]; then
-		if [ -f $DISTRO_DIR/$image ]; then
-    		echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
-    	else
-    		echo -e "\033[31mFailed! Distribution can not be found!\033[0m"
-    	fi
-	fi
-    
+    if [ x"" != x"$DISTRO" ] && [ -f $DISTRO_DIR/$image ]; then
+		echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
+	else
+		echo -e "\033[31mFailed! Distribution can not be found!\033[0m"
+    fi
+
     if [ -f $toolchain_dir/$GCC64 ]; then
     	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
     else
