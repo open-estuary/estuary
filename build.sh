@@ -218,6 +218,7 @@ fi
 automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
 if [ x"$?" = x"1" ]; then
 	sudo apt-get remove -y --purge automake*
+    rm -rf ".initialized"
 fi
 
 if [ ! -f ".initialized" ]; then
