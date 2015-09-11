@@ -405,7 +405,8 @@ fi
 ##########  Download prebuilt binaries based on md5 checksum file    ##############
 ###################################################################################
 BINARY_DIR=binary
-BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v1.2
+#BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v2.0
+BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.0
 binarysum_file="binaries.sum"
 binarydl_result=0
 
