@@ -30,7 +30,7 @@
   <project name="grub" remote="grub" />
 
   <!-- bootwrapper -->
-  <project name="bootwrapper" remote="bootwrapper" />
+  <project name="bootwrapper" />
 
   <!-- caliper -->
   <project name="caliper" />
