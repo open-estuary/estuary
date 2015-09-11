@@ -704,15 +704,15 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     if [ x"ARM32" = x"$TARGETARCH" ]; then
 		make O=../$kernel_dir hisi_defconfig
 
-		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
-		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
 
 		make O=../$kernel_dir -j14 zImage
 		make O=../$kernel_dir hip04-d01.dtb
