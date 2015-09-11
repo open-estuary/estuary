@@ -1,7 +1,7 @@
 24717efff9087e7e7c5bcf1e4ccdea47  bl1.bin
 fb9e2cba06ac589a3963eb6d1a3ae223  CH02TEVBC_V03.bin
 8ce72d76a810dced9f446e56f13bb2c1  default.filesystem
-fb17c948164c3c4a9be8387c83c43dd9  default.kernel
+59bfb01df297f2399bb882dc3da5f760  default.kernel
 ed9aa1fcaa1e00a7aca2acbe1639a24a  fip.bin
 1197ac8f9b95df2f72cf36f82d016508  grubaa64.efi
 75a892dcea0b90a6004694ca0ef1eb61  grubarm32.efi
@@ -12,4 +12,4 @@ ed9aa1fcaa1e00a7aca2acbe1639a24a  fip.bin
 7e6491fc899e58b48944020d8aedd477  mini-rootfs.cpio.gz
 4c676ecd4de4db3b14dc2305ca1c07a8  UEFI_D01.fd
 1a2c2f32705a88ed3ccbabb58b117623  UEFI_D02.fd
-d5378201f7aeadf76361d674c27217b4  zImage_D01
+dcd9b21ff29e041ed9ed8f5feb690f7c  zImage_D01

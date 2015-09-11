@@ -575,8 +575,9 @@ if [ x"D01" = x"$PLATFORM" ]; then
 
     pushd $WRAPPER_DIR
 	#export CROSS_COMPILE=$CROSS 
-    #echo $CROSS_COMPILE
-    #make
+#    echo "!!!!!!!!!!!!!!!!!!!!!!!!!"
+#    echo $CROSS_COMPILE
+#    make
     popd
 fi
 
