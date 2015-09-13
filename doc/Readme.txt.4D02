@@ -1,5 +1,10 @@
 This is the readme file for D02 platform
 
+Obove all, you need install some applications firstly as follows:
+sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool li
+bc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-esse
+ntial iasl gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
+
 After you do "./estuary/build.sh -p D02 -d Ubuntu", all targets files will be produced into <project root>/build/D02 directory, they are:
 
 ### UEFI_D02.fd ###
