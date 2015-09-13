@@ -223,7 +223,7 @@ fi
 
 if [ ! -f ".initialized" ]; then
 	sudo apt-get update
-    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential
+    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl
     if [ x"$?" = x"0" ]; then
         touch ".initialized"
     fi
