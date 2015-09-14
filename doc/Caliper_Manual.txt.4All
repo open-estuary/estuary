@@ -2,8 +2,6 @@ Caliper Benchmarking
 
 Table of Contents
 
-    What is Caliper?
-    How Caliper works?
     How to Use Caliper?
         Work Mode
             Environment Installation
@@ -27,12 +25,6 @@ Table of Contents
             6. ‘compute the score’ for the benchmark
             7. Generate the yaml file
 
-What is Caliper?
-
-Caliper is a test suite focused on functional integrity and performance evaluation of boards, it not only detects if the hardware and software of the board can work well, but also tests the performance. Caliper can be run on boards to get test data, then converse the test data to scores by a series of formulas. Then the test data can be easily to read. Thereby caliper intuitively presents various performance values and shows the performance gaps of the boards. Caliper’s ultimate goals: one is that it can generate a series of test data which provides inputs for specific boards optimization; the other is, to help to analyze the functional stability and performance of software solution (especially Estuary and Harmonic) on hardware platforms..
-How Caliper works?
-
-Caliper mainly builds on the existing open source benchmarks and test suites. It can be divided into the following parts: functional testing and performance testing, each of them is known as a “System Test Item”. Caliper’s functional testing mainly use the LTP (Linux Test Project), which contains a lot of tests focused on systems’ functions and features. Caliper’s performance assessment includes the following aspects: real-time, CPU, memory, network, file system and so on; any aspect referred above is called “Test Sub-Items” herein. When Caliper test a Test Sub-Items, it needs to test many meaningful evaluable items which constitute the Test Sub-Item, this kind of evaluable items are called “Test Points” (such as the delay of the network, and so on). Small granularity division of a Test Point is a “Test Case”, which is the minimum unit.
 How to Use Caliper?
 
 The test suite mainly includes performance test cases, it can be used to test the performance of machine, and now we have not integrated many functional tests. The test suite can run on Linux, the machines can belong to x86_64, arm_32, arm_64. Here is steps to setup testbed.
