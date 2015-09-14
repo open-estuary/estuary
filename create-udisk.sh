@@ -214,38 +214,37 @@ EOM
         mkdir -p rootfs/sys_setup/distro 2> /dev/null
         mkdir -p rootfs/sys_setup/bin 2> /dev/null
 
-        cp -a ../binary/grub* rootfs/sys_setup/boot/EFI/GRUB2
-        cp -a ../binary/Image rootfs/sys_setup/boot
-        cp -a ../binary/hip05-d02.dtb rootfs/sys_setup/boot
+        cp -a ../build/$build_PLATFORM/binary/grubaa64* rootfs/sys_setup/boot/EFI/GRUB2
+        cp -a ../build/$build_PLATFORM/binary/Image_$build_PLATFORM rootfs/sys_setup/boot/Image
+        cp -a ../build/$build_PLATFORM/binary/hip05-d02.dtb rootfs/sys_setup/boot
         
-        #TOTALSIZE=`sudo du -c ../distro/*.tar.gz | grep total | awk {'print $1'}`
-        #cp -af ../distro/*.tar.gz rootfs/sys_setup/distro &
-        #cp_progress $TOTALSIZE rootfs/sys_setup/distro
 
-if [ "0" = "1" ]; then
-        if [ "$ubuntu_en" = "y" ]; then
+if [ "0" == "1" ]; then
+        if [ "$ubuntu_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
-            cp -a distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
+            cp -af distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
         fi
-        if [ "$fedora_en" = "y" ]; then
+        if [ "$fedora_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
             cp -a distro/$build_PLATFORM/fedora$TARGET_ARCH/fedora"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
         fi
-        if [ "$opensuse_en" = "y" ]; then
+        if [ "$opensuse_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
             cp -a distro/$build_PLATFORM/opensuse$TARGET_ARCH/opensuse"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
         fi
 fi
 
-        if [ "$ubuntu_en" = "y" ]; then
+        if [ "$ubuntu_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
-            cp -a ../distro/Ubuntu_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
+            TOTALSIZE=`sudo du -c ../distro/Ubuntu_"$TARGET_ARCH".tar.gz | grep total | awk {'print $1'}`
+            cp -af ../distro/Ubuntu_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH &
+            cp_progress $TOTALSIZE rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
         fi
-        if [ "$fedora_en" = "y" ]; then
+        if [ "$fedora_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
             cp -a ../distro/Fedora_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
         fi
-        if [ "$opensuse_en" = "y" ]; then
+        if [ "$opensuse_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
             cp -a ../distro/OpenSuse_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
         fi
@@ -254,6 +253,7 @@ fi
         cp -a functions.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
         cp -a config rootfs/sys_setup/bin
+        cp -a post_install.sh rootfs/sys_setup/bin
 
         touch rootfs/etc/profile.d/antoStartUp.sh
         chmod a+x rootfs/etc/profile.d/antoStartUp.sh
@@ -552,7 +552,7 @@ EOM
 
 
 pushd ..
-if [ ! -d binary ]
+if [ ! -d build/$build_PLATFORM/binary ]
 then
     # Make sure that the build.sh file exists
     if [ -f $PWD/estuary/build.sh ]; then
@@ -588,7 +588,7 @@ then
     mkdir -P $PWD/distro/$build_PLATFORM 2> /dev/null
 
 if [ "0" == "1" ]; then
-    if [ "$ubuntu_en" = "y" ]; then
+    if [ "$ubuntu_en" == "y" ]; then
         if [ ! -d $PWD/distro/$build_PLATFORM/ubuntu$TARGET_ARCH ]; then
             mkdir $PWD/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
             pushd distro/$build_PLATFORM/ubuntu$TARGET_ARCH
@@ -615,7 +615,7 @@ if [ "0" == "1" ]; then
         fi
     fi
 
-    if [ "$fedora_en" = "y" ]; then
+    if [ "$fedora_en" == "y" ]; then
         if [ ! -d $PWD/distro/$build_PLATFORM/fedora$TARGET_ARCH ]; then
             mkdir $PWD/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
             pushd distro/$build_PLATFORM/fedora$TARGET_ARCH
@@ -641,7 +641,7 @@ if [ "0" == "1" ]; then
         fi
     fi
 
-    if [ "$opensuse_en" = "y" ]; then
+    if [ "$opensuse_en" == "y" ]; then
         if [ ! -d $PWD/distro/$build_PLATFORM/opensuse$TARGET_ARCH ]; then
             mkdir $PWD/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
             pushd distro/$build_PLATFORM/opensuse$TARGET_ARCH
@@ -700,16 +700,16 @@ set default=ubuntu_usb
 # For booting GNU/Linux
 menuentry "Ubuntu USB" --id ubuntu_usb {
 	set root=(hd0,gpt1)
-	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=:::::eth0:dhcp
+	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
 	devicetree /hip05-d02.dtb
 }
 EOM
 
-    cp -a ../binary/grub* tmp/boot/EFI/GRUB2
+    cp -a ../build/$build_PLATFORM/binary/grub* tmp/boot/EFI/GRUB2
     rm -f tmp/boot/EFI/GRUB2/grub.cfg
-    mv tmp/grub.cfg tmp/boot/EFI/GRUB2/
-    cp -a ../binary/Image tmp/boot
-    cp -a ../binary/hip05-d02.dtb tmp/boot
+    mv tmp/grub.cfg tmp/boot/
+    cp -a ../build/$build_PLATFORM/binary/Image_$build_PLATFORM tmp/boot/Image
+    cp -a ../build/$build_PLATFORM/binary/hip05-d02.dtb tmp/boot
     pushd tmp/boot
     tar -czf boot.tar.gz ./*
     popd

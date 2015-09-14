@@ -262,6 +262,12 @@ select part_tormv in "${part_name[@]}"; do
 done
 fi
 
+cat << EOM
+##############################################################################
+    Right now, the default installation will be finished.
+##############################################################################
+EOM
+
 wait_user_choose "all partitions of this Hard Disk will be deleted?" "y|n"
 
 if [ "$assert_flag" == "y" ]; then
@@ -397,7 +403,6 @@ if [ "$full_intallation" = "yes" ]; then
         sudo rm -rf rootfs/*
 
         sudo cp -a /sys_setup/boot/* boot/
-        rm -f boot/EFI/GRUB2/grub.cfg
         touch tmp/grub.cfg
 cat > tmp/grub.cfg << EOM
 #
@@ -413,11 +418,11 @@ set default=ubuntu_sata
 # For booting GNU/Linux
 menuentry "Ubuntu SATA" --id ubuntu_sata {
 	set root=(hd1,gpt1)
-	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=:::::eth0:dhcp
+	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
 	devicetree /hip05-d02.dtb
 }
 EOM
-        mv tmp/grub.cfg boot/EFI/GRUB2/
+        mv tmp/grub.cfg boot/
         tar -xzf /sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/Ubuntu_"$TARGET_ARCH".tar.gz -C rootfs/
         ubuntu_username=""
         read -p "Please input the username which you want to create in ubuntu system :" ubuntu_username
@@ -433,6 +438,10 @@ EOM
             [ $? ] || { echo "WARNING:: create username FAIL"; }
         fi
         unset ubuntu_username
+
+        cp -a /sys_setup/bin/post_install.sh rootfs/etc/profile.d/
+        chmod a+x rootfs/etc/profile.d/post_install.sh
+        sudo touch rootfs/home/estuary_init
         
         sudo umount boot rootfs
         sudo rm -rf boot rootfs tmp
