@@ -188,7 +188,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via USB
 
-    This part will tell you how to boot D02 via GRUB on USB disk. In my case, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
+    This part will tell you how to boot D02 via GRUB from USB disk. For example, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
     1. Partition and format USB disk
     Format USB disk: mkfs -t ext4 /dev/sda
     Partition USB disk as follow:
@@ -233,7 +233,6 @@ There are several methods to bring up system, you can select following anyone fi
               |
               |-------------hip05-d02.dtb      //device tree binary
         sda2: ubuntu distribution
-    Note: The names of grub files archaa64.efi is the same name with filename item in DHCP configure file /etc/dhcp/dhcpd.conf.
 
     3. modify grub config file
     And the context of grub.cfg file is as follow:
@@ -249,11 +248,13 @@ There are several methods to bring up system, you can select following anyone fi
 
     menuentry "ubuntu" --id ubuntu {
         set root=(hd0,gpt1)
-        linux /Image rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
         devicetree /hip05-d02.dtb
     }
 
-    Note: If you want to use another linux distribution, please refer above steps.
+    Note: 
+    1. XXX means the PARTUUID of that partition which your linux distribution is located in. 
+    2. If you want to use another linux distribution, please refer above steps.
 
     4. Reboot and enter UEFI menu
     5. Select boot from USB disk
@@ -261,7 +262,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via SAS
 
-    So far, D02 board don't still support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
+    So far, D02 board still don't support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
 
     1. Partition SAS disk in nfs evironment
     SAS disk may be partitioned into fews parts:
@@ -296,7 +297,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     3. start up system
     Please plug this SAS disk into D02 board.
-    Note: At this time, Other Disk (eg: SATA disk, USB disk) can not be pluged into D02 board.  
+    Note: At this time, Other Disk (eg: SATA disk, USB disk) can not connect to D02 board.  
     (1) Boot and enter UEFI menu
     (2) Select boot from FLASH Start OS
 
