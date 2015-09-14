@@ -24,19 +24,19 @@
   <project name="uefi" />
 
   <!-- patches -->
-  <project name="patches" />
+  <project name="patches" revision="refs/tags/estuary-v2.0" />
 
   <!-- grub -->
   <project name="grub" remote="grub" />
 
   <!-- bootwrapper -->
-  <project name="bootwrapper" />
+  <project name="bootwrapper" revision="refs/tags/estuary-v2.0" />
 
   <!-- caliper -->
   <project name="caliper" />
   
   <!-- tools -->
-  <project name="tools" />
+  <project name="tools" revision="refs/tags/estuary-v2.0" />
 
   <!-- toolchain -->
   <!-- project path="toolchain" name="estuary-toolchain" revision="refs/tags/estuary-v1.0" groups="linaro" / -->
