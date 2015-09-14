@@ -434,13 +434,24 @@ EOM
             echo `cat /etc/passwd | grep "$ubuntu_username"` >> rootfs/etc/passwd
             echo `cat /etc/group | grep "$ubuntu_username"` >> rootfs/etc/group
             echo `cat /etc/shadow | grep "$ubuntu_username"` >> rootfs/etc/shadow
+            echo `cat /etc/shadow | grep "$ubuntu_username"` >> rootfs/etc/shadow
+            echo "$ubuntu_username	ALL=(ALL:ALL) ALL" >> rootfs/etc/sudoers
             userdel -r $ubuntu_username
             [ $? ] || { echo "WARNING:: create username FAIL"; }
         fi
         unset ubuntu_username
 
-        cp -a /sys_setup/bin/post_install.sh rootfs/etc/profile.d/
-        chmod a+x rootfs/etc/profile.d/post_install.sh
+        touch rootfs/etc/profile.d/antoStartUp.sh
+        chmod a+x rootfs/etc/profile.d/antoStartUp.sh
+cat > rootfs/etc/profile.d/antoStartUp.sh << EOM
+#!/bin/bash
+
+pushd /home
+sudo ./post_install.sh
+popd
+EOM
+        cp -a /sys_setup/bin/post_install.sh rootfs/home/
+        chmod a+x rootfs/home/post_install.sh
         sudo touch rootfs/home/estuary_init
         
         sudo umount boot rootfs
