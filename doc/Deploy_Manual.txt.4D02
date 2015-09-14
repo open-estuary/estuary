@@ -10,7 +10,7 @@ Bring up System
     Boot via NORFLASH
     Boot via PXE
     Boot via NFS
-    Boot via SATA
+    Boot via HD
         Preprocess when the disk can’t be identified
     boot via USB
     boot via SAS
@@ -113,17 +113,17 @@ There are several methods to bring up system, you can select following anyone fi
 
     4. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.
 
-# Boot via SATA
+# Boot via HD
     
-    This part will tell you how to boot D02 via SATA disk with kernel image, dtb file, grub in it.
-    In my case, my SATA disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
+    This part will tell you how to boot D02 via hardware disk with kernel image, dtb file, grub in it.
+    In my case, my hardware disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
     
     1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
 
-    2. Part and format SATA disk
+    2. Part and format hardware disk
 
-    Format SATA disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
-    Partition SATA disk with "sudo fdisk /dev/sda" as follow:
+    Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Part hardware disk with "sudo fdisk /dev/sda" as follow:
     
     +---------+-----------+--------------+------------------+
     | Name    |   Size    |    Type      |   Tag            |
@@ -163,7 +163,7 @@ There are several methods to bring up system, you can select following anyone fi
         
         Then this disk can be identified by D02 board.
     
-    3. Download files and store them into SATA as below.
+    3. Download files and store them into hardware disk as below.
         sda1: -------EFI
               |       |
               |       GRUB2------grubaa64.efi  //grub binary file
@@ -297,7 +297,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     3. start up system
     Please plug this SAS disk into D02 board.
-    Note: At this time, Other Disk (eg: SATA disk, USB disk) can not connect to D02 board.  
+    Note: At this time, Other Disk (eg: SATA\SAS disk, USB disk) can not connect to D02 board.  
     (1) Boot and enter UEFI menu
     (2) Select boot from FLASH Start OS
 

@@ -11,7 +11,7 @@ Bring up System
     Boot via NORFLASH
     Boot via PXE
     Boot via NORFLASH with NFS as rootfs
-    Boot via NORFLASH with SATA as rootfs
+    Boot via NORFLASH with HD as rootfs
     Boot via EFI-STUB
     Boot via GRUB
     KVM on D01
@@ -136,17 +136,17 @@ There are several methods to bring up system, you can select following anyone fi
 
     3. Reboot the board. 
 
-# Boot via NORFLASH with SATA as rootfs
+# Boot via NORFLASH with HD as rootfs
     
-    This part will tell you how to boot D01 via SATA disk with ".kernel" image stored in NORFLASH.
-    In my case, my SATA disk only has one partition: sda1(Ubuntu rootfs).
+    This part will tell you how to boot D01 via hardware disk with ".kernel" image stored in NORFLASH.
+    In my case, my hardware disk only has one partition: sda1(Ubuntu rootfs).
     
     1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
 
-    2. Part and format SATA disk
+    2. Part and format hardware disk
 
-    Format SATA disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
-    Partition SATA disk with "sudo fdisk /dev/sda" as follow:
+    Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Partition hardware disk with "sudo fdisk /dev/sda" as follow:
     
     +---------+-----------+--------------+------------------+
     | Name    |   Size    |    Type      |   Tag            |
@@ -178,9 +178,9 @@ There are several methods to bring up system, you can select following anyone fi
 
     1. Rebuild kernel to produce zImage_D01 with "EFI-STUB" option
 
-    2. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
+    2. Part and format the hardware disk firstly just like above section "Boot via NORFLASH with HD as rootfs".
 
-    3. Download the corresponding files from FTP server and store them into SATA as below.
+    3. Download the corresponding files from FTP server and store them into hardware disk as below.
         sda1: |-------------zImage_D01         //kernel binary Image for D01
               |
               |-------------hip04-d01.dtb      //device tree binary for D01
@@ -200,9 +200,9 @@ There are several methods to bring up system, you can select following anyone fi
     Then the board will boot from kernel with EFI-stub.
 
 # Boot via GRUB
-    1. Part and format the SATA disk firstly just like above section "Boot via NORFLASH with SATA as rootfs".
+    1. Part and format the hardware disk firstly just like above section "Boot via NORFLASH with HD as rootfs".
 
-    3. Download the corresponding files from ftp and store them into SATA as below.
+    3. Download the corresponding files from ftp and store them into hardware disk as below.
         sda1: |-------------grubarm32.efi      //grub binary file for ARM32 architecture
               |
               |-------------grub.cfg           //grub config file
