@@ -9,23 +9,25 @@ These are the release notes for the Estuary new version. Please read them carefu
   Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
   More detail information about Estuary, please refer to http://open-estuary.com/estuary.
 
-2. Obtain and Build
+2. Obtain and build
 ================
-  How to obtain the whole solution and how to use it, please refer to http://open-estuary.com/estuary-download.
+  To obtain and build system, please refer to http://open-estuary.com/estuary-user-manual/.
 
 3. Deployment
 ================
-  How to qucikly deploy and try it, please refer to http://open-estuary.com/quick-start.
-  How to completely deploy the system into target boards, please refer to http://open-estuary.com/estuary-setup-guide.
+  More detail information about deployment, please refer to documents in "<project root>/build/<platform>/doc" directory after building.
 
-4. Contact us
+4. Prebuilt binaries
+  To use prebuilt binaries directly, please refer to http://open-estuary.com/estuary-download.
+
+5. Contact us
 ================
   About the technical support, you can contact us by http://open-estuary.com/contact-us.
 
-5.Change list compared with previous version
+6.Change list compared with previous version
   Please refer to "changelist.txt" in this project.
 
-6. TODO
+7. TODO
 ================
   Further more platforms will be supported in the esturay.
   More detail information about estuary, please refer to

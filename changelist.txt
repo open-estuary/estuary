@@ -3,14 +3,18 @@ Change list for Estuary V2.0:
 2. Enable Quick Start Deployment solution by USB disk.
 3. Integrated latest drivers: PCIE, XGE, SAS.
 4. Move all git repositories and documentations to new position.
-	Repositories: https://github.com/open-estuary
-	Website: http://www.open-estuary.com
+	a. Repositories: https://github.com/open-estuary
+	b. Website: http://www.open-estuary.com (IE11, Chrome 44, Firefox 40 are recommended.)
 5. Validated & supported more distributions: OpenSuse, Debian.
 6. Improved Ubuntu distribution to be more stable.
 7. Largely improved the efficiency of build.sh 
 8. Enabled building grub from source code directly.
 	Must mv grub.cfg file to root directory in boot partition on SATA.
 9. Pubished the latest UEFI source code for D02 and eanbled building UEFI from source code directly.
-10. Add functionality test in Caliper.
+10. Upgraded Caliper project.
+    a. Add compile, unzip, java scimark and ebizzy test cases.
+    b. Add funtional showing in the frontend, and fix some bugs
+    c. Add crash handle part for target
+    d. Add the feature to support the specified output directory and specified config files
 11. Upgraded UEFI to add PCIE scaning.
 12. Move most documents into project directly, you can get them in build/<platform>/doc directory.
