@@ -18,10 +18,10 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project name="kernel" />
+  <project name="kernel" revision="refs/tags/estuary-v2.0" />
 
   <!-- uefi -->
-  <project name="uefi" />
+  <project name="uefi" revision="refs/tags/estuary-v2.0" />
 
   <!-- patches -->
   <project name="patches" revision="refs/tags/estuary-v2.0" />
@@ -33,7 +33,7 @@
   <project name="bootwrapper" revision="refs/tags/estuary-v2.0" />
 
   <!-- caliper -->
-  <project name="caliper" />
+  <project name="caliper" revision="refs/tags/estuary-v2.0" />
   
   <!-- tools -->
   <project name="tools" revision="refs/tags/estuary-v2.0" />
