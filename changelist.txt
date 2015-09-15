@@ -17,4 +17,9 @@ Change list for Estuary V2.0:
     c. Add crash handle part for target
     d. Add the feature to support the specified output directory and specified config files
 11. Upgraded UEFI to add PCIE scaning.
+    a. Remove GE4 and keep only GE5 on UEFI, to avoid confusion with 2 NICs.
+    b. Re-enable PCI Express link up for port 1 and 2 (According to PCI Express slots on the board).
+    c. Fix PXE timeout issue.
+    d. Re-enable showbrdnum and setbrdnum commands on EBL.
+    e. Fix several other bugs.
 12. Move most documents into project directly, you can get them in build/<platform>/doc directory.
