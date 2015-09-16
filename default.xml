@@ -27,7 +27,8 @@
   <project name="patches" />
 
   <!-- grub -->
-  <project name="grub" remote="grub" />
+  <!-- project name="grub" remote="grub" / -->
+  <project name="grub" />
 
   <!-- bootwrapper -->
   <project name="bootwrapper" />
@@ -45,7 +46,8 @@
   <!-- project path="distro" name="estuary-distro" revision="refs/tags/estuary-v1.0" / -->
 
   <!-- qemu -->
-  <project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" />
+  <!-- project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" / -->
+  <project name="qemu" />
 
   <!-- estuary -->
   <project name="estuary" />
