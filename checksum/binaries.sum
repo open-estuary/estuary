@@ -12,7 +12,6 @@ ed9aa1fcaa1e00a7aca2acbe1639a24a  fip.bin
 871837d35e2ebd2e95a3f07ed0e81eb0  hip05-d02.dtb
 46468e97468aa8d84c7bb8b773f48068  Image_D02
 7e6491fc899e58b48944020d8aedd477  mini-rootfs.cpio.gz
-f0579a01e73b52076842090a1e0e975d  Readme.txt
 4c676ecd4de4db3b14dc2305ca1c07a8  UEFI_D01.fd
 1a2c2f32705a88ed3ccbabb58b117623  UEFI_D02.fd
 dcd9b21ff29e041ed9ed8f5feb690f7c  zImage_D01
