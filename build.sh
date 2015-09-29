@@ -860,6 +860,23 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	done
 fi
 
+###################################################################################
+###################### Download, Build, and/or install Armor Tools ####################
+###################################################################################
+ARMOR_DIR=armor
+armor_dir=$build_dir/$ARMOR_DIR
+
+    echo "Building Armor Tools..."
+    rm -rf $armor_dir
+
+    cp -rf $ARMOR_DIR $build_dir
+    pushd $armor_dir
+    cd testing/build_scripts/
+    sh build_armor_tools_int01.sh dmidecode $cross_gcc
+    # TODO copy binary to the RFS
+    # cp ../source/dmidecode/dmidecode ...  
+    cd -
+    popd
 
 ###################################################################################
 ########################## Check and report build resutl   ########################
@@ -963,7 +980,13 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	fi
 fi
 
-###################################################################################
+# Armor report
+if [ -d  $ARMOR_DIR ] ; then
+    echo -e "\033[32m Armor tools files successfully downloded and built\033[0m"
+else
+    echo -e "\033[31mFailed! Armor tools can not be found!\033[0m"
+fi
+#################################################################################
 ################ Build QEMU and start it if platform is QEMU   ####################
 ###################################################################################
 if [ x"QEMU" = x"$PLATFORM" ]; then
