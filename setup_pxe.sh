@@ -37,7 +37,7 @@ EOF
 
 entry_header
 
-packages_to_install="isc-dhcp-server syslinux apache2 tftpd-hpa tftp-hpa lftp openbsd-inetd inetutils-inetd nfs-kernel-server build-essential libncurses5-dev"
+packages_to_install="isc-dhcp-server syslinux apache2 tftpd-hpa tftp-hpa lftp inetutils-inetd nfs-kernel-server build-essential libncurses5-dev openbsd-inetd"
 
 cmd="sudo apt-get install "
 
@@ -105,6 +105,9 @@ do
         ;;
         "fedora")
         fedora_en=$value
+        ;;
+        "nfs_server")
+        nfs_server=$value
         ;;
         *)
         ;;
@@ -184,8 +187,13 @@ menuentry "minilinux" --id minilinux {
         devicetree /wangyanliang/hip05-d02.dtb
 }
 menuentry "ubuntu" --id ubuntu {
-        set root=(tftp,192.168.3.211)
-        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/wangyanliang/ubuntu ip=192.168.1.156:192.168.1.107:192.168.1.1:255.255.255.0::eth0:dhcp
+        set root=(tftp,$nfs_server)
+        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=$nfs_server:/targetNFS ip=::::::dhcp
+       devicetree /hip05-d02.dtb
+}
+menuentry "ubuntu_bk" --id ubuntu_bk {
+        set root=(tftp,192.168.3.102)
+        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.3.102:/targetNFS ip=192.168.3.156:192.168.3.102:192.168.3.1:255.255.255.0:::dhcp
        devicetree /hip05-d02.dtb
 }
 menuentry "opensuse" --id opensuse {
@@ -300,7 +308,6 @@ echo
 if [ -f $tftpcfg ]; then
     echo "$tftpcfg already exists.."
     tmp=\"$tftproot\"
-    #Use = instead of == for POSIX and dash shell compliance
     if [ "`cat $tftpcfg | grep TFTP_DIRECTORY | cut -d= -f2 | sed 's/^[ ]*//'`" \
           = "$tmp" ]; then
         echo "$tftproot already exported for TFTP, skipping.."
@@ -337,5 +344,110 @@ sleep 1
 sudo service isc-dhcp-server start
 sudo service openbsd-inetd start
 sudo service tftpd-hpa start
+check_status
+echo "--------------------------------------------------------------------------------"
+
+
+sudo apt-get install nfs-kernel-server
+sudo apt-get install rpcbind
+dstdefault=/targetNFS
+
+echo "--------------------------------------------------------------------------------"
+echo "In which directory do you want to install the target filesystem?(if this directory does not exist it will be created)"
+read -p "[ $dstdefault ] " dst
+
+if [ ! -n "$dst" ]; then
+    dst=$dstdefault
+fi
+echo "--------------------------------------------------------------------------------"
+
+echo
+echo "--------------------------------------------------------------------------------"
+echo "This step will extract the target filesystem to $dst"
+echo
+echo "Note! This command requires you to have administrator priviliges (sudo access) "
+echo "on your host."
+read -p "Press return to continue" REPLY
+
+extract_fs() {
+    fstar=`ls -1 udisk_images/udisk_*.tar.gz`
+    me=`whoami`
+    sudo mkdir -p $1
+    check_status
+    sudo tar -xzf $fstar -C $1
+    check_status
+    sudo chown $me:$me $1
+    check_status
+    sudo chown -R $me:$me $1/home $1/usr $1/etc $1/lib $1/boot
+    check_status
+
+    # Opt isn't a standard Linux directory. First make sure it exist.
+    if [ -d $1/opt ];
+    then
+            sudo chown -R $me:$me $1/opt
+            check_status
+    fi
+
+    echo
+    echo "Successfully extracted `basename $fstar` to $1"
+}
+
+if [ -d $dst ]; then
+    echo "$dst already exists"
+    echo "(r) rename existing filesystem (o) overwrite existing filesystem (s) skip filesystem extraction"
+    read -p "[r] " exists
+    case "$exists" in
+      s) echo "Skipping filesystem extraction"
+         echo "WARNING! Keeping the previous filesystem may cause compatibility problems if you are upgrading the SDK"
+         ;;
+      o) sudo rm -rf $dst
+         echo "Old $dst removed"
+         extract_fs $dst
+         ;;
+      *) dte="`date +%m%d%Y`_`date +%H`.`date +%M`"
+         echo "Path for old filesystem:"
+         read -p "[ $dst.$dte ]" old
+         if [ ! -n "$old" ]; then
+             old="$dst.$dte"
+         fi
+         sudo mv $dst $old
+         check_status
+         echo
+         echo "Successfully moved old $dst to $old"
+         extract_fs $dst
+         ;;
+    esac
+else
+    extract_fs $dst
+fi
+echo $dst > $cwd/../.targetfs
+echo "--------------------------------------------------------------------------------"
+
+platform=`grep platform= $cwd/estuary.cfg | cut -d= -f2`
+echo
+echo "--------------------------------------------------------------------------------"
+echo "This step will export your target filesystem for NFS access."
+echo
+echo "Note! This command requires you to have administrator priviliges (sudo access) "
+echo "on your host."
+read -p "Press return to continue" REPLY
+
+grep $dst /etc/exports > /dev/null
+if [ "$?" -eq "0" ]; then
+    echo "$dst already NFS exported, skipping.."
+else
+    sudo chmod 666 /etc/exports
+    check_status
+    sudo echo "$dst *(rw,nohide,insecure,no_subtree_check,async,no_root_squash)" >> /etc/exports
+    check_status
+    sudo chmod 644 /etc/exports
+    check_status
+fi
+
+echo
+sudo /etc/init.d/nfs-kernel-server stop
+check_status
+sleep 1
+sudo /etc/init.d/nfs-kernel-server start
 check_status
 echo "--------------------------------------------------------------------------------"
