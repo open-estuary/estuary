@@ -73,7 +73,7 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
     2. IP address config:
 
     ifconfig -s eth0 <IP address> <mask> <gateway>
-    eg. ifconfig -s eth0 192.168.10.155 255.255.255.0 192.168.10.1
+    eg. ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1
     
     3. Download BootWrapper binary from FTP server
         
