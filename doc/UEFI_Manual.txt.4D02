@@ -54,7 +54,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
     provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
     # Write the data into NORFLASH
     updatecpld <target address>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f CH02_TEVBC_V03.bin -a 100000
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 100000
           updatecpld 100000
     
     d. Burn files for Trust Firmware
