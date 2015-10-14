@@ -40,9 +40,9 @@ All following sections will take the D01 board as example, other boards have the
 
 ### Show & change kernel cmdline in UEFI ###
 
-    1. Boot D01 and enter UEFI EBL.
+    1. Boot D01 to enter UEFI "EBL".
 
-        We will often do some commands UEFI EBL after here, about how to enter it, please refer to UEFI_Manual.txt.
+        We will often do some commands UEFI "EBL" after here, about how to enter it, please refer to UEFI_Manual.txt.
 
     2. Use getlinuxatag to see current kernel parameter
         > getlinuxatag
@@ -63,7 +63,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via NORFLASH
     
-    Boot D01 to UEFI EBL, and type the follow commands in EBL:
+    Boot D01 to UEFI "EBL", and type the following commands in "EBL":
 
     1. IP address config
     
@@ -100,9 +100,9 @@ There are several methods to bring up system, you can select following anyone fi
 
     Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
 
-    2. Reboot and enter UEFI EBL.
+    2. Reboot and enter UEFI "Boot Menu".
 
-    Do follows in UEF EBL:
+    Do follows in UEF "Boot Menu":
         2      #Boot Manager
         1      #Add Boot Device Entry
         3      #PXE on MAC Address:...
@@ -164,7 +164,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     To get different distributions, please refer to Distributions_Guider.txt.
     
-    4. Reboot and enter UEFI EBL Shell.
+    4. Reboot and enter UEFI "EBL" Shell.
 
     5. Change kernel cmdline as follow according to "Show & change kernel cmdline in UEFI"
     
