@@ -91,13 +91,9 @@ Normally they are placed into bootable partition as following structure.
 |       |
 |       GRUB2------grubaa64.efi # grub binary file only for ARM64 architecture
 |
-|------boot
-|       |
-|       grub-------grub.cfg     # grub config file for grubarm32.efi
-|
 |-------------grubarm32.efi     # grub binary file only for ARM32 architecture
 |
-|-------------grub.cfg          # grub config file for grubaa64.efi
+|-------------grub.cfg          # grub config file
 |
 |-------------Image_D02         # kernel Image file only for D02 platform
 |
