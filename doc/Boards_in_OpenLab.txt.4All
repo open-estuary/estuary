@@ -60,9 +60,10 @@ scp hip05-d02.dtb XXXX@htsat.vicp.cc:~/ftp/
 
 Edit the grub confige file
 
-As you log in the host through ssh, the system will create a default config file(grub.conf) for you.Once use the command board_connect successfully, it will replace the board’s grub.cfg that the “config” file linked to. Therefore, you can edit the grub.conf file to add you own information.
+As you log in the host through ssh, the system will create a default config file(grub.cfg) for you.
+Once use the command board_connect successfully, it will replace the board’s grub.cfg that the “config” file linked to. Therefore, you can edit the grub.cfg file to add you own information.
 
-vim grub.conf
+vim grub.cfg
 
 2. Access the board
 
@@ -92,7 +93,7 @@ provision 192.168.1.107 -u username -p password -f ftp/XXXX.bin -a 100000
 
 2) After finish using the board, we suggest you to quit the telnet connection as well as the ssh connection.
 
-press “ctrl+]” and input “quit” to quit the telnet connection
+press "ctrl+]" and input "quit" to quit the telnet connection
 
 3) If there is no activity on the telnet connection in 10 minitues, the connection will disconnect.
 

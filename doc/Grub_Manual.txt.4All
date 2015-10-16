@@ -78,10 +78,10 @@ You should change them acoording to your real local environment.
     # Booting from NFS with Ubuntu rootfs
     menuentry "D01 Ubuntu NFS" --id d01_ubuntu_nfs {
         devicetree (hd0,msdos1)/hip04-d01.dtb
-        linux (hd0,msdos1)/zImage_D01 console=ttyS0,115200 earlyprintk rootfstype=nfsroot root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu32 ip=192.168.1.39:192.168.1.1::255.255.255.0::eth0:on:192.168.1.1:8.8.8.8 
+        linux (hd0,msdos1)/zImage_D01 console=ttyS0,115200 earlyprintk rootfstype=nfsroot root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu32 ip=dhcp 
     }
 
-Note: You should only select the parts from above sample which is suitable for you platform.
+Note: You should only select the parts from above sample which are suitable for your real situation.
 
 ### files structure bootable partition ###
 
@@ -103,8 +103,7 @@ Normally they are placed into bootable partition as following structure.
 |
 |-------------hip04-d01.dtb     # kernel data tree binary file only for D01 platform
 
-In fact, the position of kernel image and dtb should be consistent with the configurations in grub.cfg as above.
-
-In case of booting by PXE mode:
+Note: In case of booting by PXE mode:
     1. The gurb binary and grub.cfg files must be placed in the TFTP root directory.
     2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
+    3. The grub binary name (grubxxx.efi) must be consistent with the "filename" in /etc/dhcp/dhcpd.conf, for more detail, please refer to Setup_PXE_Env_on_Host.txt.

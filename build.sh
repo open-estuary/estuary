@@ -884,59 +884,79 @@ armor_dir=$build_dir/$ARMOR_DIR
 echo ""
 echo -e "\033[32m==========================================================================\033[0m"
 if [ x"" != x"$PLATFORM" ]; then
-    echo -e "\033[32mBuilding completed! Most binaries can be found in $binary_dir direcory.\033[0m"
-    echo "Of course, you can also find all original binaries in follows:"
+    echo "Building completed!"
+    #echo "Of course, you can also find all original binaries in follows:"
     
+    build_error=0
     if [ x"QEMU" != x"$PLATFORM" ]; then
     	if [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ]; then
-    		echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
+    		#echo -e "\033[32mUEFI         is $uefi_bin.\033[0m"
+            true
     	else
     		echo -e "\033[31mFailed! UEFI         can not be found!\033[0m"
+            build_error=1
     	fi
     fi
     
     if [ x"QEMU" != x"$PLATFORM" ]; then
     	if [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ]; then
-    		echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
+    		#echo -e "\033[32mgrub         is $GRUB_BIN.\033[0m"
+            true
     	else
     		echo -e "\033[31mFailed! grub         can not be found!\033[0m"
+            build_error=1
     	fi
     fi
 
     if [ x"D01" = x"$PLATFORM" ]; then
         if [ -f $wrapper_dir/.text ] && [ -f $wrapper_dir/.monitor ]; then
-		    echo -e "\033[32mBoot wrapper is in $wrapper_dir.\033[0m"
+		    #echo -e "\033[32mBoot wrapper is in $wrapper_dir.\033[0m"
+            true
 	    else
 		    echo -e "\033[31mFailed! Boot wrapper can not be found!\033[0m"
+            build_error=1
         fi
     fi
     
     if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
-    	echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
+    	#echo -e "\033[32mkernel       is $KERNEL_BIN.\033[0m"
+        true
     else
     	echo -e "\033[31mFailed! kernel       can not be found!\033[0m"
+        build_error=1
     fi
     
     if [ x"QEMU" = x"$PLATFORM" ]; then
-    	echo "dtb is not necessary for QEMU."
+    	#echo "dtb is not necessary for QEMU."
+        true
     else
     	if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
-    		echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
+    		#echo -e "\033[32mdtb          is $DTB_BIN.\033[0m"
+            true
     	else
     		echo -e "\033[31mFailed! dtb          can not be found!\033[0m"
+            build_error=1
     	fi
     fi
     
     if [ x"" != x"$DISTRO" ] && [ -f $DISTRO_DIR/$image ]; then
-		echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
+		#echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
+        true
 	else
 		echo -e "\033[31mFailed! Distribution can not be found!\033[0m"
+        build_error=1
     fi
 
     if [ -f $toolchain_dir/$GCC64 ]; then
-    	echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
+    	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
+        true
     else
     	echo -e "\033[31mFailed! toolchain    can not be found!\033[0m"
+        build_error=1
+    fi
+
+    if [ $build_error = 0 ]; then
+        echo -e "\033[32mAll binaries are ready in $binary_dir.\033[0m"
     fi
 
     if [ -d $docdir ]; then    
@@ -946,19 +966,21 @@ if [ x"" != x"$PLATFORM" ]; then
         doc_result=1
     fi
 
-    if [ x"0" = x"$doc_result" ]; then
-    	echo -e "\033[32mDocuments    is in $doc_dir.\033[0m"
-    else
+    if [ x"0" != x"$doc_result" ]; then
     	echo -e "\033[31mFailed! Documents    can not be found!\033[0m"
+    else
+        if [ $build_error = 0 ]; then
+    	    echo -e "\033[32mPlease follow the instructions in $doc_dir/Readme.txt to use the binaries for your purpose.\033[0m"
+        fi
     fi
 fi
 
 # Binaries download report
-if [ x"0" = x"$binarydl_result" ]; then
-	echo -e "\033[32mPrebuilt Binaries are in $BINARY_DIR.\033[0m"
-else
-	echo -e "\033[31mFailed! Some Binaries ($binarydl_result) can not be found!\033[0m"
-fi
+#if [ x"0" = x"$binarydl_result" ]; then
+#	echo -e "\033[32mPrebuilt Binaries are in $BINARY_DIR.\033[0m"
+#else
+#	echo -e "\033[31mFailed! Some Binaries ($binarydl_result) can not be found!\033[0m"
+#fi
 
 # Install Caliper report
 if [ x"Caliper" = x"$INSTALL" ]; then

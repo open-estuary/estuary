@@ -17,29 +17,31 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
     All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
-#2. Boot board into UEFI SHELL
+#2. Boot board into UEFI Boot Menu and EBL
 
-    Follow below steps to enter UEFI EBL:
+    Follow below steps to enter UEFI "Boot Menu" and "EBL":
     
         a. Make sure Jumper J39 is in position 1 and 2.
             This means to use custom UEFI, If position 2 and 3 are connected, it will boot with the default UEFI, which could never be flashed.
         b. Connect the board's UART port to a host machine with a serial cable.
         c. Install a serial port application in host machine, e.g.: kermit or minicom.
         d. Config serial port setting:115200/8/N/1 on host machine.
-        e. Keep pressing ‘s’ in minicom or other serial port application to start UEFI Boot Menu.
+        e. Keep pressing ‘s’ in minicom or other serial port application to start UEFI "Boot Menu".
         f. Select "EBL" boot option and press "Enter".
             Type "help" to see all commands supported in EBL.
     
     Then the board will enter the UEFI SHELL mode.
 
 #3. Update UEFI files
-    a. IP address config:
+    a. Boot to enter UEFI "EBL" as above description
+
+    b. IP address config:
 
 	# Config IP address
     ifconfig -s eth0 <IP address> <mask> <gateway>
     eg. ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1
 
-    b. Burn BIOS file
+    c. Burn BIOS file
 
     # Download file from FTP server to board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary>
@@ -48,14 +50,14 @@ FTP protocol is used for downloading between hardware boards and local network. 
     e.g.: provision 192.168.1.107 -u sch -p aaa -f UEFI_D01.fd
           updateL1 UEFI_D01.fd
 
-    c. Power off and reboot board again
+    d. Power off and reboot board again
 
 ### Recover the UEFI when it broke ###
 
 Actually the board can restore two UEFI in case of the default one breaks, then you can restore it as following way:
     1. Power off the board, disconnect power supplier.
     2. Connect Pin 2 and Pin 3 of J39 (Leave Pin 1 unconnected)
-    3. Power on and enter UEFI SHELL again as above description.
+    3. Power on and enter UEFI "EBL" again as above description.
     4. Burn UEFI file for BIOS as above step3 "Update UEFI files".
     5. Power off the board, disconnect power supplier again.
     6. Connect Pin 1 and Pin 2 of J39 (Leave Pin 3 unconnected)
@@ -68,12 +70,12 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
 
 # Upgrade Bootwrapper
 
-    1. Boot D01 to UEFI shell with "EBL" boot option.
+    1. Boot D01 to enter UEFI "EBL" as above description.
 
     2. IP address config:
 
     ifconfig -s eth0 <IP address> <mask> <gateway>
-    eg. ifconfig -s eth0 192.168.10.155 255.255.255.0 192.168.10.1
+    eg. ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1
     
     3. Download BootWrapper binary from FTP server
         
