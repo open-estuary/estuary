@@ -48,7 +48,7 @@ build commands(supposedly, you are in <project root> currently:
         -append "console=ttyAMA0 root=/dev/vda rw" \
         -nographic
 
-More detail information about distributions, please refer to Distributions_Guider.txt
-More detail information about toolchains, please refer to Toolchains_Guider.txt
+More detail information about distributions, please refer to Distributions_Guide.txt
+More detail information about toolchains, please refer to Toolchains_Guide.txt
 More detail information about how to debug, analyse, diagnose system, please refer to Armor_Manual.txt
 More detail information about how to benchmark system, please refer to Caliper_Manual.txt
