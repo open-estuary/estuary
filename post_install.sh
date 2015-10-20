@@ -18,61 +18,61 @@ if [ "$INSTALL_ARMOR_TOOLS" = 'YES' ]; then
     case "$Distribution" in
         Ubuntu) #echo "Ubuntu Distribution"
             #INT01
-            apt-get install sysstat  # sar
-            apt-get install gdb  
-            apt-get install iptables  
+            apt-get install -y sysstat  # sar
+            apt-get install -y gdb  
+            apt-get install -y iptables  
            
             #INT02
-            apt-get install dstat  
-            apt-get install iotop  
-            apt-get install blktrace  
-            apt-get install nicstat  
-            apt-get install libconfig9  
-            apt-get install lldpad  
-            apt-get install oprofile  
-            apt-get install latencytop 
-            apt-get install systemtap  
-            apt-get install crash 
+            apt-get install -y  dstat  
+            apt-get install -y iotop  
+            apt-get install -y blktrace  
+            apt-get install -y nicstat  
+            apt-get install -y libconfig9  
+            apt-get install -y lldpad  
+            apt-get install -y oprofile  
+            apt-get install -y latencytop 
+            apt-get install -y systemtap  
+            apt-get install -y crash 
 	    #Install perf tool
-	    apt-get install linux-tools-3.19.0-23 
+	    apt-get install -y linux-tools-3.19.0-23 
             ;;
            
         Fedora) #echo "Fedora Distribution"
             #INT01
-            dnf install sysstat.aarch64 # sar
-            dnf install dmidecode.aarch64
-            dnf install tcpdump.aarch64
-            dnf install ethtool.aarch64
+            dnf install -y sysstat.aarch64 # sar
+            dnf install -y dmidecode.aarch64
+            dnf install -y tcpdump.aarch64
+            dnf install -y ethtool.aarch64
            
             #INT02
-            dnf install dstat
-            dnf install tiptop.aarch64
-            dnf install iotop.noarch
-            dnf install blktrace.aarch64
-            dnf install nicstat.aarch64
-            dnf install lldpad.aarch64
-            dnf install oprofile.aarch64
-            dnf install latencytop.aarch64
-            dnf install systemtap.aarch64
-            dnf install crash.aarch64
+            dnf install -y dstat
+            dnf install -y tiptop.aarch64
+            dnf install -y iotop.noarch
+            dnf install -y blktrace.aarch64
+            dnf install -y nicstat.aarch64
+            dnf install -y lldpad.aarch64
+            dnf install -y oprofile.aarch64
+            dnf install -y latencytop.aarch64
+            dnf install -y systemtap.aarch64
+            dnf install -y crash.aarch64
             ;;
          
         OpenSuse) #echo "OpenSuse Distribution"
             #INT01
-            zypper install ltrace
-            zypper install pcp-import-iostat2pcp # for sar, iostat etc.
-            zypper install dmidecode
-            zypper install strace
-            zypper install net-tools-deprecated
-            zypper install net-tools
+            zypper install -y ltrace
+            zypper install -y pcp-import-iostat2pcp # for sar, iostat etc.
+            zypper install -y dmidecode
+            zypper install -y strace
+            zypper install -y net-tools-deprecated
+            zypper install -y net-tools
             
             #INT02
-            zypper install dstat 
-            zypper install procps
-            zypper install iotop
-            zypper install blktrace
-            zypper install oprofile
-            zypper install systemtap
+            zypper install -y dstat 
+            zypper install -y procps
+            zypper install -y iotop
+            zypper install -y blktrace
+            zypper install -y oprofile
+            zypper install -y systemtap
             ;;
         esac
         echo "Finished installation of Armor tools packages" 
