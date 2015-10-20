@@ -20,6 +20,8 @@ if [ -z $post_install_flag ]; then
                apt-get install iptables  
            
                #INT02
+               apt-get install dstat  
+               apt-get install iotop  
                apt-get install blktrace  
                apt-get install nicstat  
                apt-get install libconfig9  
