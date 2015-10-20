@@ -29,7 +29,9 @@ if [ -z $post_install_flag ]; then
                apt-get install oprofile  
                apt-get install latencytop 
                apt-get install systemtap  
-               apt-get install crash  
+               apt-get install crash 
++	       #Install perf tool
++	       apt-get install linux-tools-3.19.0-23 
                ;;
            
            Fedora) #echo "Fedora Distribution"
