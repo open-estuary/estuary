@@ -1,9 +1,84 @@
-Armor Tools Edit
+
 Introduction
+============
 
 Armor tools covers all the platform tools for debug, diagnostics and monitoring which are available in Estuary solution.
 
- 
+Armor Release Version
+=====================
+Current Release Version- "armor-v1.0"
 
-/* We are building this page! */
+Information of Supported Armor Tools 
+===================================
+open-estuary/estuary/doc/Armor_Tools_Basic_Info.txt.4All -  the basic information of all the supported Armor tools. 
+
+openestuary/armor/testing/doc/README.perf - readme for LLC support in perf.
+
+Distributions
+=============
+Presently Armor tools are supported on the following distributions.
+
+Ubuntu 15.04 ARM64
+Fedora 22 ARM64
+OpenSuse 20150813 Tumbleweed ARM64
+
+Installation
+============
+1. Many of the Armor tolls are already present in the rootfs of open-estuary distributions.
+
+2. Some of the Armor tools are available as package in the distribution repo.
+   Those tool's packages can be installed using the installation commands added in the open-estuary/estuary/post_install.sh script.
+
+   Note 1: The following steps must be done for the successful Armor tool's package installation using the post_install.sh script.
+   Ubuntu: please update /etc/apt/sources.list file in the rfs with the right ubuntu repo paths and run 'apt-get update' command.
+   Fedora: run 'dnf update' command.
+   OpenSuse: run 'zypper update' command.
+
+   Note 2: By default Armor tool's package installation using the post_install.sh script is disabled.
+            To enable please uncomment the line INSTALL_ARMOR_TOOLS="YES".
+
+3. If the tools are not present either in distribution rootfs or as package,
+   then the tools binary built from source might added in the
+   https://github.com/open-estuary/armor/tree/master/testing/binary and can be installed.
+
+   These tool's binaries created as .deb package for Ubuntu or in .rpm package for Fedora/OpenSuse/RedHat or
+   as arm64 executable which can directly run.
+
+   How to install .deb packages on Ubuntu
+   dpkg -i DEB_PACKAGE
+
+   How to install .rpm packages on Fedora/OpenSuse
+   rpm -i RPM_PACKAGE
+
+
+How to run Tool's test scripts
+==============================
+
+1. Download the Armor project files from open-estuary repo either on host machine or on the terminal of your board(example - D02)
+   git clone https://github.com/open-estuary/armor
+   Note: The armor repo will be downloaded when you build open-estuary using build.sh. 
+
+2. Copy testing/test_scripts folder to your NFS for your board. 
+   OR
+   On the shell terminal, go to testing/test_scripts folder if you downloaded on your board.
+
+3. To test individual tools please run on the shell terminal
+    'sh test_<tool's name>.sh' -> to run test script of an armor tool.
+    For example, 'sh test_strace.sh' to run tests for strace.
+    The test results can be seen on the console.
+
+4. run command 'sh auto_test_armor_tools.sh'
+   This script will run the basic tests for the list of tools supported in Armor releases.
+
+
+Known Limitations/Issues
+========================
+
+1. dmidecode tool does not run on open-estuary distributions with the error "/dev/mem: Operation not permitted". 
+
+
+
+========================================= End =============================================
+
+
 
