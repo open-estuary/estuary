@@ -2,6 +2,7 @@
 
 #set -x
 
+wyl_debug=y
 en_shield=y
 declare -a disk_list
 export disk_list=
@@ -29,10 +30,13 @@ do
         "fedora")
         fedora_en=$value
         ;;
+        "target_system_type")
+        target_system_type=$value
+        ;;
         *)
         ;;
     esac
-done < config
+done < estuary.cfg
 
 if [ ! -o pipefail ]; then
 	set -o pipefail
@@ -372,6 +376,7 @@ if [ "$full_intallation" = "yes" ]; then
     rootfs_start=512
     rootfs_end=20
 
+
     if [ "$ubuntu_en" == "y" ]; then
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart ubuntu ${rootfs_start}M ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
@@ -389,40 +394,15 @@ if [ "$full_intallation" = "yes" ]; then
 
         #we always re-format the root partition
         mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
-    
-        rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
-        rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
-        sudo mkdir $PWD/boot
+        
+        
         sudo mkdir $PWD/rootfs
         sudo mkdir $PWD/tmp
 
-        sudo mount -t vfat /dev/${disk_list[0]}1 boot
         sudo mount -t ext3 /dev/${disk_list[0]}$NEWRT_IDX rootfs
 
-        sudo rm -rf boot/*
         sudo rm -rf rootfs/*
 
-        sudo cp -a /sys_setup/boot/* boot/
-        touch tmp/grub.cfg
-cat > tmp/grub.cfg << EOM
-#
-# Sample GRUB configuration file
-#
-
-# Boot automatically after 0 secs.
-set timeout=5
-
-# By default, boot the Euler/Linux
-set default=ubuntu_sata
-
-# For booting GNU/Linux
-menuentry "Ubuntu SATA" --id ubuntu_sata {
-	set root=(hd1,gpt1)
-	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
-	devicetree /hip05-d02.dtb
-}
-EOM
-        mv tmp/grub.cfg boot/
         tar -xzf /sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/Ubuntu_"$TARGET_ARCH".tar.gz -C rootfs/
         ubuntu_username=""
         read -p "Please input the username which you want to create in ubuntu system :" ubuntu_username
@@ -454,8 +434,13 @@ EOM
         chmod a+x rootfs/home/post_install.sh
         sudo touch rootfs/home/estuary_init
         
-        sudo umount boot rootfs
-        sudo rm -rf boot rootfs tmp
+        sudo umount rootfs
+        sudo rm -rf rootfs tmp
+        
+        if [ "$target_system_type" == "ubuntu" ]; then
+            rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
+            rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
+        fi
     fi
     if [ "$fedora_en" == "y" ]; then
     
@@ -483,6 +468,11 @@ EOM
         tar -xzf /sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH/Fedora_"$TARGET_ARCH".tar.gz -C rootfs/
         sudo umount rootfs
         sudo rm -rf rootfs
+        
+        if [ "$target_system_type" == "fedora" ]; then
+            rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
+            rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
+        fi
     fi
     if [ "$opensuse_en" == "y" ]; then
     
@@ -510,7 +500,39 @@ EOM
         tar -xzf /sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH/OpenSuse_"$TARGET_ARCH".tar.gz -C rootfs/
         sudo umount rootfs
         sudo rm -rf rootfs
+        
+        if [ "$target_system_type" == "opensuse" ]; then
+            rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
+            rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
+        fi
     fi
+
+    sudo mkdir $PWD/boot
+    sudo mount -t vfat /dev/${disk_list[0]}1 boot
+    sudo rm -rf boot/*
+    sudo cp -a /sys_setup/boot/* boot/
+cat > boot/grub.cfg << EOM
+#
+# Sample GRUB configuration file
+#
+
+# Boot automatically after 0 secs.
+set timeout=5
+
+# By default, boot the Euler/Linux
+set default=${target_system_type}_sata
+
+# For booting GNU/Linux
+menuentry "$target_system_type SATA" --id ${target_system_type}_sata {
+	set root=(hd1,gpt1)
+	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
+	devicetree /hip05-d02.dtb
+}
+EOM
+
+    sudo umount boot
+    sudo rm -rf boot
+
     exit 0
 else
 

@@ -5,6 +5,7 @@
 
 export LANG=C
 
+wyl_debug=y
 en_shield=y
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -47,7 +48,6 @@ fi
 THEPWD=$EXEPATH
 PARSEPATH=`echo $THEPWD | grep -o -E 'estuary'`
 
-
 if [ "$PARSEPATH" != "" ] ; then
 PATHVALID=1
 else
@@ -55,7 +55,7 @@ PATHVALID=0
 fi
 
 cat << EOM
-parsing config ...
+start to parse  estuary.cfg ...
 EOM
 while read line
 do
@@ -83,7 +83,7 @@ do
         *)
         ;;
     esac
-done < config
+done < estuary.cfg
 
 #Precentage function
 untar_progress ()
@@ -252,7 +252,7 @@ fi
         cp -a sys_setup.sh rootfs/sys_setup/bin
         cp -a functions.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
-        cp -a config rootfs/sys_setup/bin
+        cp -a estuary.cfg rootfs/sys_setup/bin
         cp -a post_install.sh rootfs/sys_setup/bin
 
         touch rootfs/etc/profile.d/antoStartUp.sh
@@ -668,15 +668,16 @@ if [ "0" == "1" ]; then
     fi
 fi
 
-    if [ "$fedora_en" = "y" ]; then
+    if [ "$fedora_en" == "y" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
-            $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+            #$PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+            echo ""
         fi
         popd
     fi
 
-    if [ "$opensuse_en" = "y" ]; then
+    if [ "$opensuse_en" == "y" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
