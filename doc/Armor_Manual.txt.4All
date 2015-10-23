@@ -10,9 +10,9 @@ Current Release Version- "armor-v1.0"
 
 Information of Supported Armor Tools 
 ===================================
-open-estuary/estuary/doc/Armor_Tools_Basic_Info.txt.4All -  the basic information of all the supported Armor tools. 
+- For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/armor-dev/doc/Armor_Tools_Basic_Info.txt.4All
 
-openestuary/armor/testing/doc/README.perf - readme for LLC support in perf.
+- Documentation for LLC support in perf https://github.com/open-estuary/armor/blob/master/testing/doc/README.perf
 
 Distributions
 =============
