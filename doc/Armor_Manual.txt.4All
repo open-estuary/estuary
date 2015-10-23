@@ -14,6 +14,8 @@ Information of Supported Armor Tools
 
 - Documentation for LLC support in perf https://github.com/open-estuary/armor/blob/master/testing/doc/README.perf
 
+- README for using KGDB and KDB please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.kgdb.kdb
+
 Distributions
 =============
 Presently Armor tools are supported on the following distributions.
