@@ -1,4 +1,7 @@
 #!/bin/bash
+#description: setup PXE environment for deploying estuary.
+#author: wangyanliang
+#date: October 19, 2015
 
 cwd=`dirname $0`
 . $cwd/common.sh
@@ -119,20 +122,19 @@ cat > dhcp_interface << EOM
 INTERFACES="eth0"
 EOM
 
+net_param=${nfs_server%.*}
 cat > /etc/dhcp/dhcpd.conf << EOM
 authoritative;
 default-lease-time 600;
 max-lease-time 7200;
-subnet 192.168.3.0 netmask 255.255.255.0 {
-    range 192.168.3.210 192.168.3.250;
+subnet ${net_param}.0 netmask 255.255.255.0 {
+    range ${net_param}.210 ${net_param}.250;
     option subnet-mask 255.255.255.0;
-    option domain-name-servers 192.168.3.1;
-    option routers 192.168.3.1;
+    option domain-name-servers ${net_param}.1;
+    option routers ${net_param}.1;
     option subnet-mask 255.255.255.0;
-    option broadcast-address 192.168.3.255;
+    option broadcast-address ${net_param}.255;
     filename "grubaa64.efi";
-    #next-server 192.168.3.100
-    #
 }
 EOM
 
@@ -175,8 +177,12 @@ else
     check_status
 fi
 sudo rm -f /var/lib/tftpboot/grub.cfg*
-read -p "[ Please input MAC address of D02 boards ] " grub_suffix
-
+mac_addr_list=`cat estuary.cfg | grep -e "^MAC_addr_boards=" | cut -d= -f2`
+mac_nums=`echo $mac_addr_list | awk -F ":" '{print NF}'`
+for (( i=1; i<=$mac_nums; i++ ))
+do
+    mac_addr=`echo $mac_addr_list | awk -F ":" -v j=$i '{print $j}'`
+    grub_suffix=$mac_addr
 cat > /var/lib/tftpboot/grub.cfg-$grub_suffix << EOM
 set timeout=5
 set default=ubuntu
@@ -202,6 +208,7 @@ menuentry "opensuse" --id opensuse {
        devicetree /wangyanliang/hip05-d02.dtb
 }
 EOM
+done
 
 platform=`cat estuary.cfg | grep -e "^platform=" | cut -d= -f2`
 kernelimage="Image_""$platform"
@@ -369,6 +376,20 @@ echo "Note! This command requires you to have administrator priviliges (sudo acc
 echo "on your host."
 read -p "Press return to continue" REPLY
 
+#copy/paste programs
+cp_progress ()
+{
+	CURRENTSIZE=0
+	while [ $CURRENTSIZE -lt $TOTALSIZE ]
+	do
+		TOTALSIZE=$1;
+		TOHERE=$2;
+		CURRENTSIZE=`sudo du -c $TOHERE | grep total | awk {'print $1'}`
+		echo -e -n "$CURRENTSIZE /  $TOTALSIZE copied \r"
+		sleep 1
+	done
+}
+
 extract_fs() {
     fstar=`ls -1 udisk_images/udisk_*.tar.gz`
     me=`whoami`
@@ -390,6 +411,67 @@ extract_fs() {
 
     echo
     echo "Successfully extracted `basename $fstar` to $1"
+    
+    pushd ..
+    if [ ! -d build/$build_PLATFORM/binary ]
+    then
+        # Make sure that the build.sh file exists
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Ubuntu
+            echo "execute build.sh"
+        else
+            echo "build.sh does not exist in the directory"
+            exit 1
+        fi
+    fi
+    popd
+    
+    mkdir -p $1/sys_setup/boot/EFI/GRUB2 2> /dev/null
+    mkdir -p $1/sys_setup/distro 2> /dev/null
+    mkdir -p $1/sys_setup/bin 2> /dev/null
+    cp -a $cwd/../build/$build_PLATFORM/binary/grubaa64* $1/sys_setup/boot/EFI/GRUB2
+    cp -a $cwd/../build/$build_PLATFORM/binary/Image_$build_PLATFORM $1/sys_setup/boot/Image
+    cp -a $cwd/../build/$build_PLATFORM/binary/hip05-d02.dtb $1/sys_setup/boot
+    if [ "$ubuntu_en" == "y" ]; then
+        mkdir -p $1/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
+        TOTALSIZE=`sudo du -c ../distro/Ubuntu_"$TARGET_ARCH".tar.gz | grep total | awk {'print $1'}`
+        cp -af $cwd/../distro/Ubuntu_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH &
+        cp_progress $TOTALSIZE $1/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
+    fi
+    if [ "$fedora_en" == "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+        fi
+        popd
+        mkdir -p $1/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
+        cp -a $cwd/../distro/Fedora_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
+    fi
+    if [ "$opensuse_en" == "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
+        fi
+        popd
+        mkdir -p $1/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
+        cp -a $cwd/../distro/OpenSuse_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
+    fi
+
+    cp -a sys_setup.sh $1/sys_setup/bin
+    cp -a functions.sh $1/sys_setup/bin
+    cp -a find_disk.sh $1/sys_setup/bin
+    cp -a estuary.cfg $1/sys_setup/bin
+    cp -a post_install.sh $1/sys_setup/bin
+
+    touch $1/etc/profile.d/antoStartUp.sh
+    chmod a+x $1/etc/profile.d/antoStartUp.sh
+cat > $1/etc/profile.d/antoStartUp.sh << EOM
+#!/bin/bash
+
+pushd /sys_setup/bin
+sudo ./sys_setup.sh
+popd
+EOM
 }
 
 if [ -d $dst ]; then
