@@ -864,17 +864,23 @@ fi
 ###################### Download, Build, and/or install Armor Tools ####################
 ###################################################################################
 ARMOR_DIR=armor
-armor_dir=$build_dir/$ARMOR_DIR
+armor_build_dir=$build_dir/$ARMOR_DIR
+kernel_build_dir=`pwd`/$build_dir/$KERNEL_DIR
 
     echo "Building Armor Tools..."
-    rm -rf $armor_dir
+    rm -rf $armor_build_dir
 
     cp -rf $ARMOR_DIR $build_dir
-    pushd $armor_dir
+    pushd $armor_build_dir
     cd testing/build_scripts/
     sh build_armor_tools_int01.sh dmidecode $cross_gcc
     # TODO copy binary to the RFS
-    # cp ../source/dmidecode/dmidecode ...  
+    # cp $armor_build_dir/testing/source/dmidecode/dmidecode ...
+
+    sh build_kprobes_test.sh $kernel_build_dir
+    # TODO copy binary to the RFS
+    # cp $armor_build_dir/testing/source/kprobes_test/kprobe_test ...
+    # cp $armor_build_dir/testing/source/kprobes_test/kprobe_test.ko ...
     cd -
     popd
 
