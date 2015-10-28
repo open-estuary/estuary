@@ -84,7 +84,7 @@ fi
 exit_footer
 
 cat << EOM
-start to parse  estuary.cfg ...
+begin to parse estuary.cfg ...
 EOM
 while read line
 do
@@ -109,6 +109,9 @@ do
         "fedora")
         fedora_en=$value
         ;;
+        "debian")
+        debian_en=$value
+        ;;
         "nfs_server")
         nfs_server=$value
         ;;
@@ -127,13 +130,21 @@ cat > /etc/dhcp/dhcpd.conf << EOM
 authoritative;
 default-lease-time 600;
 max-lease-time 7200;
+ping-check true;
+ping-timeout 2;
+allow booting;
+allow bootp;
 subnet ${net_param}.0 netmask 255.255.255.0 {
     range ${net_param}.210 ${net_param}.250;
     option subnet-mask 255.255.255.0;
     option domain-name-servers ${net_param}.1;
+    option time-offset -18000;
     option routers ${net_param}.1;
     option subnet-mask 255.255.255.0;
     option broadcast-address ${net_param}.255;
+    default-lease-time 600;
+    max-lease-time 7200;
+    next-server ${nfs_server};
     filename "grubaa64.efi";
 }
 EOM
@@ -186,26 +197,10 @@ do
 cat > /var/lib/tftpboot/grub.cfg-$grub_suffix << EOM
 set timeout=5
 set default=ubuntu
-menuentry "minilinux" --id minilinux {
-        set root=(tftp,192.168.1.107)
-        linux /wangyanliang/Image rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000
-        initrd /wangyanliang/hulk-hip05.cpio.gz
-        devicetree /wangyanliang/hip05-d02.dtb
-}
 menuentry "ubuntu" --id ubuntu {
         set root=(tftp,$nfs_server)
         linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=$nfs_server:/targetNFS ip=::::::dhcp
        devicetree /hip05-d02.dtb
-}
-menuentry "ubuntu_bk" --id ubuntu_bk {
-        set root=(tftp,192.168.3.102)
-        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.3.102:/targetNFS ip=192.168.3.156:192.168.3.102:192.168.3.1:255.255.255.0:::dhcp
-       devicetree /hip05-d02.dtb
-}
-menuentry "opensuse" --id opensuse {
-        set root=(tftp,192.168.1.107)
-        linux /wangyanliang/Image rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/wangyanliang/opensuse ip=192.168.1.156:192.168.1.107:192.168.1.1:255.255.255.0::eth0:dhcp
-       devicetree /wangyanliang/hip05-d02.dtb
 }
 EOM
 done
@@ -446,6 +441,15 @@ extract_fs() {
         popd
         mkdir -p $1/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
         cp -a $cwd/../distro/Fedora_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
+    fi
+    if [ "$debian_en" == "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Debian
+        fi
+        popd
+        mkdir -p $1/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH 2> /dev/null
+        cp -a $cwd/../distro/Debian_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH
     fi
     if [ "$opensuse_en" == "y" ]; then
         pushd ..

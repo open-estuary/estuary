@@ -30,6 +30,9 @@ do
         "fedora")
         fedora_en=$value
         ;;
+        "debian")
+        debian_en=$value
+        ;;
         "target_system_type")
         target_system_type=$value
         ;;
@@ -332,8 +335,6 @@ fi
 fi
 done
 
-
-
 #NEWFS_DEV=${disk_list[0]}
 
 ## the later two entry is not used again unset them
@@ -394,7 +395,6 @@ if [ "$full_intallation" = "yes" ]; then
 
         #we always re-format the root partition
         mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
-        
         
         sudo mkdir $PWD/rootfs
         sudo mkdir $PWD/tmp
@@ -474,6 +474,38 @@ EOM
             rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
         fi
     fi
+    if [ "$debian_en" == "y" ]; then
+    
+        cmd_str="sudo parted /dev/${disk_list[0]} mkpart debian ${rootfs_start}G ${rootfs_end}G"
+        echo -n "make root partition by "$cmd_str
+        eval $cmd_str
+        [ $? ] || { echo " ERR"; exit; }
+
+        #get the device id that match with the partition just made
+        read -a cur_idx <<< $(sudo parted /dev/${disk_list[0]} print | \
+        grep "debian" | awk '{print $1}' | sort)
+        echo "root cur_idx is ${cur_idx[*]}"
+        NEWRT_IDX=${cur_idx[0]}
+
+        rootfs_start=$rootfs_end
+        rootfs_end=$(( rootfs_start + 20 ))
+
+        #we always re-format the root partition
+        mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
+        sudo mkdir $PWD/rootfs
+
+        sudo mount -t ext3 /dev/${disk_list[0]}$NEWRT_IDX rootfs
+
+        sudo rm -rf rootfs/*
+        tar -xzf /sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH/Debian_"$TARGET_ARCH".tar.gz -C rootfs/
+        sudo umount rootfs
+        sudo rm -rf rootfs
+        
+        if [ "$target_system_type" == "debian" ]; then
+            rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
+            rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
+        fi
+    fi
     if [ "$opensuse_en" == "y" ]; then
     
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart opensuse ${rootfs_start}G ${rootfs_end}G"
@@ -507,10 +539,10 @@ EOM
         fi
     fi
 
-    sudo mkdir $PWD/boot
+    mkdir $PWD/boot
     sudo mount -t vfat /dev/${disk_list[0]}1 boot
     sudo rm -rf boot/*
-    sudo cp -a /sys_setup/boot/* boot/
+    sudo cp -r /sys_setup/boot/* boot/
 cat > boot/grub.cfg << EOM
 #
 # Sample GRUB configuration file

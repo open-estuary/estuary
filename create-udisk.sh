@@ -80,6 +80,9 @@ do
         "fedora")
         fedora_en=$value
         ;;
+        "debian")
+        debian_en=$value
+        ;;
         *)
         ;;
     esac
@@ -243,6 +246,10 @@ fi
         if [ "$fedora_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
             cp -a ../distro/Fedora_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
+        fi
+        if [ "$debian_en" == "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH 2> /dev/null
+            cp -a ../distro/Debian_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH
         fi
         if [ "$opensuse_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
@@ -551,9 +558,8 @@ cat << EOM
 EOM
 
 
+if [ ! -d build/$build_PLATFORM/binary ]; then
 pushd ..
-if [ ! -d build/$build_PLATFORM/binary ]
-then
     # Make sure that the build.sh file exists
     if [ -f $PWD/estuary/build.sh ]; then
         $PWD/estuary/build.sh -p $build_PLATFORM -d Ubuntu
@@ -562,8 +568,8 @@ then
         echo "build.sh does not exist in the directory"
         exit 1
     fi
-fi
 popd
+fi
 
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
@@ -671,7 +677,15 @@ fi
     if [ "$fedora_en" == "y" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
-            #$PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+            echo ""
+        fi
+        popd
+    fi
+    if [ "$debian_en" == "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Debian
             echo ""
         fi
         popd
