@@ -124,16 +124,35 @@ check_install()
 }
 
 ###################################################################################
+############################# Check initilization status ##########################
+###################################################################################
+lastupdate="2015-10-15"
+check_init()
+{
+    tmpfile=$1
+    tmpdate=$2
+
+    if [ -f "$tmpfile" ]; then
+        inittime=`stat -c %Y $tmpfile`
+        checktime=`date +%s -d $tmpdate`
+
+        if [ $inittime -gt $checktime ]; then
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+###################################################################################
 ############################# Check the checksum file   ###########################
 ###################################################################################
-checksum_result=0
 check_sum()
 {
     checksum_source=$1
     if [ x"$checksum_source" = x"" ]; then
         echo "Invalidate checksum file!"
-        checksum_result=1
-        exit 1
+        return 1
     fi
 
     checksum_file=${checksum_source##*/}
@@ -145,17 +164,17 @@ check_sum()
 		cp $checksum_source ./
 	fi
 
-	if [ -f ".$checksum_file" ]; then
-		checksum_result=0
-		return
+    check_init ".$checksum_file" $lastupdate
+	if [ x"$?" = x"1" ]; then
+		return 0
 	fi
 
 	md5sum --quiet --check $checksum_file 2>/dev/null | grep 'FAILED' >/dev/null
 	if [ x"$?" = x"0" ]; then
-		checksum_result=1
+        return 1
 	else
-		checksum_result=0
 		touch ".$checksum_file"
+        return 0
 	fi
 }
 
@@ -221,7 +240,8 @@ if [ x"$?" = x"1" ]; then
     rm -rf ".initialized"
 fi
 
-if [ ! -f ".initialized" ]; then
+check_init ".initialized" $lastupdate
+if [ x"0" = x"$?" ]; then
 	sudo apt-get update
     sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl
     if [ x"$?" = x"0" ]; then
@@ -275,7 +295,7 @@ TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 echo "Check the checksum for toolchain..."
 check_sum "../estuary/checksum/$toolchainsum_file"
-if [ x"$checksum_result" != x"0" ]; then
+if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
 	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 	while read LINE
@@ -383,7 +403,7 @@ if [ x"$DISTRO_SOURCE" != x"none" ]; then
 	# Download it based on md5 checksum file
 	echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
 	check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
-	if [ x"$checksum_result" != x"0" ]; then
+	if [ x"$?" != x"0" ]; then
 	    echo "Check the checksum for distribution..."
 		distrosum_file=${DISTRO_SOURCE##*/}".sum"
 #		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
@@ -418,7 +438,7 @@ fi
 cd $BINARY_DIR/
 echo "Check the checksum for binaries..."
 check_sum "../estuary/checksum/$binarysum_file"
-if [ x"$checksum_result" != x"0" ]; then
+if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
 	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 	while read LINE
@@ -1054,7 +1074,8 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
 	if [ x"" = x"$QEMU" ]; then
 		pushd qemu/
-        if [ ! -f ".initialized" ]; then
+        check_init ".initialized" $lastupdate
+        if [ x"$?" = x"0" ]; then
             sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
             if [ x"$?" = x"0" ]; then
                 touch ".initialized"
