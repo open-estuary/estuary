@@ -36,7 +36,7 @@ PATH_UBUNTU32=default
 usage()
 {
 	echo "usage:"
-	echo -n "build.sh [ -p "
+	echo -n "build.sh [ -f cfgfile.json ] [ -p "
 	echo -n ${platforms[*]} | sed "s/ / | /g"
 	echo -n " ] [ -d "
 	echo -n ${distros[*]} | sed "s/ / | /g"
@@ -45,7 +45,8 @@ usage()
 	echo " ] "
 
 	echo -e "\n -h,--help: to print this message"
-	echo " -p,--platform: the target platform, the -d musb be specified if platform is QEMU"
+	echo " -f,--file: the config json file for Estuary building"
+	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
 	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
@@ -179,11 +180,46 @@ check_sum()
 }
 
 ###################################################################################
-############################# Check all parameters     ############################
+############################# Parse config file        ############################
 ###################################################################################
 PLATFORM=
 DISTRO=
 INSTALL=
+CFGFILE=
+parse_cfg()
+{
+    CFGFILE=$1
+
+    if [ ! -f $CFGFILE ]; then
+	    echo -e "\033[31m$CFGFILE does not exist!\033[0m"
+        usage
+        exit 1
+    fi
+
+    PLATFORM=`jq -r ".system.platform" $CFGFILE`
+
+    if [ x"0" != x"$?" ]; then
+	    echo -e "\033[31mDo not find the .system.platform in $CFGFILE!\033[0m"
+        usage
+		exit 1
+    fi
+
+	idx=0
+    install=`jq -r ".distros[$idx].install" $CFGFILE`
+	while [ x"$install" != x"null" ];
+	do
+		if [ x"yes" = x"$install" ]; then
+    		DISTRO=`jq -r ".distros[$idx].name" $CFGFILE`
+			break
+		fi
+		let idx=$idx+1
+    	install=`jq -r ".distros[$idx].install" $CFGFILE`
+	done
+}
+
+###################################################################################
+############################# Check all parameters     ############################
+###################################################################################
 while [ x"$1" != x"" ]; do 
     case $1 in 
         "-h" | "--help" )
@@ -204,6 +240,15 @@ while [ x"$1" != x"" ]; do
 			shift
 			check_install $1
 			echo "Install: $1"
+			;;
+		"-f" | "--file" )
+			shift
+            CFGFILE=`pwd`"/$1"
+            parse_cfg $CFGFILE
+			check_platform $PLATFORM
+			check_distro $DISTRO
+			echo "Install: $DISTRO"
+            break
 			;;
 		* )
 			echo "unknown arg $1"
@@ -250,15 +295,16 @@ if [ x"0" = x"$?" ]; then
 fi
 
 # Detect and dertermine some environment variables
-LOCALARCH=`uname -m`
 TOOLS_DIR="`dirname $0`"
+cd $TOOLS_DIR/../
+
+LOCALARCH=`uname -m`
 if [ x"$PLATFORM" = x"D01" ]; then
     TARGETARCH="ARM32"
 else
     TARGETARCH="ARM64"
 fi
 
-cd $TOOLS_DIR/../
 build_dir=build/$PLATFORM
 if [ ! -d "$build_dir" ] ; then
 	mkdir -p "$build_dir" 2> /dev/null

@@ -1,0 +1,34 @@
+{
+"comments0":"system configurations",
+"system":{
+"platform":"D02"
+},
+
+"comments1":"distribution configurations",
+"distros":[
+{"name":"Ubuntu","install":"yes"},
+{"name":"Debian","install":"no"},
+{"name":"Fedora","install":"yes"},
+{"name":"OpenSuse","install":"no"}
+],
+
+"comments2":"boards configuration",
+"boards":[
+{"mac":"00-00-00-00-00-01"},
+{"mac":"00-00-00-00-00-02"}
+],
+
+"comments3":"applications configuration",
+"applications":[
+{"name":"mysql","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh", 
+"install":[
+{"sour":"build/bin","dest":"/usr/bin","dir":"yes"},
+{"sour":"build/cfg","dest":"/etc/mysql","dir":"no"},
+{"sour":"build/mysqlpostinstall.sh","dest":"/usr/bin/estuary/postinstall","dir":"no"},
+{"sour":"build/mysqlupdate.sh","dest":"/usr/bin/estuary/update","dir":"no"},
+{"sour":"build/mysqlremove.sh","dest":"/usr/bin/estuary/remove","dir":"no"}
+]},
+
+{"name":"test","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh", "install":[{"sour":"build/bin","dest":"/usr/bin","dir":"no"}]}
+]
+}
