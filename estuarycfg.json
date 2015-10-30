@@ -20,15 +20,15 @@
 
 "comments3":"applications configuration",
 "applications":[
-{"name":"mysql","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh", 
+{"name":"test","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh","version":"v1.0","install":[{"sour":"build/bin","dest":"/usr/bin","dir":"no"}]},
+
+{"name":"mysql","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh","version":"v1.1", 
 "install":[
 {"sour":"build/bin","dest":"/usr/bin","dir":"yes"},
 {"sour":"build/cfg","dest":"/etc/mysql","dir":"no"},
 {"sour":"build/mysqlpostinstall.sh","dest":"/usr/bin/estuary/postinstall","dir":"no"},
 {"sour":"build/mysqlupdate.sh","dest":"/usr/bin/estuary/update","dir":"no"},
 {"sour":"build/mysqlremove.sh","dest":"/usr/bin/estuary/remove","dir":"no"}
-]},
-
-{"name":"test","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh", "install":[{"sour":"build/bin","dest":"/usr/bin","dir":"no"}]}
+]}
 ]
 }

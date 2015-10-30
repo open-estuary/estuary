@@ -184,6 +184,7 @@ check_sum()
 ###################################################################################
 PLATFORM=
 DISTRO=
+DISTROLS=()
 INSTALL=
 CFGFILE=
 parse_cfg()
@@ -209,12 +210,19 @@ parse_cfg()
 	while [ x"$install" != x"null" ];
 	do
 		if [ x"yes" = x"$install" ]; then
-    		DISTRO=`jq -r ".distros[$idx].name" $CFGFILE`
-			break
+    		DISTROLS[${#DISTROLS[@]}]=`jq -r ".distros[$idx].name" $CFGFILE`
 		fi
 		let idx=$idx+1
     	install=`jq -r ".distros[$idx].install" $CFGFILE`
 	done
+
+	check_platform $PLATFORM
+	for tmp in "${DISTROLS[@]}"
+	do
+		check_distro $tmp
+	done
+
+	DISTRO=$DISTROLS
 }
 
 ###################################################################################
@@ -245,8 +253,6 @@ while [ x"$1" != x"" ]; do
 			shift
             CFGFILE=`pwd`"/$1"
             parse_cfg $CFGFILE
-			check_platform $PLATFORM
-			check_distro $DISTRO
 			echo "Install: $DISTRO"
             break
 			;;
@@ -258,6 +264,11 @@ while [ x"$1" != x"" ]; do
     esac
 	shift
 done
+
+# Default to add $DISTRO into distro list if don't use config file
+if [ x"" = x"$CFGFILE" ]; then
+	DISTROLS[${#DISTROLS[@]}]=$DISTRO
+fi
 
 if [ x"$PLATFORM" = x"" -a x"$DISTRO" != x"" ]; then
 	echo -e "\033[31m-p must be specified with a determined -d parameter.\033[0m"
@@ -388,85 +399,93 @@ echo "Cross compiler is $CROSS"
 ###################################################################################
 ######## Download distribution according to special PLATFORM and DISTRO ###########
 ###################################################################################
-DISTRO_DIR=distro
-if [ ! -d "$DISTRO_DIR" ] ; then
-	mkdir -p "$DISTRO_DIR" 2> /dev/null
-fi
-
-# Determine the source file
-if [ x"$TARGETARCH" = x"ARM32" ] ; then
-	case $DISTRO in
-#		"OpenSuse" )
-#			DISTRO_SOURCE=$PATH_OPENSUSE32
-#			;;
-		"Ubuntu" )
-			DISTRO_SOURCE=$PATH_UBUNTU32
-			;;	
-			* )
-			DISTRO_SOURCE="none"
-			;;
-	esac
-else
-	case $DISTRO in
-		"OpenSuse" )
-			DISTRO_SOURCE=$PATH_OPENSUSE64
-			;;
-		"Ubuntu" )
-			DISTRO_SOURCE=$PATH_UBUNTU64
-			;;	
-        "Fedora" )
-			DISTRO_SOURCE=$PATH_FEDORA64
-			;;	
-        "Debian" )
-			DISTRO_SOURCE=$PATH_DEBIAN64
-			;;	
-		* )
-			DISTRO_SOURCE="none"
-			;;
-	esac
-fi
-#DISTRO_SOURCE="default"
-
-if [ x"$DISTRO_SOURCE" != x"none" ]; then
-
-	if [ x"$DISTRO_SOURCE" = x"default" ]; then
-	    DISTRO_SOURCE=$PATH_DISTRO/"$DISTRO"_"$TARGETARCH"."tar.gz"
+download_distro()
+{
+	DISTRO_DIR=distro
+	if [ ! -d "$DISTRO_DIR" ] ; then
+		mkdir -p "$DISTRO_DIR" 2> /dev/null
 	fi
-	
-	# Check the postfix name
-	postfix=${DISTRO_SOURCE#*.tar} 
-	if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
-	    postfix=${DISTRO_SOURCE##*.} 
+
+	# Determine the source file
+	if [ x"$TARGETARCH" = x"ARM32" ] ; then
+		case $1 in
+	#		"OpenSuse" )
+	#			DISTRO_SOURCE=$PATH_OPENSUSE32
+	#			;;
+			"Ubuntu" )
+				DISTRO_SOURCE=$PATH_UBUNTU32
+				;;	
+				* )
+				DISTRO_SOURCE="none"
+				;;
+		esac
 	else
-		if [ x"$postfix" = x"" ]; then
-			postfix=".tar"
-		else
-			postfix="tar"$postfix	
-		fi
+		case $1 in
+			"OpenSuse" )
+				DISTRO_SOURCE=$PATH_OPENSUSE64
+				;;
+			"Ubuntu" )
+				DISTRO_SOURCE=$PATH_UBUNTU64
+				;;	
+	        "Fedora" )
+				DISTRO_SOURCE=$PATH_FEDORA64
+				;;	
+	        "Debian" )
+				DISTRO_SOURCE=$PATH_DEBIAN64
+				;;	
+			* )
+				DISTRO_SOURCE="none"
+				;;
+		esac
 	fi
+	#DISTRO_SOURCE="default"
 	
-	cd $DISTRO_DIR
-	# Download it based on md5 checksum file
-	echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
-	check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
-	if [ x"$?" != x"0" ]; then
-	    echo "Check the checksum for distribution..."
-		distrosum_file=${DISTRO_SOURCE##*/}".sum"
-#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
-#		if [ x"$?" = x"0" ]; then
-		    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
-			rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
-		    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
-			if [ x"$?" != x"0" ]; then
-				rm -rf $distrosum_file $DISTRO"_"$TARGETARCH"."$postfix 2>/dev/null
-				echo "Download distributions "$DISTRO"_"$TARGETARCH"."$postfix" failed!"
-				exit 1
+	if [ x"$DISTRO_SOURCE" != x"none" ]; then
+	
+		if [ x"$DISTRO_SOURCE" = x"default" ]; then
+		    DISTRO_SOURCE=$PATH_DISTRO/"$1"_"$TARGETARCH"."tar.gz"
+		fi
+		
+		# Check the postfix name
+		postfix=${DISTRO_SOURCE#*.tar} 
+		if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
+		    postfix=${DISTRO_SOURCE##*.} 
+		else
+			if [ x"$postfix" = x"" ]; then
+				postfix=".tar"
+			else
+				postfix="tar"$postfix	
 			fi
-		    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
-#		fi
+		fi
+		
+		cd $DISTRO_DIR
+		# Download it based on md5 checksum file
+		echo "Check the checksum for distribution: "$1"_"$TARGETARCH"..."
+		check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
+		if [ x"$?" != x"0" ]; then
+		    echo "Check the checksum for distribution..."
+			distrosum_file=${DISTRO_SOURCE##*/}".sum"
+	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
+	#		if [ x"$?" = x"0" ]; then
+			    echo "Download the distribution: "$1"_"$TARGETARCH"..."
+				rm -rf "$1"_"$TARGETARCH"."$postfix" 2>/dev/null
+			    wget -c $DISTRO_SOURCE -O "$1"_"$TARGETARCH"."$postfix"
+				if [ x"$?" != x"0" ]; then
+					rm -rf $distrosum_file $1"_"$TARGETARCH"."$postfix 2>/dev/null
+					echo "Download distributions "$1"_"$TARGETARCH"."$postfix" failed!"
+					exit 1
+				fi
+			    chmod 777 "$1"_"$TARGETARCH".$postfix
+	#		fi
+		fi
+		cd -
 	fi
-	cd -
-fi
+}
+
+for tmp in "${DISTROLS[@]}"
+do
+	download_distro $tmp
+done
 
 ###################################################################################
 ##########  Download prebuilt binaries based on md5 checksum file    ##############
@@ -844,52 +863,93 @@ fi
 ###################################################################################
 ######################### Uncompress the distribution   ###########################
 ###################################################################################
-distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
-image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
-if [ x"" != x"$DISTRO" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
-    mkdir -p "$distro_dir" 2> /dev/null
-    
-    echo "Uncompress the distribution($DISTRO) ......"
-    if [ x"${image##*.}" = x"bz2" ] ; then
-    	TEMP=${image%.*}
-    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a tar.bz2 package"
-    	else
-    		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a bz2 package"
-    	fi
-    fi
-    if [ x"${image##*.}" = x"gz" ] ; then
-    	TEMP=${image%.*}
-    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a tar.gz package"
-    	else
-    		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a gz package"
-    	fi
-    fi
-    if [ x"${image##*.}" = x"tar" ] ; then 
-    	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    	echo "This is a tar package"
-    fi
-    if [ x"${image##*.}" = x"xz" ] ; then 
-    #	echo "This is a xz package"
-    	TEMP=${image%.*}
-    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
-    		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
-    	fi
-    fi
-    if [ x"${image##*.}" = x"tbz" ] ; then
-    	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    fi
-    if [ x"${image}" = x"" ] ; then
-    	echo "Can not find the suitable root filesystem!"
-        exit 1
-    fi
-fi
+uncompress_distro()
+{
+	distro_dir=$build_dir/$DISTRO_DIR/$1
+	image=`ls "$DISTRO_DIR/" | grep -E "^$1*" | grep -E "$TARGETARCH" | grep -v ".sum"`
+	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
+	    mkdir -p "$distro_dir" 2> /dev/null
+	    
+	    echo "Uncompress the distribution($1) ......"
+	    if [ x"${image##*.}" = x"bz2" ] ; then
+	    	TEMP=${image%.*}
+	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+	    		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a tar.bz2 package"
+	    	else
+	    		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a bz2 package"
+	    	fi
+	    fi
+	    if [ x"${image##*.}" = x"gz" ] ; then
+	    	TEMP=${image%.*}
+	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+	    		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a tar.gz package"
+	    	else
+	    		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a gz package"
+	    	fi
+	    fi
+	    if [ x"${image##*.}" = x"tar" ] ; then 
+	    	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    	echo "This is a tar package"
+	    fi
+	    if [ x"${image##*.}" = x"xz" ] ; then 
+	    #	echo "This is a xz package"
+	    	TEMP=${image%.*}
+	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+	    		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
+	    		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
+	    	fi
+	    fi
+	    if [ x"${image##*.}" = x"tbz" ] ; then
+	    	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    fi
+	    if [ x"${image}" = x"" ] ; then
+	    	echo "Can not find the suitable root filesystem!"
+	        exit 1
+	    fi
+	fi
+}
+
+for tmp in "${DISTROLS[@]}"
+do
+	uncompress_distro $tmp
+done
+
+###################################################################################
+######################### install applications          ###########################
+###################################################################################
+install_apps()
+{
+    if [ x"" = x"$CFGFILE" ] || [ ! -f $CFGFILE ]; then
+		return
+	fi
+
+	echo "Install applications..."
+}
+
+###################################################################################
+######################### create distribution           ###########################
+###################################################################################
+create_distro()
+{
+	distro_dir=$build_dir/$DISTRO_DIR/$1
+	image="$1_$TARGETARCH.tar.gz"
+	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
+		pushd $distro_dir/
+		install_apps
+		echo "Create $image..."
+		sudo tar -czf ../$image *
+		popd
+	fi
+}
+
+for tmp in "${DISTROLS[@]}"
+do
+	create_distro $tmp
+done
 
 installresult=0
 ###################################################################################
