@@ -952,6 +952,8 @@ create_distro()
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		install_apps $distro_dir
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
+		sudo cp estuary/post_install.sh $distro_dir/etc/profile.d/
+		sudo chmod 755 $distro_dir/etc/profile.d/post_install.sh
 
 		pushd $distro_dir/
 		echo "Creating $image ..."
