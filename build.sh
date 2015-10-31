@@ -190,8 +190,6 @@ INSTALL=
 CFGFILE=
 parse_cfg()
 {
-    CFGFILE=$1
-
     if [ ! -f $CFGFILE ]; then
 	    echo -e "\033[31m$CFGFILE does not exist!\033[0m"
         usage
@@ -253,7 +251,7 @@ while [ x"$1" != x"" ]; do
 		"-f" | "--file" )
 			shift
             CFGFILE=`pwd`"/$1"
-            parse_cfg $CFGFILE
+            parse_cfg
 			echo "Install: $DISTRO"
             break
 			;;
@@ -351,7 +349,7 @@ fi
 # Download firstly
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
-echo "Check the checksum for toolchain..."
+echo "Checking the checksum for toolchain ..."
 check_sum "../estuary/checksum/$toolchainsum_file"
 if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
@@ -359,7 +357,7 @@ if [ x"$?" != x"0" ]; then
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
-	        echo "Download the toolchain..."
+	        echo "Downloading the toolchain ..."
 			rm -rf $LINE 2>/dev/null
 		    wget -c $TOOLCHAIN_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
@@ -375,7 +373,7 @@ cd -
 
 # Copy to build target directory
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
-    echo "Copy toolchain to 'build' directory..."
+    echo "Copying toolchain to 'build' directory ..."
 	mkdir -p "$toolchain_dir" 2>/dev/null
     cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
     cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
@@ -385,7 +383,7 @@ fi
 arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc" 2>/dev/null`
 if [ x"" = x"$arm_gcc" ]; then 
 	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
-	echo "Uncompress the toolchain......"
+	echo "Uncompressing the toolchain ..."
 	tar Jxf $package -C $TOOLCHAIN_DIR
 	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc 2>/dev/null`
 fi
@@ -461,14 +459,14 @@ download_distro()
 		
 		cd $DISTRO_DIR
 		# Download it based on md5 checksum file
-		echo "Check the checksum for distribution: "$1"_"$TARGETARCH"..."
+		echo "Checking the checksum for distribution: "$1"_"$TARGETARCH" ..."
 		check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
 		if [ x"$?" != x"0" ]; then
-		    echo "Check the checksum for distribution..."
+		    echo "Checking the checksum for distribution ..."
 			distrosum_file=${DISTRO_SOURCE##*/}".sum"
 	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
 	#		if [ x"$?" = x"0" ]; then
-			    echo "Download the distribution: "$1"_"$TARGETARCH"..."
+			    echo "Downloading the distribution: "$1"_"$TARGETARCH" ..."
 				rm -rf "$1"_"$TARGETARCH"."$postfix" 2>/dev/null
 			    wget -c $DISTRO_SOURCE -O "$1"_"$TARGETARCH"."$postfix"
 				if [ x"$?" != x"0" ]; then
@@ -502,7 +500,7 @@ if [ ! -d "$BINARY_DIR" ] ; then
 fi
 
 cd $BINARY_DIR/
-echo "Check the checksum for binaries..."
+echo "Checking the checksum for binaries ..."
 check_sum "../estuary/checksum/$binarysum_file"
 if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
@@ -510,7 +508,7 @@ if [ x"$?" != x"0" ]; then
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
-	        echo "Download "$LINE"..."
+	        echo "Downloading $LINE ..."
 		    rm -rf $LINE 2>/dev/null
 		    wget -c $BINARY_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
@@ -597,7 +595,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     # Let UEFI detect the arch automatically
     export ARCH=
 
-	echo "Build UEFI..."
+	echo "Building UEFI ..."
 
 	if [ x"ARM32" = x"$TARGETARCH" ]; then
 		# Build UEFI for D01 platform
@@ -666,7 +664,7 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	fi
 
     if [ ! -f $wrapper_dir/.text ]; then
-        echo "Build boot wrapper..."
+        echo "Building boot wrapper ..."
         pushd $WRAPPER_DIR
         make clean
         make
@@ -796,7 +794,7 @@ else
 fi
 
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
-    echo "Build kernel..."
+    echo "Building kernel ..."
     mkdir -p "$kernel_dir" 2> /dev/null
 
 	pushd $KERNEL_DIR/
@@ -871,7 +869,7 @@ uncompress_distro()
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
 	    mkdir -p "$distro_dir" 2> /dev/null
 	    
-	    echo "Uncompress the distribution($1) ......"
+	    echo "Uncompressing the distribution($1) ..."
 	    if [ x"${image##*.}" = x"bz2" ] ; then
 	    	TEMP=${image%.*}
 	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
@@ -928,7 +926,19 @@ install_apps()
 		return
 	fi
 
-	echo "Install applications..."
+	echo "Installing applications ..."
+
+	idx=0
+    app=`jq -r ".applications[$idx].name" $CFGFILE`
+	while [ x"$app" != x"null" ];
+	do
+		if [ x"" != x"$app" ]; then
+			echo "Installing $app ..."
+		fi
+
+		let idx=$idx+1
+    	app=`jq -r ".applications[$idx].name" $CFGFILE`
+	done
 }
 
 ###################################################################################
@@ -942,7 +952,7 @@ create_distro()
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		pushd $distro_dir/
 		install_apps
-		echo "Create $image..."
+		echo "Creating $image ..."
 		sudo tar -czf ../$image *
 		popd
 	fi
@@ -959,7 +969,7 @@ installresult=0
 ###################################################################################
 if [ x"Caliper" = x"$INSTALL" ]; then
 	pushd caliper
-	echo "Start to install Caliper..."
+	echo "Installing Caliper ..."
 	sudo python setup.py install
 	installresult=$?
 	popd
@@ -973,7 +983,7 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	for compiler in $GCC32 $GCC64
 	do
 		compiler=${compiler%%.tar.xz}
-		echo "Installing $compiler..."
+		echo "Installing $compiler ..."
 		if [ ! -d "/opt/$compiler" ]; then
 			sudo cp -r $TOOLCHAIN_DIR/$compiler /opt/
 			if [ x"$?" != x"0" ]; then
@@ -1138,7 +1148,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                 # Create a new image file from rootfs directory for QEMU
                 sudo find $distro_dir -name "etc" | grep --quiet "etc"
                 if [ x"$?" = x"0" ]; then
-        	        echo "Create a new rootfs image file for QEMU..."
+        	        echo "Creating new rootfs image file for QEMU ..."
                     cd $distro_dir
                     
                     IMAGEFILE="$DISTRO"_"$TARGETARCH"."img"
@@ -1146,7 +1156,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                     mkfs.ext4 ../$IMAGEFILE -F
                     mkdir -p ../tempdir 2>/dev/null
                     sudo mount ../$IMAGEFILE ../tempdir
-					echo "Produce the rootfs image file for QEMU..."
+					echo "Producing the rootfs image file for QEMU ..."
                     sudo cp -a * ../tempdir/
                     sudo umount ../tempdir
                     rm -rf ../tempdir
@@ -1193,7 +1203,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                 touch ".initialized"
             fi
         fi
-        echo "Build the QEMU..."
+        echo "Building the QEMU ..."
 		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
 		make -j14
 		make install
@@ -1202,7 +1212,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	fi
 	
 # Run the qemu
-    echo "Start QEMU..."
+    echo "Starting QEMU ..."
 	$QEMU -machine virt -cpu cortex-a57 \
 	    -kernel `pwd`/$KERNEL_BIN \
 	    -drive if=none,file=$rootfs,id=fs \
