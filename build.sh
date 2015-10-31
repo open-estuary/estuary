@@ -3,6 +3,7 @@
 #Use case:
 #   ./build.sh -h:                  to get help information for this script
 #   ./build.sh -p D02 -d Ubuntu:    to build Ubuntu distribution for D02 platform
+#   ./build.sh -f estuarycfg.json:  to build target system according to estuarycfg.json
 #Author: Justin Zhao
 #Date: August 7, 2015
 
@@ -933,10 +934,11 @@ install_apps()
 ###################################################################################
 ######################### create distribution           ###########################
 ###################################################################################
+distro_postfix=".tar.gz"
 create_distro()
 {
 	distro_dir=$build_dir/$DISTRO_DIR/$1
-	image="$1_$TARGETARCH.tar.gz"
+	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		pushd $distro_dir/
 		install_apps
@@ -1048,13 +1050,17 @@ if [ x"" != x"$PLATFORM" ]; then
     	fi
     fi
     
-    if [ x"" != x"$DISTRO" ] && [ -f $DISTRO_DIR/$image ]; then
-		#echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
-        true
-	else
-		echo -e "\033[31mFailed! Distribution can not be found!\033[0m"
-        build_error=1
-    fi
+	for tmp in "${DISTROLS[@]}"
+	do
+		image="$build_dir/$DISTRO_DIR/$tmp"_"$TARGETARCH$distro_postfix"
+	    if [ -f $image ]; then
+			#echo -e "\033[32mDistribution is $image.\033[0m"
+	        true
+		else
+			echo -e "\033[31mFailed! Distribution($image) can not be found!\033[0m"
+	        build_error=1
+	    fi
+	done
 
     if [ -f $toolchain_dir/$GCC64 ]; then
     	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
