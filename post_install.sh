@@ -3,7 +3,7 @@
 #date: 31/10/2015
 #description: automatically call all post install scripts in post_dir
 
-lastupdate="2015-05-15"
+lastupdate="2015-10-15"
 post_dir="/usr/bin/estuary/postinstall"
 
 ###################################################################################

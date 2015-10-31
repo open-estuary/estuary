@@ -286,6 +286,9 @@ if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
     exit 1
 fi
 
+TOOLS_DIR="`dirname $0`"
+cd $TOOLS_DIR/../
+
 ###################################################################################
 ############################# Setup host environmenta #############################
 ###################################################################################
@@ -305,9 +308,6 @@ if [ x"0" = x"$?" ]; then
 fi
 
 # Detect and dertermine some environment variables
-TOOLS_DIR="`dirname $0`"
-cd $TOOLS_DIR/../
-
 LOCALARCH=`uname -m`
 if [ x"$PLATFORM" = x"D01" ]; then
     TARGETARCH="ARM32"
@@ -952,6 +952,8 @@ create_distro()
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		pushd $distro_dir/
 		install_apps
+		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
+
 		echo "Creating $image ..."
 		sudo tar -czf ../$image *
 		popd
