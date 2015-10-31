@@ -8,8 +8,8 @@
 "distros":[
 {"name":"Ubuntu","install":"yes"},
 {"name":"Debian","install":"no"},
-{"name":"Fedora","install":"yes"},
-{"name":"OpenSuse","install":"no"}
+{"name":"Fedora","install":"no"},
+{"name":"OpenSuse","install":"yes"}
 ],
 
 "comments2":"boards configuration",

@@ -950,10 +950,10 @@ create_distro()
 	distro_dir=$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
-		pushd $distro_dir/
-		install_apps
+		install_apps $distro_dir
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
 
+		pushd $distro_dir/
 		echo "Creating $image ..."
 		sudo tar -czf ../$image *
 		popd
