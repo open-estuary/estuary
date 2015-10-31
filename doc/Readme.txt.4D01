@@ -106,9 +106,9 @@ build commands(supposedly, you are in <project root> currently:
     cp .kernel ../build/D01/binary/
     popd
 
-More detail information about distributions, please refer to Distributions_Guide.txt
-More detail information about toolchains, please refer to Toolchains_Guide.txt
-More detail information about how to deploy target system into D01 board, please refer to Deployment_Manual.txt.
-More detail information about how to debug, analyse, diagnose system, please refer to Armor_Manual.txt
-More detail information about how to benchmark system, please refer to Caliper_Manual.txt
-More detail information about how to access remote boards in OpenLab, please refer to Boards_in_OpenLab.txt
+More detail about distributions, please refer to Distributions_Guide.txt
+More detail about toolchains, please refer to Toolchains_Guide.txt
+More detail about how to deploy target system into D01 board, please refer to Deployment_Manual.txt.
+More detail about how to debug, analyse, diagnose system, please refer to Armor_Manual.txt
+More detail about how to benchmark system, please refer to Caliper_Manual.txt
+More detail about how to access remote boards in OpenLab, please refer to Boards_in_OpenLab.txt
