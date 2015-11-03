@@ -9,7 +9,7 @@ Change list for Estuary V2.1:
     e. Resolved memory reducing issues when booting from provision.
 
 3. Upgrade kernel
-    a. Enable both HiKey board and Hi1610 EVB board.
+    a. Enable HiKey board.
 
 4. Improved some documents
 
