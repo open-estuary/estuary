@@ -937,7 +937,8 @@ install_pkgs()
 		if [ x"yes" = x"$install" ]; then
 			appdir="$PACKAGES/$pkg"
 			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
-				$appdir/build.sh $PLATFORM $1 $2
+				kdir=`pwd`/$KERNEL_DIR
+				$appdir/build.sh $PLATFORM $1 $2 $kdir
 
 				for cpfile in postinstall remove
 				do
