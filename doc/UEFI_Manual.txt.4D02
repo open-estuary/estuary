@@ -50,6 +50,8 @@ FTP protocol is used for downloading between hardware boards and local network. 
     
     c. Burn CPLD file
     
+	Notes: This is a very dangerous operation, please don't do it when not necessary.
+	If you really want to do it, please make sure the power can *NOT* be shut off suddenly during updating CPLD.
     # Download file from FTP server to board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
     # Write the data into NORFLASH
@@ -57,19 +59,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
     e.g.: provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 100000
           updatecpld 100000
     
-    d. Burn files for Trust Firmware
-    
-    This step is not necessary only when the format of UEFI is end of fd which is consist of trusted firmware and uefi.
-    
-    # Download file from FTP server to board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <trustfw bins> -a <download target address>
-    spiwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f bl1.bin -a 100000
-          spiwfmem 100000 200000 10000
-          provision 192.168.1.107 -u sch -p aaa -f fip.bin -a 100000
-          spiwfmem 100000 220000 10000
-    
-    e. Power off and reboot board again
+    d. Power off and reboot board again
 
 ### Recover the UEFI when it broke ###
 

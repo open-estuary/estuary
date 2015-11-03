@@ -637,10 +637,10 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    	popd
 	    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
 
-			if [ x"$UEFI_BIN" != x"" ]; then
-				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
-				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
-			fi
+#			if [ x"$UEFI_BIN" != x"" ]; then
+#				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
+#				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
+#			fi
 		fi
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
