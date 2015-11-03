@@ -17,6 +17,7 @@
 
 "packages":[
 {"name":"armor","install":"yes"},
+{"name":"lamp","install":"no"},
 {"name":"docker","install":"no"},
 {"name":"mysql","install":"no"}
 ]
