@@ -1,10 +1,8 @@
 {
-"comments0":"system configurations",
 "system":{
 "platform":"D02"
 },
 
-"comments1":"distribution configurations",
 "distros":[
 {"name":"Ubuntu","install":"yes"},
 {"name":"Debian","install":"no"},
@@ -12,23 +10,14 @@
 {"name":"OpenSuse","install":"yes"}
 ],
 
-"comments2":"boards configuration",
 "boards":[
 {"mac":"00-00-00-00-00-01"},
 {"mac":"00-00-00-00-00-02"}
 ],
 
-"comments3":"applications configuration",
-"applications":[
-{"name":"test","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh","version":"v1.0","install":[{"sour":"build/bin","dest":"/usr/bin","dir":"no"}]},
-
-{"name":"mysql","source":"http://xxx.git","patches":"http://xxx.git","build":"build.sh","version":"v1.1", 
-"install":[
-{"sour":"build/bin","dest":"/usr/bin","dir":"yes"},
-{"sour":"build/cfg","dest":"/etc/mysql","dir":"no"},
-{"sour":"build/mysqlpostinstall.sh","dest":"/usr/bin/estuary/postinstall","dir":"no"},
-{"sour":"build/mysqlupdate.sh","dest":"/usr/bin/estuary/update","dir":"no"},
-{"sour":"build/mysqlremove.sh","dest":"/usr/bin/estuary/remove","dir":"no"}
-]}
+"packages":[
+{"name":"armor","install":"yes"},
+{"name":"docker","install":"no"},
+{"name":"mysql","install":"no"}
 ]
 }

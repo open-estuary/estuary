@@ -301,7 +301,7 @@ fi
 check_init ".initialized" $lastupdate
 if [ x"0" = x"$?" ]; then
 	sudo apt-get update
-    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl
+    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
     if [ x"$?" = x"0" ]; then
         touch ".initialized"
     fi
@@ -920,24 +920,40 @@ done
 ###################################################################################
 ######################### install applications          ###########################
 ###################################################################################
-install_apps()
+PACKAGES=packages
+install_pkgs()
 {
     if [ x"" = x"$CFGFILE" ] || [ ! -f $CFGFILE ]; then
 		return
 	fi
 
-	echo "Installing applications ..."
+	echo "Installing packages ..."
 
 	idx=0
-    app=`jq -r ".applications[$idx].name" $CFGFILE`
-	while [ x"$app" != x"null" ];
+    pkg=`jq -r ".packages[$idx].name" $CFGFILE`
+	while [ x"$pkg" != x"null" ];
 	do
-		if [ x"" != x"$app" ]; then
-			echo "Installing $app ..."
+    	install=`jq -r ".packages[$idx].install" $CFGFILE`
+		if [ x"yes" = x"$install" ]; then
+			appdir="$PACKAGES/$pkg"
+			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
+				$appdir/build.sh $PLATFORM $1 $2
+
+				for cpfile in postinstall remove
+				do
+					if [ -f "$appdir/$pkg"_"$cpfile".sh ]; then
+						targetdir="$2/usr/bin/estuary/$cpfile"
+						if [ ! -d $targetdir ]; then
+							sudo mkdir -p $targetdir 2>/dev/null
+						fi
+						sudo cp "$appdir/$pkg"_"$cpfile".sh  $targetdir/
+					fi
+				done
+			fi
 		fi
 
 		let idx=$idx+1
-    	app=`jq -r ".applications[$idx].name" $CFGFILE`
+    	pkg=`jq -r ".packages[$idx].name" $CFGFILE`
 	done
 }
 
@@ -947,10 +963,10 @@ install_apps()
 distro_postfix=".tar.gz"
 create_distro()
 {
-	distro_dir=$build_dir/$DISTRO_DIR/$1
+	distro_dir=`pwd`/$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
-		install_apps $distro_dir
+		install_pkgs $1 $distro_dir
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
 		sudo cp estuary/post_install.sh $distro_dir/etc/profile.d/
 		sudo chmod 755 $distro_dir/etc/profile.d/post_install.sh

@@ -1,0 +1,11 @@
+{
+"system":{
+"platform":"D02"
+},
+
+"distros":[
+{"name":"Ubuntu","install":"yes"},
+{"name":"Debian","install":"no"}
+]
+
+}

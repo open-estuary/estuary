@@ -26,6 +26,9 @@
   <!-- patches -->
   <project name="patches" />
 
+  <!-- packages -->
+  <project name="packages" />
+
   <!-- grub -->
   <!-- project name="grub" remote="grub" / -->
   <project name="grub" />
