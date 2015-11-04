@@ -5,7 +5,6 @@ UEFI User Manual
 UEFI is a kind of BIOS to boot system and provide runtime service to OS which can do some basic IO operation with the runtime service, e.g.: reboot, power off and etc.
 Normally, there are some trust firmware will be produce from UEFI building, they are responsible for trust reprogram, they include:
     UEFI_D02.fd         # UEFI executable binary file.
-    bl1.bin, fip.bin    # Trust firmware binary files.
     CH02TEVBC_V03.bin   # CPLD binary to control power supplier.
 
 Where to get them, please refer to Readme.txt.

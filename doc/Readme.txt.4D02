@@ -3,8 +3,6 @@ This is the readme file for D02 platform
 After you do "./estuary/build.sh -p D02 -d Ubuntu", all targets files will be produced into <project root>/build/D02 directory, they are:
 
 ### UEFI_D02.fd ###
-### bl1.bin ###
-### fip.bin ###
 ### CH02TEVBC_V03.bin ###
 description: UEFI_D02.fd is the UEFI bios for D02 platform, CH02TEVBC_V03.bin is the CPLD binary for D02 board, the others are binaries for trust firmware.
 target: <project root>/build/D02/binary/
@@ -24,7 +22,6 @@ build commands(supposedly, you are in <project root> currently:
     build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 
     cp Build/Pv660D02/RELEASE_ARMLINUXGCC/FV/PV660D02.fd ../build/D02/binary/UEFI_D02.fd
-    cp HwProductsPkg/D02/*.bin ../build/D02/binary/
     popd
 
 Then you will find *.fd in <project root>/uefi/Build and the other trust firmware binaries in <project root>/HwProductsPkg.
