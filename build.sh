@@ -325,14 +325,6 @@ if [ x"" != x"$PLATFORM" ] && [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
 fi
 
-if [ x"$TARGETARCH" = x"ARM32" ]; then
-	cross_gcc=arm-linux-gnueabihf-gcc
-	cross_prefix=arm-linux-gnueabihf
-else
-	cross_gcc=aarch64-linux-gnu-gcc
-	cross_prefix=aarch64-linux-gnu
-fi
-
 ###################################################################################
 ###################### Download & uncompress toochain #############################
 ###################################################################################
@@ -341,6 +333,7 @@ toolchain_dir=$build_dir/toolchain
 GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 toolchainsum_file="toolchain.sum"
+
 
 if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
@@ -380,17 +373,30 @@ if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
 fi
 
 # Uncompress the toolchain
-arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc" 2>/dev/null`
-if [ x"" = x"$arm_gcc" ]; then 
-	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
-	echo "Uncompressing the toolchain ..."
-	tar Jxf $package -C $TOOLCHAIN_DIR
-	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc 2>/dev/null`
-fi
-CROSS=`pwd`/${arm_gcc%g*}
-export PATH=${CROSS%/*}:$PATH
+for	cross_prefix in arm-linux-gnueabihf aarch64-linux-gnu
+do
+	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+	if [ x"" = x"$arm_gcc" ]; then 
+		package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
+		echo "Uncompressing the toolchain ..."
+		tar Jxf $package -C $TOOLCHAIN_DIR
+		arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+	fi
+	
+	COMPILER_DIR=`pwd`/${arm_gcc%/*}
+	export PATH=$COMPILER_DIR:$PATH
+
+	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnuabihf" ]; then
+		CROSS=`pwd`/${arm_gcc%g*}
+	fi
+
+	if [ x"$TARGETARCH" = x"ARM64" ] && [ x"$cross_prefix" = x"aarch64-linux-gnu" ]; then
+		CROSS=`pwd`/${arm_gcc%g*}
+	fi
+done
+
 if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
-	export CROSS_COMPILE=$CROSS 
+	export CROSS_COMPILE=$CROSS
 fi
 
 echo "Cross compiler is $CROSS"
