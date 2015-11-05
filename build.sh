@@ -11,8 +11,8 @@
 ############################# Variables definition         ########################
 ###################################################################################
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
-distros_d01=(Ubuntu)
-distros_d02=(Ubuntu OpenSuse Fedora Debian)
+distros_arm32=(Ubuntu)
+distros_arm64=(Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02 HiKey)
 installs=(Caliper toolchain)
 
@@ -61,22 +61,15 @@ usage()
 ###################################################################################
 check_distro()
 {
-	if [ x"QEMU" = x"$PLATFORM" ]; then
-		for dis in ${distros_d02[@]}; do
+	if [ x"D01" = x"$PLATFORM" ]; then
+		for dis in ${distros_arm32[@]}; do
 			if [ x"$dis" = x"$1" ]; then 
 				DISTRO=$1
 				return
 			fi
 		done
-	elif [ x"D01" = x"$PLATFORM" ]; then
-		for dis in ${distros_d01[@]}; do
-			if [ x"$dis" = x"$1" ]; then 
-				DISTRO=$1
-				return
-			fi
-		done
-	elif [ x"D02" = x"$PLATFORM" ]; then
-		for dis in ${distros_d02[@]}; do
+	elif [ x"" != x"$PLATFORM" ]; then
+		for dis in ${distros_arm64[@]}; do
 			if [ x"$dis" = x"$1" ]; then 
 				DISTRO=$1
 				return
@@ -603,7 +596,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 
 	echo "Building UEFI ..."
 
-	if [ x"ARM32" = x"$TARGETARCH" ]; then
+	if [ x"D01" = x"$PLATFORM" ]; then
 		# Build UEFI for D01 platform
      	pushd $UEFI_TOOLS/
      	echo "[d01]" >> platforms.config 
@@ -623,37 +616,68 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
     	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
-	else
-		if [ x"QEMU" != x"$PLATFORM" ]; then
-			# Build UEFI for D02 platform
-	    	pushd $UEFI_DIR/
-			# roll back to special version for D02
-			git reset --hard
-			git checkout open-estuary/master
-			git apply HwPkg/Patch/*.patch
-			export LC_CTYPE=C 
-            make -C BaseTools clean
-			make -C BaseTools 
-			source edksetup.sh 
-            build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc cleanall
-			build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
-	
-	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
-	    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
-	    	popd
-	    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+	elif [ x"D02" = x"$PLATFORM" ]; then
+		# Build UEFI for D02 platform
+    	pushd $UEFI_DIR/
+		# roll back to special version for D02
+		git reset --hard
+		git checkout open-estuary/master
+		git apply HwPkg/Patch/*.patch
+		export LC_CTYPE=C 
+        make -C BaseTools clean
+		make -C BaseTools 
+		source edksetup.sh 
+        build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc cleanall
+		build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 
-#			if [ x"$UEFI_BIN" != x"" ]; then
-#				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
-#				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
-#			fi
-		fi
+    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
+    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
+    	popd
+    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+
+#		if [ x"$UEFI_BIN" != x"" ]; then
+#			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
+#			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
+#		fi
+	elif [ x"HiKey" = x"$PLATFORM" ]; then
+		# Build UEFI for D02 platform
+    	pushd $UEFI_DIR/
+		export AARCH64_TOOLCHAIN=GCC49
+	    export EDK2_DIR=${PWD}
+	    export UEFI_TOOLS_DIR=${PWD}/uefi-tools
+
+	    git reset --hard 37500bcd263482fda9c976
+	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
+	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
+
+	    cd l-loader
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/bl1.bin ./
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/fip.bin ./
+
+	    arm-linux-gnueabihf-gcc -c -o start.o start.S
+	    arm-linux-gnueabihf-gcc -c -o debug.o debug.S
+	    arm-linux-gnueabihf-ld -Bstatic -Tl-loader.lds -Ttext 0xf9800800 start.o debug.o -o loader
+	    arm-linux-gnueabihf-objcopy -O binary loader temp
+	    python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
+
+	    sudo PTABLE=linux bash -x generate_ptable.sh
+	    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
+
+	    cp l-loader.bin $uefi_bin/
+#	    cp fip.bin      $uefi_bin/
+	    cp ptable-linux.img $uefi_bin/
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi $uefi_bin/
+		cd ..
+		# roll back to special version for D02
+    	popd
+    	UEFI_BIN=`find "$UEFI_DIR/l-loader" -name "fip.bin" 2>/dev/null`
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
 		uefi_bin=$uefi_dir"/UEFI_"$PLATFORM".fd"
     	cp $UEFI_BIN $uefi_bin
 	fi
 fi
+
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
 fi
@@ -727,8 +751,8 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	cd $grub_dir
     	./bin/grub-mkimage -v -o grubarm32.efi -O arm-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	cd -
-else
-# Build grub for D02 platform
+	else
+# Build grub for ARM64 platform
     	pushd $GRUB_DIR/
 # Apply patch for boot from inidcated MAC address
         git reset --hard
@@ -788,6 +812,8 @@ else
 	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
     if [ x"QEMU" = x"$PLATFORM" ]; then
         DTB_BIN=""
+    elif [ x"HiKey" = x"$PLATFORM" ]; then
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
     else
 	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
     fi
@@ -822,8 +848,8 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 #		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
 
-		make O=../$kernel_dir -j14 zImage
-		make O=../$kernel_dir hip04-d01.dtb
+		make O=../$kernel_dir -j14 ${KERNEL_BIN##*/}
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
 		make O=../$kernel_dir defconfig
@@ -837,10 +863,15 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
         fi
-		make O=../$kernel_dir -j14 Image
+		make O=../$kernel_dir -j14 ${KERNEL_BIN##*/}
 
-	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
-		make O=../$kernel_dir hisilicon/hip05-d02.dtb
+		dtb_dir=${DTB_BIN#*arch/}
+		dtb_dir=${DTB_BIN%/*}
+		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
+
+	    mkdir -p $dtb_dir 2>/dev/null
+
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
     fi
 
     # postprocess for kernel building
