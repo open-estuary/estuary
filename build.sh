@@ -13,7 +13,7 @@
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_d01=(Ubuntu)
 distros_d02=(Ubuntu OpenSuse Fedora Debian)
-platforms=(QEMU D01 D02)
+platforms=(QEMU D01 D02 HiKey)
 installs=(Caliper toolchain)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -50,7 +50,7 @@ usage()
 	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
-	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
+	echo "		*for D02,HiKey, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
