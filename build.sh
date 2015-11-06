@@ -663,10 +663,10 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    sudo PTABLE=linux bash -x generate_ptable.sh
 	    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
 
-	    cp l-loader.bin $uefi_bin/
-#	    cp fip.bin      $uefi_bin/
-	    cp ptable-linux.img $uefi_bin/
-	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi $uefi_bin/
+	    cp l-loader.bin ../../$uefi_dir/
+#	    cp fip.bin      ../../$uefi_dir/
+	    cp ptable-linux.img ../../$uefi_dir/
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi ../../$uefi_dir/
 		cd ..
 		# roll back to special version for D02
     	popd
