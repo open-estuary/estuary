@@ -570,6 +570,7 @@ fi
 ###################################################################################
 ########################### Build UEFI from source code   #########################
 ###################################################################################
+set -x
 UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
@@ -623,15 +624,9 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		git reset --hard
 		git checkout open-estuary/master
 		git apply HwPkg/Patch/*.patch
-		export LC_CTYPE=C 
-        make -C BaseTools clean
-		make -C BaseTools 
-		source edksetup.sh 
-        build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc cleanall
-		build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
-    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
+    	uefi-tools/uefi-build.sh d02
     	popd
     	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
 
@@ -642,7 +637,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	elif [ x"HiKey" = x"$PLATFORM" ]; then
 		# Build UEFI for D02 platform
     	pushd $UEFI_DIR/
-		export AARCH64_TOOLCHAIN=GCC49
+#		export AARCH64_TOOLCHAIN=GCC49
 	    export EDK2_DIR=${PWD}
 	    export UEFI_TOOLS_DIR=${PWD}/uefi-tools
 
