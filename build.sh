@@ -10,6 +10,8 @@
 ###################################################################################
 ############################# Variables definition         ########################
 ###################################################################################
+#core number for building
+corenum=36
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
 distros_arm32=(Ubuntu)
 distros_arm64=(Ubuntu OpenSuse Fedora Debian)
@@ -379,7 +381,7 @@ do
 	COMPILER_DIR=`pwd`/${arm_gcc%/*}
 	export PATH=$COMPILER_DIR:$PATH
 
-	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnuabihf" ]; then
+	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnueabihf" ]; then
 		CROSS=`pwd`/${arm_gcc%g*}
 	fi
 
@@ -393,6 +395,7 @@ if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
 fi
 
 echo "Cross compiler is $CROSS"
+
 
 ###################################################################################
 ######## Download distribution according to special PLATFORM and DISTRO ###########
@@ -570,7 +573,6 @@ fi
 ###################################################################################
 ########################### Build UEFI from source code   #########################
 ###################################################################################
-set -x
 UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
@@ -739,7 +741,7 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	make distclean
     	./autogen.sh
     	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
-    	make -j14 
+    	make -j${corenum}
     	make install
     	popd
     	# TODO -- check whether it is useful
@@ -760,7 +762,7 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	make distclean
     	./autogen.sh
     	./configure --prefix="$absolute_dir" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
-    	make -j14
+    	make -j${corenum}
     	make  install
     	popd
     	# TODO -- check whether it is useful
@@ -843,7 +845,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 #		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
 
-		make O=../$kernel_dir -j14 ${KERNEL_BIN##*/}
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
@@ -858,7 +860,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
         fi
-		make O=../$kernel_dir -j14 ${KERNEL_BIN##*/}
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
 		dtb_dir=${DTB_BIN#*arch/}
 		dtb_dir=${DTB_BIN%/*}
@@ -871,9 +873,9 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
     # postprocess for kernel building
 	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
-		make O=../$kernel_dir -j14 modules
-		make O=../$kernel_dir -j14 modules_install
-		make O=../$kernel_dir -j14 firmware_install
+		make O=../$kernel_dir -j${corenum} modules
+		make O=../$kernel_dir -j${corenum} modules_install
+		make O=../$kernel_dir -j${corenum} firmware_install
 	fi
 
 	popd
@@ -1258,7 +1260,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
         fi
         echo "Building the QEMU ..."
 		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
-		make -j14
+		make -j${corenum}
 		make install
 		popd
 	    QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
