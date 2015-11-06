@@ -3,16 +3,19 @@
 #Use case:
 #   ./build.sh -h:                  to get help information for this script
 #   ./build.sh -p D02 -d Ubuntu:    to build Ubuntu distribution for D02 platform
+#   ./build.sh -f estuarycfg.json:  to build target system according to estuarycfg.json
 #Author: Justin Zhao
 #Date: August 7, 2015
 
 ###################################################################################
 ############################# Variables definition         ########################
 ###################################################################################
+#core number for building
+corenum=36
 distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
-distros_d01=(Ubuntu)
-distros_d02=(Ubuntu OpenSuse Fedora Debian)
-platforms=(QEMU D01 D02)
+distros_arm32=(Ubuntu)
+distros_arm64=(Ubuntu OpenSuse Fedora Debian)
+platforms=(QEMU D01 D02 HiKey)
 installs=(Caliper toolchain)
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -36,7 +39,7 @@ PATH_UBUNTU32=default
 usage()
 {
 	echo "usage:"
-	echo -n "build.sh [ -p "
+	echo -n "build.sh [ -f cfgfile.json ] [ -p "
 	echo -n ${platforms[*]} | sed "s/ / | /g"
 	echo -n " ] [ -d "
 	echo -n ${distros[*]} | sed "s/ / | /g"
@@ -45,10 +48,11 @@ usage()
 	echo " ] "
 
 	echo -e "\n -h,--help: to print this message"
-	echo " -p,--platform: the target platform, the -d musb be specified if platform is QEMU"
+	echo " -f,--file: the config json file for Estuary building"
+	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
-	echo "		*for D02, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
+	echo "		*for D02,HiKey, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
@@ -59,22 +63,15 @@ usage()
 ###################################################################################
 check_distro()
 {
-	if [ x"QEMU" = x"$PLATFORM" ]; then
-		for dis in ${distros_d02[@]}; do
+	if [ x"D01" = x"$PLATFORM" ]; then
+		for dis in ${distros_arm32[@]}; do
 			if [ x"$dis" = x"$1" ]; then 
 				DISTRO=$1
 				return
 			fi
 		done
-	elif [ x"D01" = x"$PLATFORM" ]; then
-		for dis in ${distros_d01[@]}; do
-			if [ x"$dis" = x"$1" ]; then 
-				DISTRO=$1
-				return
-			fi
-		done
-	elif [ x"D02" = x"$PLATFORM" ]; then
-		for dis in ${distros_d02[@]}; do
+	elif [ x"" != x"$PLATFORM" ]; then
+		for dis in ${distros_arm64[@]}; do
 			if [ x"$dis" = x"$1" ]; then 
 				DISTRO=$1
 				return
@@ -124,16 +121,35 @@ check_install()
 }
 
 ###################################################################################
+############################# Check initilization status ##########################
+###################################################################################
+lastupdate="2015-10-15"
+check_init()
+{
+    tmpfile=$1
+    tmpdate=$2
+
+    if [ -f "$tmpfile" ]; then
+        inittime=`stat -c %Y $tmpfile`
+        checktime=`date +%s -d $tmpdate`
+
+        if [ $inittime -gt $checktime ]; then
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+###################################################################################
 ############################# Check the checksum file   ###########################
 ###################################################################################
-checksum_result=0
 check_sum()
 {
     checksum_source=$1
     if [ x"$checksum_source" = x"" ]; then
         echo "Invalidate checksum file!"
-        checksum_result=1
-        exit 1
+        return 1
     fi
 
     checksum_file=${checksum_source##*/}
@@ -145,26 +161,67 @@ check_sum()
 		cp $checksum_source ./
 	fi
 
-	if [ -f ".$checksum_file" ]; then
-		checksum_result=0
-		return
+    check_init ".$checksum_file" $lastupdate
+	if [ x"$?" = x"1" ]; then
+		return 0
 	fi
 
 	md5sum --quiet --check $checksum_file 2>/dev/null | grep 'FAILED' >/dev/null
 	if [ x"$?" = x"0" ]; then
-		checksum_result=1
+        return 1
 	else
-		checksum_result=0
 		touch ".$checksum_file"
+        return 0
 	fi
+}
+
+###################################################################################
+############################# Parse config file        ############################
+###################################################################################
+PLATFORM=
+DISTRO=
+DISTROLS=()
+INSTALL=
+CFGFILE=
+parse_cfg()
+{
+    if [ ! -f $CFGFILE ]; then
+	    echo -e "\033[31m$CFGFILE does not exist!\033[0m"
+        usage
+        exit 1
+    fi
+
+    PLATFORM=`jq -r ".system.platform" $CFGFILE`
+
+    if [ x"0" != x"$?" ]; then
+	    echo -e "\033[31mDo not find the .system.platform in $CFGFILE!\033[0m"
+        usage
+		exit 1
+    fi
+
+	idx=0
+    install=`jq -r ".distros[$idx].install" $CFGFILE`
+	while [ x"$install" != x"null" ];
+	do
+		if [ x"yes" = x"$install" ]; then
+    		DISTROLS[${#DISTROLS[@]}]=`jq -r ".distros[$idx].name" $CFGFILE`
+		fi
+		let idx=$idx+1
+    	install=`jq -r ".distros[$idx].install" $CFGFILE`
+	done
+
+	check_platform $PLATFORM
+	for tmp in "${DISTROLS[@]}"
+	do
+		check_distro $tmp
+	done
+
+	DISTRO=$DISTROLS
 }
 
 ###################################################################################
 ############################# Check all parameters     ############################
 ###################################################################################
-PLATFORM=
-DISTRO=
-INSTALL=
 while [ x"$1" != x"" ]; do 
     case $1 in 
         "-h" | "--help" )
@@ -186,6 +243,13 @@ while [ x"$1" != x"" ]; do
 			check_install $1
 			echo "Install: $1"
 			;;
+		"-f" | "--file" )
+			shift
+            CFGFILE=`pwd`"/$1"
+            parse_cfg
+			echo "Install: $DISTRO"
+            break
+			;;
 		* )
 			echo "unknown arg $1"
 			usage
@@ -194,6 +258,11 @@ while [ x"$1" != x"" ]; do
     esac
 	shift
 done
+
+# Default to add $DISTRO into distro list if don't use config file
+if [ x"" = x"$CFGFILE" ]; then
+	DISTROLS[${#DISTROLS[@]}]=$DISTRO
+fi
 
 if [ x"$PLATFORM" = x"" -a x"$DISTRO" != x"" ]; then
 	echo -e "\033[31m-p must be specified with a determined -d parameter.\033[0m"
@@ -212,6 +281,9 @@ if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
     exit 1
 fi
 
+TOOLS_DIR="`dirname $0`"
+cd $TOOLS_DIR/../
+
 ###################################################################################
 ############################# Setup host environmenta #############################
 ###################################################################################
@@ -221,9 +293,10 @@ if [ x"$?" = x"1" ]; then
     rm -rf ".initialized"
 fi
 
-if [ ! -f ".initialized" ]; then
+check_init ".initialized" $lastupdate
+if [ x"0" = x"$?" ]; then
 	sudo apt-get update
-    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl
+    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
     if [ x"$?" = x"0" ]; then
         touch ".initialized"
     fi
@@ -231,14 +304,12 @@ fi
 
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
-TOOLS_DIR="`dirname $0`"
 if [ x"$PLATFORM" = x"D01" ]; then
     TARGETARCH="ARM32"
 else
     TARGETARCH="ARM64"
 fi
 
-cd $TOOLS_DIR/../
 build_dir=build/$PLATFORM
 if [ ! -d "$build_dir" ] ; then
 	mkdir -p "$build_dir" 2> /dev/null
@@ -247,14 +318,6 @@ fi
 binary_dir=$build_dir/binary
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
-fi
-
-if [ x"$TARGETARCH" = x"ARM32" ]; then
-	cross_gcc=arm-linux-gnueabihf-gcc
-	cross_prefix=arm-linux-gnueabihf
-else
-	cross_gcc=aarch64-linux-gnu-gcc
-	cross_prefix=aarch64-linux-gnu
 fi
 
 ###################################################################################
@@ -266,6 +329,7 @@ GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 toolchainsum_file="toolchain.sum"
 
+
 if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 fi
@@ -273,15 +337,15 @@ fi
 # Download firstly
 TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
-echo "Check the checksum for toolchain..."
+echo "Checking the checksum for toolchain ..."
 check_sum "../estuary/checksum/$toolchainsum_file"
-if [ x"$checksum_result" != x"0" ]; then
+if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
 	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
-	        echo "Download the toolchain..."
+	        echo "Downloading the toolchain ..."
 			rm -rf $LINE 2>/dev/null
 		    wget -c $TOOLCHAIN_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
@@ -297,110 +361,132 @@ cd -
 
 # Copy to build target directory
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
-    echo "Copy toolchain to 'build' directory..."
+    echo "Copying toolchain to 'build' directory ..."
 	mkdir -p "$toolchain_dir" 2>/dev/null
     cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
     cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
 fi
 
 # Uncompress the toolchain
-arm_gcc=`find "$TOOLCHAIN_DIR" -name "$cross_gcc" 2>/dev/null`
-if [ x"" = x"$arm_gcc" ]; then 
-	package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
-	echo "Uncompress the toolchain......"
-	tar Jxf $package -C $TOOLCHAIN_DIR
-	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_gcc 2>/dev/null`
-fi
-CROSS=`pwd`/${arm_gcc%g*}
-export PATH=${CROSS%/*}:$PATH
+for	cross_prefix in arm-linux-gnueabihf aarch64-linux-gnu
+do
+	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+	if [ x"" = x"$arm_gcc" ]; then 
+		package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
+		echo "Uncompressing the toolchain ..."
+		tar Jxf $package -C $TOOLCHAIN_DIR
+		arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+	fi
+	
+	COMPILER_DIR=`pwd`/${arm_gcc%/*}
+	export PATH=$COMPILER_DIR:$PATH
+
+	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnueabihf" ]; then
+		CROSS=`pwd`/${arm_gcc%g*}
+	fi
+
+	if [ x"$TARGETARCH" = x"ARM64" ] && [ x"$cross_prefix" = x"aarch64-linux-gnu" ]; then
+		CROSS=`pwd`/${arm_gcc%g*}
+	fi
+done
+
 if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
-	export CROSS_COMPILE=$CROSS 
+	export CROSS_COMPILE=$CROSS
 fi
 
 echo "Cross compiler is $CROSS"
 
+
 ###################################################################################
 ######## Download distribution according to special PLATFORM and DISTRO ###########
 ###################################################################################
-DISTRO_DIR=distro
-if [ ! -d "$DISTRO_DIR" ] ; then
-	mkdir -p "$DISTRO_DIR" 2> /dev/null
-fi
-
-# Determine the source file
-if [ x"$TARGETARCH" = x"ARM32" ] ; then
-	case $DISTRO in
-#		"OpenSuse" )
-#			DISTRO_SOURCE=$PATH_OPENSUSE32
-#			;;
-		"Ubuntu" )
-			DISTRO_SOURCE=$PATH_UBUNTU32
-			;;	
-			* )
-			DISTRO_SOURCE="none"
-			;;
-	esac
-else
-	case $DISTRO in
-		"OpenSuse" )
-			DISTRO_SOURCE=$PATH_OPENSUSE64
-			;;
-		"Ubuntu" )
-			DISTRO_SOURCE=$PATH_UBUNTU64
-			;;	
-        "Fedora" )
-			DISTRO_SOURCE=$PATH_FEDORA64
-			;;	
-        "Debian" )
-			DISTRO_SOURCE=$PATH_DEBIAN64
-			;;	
-		* )
-			DISTRO_SOURCE="none"
-			;;
-	esac
-fi
-#DISTRO_SOURCE="default"
-
-if [ x"$DISTRO_SOURCE" != x"none" ]; then
-
-	if [ x"$DISTRO_SOURCE" = x"default" ]; then
-	    DISTRO_SOURCE=$PATH_DISTRO/"$DISTRO"_"$TARGETARCH"."tar.gz"
+download_distro()
+{
+	DISTRO_DIR=distro
+	if [ ! -d "$DISTRO_DIR" ] ; then
+		mkdir -p "$DISTRO_DIR" 2> /dev/null
 	fi
-	
-	# Check the postfix name
-	postfix=${DISTRO_SOURCE#*.tar} 
-	if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
-	    postfix=${DISTRO_SOURCE##*.} 
+
+	# Determine the source file
+	if [ x"$TARGETARCH" = x"ARM32" ] ; then
+		case $1 in
+	#		"OpenSuse" )
+	#			DISTRO_SOURCE=$PATH_OPENSUSE32
+	#			;;
+			"Ubuntu" )
+				DISTRO_SOURCE=$PATH_UBUNTU32
+				;;	
+				* )
+				DISTRO_SOURCE="none"
+				;;
+		esac
 	else
-		if [ x"$postfix" = x"" ]; then
-			postfix=".tar"
-		else
-			postfix="tar"$postfix	
-		fi
+		case $1 in
+			"OpenSuse" )
+				DISTRO_SOURCE=$PATH_OPENSUSE64
+				;;
+			"Ubuntu" )
+				DISTRO_SOURCE=$PATH_UBUNTU64
+				;;	
+	        "Fedora" )
+				DISTRO_SOURCE=$PATH_FEDORA64
+				;;	
+	        "Debian" )
+				DISTRO_SOURCE=$PATH_DEBIAN64
+				;;	
+			* )
+				DISTRO_SOURCE="none"
+				;;
+		esac
 	fi
+	#DISTRO_SOURCE="default"
 	
-	cd $DISTRO_DIR
-	# Download it based on md5 checksum file
-	echo "Check the checksum for distribution: "$DISTRO"_"$TARGETARCH"..."
-	check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
-	if [ x"$checksum_result" != x"0" ]; then
-	    echo "Check the checksum for distribution..."
-		distrosum_file=${DISTRO_SOURCE##*/}".sum"
-#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
-#		if [ x"$?" = x"0" ]; then
-		    echo "Download the distribution: "$DISTRO"_"$TARGETARCH"..."
-			rm -rf "$DISTRO"_"$TARGETARCH"."$postfix" 2>/dev/null
-		    wget -c $DISTRO_SOURCE -O "$DISTRO"_"$TARGETARCH"."$postfix"
-			if [ x"$?" != x"0" ]; then
-				rm -rf $distrosum_file $DISTRO"_"$TARGETARCH"."$postfix 2>/dev/null
-				echo "Download distributions "$DISTRO"_"$TARGETARCH"."$postfix" failed!"
-				exit 1
+	if [ x"$DISTRO_SOURCE" != x"none" ]; then
+	
+		if [ x"$DISTRO_SOURCE" = x"default" ]; then
+		    DISTRO_SOURCE=$PATH_DISTRO/"$1"_"$TARGETARCH"."tar.gz"
+		fi
+		
+		# Check the postfix name
+		postfix=${DISTRO_SOURCE#*.tar} 
+		if [ x"$postfix" = x"$DISTRO_SOURCE" ]; then
+		    postfix=${DISTRO_SOURCE##*.} 
+		else
+			if [ x"$postfix" = x"" ]; then
+				postfix=".tar"
+			else
+				postfix="tar"$postfix	
 			fi
-		    chmod 777 "$DISTRO"_"$TARGETARCH".$postfix
-#		fi
+		fi
+		
+		cd $DISTRO_DIR
+		# Download it based on md5 checksum file
+		echo "Checking the checksum for distribution: "$1"_"$TARGETARCH" ..."
+		check_sum "../estuary/checksum/${DISTRO_SOURCE##*/}.sum"
+		if [ x"$?" != x"0" ]; then
+		    echo "Checking the checksum for distribution ..."
+			distrosum_file=${DISTRO_SOURCE##*/}".sum"
+	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
+	#		if [ x"$?" = x"0" ]; then
+			    echo "Downloading the distribution: "$1"_"$TARGETARCH" ..."
+				rm -rf "$1"_"$TARGETARCH"."$postfix" 2>/dev/null
+			    wget -c $DISTRO_SOURCE -O "$1"_"$TARGETARCH"."$postfix"
+				if [ x"$?" != x"0" ]; then
+					rm -rf $distrosum_file $1"_"$TARGETARCH"."$postfix 2>/dev/null
+					echo "Download distributions "$1"_"$TARGETARCH"."$postfix" failed!"
+					exit 1
+				fi
+			    chmod 777 "$1"_"$TARGETARCH".$postfix
+	#		fi
+		fi
+		cd -
 	fi
-	cd -
-fi
+}
+
+for tmp in "${DISTROLS[@]}"
+do
+	download_distro $tmp
+done
 
 ###################################################################################
 ##########  Download prebuilt binaries based on md5 checksum file    ##############
@@ -416,15 +502,15 @@ if [ ! -d "$BINARY_DIR" ] ; then
 fi
 
 cd $BINARY_DIR/
-echo "Check the checksum for binaries..."
+echo "Checking the checksum for binaries ..."
 check_sum "../estuary/checksum/$binarysum_file"
-if [ x"$checksum_result" != x"0" ]; then
+if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
 	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
-	        echo "Download "$LINE"..."
+	        echo "Downloading $LINE ..."
 		    rm -rf $LINE 2>/dev/null
 		    wget -c $BINARY_SOURCE/$LINE
 			if [ x"$?" != x"0" ]; then
@@ -485,6 +571,16 @@ if [ x"" != x"$PLATFORM" ]; then
 fi
 
 ###################################################################################
+########################### Copy prebuilt files           #########################
+###################################################################################
+if [ x"HiKey" = x"$PLATFORM" ]; then
+	HIKEY_TOOLS=tools/hikey-tools
+	if [ ! -f $binary_dir/hisi-idt.py ]; then
+    	cp $HIKEY_TOOLS/* $binary_dir/
+	fi
+fi
+
+###################################################################################
 ########################### Build UEFI from source code   #########################
 ###################################################################################
 UEFI_TOOLS=tools/uefi-tools
@@ -511,9 +607,9 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     # Let UEFI detect the arch automatically
     export ARCH=
 
-	echo "Build UEFI..."
+	echo "Building UEFI ..."
 
-	if [ x"ARM32" = x"$TARGETARCH" ]; then
+	if [ x"D01" = x"$PLATFORM" ]; then
 		# Build UEFI for D01 platform
      	pushd $UEFI_TOOLS/
      	echo "[d01]" >> platforms.config 
@@ -533,37 +629,62 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
     	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
-	else
-		if [ x"QEMU" != x"$PLATFORM" ]; then
-			# Build UEFI for D02 platform
-	    	pushd $UEFI_DIR/
-			# roll back to special version for D02
-			git reset --hard
-			git checkout open-estuary/master
-			git apply HwPkg/Patch/*.patch
-			export LC_CTYPE=C 
-            make -C BaseTools clean
-			make -C BaseTools 
-			source edksetup.sh 
-            build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc cleanall
-			build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
-	
-	    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
-	    	#../$UEFI_TOOLS/uefi-build.sh -b DEBUG d02
-	    	popd
-	    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+	elif [ x"D02" = x"$PLATFORM" ]; then
+		# Build UEFI for D02 platform
+    	pushd $UEFI_DIR/
+		# roll back to special version for D02
+		git reset --hard
+		git checkout open-estuary/master
+		git apply HwPkg/Patch/*.patch
 
-			if [ x"$UEFI_BIN" != x"" ]; then
-				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
-				cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
-			fi
-		fi
+    	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
+    	uefi-tools/uefi-build.sh d02
+    	popd
+    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+
+#		if [ x"$UEFI_BIN" != x"" ]; then
+#			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
+#			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
+#		fi
+	elif [ x"HiKey" = x"$PLATFORM" ]; then
+		# Build UEFI for D02 platform
+    	pushd $UEFI_DIR/
+#		export AARCH64_TOOLCHAIN=GCC49
+	    export EDK2_DIR=${PWD}
+	    export UEFI_TOOLS_DIR=${PWD}/uefi-tools
+
+	    git reset --hard 37500bcd263482fda9c976
+	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
+	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
+
+	    cd l-loader
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/bl1.bin ./
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/fip.bin ./
+
+	    arm-linux-gnueabihf-gcc -c -o start.o start.S
+	    arm-linux-gnueabihf-gcc -c -o debug.o debug.S
+	    arm-linux-gnueabihf-ld -Bstatic -Tl-loader.lds -Ttext 0xf9800800 start.o debug.o -o loader
+	    arm-linux-gnueabihf-objcopy -O binary loader temp
+	    python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
+
+	    sudo PTABLE=linux bash -x generate_ptable.sh
+	    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
+
+	    cp l-loader.bin ../../$uefi_dir/
+#	    cp fip.bin      ../../$uefi_dir/
+	    cp ptable-linux.img ../../$uefi_dir/
+	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi ../../$uefi_dir/
+		cd ..
+		# roll back to special version for D02
+    	popd
+    	UEFI_BIN=`find "$UEFI_DIR/l-loader" -name "fip.bin" 2>/dev/null`
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
 		uefi_bin=$uefi_dir"/UEFI_"$PLATFORM".fd"
     	cp $UEFI_BIN $uefi_bin
 	fi
 fi
+
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
 fi
@@ -580,7 +701,7 @@ if [ x"D01" = x"$PLATFORM" ]; then
 	fi
 
     if [ ! -f $wrapper_dir/.text ]; then
-        echo "Build boot wrapper..."
+        echo "Building boot wrapper ..."
         pushd $WRAPPER_DIR
         make clean
         make
@@ -630,15 +751,15 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	make distclean
     	./autogen.sh
     	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
-    	make -j14 
+    	make -j${corenum}
     	make install
     	popd
     	# TODO -- check whether it is useful
     	cd $grub_dir
     	./bin/grub-mkimage -v -o grubarm32.efi -O arm-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     	cd -
-else
-# Build grub for D02 platform
+	else
+# Build grub for ARM64 platform
     	pushd $GRUB_DIR/
 # Apply patch for boot from inidcated MAC address
         git reset --hard
@@ -651,7 +772,7 @@ else
     	make distclean
     	./autogen.sh
     	./configure --prefix="$absolute_dir" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
-    	make -j14
+    	make -j${corenum}
     	make  install
     	popd
     	# TODO -- check whether it is useful
@@ -698,6 +819,8 @@ else
 	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
     if [ x"QEMU" = x"$PLATFORM" ]; then
         DTB_BIN=""
+    elif [ x"HiKey" = x"$PLATFORM" ]; then
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
     else
 	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
     fi
@@ -710,7 +833,7 @@ else
 fi
 
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
-    echo "Build kernel..."
+    echo "Building kernel ..."
     mkdir -p "$kernel_dir" 2> /dev/null
 
 	pushd $KERNEL_DIR/
@@ -732,8 +855,8 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 #		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
 
-		make O=../$kernel_dir -j14 zImage
-		make O=../$kernel_dir hip04-d01.dtb
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
 		make O=../$kernel_dir defconfig
@@ -747,17 +870,22 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
         fi
-		make O=../$kernel_dir -j14 Image
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
-	    mkdir -p "../$kernel_dir/arch/arm64/boot/dts/hisilicon"
-		make O=../$kernel_dir hisilicon/hip05-d02.dtb
+		dtb_dir=${DTB_BIN#*arch/}
+		dtb_dir=${DTB_BIN%/*}
+		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
+
+	    mkdir -p $dtb_dir 2>/dev/null
+
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
     fi
 
     # postprocess for kernel building
 	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
-		make O=../$kernel_dir -j14 modules
-		make O=../$kernel_dir -j14 modules_install
-		make O=../$kernel_dir -j14 firmware_install
+		make O=../$kernel_dir -j${corenum} modules
+		make O=../$kernel_dir -j${corenum} modules_install
+		make O=../$kernel_dir -j${corenum} firmware_install
 	fi
 
 	popd
@@ -778,52 +906,127 @@ fi
 ###################################################################################
 ######################### Uncompress the distribution   ###########################
 ###################################################################################
-distro_dir=$build_dir/$DISTRO_DIR/$DISTRO
-image=`ls "$DISTRO_DIR/" | grep -E "^$DISTRO*" | grep -E "$TARGETARCH" | grep -v ".sum"`
-if [ x"" != x"$DISTRO" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
-    mkdir -p "$distro_dir" 2> /dev/null
-    
-    echo "Uncompress the distribution($DISTRO) ......"
-    if [ x"${image##*.}" = x"bz2" ] ; then
-    	TEMP=${image%.*}
-    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a tar.bz2 package"
-    	else
-    		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a bz2 package"
-    	fi
-    fi
-    if [ x"${image##*.}" = x"gz" ] ; then
-    	TEMP=${image%.*}
-    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a tar.gz package"
-    	else
-    		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    		echo "This is a gz package"
-    	fi
-    fi
-    if [ x"${image##*.}" = x"tar" ] ; then 
-    	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    	echo "This is a tar package"
-    fi
-    if [ x"${image##*.}" = x"xz" ] ; then 
-    #	echo "This is a xz package"
-    	TEMP=${image%.*}
-    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-    		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
-    		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
-    	fi
-    fi
-    if [ x"${image##*.}" = x"tbz" ] ; then
-    	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-    fi
-    if [ x"${image}" = x"" ] ; then
-    	echo "Can not find the suitable root filesystem!"
-        exit 1
-    fi
-fi
+uncompress_distro()
+{
+	distro_dir=$build_dir/$DISTRO_DIR/$1
+	image=`ls "$DISTRO_DIR/" | grep -E "^$1*" | grep -E "$TARGETARCH" | grep -v ".sum"`
+	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -d "$distro_dir" ]; then
+	    mkdir -p "$distro_dir" 2> /dev/null
+	    
+	    echo "Uncompressing the distribution($1) ..."
+	    if [ x"${image##*.}" = x"bz2" ] ; then
+	    	TEMP=${image%.*}
+	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+	    		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a tar.bz2 package"
+	    	else
+	    		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a bz2 package"
+	    	fi
+	    fi
+	    if [ x"${image##*.}" = x"gz" ] ; then
+	    	TEMP=${image%.*}
+	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+	    		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a tar.gz package"
+	    	else
+	    		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    		echo "This is a gz package"
+	    	fi
+	    fi
+	    if [ x"${image##*.}" = x"tar" ] ; then 
+	    	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    	echo "This is a tar package"
+	    fi
+	    if [ x"${image##*.}" = x"xz" ] ; then 
+	    #	echo "This is a xz package"
+	    	TEMP=${image%.*}
+	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
+	    		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
+	    		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
+	    	fi
+	    fi
+	    if [ x"${image##*.}" = x"tbz" ] ; then
+	    	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+	    fi
+	    if [ x"${image}" = x"" ] ; then
+	    	echo "Can not find the suitable root filesystem!"
+	        exit 1
+	    fi
+	fi
+}
+
+for tmp in "${DISTROLS[@]}"
+do
+	uncompress_distro $tmp
+done
+
+###################################################################################
+######################### install applications          ###########################
+###################################################################################
+PACKAGES=packages
+install_pkgs()
+{
+    if [ x"" = x"$CFGFILE" ] || [ ! -f $CFGFILE ]; then
+		return
+	fi
+
+	echo "Installing packages ..."
+
+	idx=0
+    pkg=`jq -r ".packages[$idx].name" $CFGFILE`
+	while [ x"$pkg" != x"null" ];
+	do
+    	install=`jq -r ".packages[$idx].install" $CFGFILE`
+		if [ x"yes" = x"$install" ]; then
+			appdir="$PACKAGES/$pkg"
+			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
+				kdir=`pwd`/$kernel_dir
+				$appdir/build.sh $PLATFORM $1 $2 $kdir
+
+				for cpfile in postinstall remove
+				do
+					if [ -f "$appdir/$pkg"_"$cpfile".sh ]; then
+						targetdir="$2/usr/bin/estuary/$cpfile"
+						if [ ! -d $targetdir ]; then
+							sudo mkdir -p $targetdir 2>/dev/null
+						fi
+						sudo cp "$appdir/$pkg"_"$cpfile".sh  $targetdir/
+					fi
+				done
+			fi
+		fi
+
+		let idx=$idx+1
+    	pkg=`jq -r ".packages[$idx].name" $CFGFILE`
+	done
+}
+
+###################################################################################
+######################### create distribution           ###########################
+###################################################################################
+distro_postfix=".tar.gz"
+create_distro()
+{
+	distro_dir=`pwd`/$build_dir/$DISTRO_DIR/$1
+	image="$1_$TARGETARCH$distro_postfix"
+	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
+		install_pkgs $1 $distro_dir
+		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
+		sudo cp estuary/post_install.sh $distro_dir/etc/profile.d/
+		sudo chmod 755 $distro_dir/etc/profile.d/post_install.sh
+
+		pushd $distro_dir/
+		echo "Creating $image ..."
+		sudo tar -czf ../$image *
+		popd
+	fi
+}
+
+for tmp in "${DISTROLS[@]}"
+do
+	create_distro $tmp
+done
 
 installresult=0
 ###################################################################################
@@ -831,7 +1034,7 @@ installresult=0
 ###################################################################################
 if [ x"Caliper" = x"$INSTALL" ]; then
 	pushd caliper
-	echo "Start to install Caliper..."
+	echo "Installing Caliper ..."
 	sudo python setup.py install
 	installresult=$?
 	popd
@@ -845,7 +1048,7 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	for compiler in $GCC32 $GCC64
 	do
 		compiler=${compiler%%.tar.xz}
-		echo "Installing $compiler..."
+		echo "Installing $compiler ..."
 		if [ ! -d "/opt/$compiler" ]; then
 			sudo cp -r $TOOLCHAIN_DIR/$compiler /opt/
 			if [ x"$?" != x"0" ]; then
@@ -931,13 +1134,17 @@ if [ x"" != x"$PLATFORM" ]; then
     	fi
     fi
     
-    if [ x"" != x"$DISTRO" ] && [ -f $DISTRO_DIR/$image ]; then
-		#echo -e "\033[32mDistribution is $DISTRO_DIR/$image.\033[0m"
-        true
-	else
-		echo -e "\033[31mFailed! Distribution can not be found!\033[0m"
-        build_error=1
-    fi
+	for tmp in "${DISTROLS[@]}"
+	do
+		image="$build_dir/$DISTRO_DIR/$tmp"_"$TARGETARCH$distro_postfix"
+	    if [ -f $image ]; then
+			#echo -e "\033[32mDistribution is $image.\033[0m"
+	        true
+		else
+			echo -e "\033[31mFailed! Distribution($image) can not be found!\033[0m"
+	        build_error=1
+	    fi
+	done
 
     if [ -f $toolchain_dir/$GCC64 ]; then
     	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
@@ -1021,7 +1228,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                 # Create a new image file from rootfs directory for QEMU
                 sudo find $distro_dir -name "etc" | grep --quiet "etc"
                 if [ x"$?" = x"0" ]; then
-        	        echo "Create a new rootfs image file for QEMU..."
+        	        echo "Creating new rootfs image file for QEMU ..."
                     cd $distro_dir
                     
                     IMAGEFILE="$DISTRO"_"$TARGETARCH"."img"
@@ -1029,7 +1236,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
                     mkfs.ext4 ../$IMAGEFILE -F
                     mkdir -p ../tempdir 2>/dev/null
                     sudo mount ../$IMAGEFILE ../tempdir
-					echo "Produce the rootfs image file for QEMU..."
+					echo "Producing the rootfs image file for QEMU ..."
                     sudo cp -a * ../tempdir/
                     sudo umount ../tempdir
                     rm -rf ../tempdir
@@ -1069,22 +1276,23 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
 	if [ x"" = x"$QEMU" ]; then
 		pushd qemu/
-        if [ ! -f ".initialized" ]; then
+        check_init ".initialized" $lastupdate
+        if [ x"$?" = x"0" ]; then
             sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
             if [ x"$?" = x"0" ]; then
                 touch ".initialized"
             fi
         fi
-        echo "Build the QEMU..."
+        echo "Building the QEMU ..."
 		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu
-		make -j14
+		make -j${corenum}
 		make install
 		popd
 	    QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
 	fi
 	
 # Run the qemu
-    echo "Start QEMU..."
+    echo "Starting QEMU ..."
 	$QEMU -machine virt -cpu cortex-a57 \
 	    -kernel `pwd`/$KERNEL_BIN \
 	    -drive if=none,file=$rootfs,id=fs \

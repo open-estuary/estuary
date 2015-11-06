@@ -5,6 +5,7 @@
 
 export LANG=C
 
+wyl_debug=y
 en_shield=y
 
 PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -47,7 +48,6 @@ fi
 THEPWD=$EXEPATH
 PARSEPATH=`echo $THEPWD | grep -o -E 'estuary'`
 
-
 if [ "$PARSEPATH" != "" ] ; then
 PATHVALID=1
 else
@@ -55,7 +55,7 @@ PATHVALID=0
 fi
 
 cat << EOM
-parsing config ...
+start to parse  estuary.cfg ...
 EOM
 while read line
 do
@@ -80,10 +80,13 @@ do
         "fedora")
         fedora_en=$value
         ;;
+        "debian")
+        debian_en=$value
+        ;;
         *)
         ;;
     esac
-done < config
+done < estuary.cfg
 
 #Precentage function
 untar_progress ()
@@ -244,6 +247,10 @@ fi
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
             cp -a ../distro/Fedora_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
         fi
+        if [ "$debian_en" == "y" ]; then
+            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH 2> /dev/null
+            cp -a ../distro/Debian_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH
+        fi
         if [ "$opensuse_en" == "y" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
             cp -a ../distro/OpenSuse_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
@@ -252,7 +259,7 @@ fi
         cp -a sys_setup.sh rootfs/sys_setup/bin
         cp -a functions.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
-        cp -a config rootfs/sys_setup/bin
+        cp -a estuary.cfg rootfs/sys_setup/bin
         cp -a post_install.sh rootfs/sys_setup/bin
 
         touch rootfs/etc/profile.d/antoStartUp.sh
@@ -551,9 +558,8 @@ cat << EOM
 EOM
 
 
+if [ ! -d build/$build_PLATFORM/binary ]; then
 pushd ..
-if [ ! -d build/$build_PLATFORM/binary ]
-then
     # Make sure that the build.sh file exists
     if [ -f $PWD/estuary/build.sh ]; then
         $PWD/estuary/build.sh -p $build_PLATFORM -d Ubuntu
@@ -562,8 +568,8 @@ then
         echo "build.sh does not exist in the directory"
         exit 1
     fi
-fi
 popd
+fi
 
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
@@ -668,15 +674,24 @@ if [ "0" == "1" ]; then
     fi
 fi
 
-    if [ "$fedora_en" = "y" ]; then
+    if [ "$fedora_en" == "y" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
+            echo ""
+        fi
+        popd
+    fi
+    if [ "$debian_en" == "y" ]; then
+        pushd ..
+        if [ -f $PWD/estuary/build.sh ]; then
+            $PWD/estuary/build.sh -p $build_PLATFORM -d Debian
+            echo ""
         fi
         popd
     fi
 
-    if [ "$opensuse_en" = "y" ]; then
+    if [ "$opensuse_en" == "y" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
