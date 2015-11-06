@@ -1,19 +1,26 @@
 Change list for Estuary V2.1:
-1. Update buil.sh to support building from config file.
+1. Update buil.sh
+	a. Support building from config file.
+	b. Enable more boards
+	c. Enable application integration
 
 2. Upgrade UEFI
     a. Resolved CPLD updating failed issue.
-    b. Enabled PCIE 3.0
-    c. Resolved random MAC address issue.
-    d. Enable HiKey and Hi1610 EVB board.
-    e. Resolved memory reducing issues when booting from provision.
+    b. Enabled PCIE 3.0 link scaning
+    c. Enable HiKey board.
+    d. Resolved memory reducing issues when booting from provision.
 
 3. Upgrade kernel
     a. Enable HiKey board.
+    b. Resolved random MAC address issue.
 
-4. Improved some documents
+4. Firstly integrate and enable some appliations.
+	a. Armor tools
+	b. Docker
 
-5. Improved website
+5. Improved some documents
+
+6. Improved website
 	a. Optimized bug trucker system.
 	b. Added special binaries download page.
 	c. Fixed some issues about account register on website.

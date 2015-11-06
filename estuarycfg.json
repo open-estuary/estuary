@@ -1,6 +1,6 @@
 {
 "system":{
-"platform":"D01"
+"platform":"QEMU"
 },
 
 "distros":[
