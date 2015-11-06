@@ -26,6 +26,9 @@
   <!-- patches -->
   <project name="patches" />
 
+  <!--armor -->
+  <project name="armor" />
+
   <!-- packages -->
   <project name="packages" />
 
