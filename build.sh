@@ -1013,8 +1013,9 @@ create_distro()
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		install_pkgs $1 $distro_dir
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
-		sudo cp estuary/post_install.sh $distro_dir/etc/profile.d/
-		sudo chmod 755 $distro_dir/etc/profile.d/post_install.sh
+		sudo cp estuary/post_install.sh $distro_dir/usr/bin/estuary/
+		sudo chmod 755 $distro_dir/usr/bin/estuary/post_install.sh
+		sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" /etc/rc.local
 
 		pushd $distro_dir/
 		echo "Creating $image ..."
