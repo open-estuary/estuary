@@ -1015,7 +1015,7 @@ create_distro()
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
 		sudo cp estuary/post_install.sh $distro_dir/usr/bin/estuary/
 		sudo chmod 755 $distro_dir/usr/bin/estuary/post_install.sh
-		sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" /etc/rc.local
+		sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" $distro_dir/etc/rc.local
 
 		pushd $distro_dir/
 		echo "Creating $image ..."
