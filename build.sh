@@ -176,6 +176,24 @@ check_sum()
 }
 
 ###################################################################################
+############################# Setup host environment ##############################
+###################################################################################
+automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
+if [ x"$?" = x"1" ]; then
+	sudo apt-get remove -y --purge automake*
+    rm -rf ".initialized"
+fi
+
+check_init ".initialized" $lastupdate
+if [ x"0" = x"$?" ]; then
+	sudo apt-get update
+    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
+    if [ x"$?" = x"0" ]; then
+        touch ".initialized"
+    fi
+fi
+
+###################################################################################
 ############################# Parse config file        ############################
 ###################################################################################
 PLATFORM=
@@ -283,24 +301,6 @@ fi
 
 TOOLS_DIR="`dirname $0`"
 cd $TOOLS_DIR/../
-
-###################################################################################
-############################# Setup host environmenta #############################
-###################################################################################
-automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
-if [ x"$?" = x"1" ]; then
-	sudo apt-get remove -y --purge automake*
-    rm -rf ".initialized"
-fi
-
-check_init ".initialized" $lastupdate
-if [ x"0" = x"$?" ]; then
-	sudo apt-get update
-    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
-    if [ x"$?" = x"0" ]; then
-        touch ".initialized"
-    fi
-fi
 
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
