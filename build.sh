@@ -992,12 +992,13 @@ install_pkgs()
 
 				for cpfile in postinstall remove
 				do
-					if [ -f "$appdir/$pkg"_"$cpfile".sh ]; then
+					specialfile=`find $appdir -name "*${pkg}_${cpfile}.sh"`
+					if [ x"" != x"$specialfile" ] && [ -f $specialfile ]; then
 						targetdir="$2/usr/bin/estuary/$cpfile"
 						if [ ! -d $targetdir ]; then
 							sudo mkdir -p $targetdir 2>/dev/null
 						fi
-						sudo cp "$appdir/$pkg"_"$cpfile".sh  $targetdir/
+						sudo cp $specialfile  $targetdir/
 					fi
 				done
 			fi
