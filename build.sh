@@ -1018,6 +1018,10 @@ create_distro()
 	distro_dir=`pwd`/$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
+		if [ ! -d $distro_dir/usr/bin/estuary ]; then
+			sudo mkdir -p $distro_dir/usr/bin/estuary 2>/dev/null
+		fi
+
 		install_pkgs $1 $distro_dir
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
 		sudo cp estuary/post_install.sh $distro_dir/usr/bin/estuary/
