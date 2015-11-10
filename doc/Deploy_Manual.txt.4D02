@@ -288,7 +288,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     2. Build the kernel
     (1) Modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
-        bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp"
+        bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
     (2) Modify defconfig file at kernel/arch/arm64/configs directory as follow:
         CONFIG_SCSI_HISI_SAS=y
         CONFIG_ATA=m
