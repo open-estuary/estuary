@@ -144,6 +144,7 @@ check_init()
 ###################################################################################
 ############################# Check the checksum file   ###########################
 ###################################################################################
+FAILED_STR="FAILED\|失败"
 check_sum()
 {
     checksum_source=$1
@@ -166,7 +167,7 @@ check_sum()
 		return 0
 	fi
 
-	md5sum --quiet --check $checksum_file 2>/dev/null | grep 'FAILED' >/dev/null
+	md5sum --quiet --check $checksum_file 2>/dev/null | grep "$FAILED_STR" >/dev/null
 	if [ x"$?" = x"0" ]; then
         return 1
 	else
@@ -341,7 +342,7 @@ echo "Checking the checksum for toolchain ..."
 check_sum "../estuary/checksum/$toolchainsum_file"
 if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
-	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep "$FAILED_STR" | cut -d : -f 1 > $TEMPFILE
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
@@ -466,7 +467,7 @@ download_distro()
 		if [ x"$?" != x"0" ]; then
 		    echo "Checking the checksum for distribution ..."
 			distrosum_file=${DISTRO_SOURCE##*/}".sum"
-	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
+	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep "$FAILED_STR" >/dev/null
 	#		if [ x"$?" = x"0" ]; then
 			    echo "Downloading the distribution: "$1"_"$TARGETARCH" ..."
 				rm -rf "$1"_"$TARGETARCH"."$postfix" 2>/dev/null
@@ -506,7 +507,7 @@ echo "Checking the checksum for binaries ..."
 check_sum "../estuary/checksum/$binarysum_file"
 if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
-	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	md5sum --quiet --check $binarysum_file 2>/dev/null | grep "$FAILED_STR" | cut -d : -f 1 > $TEMPFILE
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
