@@ -636,6 +636,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		# roll back to special version for D02
 		git reset --hard
 		git checkout open-estuary/master
+	    git reset --hard 37500bcd263482fda9c976
 		git apply HwPkg/Patch/*.patch
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
@@ -654,6 +655,8 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    export EDK2_DIR=${PWD}
 	    export UEFI_TOOLS_DIR=${PWD}/uefi-tools
 
+		git reset --hard
+		git checkout open-estuary/master
 	    git reset --hard 37500bcd263482fda9c976
 	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
 	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
