@@ -144,6 +144,7 @@ check_init()
 ###################################################################################
 ############################# Check the checksum file   ###########################
 ###################################################################################
+FAILED_STR="FAILED\|失败"
 check_sum()
 {
     checksum_source=$1
@@ -166,7 +167,7 @@ check_sum()
 		return 0
 	fi
 
-	md5sum --quiet --check $checksum_file 2>/dev/null | grep 'FAILED' >/dev/null
+	md5sum --quiet --check $checksum_file 2>/dev/null | grep "$FAILED_STR" >/dev/null
 	if [ x"$?" = x"0" ]; then
         return 1
 	else
@@ -174,6 +175,24 @@ check_sum()
         return 0
 	fi
 }
+
+###################################################################################
+############################# Setup host environment ##############################
+###################################################################################
+automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
+if [ x"$?" = x"1" ]; then
+	sudo apt-get remove -y --purge automake*
+    rm -rf ".initialized"
+fi
+
+check_init ".initialized" $lastupdate
+if [ x"0" = x"$?" ]; then
+	sudo apt-get update
+    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
+    if [ x"$?" = x"0" ]; then
+        touch ".initialized"
+    fi
+fi
 
 ###################################################################################
 ############################# Parse config file        ############################
@@ -284,24 +303,6 @@ fi
 TOOLS_DIR="`dirname $0`"
 cd $TOOLS_DIR/../
 
-###################################################################################
-############################# Setup host environmenta #############################
-###################################################################################
-automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
-if [ x"$?" = x"1" ]; then
-	sudo apt-get remove -y --purge automake*
-    rm -rf ".initialized"
-fi
-
-check_init ".initialized" $lastupdate
-if [ x"0" = x"$?" ]; then
-	sudo apt-get update
-    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
-    if [ x"$?" = x"0" ]; then
-        touch ".initialized"
-    fi
-fi
-
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
 if [ x"$PLATFORM" = x"D01" ]; then
@@ -341,7 +342,7 @@ echo "Checking the checksum for toolchain ..."
 check_sum "../estuary/checksum/$toolchainsum_file"
 if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
-	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep "$FAILED_STR" | cut -d : -f 1 > $TEMPFILE
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
@@ -466,7 +467,7 @@ download_distro()
 		if [ x"$?" != x"0" ]; then
 		    echo "Checking the checksum for distribution ..."
 			distrosum_file=${DISTRO_SOURCE##*/}".sum"
-	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep 'FAILED' >/dev/null
+	#		md5sum --quiet --check $distrosum_file 2>/dev/null | grep "$FAILED_STR" >/dev/null
 	#		if [ x"$?" = x"0" ]; then
 			    echo "Downloading the distribution: "$1"_"$TARGETARCH" ..."
 				rm -rf "$1"_"$TARGETARCH"."$postfix" 2>/dev/null
@@ -506,7 +507,7 @@ echo "Checking the checksum for binaries ..."
 check_sum "../estuary/checksum/$binarysum_file"
 if [ x"$?" != x"0" ]; then
 	TEMPFILE=tempfile
-	md5sum --quiet --check $binarysum_file 2>/dev/null | grep ': FAILED' | cut -d : -f 1 > $TEMPFILE
+	md5sum --quiet --check $binarysum_file 2>/dev/null | grep "$FAILED_STR" | cut -d : -f 1 > $TEMPFILE
 	while read LINE
 	do
 	    if [ x"$LINE" != x"" ]; then
@@ -635,6 +636,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		# roll back to special version for D02
 		git reset --hard
 		git checkout open-estuary/master
+	    git reset --hard 37500bcd263482fda9c976
 		git apply HwPkg/Patch/*.patch
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
@@ -653,6 +655,8 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    export EDK2_DIR=${PWD}
 	    export UEFI_TOOLS_DIR=${PWD}/uefi-tools
 
+		git reset --hard
+		git checkout open-estuary/master
 	    git reset --hard 37500bcd263482fda9c976
 	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
 	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
@@ -982,16 +986,23 @@ install_pkgs()
 			appdir="$PACKAGES/$pkg"
 			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
 				kdir=`pwd`/$kernel_dir
-				$appdir/build.sh $PLATFORM $1 $2 $kdir
+				mkdir -p $build_dir/$appdir 2>/dev/null
+				if [ ! -f $build_dir/$appdir/.built ]; then
+					$appdir/build.sh $PLATFORM $1 $2 $kdir
+					if [ x"0" = x"$?" ]; then
+						touch $build_dir/$appdir/.built
+					fi
+				fi
 
 				for cpfile in postinstall remove
 				do
-					if [ -f "$appdir/$pkg"_"$cpfile".sh ]; then
+					specialfile=`find $appdir -name "*${pkg}_${cpfile}.sh"`
+					if [ x"" != x"$specialfile" ] && [ -f $specialfile ]; then
 						targetdir="$2/usr/bin/estuary/$cpfile"
 						if [ ! -d $targetdir ]; then
 							sudo mkdir -p $targetdir 2>/dev/null
 						fi
-						sudo cp "$appdir/$pkg"_"$cpfile".sh  $targetdir/
+						sudo cp $specialfile  $targetdir/
 					fi
 				done
 			fi
@@ -1011,10 +1022,18 @@ create_distro()
 	distro_dir=`pwd`/$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
+		if [ ! -d $distro_dir/usr/bin/estuary ]; then
+			sudo mkdir -p $distro_dir/usr/bin/estuary 2>/dev/null
+		fi
+
 		install_pkgs $1 $distro_dir
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
-		sudo cp estuary/post_install.sh $distro_dir/etc/profile.d/
-		sudo chmod 755 $distro_dir/etc/profile.d/post_install.sh
+		sudo cp estuary/post_install.sh $distro_dir/usr/bin/estuary/
+		sudo chmod 755 $distro_dir/usr/bin/estuary/post_install.sh
+		grep "/usr/bin/estuary/post_postinstall.sh" $distro_dir/etc/rc.local >/dev/null
+		if [ x"$?" != x"0" ]; then
+			sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" $distro_dir/etc/rc.local
+		fi
 
 		pushd $distro_dir/
 		echo "Creating $image ..."
