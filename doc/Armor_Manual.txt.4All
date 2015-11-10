@@ -14,7 +14,10 @@ Information of Supported Armor Tools
 
 - Documentation for LLC support in perf https://github.com/open-estuary/armor/blob/master/testing/doc/README.perf
 
-- README for using KGDB and KDB please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.kgdb.kdb
+- Documentation for using KGDB and KDB please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.kgdb.kdb
+
+- Documentation for LTTng userspace and kernel tracing, please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.lttng
+ 
 
 Distributions
 =============
@@ -29,56 +32,53 @@ Installation
 1. Many of the Armor tolls are already present in the rootfs of open-estuary distributions.
 
 2. Some of the Armor tools are available as package in the distribution repo.
-   Those tool's packages can be installed using the installation commands added in the open-estuary/estuary/post_install.sh script.
+   Those tool's packages will be installed using the installation commands added in the open-estuary/packages/armor/armor_postinstall.sh script.
 
-   Note 1: The following steps must be done for the successful Armor tool's package installation using the post_install.sh script.
+   Note 1: The following steps may have to be done for the successful Armor tool's package installation using the post_install.sh script.
    Ubuntu: please update /etc/apt/sources.list file in the rfs with the right ubuntu repo paths and run 'apt-get update' command.
    Fedora: run 'dnf update' command.
    OpenSuse: run 'zypper update' command.
 
-   Note 2: By default Armor tool's package installation using the post_install.sh script is disabled.
-            To enable please uncomment the line INSTALL_ARMOR_TOOLS="YES".
+   Note 2: The Armor tool's package installation using the armor_postinstall.sh script can be enables/disabled using the flag INSTALL_ARMOR_TOOLS.
+            Default value INSTALL_ARMOR_TOOLS="YES".
 
-3. If the tools are not present either in distribution rootfs or as package,
+3. Also the prebuilt binary packages for some of the tools which are not present either in distribution rootfs or as package,
    then the tools binary built from source might added in the
-   https://github.com/open-estuary/armor/tree/master/testing/binary and can be installed.
+   https://github.com/open-estuary/armor/tree/master/testing/binary.
 
    These tool's binaries created as .deb package for Ubuntu or in .rpm package for Fedora/OpenSuse/RedHat or
    as arm64 executable which can directly run.
 
-   How to install .deb packages on Ubuntu
-   dpkg -i DEB_PACKAGE
-
-   How to install .rpm packages on Fedora/OpenSuse
-   rpm -i RPM_PACKAGE
-
+   These packages are installed to rootfs using open-estuary/packages/armor/armor_postinstall.sh script. 
 
 How to run Tool's test scripts
 ==============================
+1. 
+1.a. When /packages/armor/armor_postinstall run as part of estuary build, the armor tools test scripts and test apps are copied into the /usr/local/armor folder in rootfs. 
+     Note: The armor repo will be downloaded when you build open-estuary using build.sh. 
 
-1. Download the Armor project files from open-estuary repo either on host machine or on the terminal of your board(example - D02)
+    OR 
+
+1.b Download the Armor project files from open-estuary repo either on host machine or on the terminal of your board(example - D02)
    git clone https://github.com/open-estuary/armor
-   Note: The armor repo will be downloaded when you build open-estuary using build.sh. 
-
-2. Copy testing/test_scripts folder to your NFS for your board. 
-   OR
-   On the shell terminal, go to testing/test_scripts folder if you downloaded on your board.
-
-3. To test individual tools please run on the shell terminal
+   Copy testing/test_scripts folder to your NFS for your board. 
+   
+2. To test individual tools please run on the shell terminal
     'sh test_<tool's name>.sh' -> to run test script of an armor tool.
     For example, 'sh test_strace.sh' to run tests for strace.
     The test results can be seen on the console.
 
-4. run command 'sh auto_test_armor_tools.sh'
-   This script will run the basic tests for the list of tools supported in Armor releases.
+3. Run command 'sh auto_test_armor_tools.sh'
+   This script will run the test scripts for the list of tools supported in Armor releases.
 
-
+4. The test results will be displayed on the terminal.    
+   
 Known Limitations/Issues
 ========================
-
 1. dmidecode tool does not run on open-estuary distributions with the error "/dev/mem: Operation not permitted". 
-
-
+2. sar tool does not work.
+3. KDump/Kexec may not work.
+4. Don't know how to verify fsck and iptables on D02.
 
 ========================================= End =============================================
 
