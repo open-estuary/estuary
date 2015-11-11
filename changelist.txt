@@ -14,9 +14,11 @@ Change list for Estuary V2.1:
     a. Enable HiKey board.
     b. Resolved random MAC address issue.
 
-4. Firstly integrate and enable some appliations.
+4. Firstly integrate and enable some appliations.(Currently only for Ubuntu distribution)
 	a. Armor tools
 	b. Docker
+	c. ODP (Open data plane)
+	d. LAMP (Linux\Arm\MySQL\PHP)
 
 5. Improved some documents
 
