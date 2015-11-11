@@ -1,5 +1,5 @@
 Change list for Estuary V2.1:
-1. Update buil.sh
+1. Update build.sh script
 	a. Support building from config file.
 	b. Enable more boards
 	c. Enable application integration
