@@ -542,9 +542,8 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
 		HIKEY_TOOLS=tools/hikey-tools
 		if [ ! -f $binary_dir/hisi-idt.py ]; then
 	    	cp $HIKEY_TOOLS/* $binary_dir/
+		fi
 	fi
-fi
-
 fi
 
 ###################################################################################
