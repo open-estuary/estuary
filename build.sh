@@ -360,7 +360,7 @@ if [ x"$?" != x"0" ]; then
 fi
 cd -
 
-# Copy to build target directory
+# Copy compiler to build target directory
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
     echo "Copying toolchain to 'build' directory ..."
 	mkdir -p "$toolchain_dir" 2>/dev/null
@@ -524,7 +524,7 @@ if [ x"$?" != x"0" ]; then
 fi
 cd -
 
-# Copy some common to build target directory
+# Copy some common prebuilt files to build target directory
 if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
     if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ]; then
         cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
@@ -537,6 +537,14 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
     if [ x"D01" = x"$PLATFORM" ] && [ -f $BINARY_DIR/default.filesystem ]; then
         cp $BINARY_DIR/default.filesystem $binary_dir/.filesystem
     fi
+
+	if [ x"HiKey" = x"$PLATFORM" ]; then
+		HIKEY_TOOLS=tools/hikey-tools
+		if [ ! -f $binary_dir/hisi-idt.py ]; then
+	    	cp $HIKEY_TOOLS/* $binary_dir/
+	fi
+fi
+
 fi
 
 ###################################################################################
@@ -569,16 +577,6 @@ if [ x"" != x"$PLATFORM" ]; then
     fi
     copy_doc ".4All"
     copy_doc ".4$PLATFORM"
-fi
-
-###################################################################################
-########################### Copy prebuilt files           #########################
-###################################################################################
-if [ x"HiKey" = x"$PLATFORM" ]; then
-	HIKEY_TOOLS=tools/hikey-tools
-	if [ ! -f $binary_dir/hisi-idt.py ]; then
-    	cp $HIKEY_TOOLS/* $binary_dir/
-	fi
 fi
 
 ###################################################################################
