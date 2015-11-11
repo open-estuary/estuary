@@ -438,7 +438,6 @@ sudo service tftpd-hpa start
 check_status
 echo "--------------------------------------------------------------------------------"
 
-
 sudo apt-get install nfs-kernel-server
 sudo apt-get install rpcbind
 dstdefault=/targetNFS
