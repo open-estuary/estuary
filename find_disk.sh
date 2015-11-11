@@ -2,44 +2,61 @@
 
 #set -x
 
-wyl_debug=y
+cwd=`dirname $0`
+
 en_shield=y
+
 declare -a disk_list
 export disk_list=
 
-while read line
+CFGFILE=$cwd/estuarycfg.json
+cat << EOM
+begin to parse estuarycfg.json ...
+EOM
+build_PLATFORM=`jq -r ".system.platform" $CFGFILE`
+
+if [ "$build_PLATFORM" == "D01" ]; then
+    TARGET_ARCH=ARM32
+else
+    TARGET_ARCH=ARM64
+fi
+
+DISTROS=()
+idx=0
+idx_en=0
+install=`jq -r ".distros[$idx].install" $CFGFILE`
+while [ x"$install" != x"null" ];
 do
-    name=`echo $line | awk -F '=' '{print $1}'`
-    value=`echo $line | awk -F '=' '{print $2}'`
+    if [ x"yes" = x"$install" ]; then
+        idx_en=${#DISTROS[@]}
+        DISTROS[${#DISTROS[@]}]=`jq -r ".distros[$idx].name" $CFGFILE`
+        echo "$idx_en) ${DISTROS[$idx_en]}"
+    fi
+    name=`jq -r ".distros[$idx].name" $CFGFILE`
+    value=`jq -r ".distros[$idx].install" $CFGFILE`
     case $name in
-        "arch")
-        TARGET_ARCH=$value
-        ;;
-        "platform")
-        build_PLATFORM=$value
-        ;;
-        "distro")
-        build_DISTRO=$value
-        ;;
-        "ubuntu")
+        "Ubuntu")
         ubuntu_en=$value
         ;;
-        "opensuse")
+        "Opensuse")
         opensuse_en=$value
         ;;
-        "fedora")
+        "Fedora")
         fedora_en=$value
         ;;
-        "debian")
+        "Debian")
         debian_en=$value
-        ;;
-        "target_system_type")
-        target_system_type=$value
         ;;
         *)
         ;;
     esac
-done < estuary.cfg
+    let idx=$idx+1
+    install=`jq -r ".distros[$idx].install" $CFGFILE`
+done
+
+read -p 'Please select the target system type: ' type_idx
+echo "$type_idx ${DISTROS[$type_idx]}" 
+target_system_type=${DISTROS[$type_idx]}
 
 if [ ! -o pipefail ]; then
 	set -o pipefail
@@ -378,7 +395,7 @@ if [ "$full_intallation" = "yes" ]; then
     rootfs_end=20
 
 
-    if [ "$ubuntu_en" == "y" ]; then
+    if [ "$ubuntu_en" == "yes" ]; then
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart ubuntu ${rootfs_start}M ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
         eval $cmd_str
@@ -420,29 +437,16 @@ if [ "$full_intallation" = "yes" ]; then
             [ $? ] || { echo "WARNING:: create username FAIL"; }
         fi
         unset ubuntu_username
-
-        touch rootfs/etc/profile.d/antoStartUp.sh
-        chmod a+x rootfs/etc/profile.d/antoStartUp.sh
-cat > rootfs/etc/profile.d/antoStartUp.sh << EOM
-#!/bin/bash
-
-pushd /home
-sudo ./post_install.sh
-popd
-EOM
-        cp -a /sys_setup/bin/post_install.sh rootfs/home/
-        chmod a+x rootfs/home/post_install.sh
-        sudo touch rootfs/home/estuary_init
         
         sudo umount rootfs
         sudo rm -rf rootfs tmp
         
-        if [ "$target_system_type" == "ubuntu" ]; then
+        if [ "$target_system_type" == "Ubuntu" ]; then
             rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
             rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
         fi
     fi
-    if [ "$fedora_en" == "y" ]; then
+    if [ "$fedora_en" == "yes" ]; then
     
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart fedora ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
@@ -469,12 +473,12 @@ EOM
         sudo umount rootfs
         sudo rm -rf rootfs
         
-        if [ "$target_system_type" == "fedora" ]; then
+        if [ "$target_system_type" == "Fedora" ]; then
             rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
             rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
         fi
     fi
-    if [ "$debian_en" == "y" ]; then
+    if [ "$debian_en" == "yes" ]; then
     
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart debian ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
@@ -501,12 +505,12 @@ EOM
         sudo umount rootfs
         sudo rm -rf rootfs
         
-        if [ "$target_system_type" == "debian" ]; then
+        if [ "$target_system_type" == "Debian" ]; then
             rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
             rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
         fi
     fi
-    if [ "$opensuse_en" == "y" ]; then
+    if [ "$opensuse_en" == "yes" ]; then
     
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart opensuse ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
@@ -533,7 +537,7 @@ EOM
         sudo umount rootfs
         sudo rm -rf rootfs
         
-        if [ "$target_system_type" == "opensuse" ]; then
+        if [ "$target_system_type" == "Opensuse" ]; then
             rootfs_dev=/dev/${disk_list[0]}$NEWRT_IDX
             rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev##*/}" | awk {'print $9'}`
         fi
@@ -768,7 +772,7 @@ menuentry "Ubuntu SATA" --id ubuntu_sata {
 EOM
 mv tmp/grub.cfg boot/EFI/GRUB2/
 #sudo dd if=/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu-vivid.img of=/dev/${disk_list[0]}2
-if [ "$ubuntu_en" == "y" ]; then
+if [ "$ubuntu_en" == "yes" ]; then
 tar -xzf /sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu"$TARGET_ARCH"_"$build_PLATFORM".tar.gz -C rootfs/
 fi
 sudo umount boot rootfs

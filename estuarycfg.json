@@ -1,18 +1,18 @@
 {
 "system":{
-"platform":"QEMU"
+"platform":"D02"
 },
 
 "distros":[
 {"name":"Ubuntu","install":"yes"},
 {"name":"Debian","install":"no"},
 {"name":"Fedora","install":"no"},
-{"name":"OpenSuse","install":"no"}
+{"name":"OpenSuse","install":"yes"}
 ],
 
 "boards":[
-{"mac":"00-00-00-00-00-01"},
-{"mac":"00-00-00-00-00-02"}
+{"mac":"01-00-18-82-05-00-7f"},
+{"mac":"01-00-18-82-05-00-68"}
 ],
 
 "packages":[
