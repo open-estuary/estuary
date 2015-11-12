@@ -144,7 +144,7 @@ check_init()
 ###################################################################################
 ############################# Check the checksum file   ###########################
 ###################################################################################
-FAILED_STR="FAILED\|失败"
+FAILED_STR="FAILED"
 check_sum()
 {
     checksum_source=$1
@@ -193,6 +193,8 @@ if [ x"0" = x"$?" ]; then
         touch ".initialized"
     fi
 fi
+export LC_ALL=C
+export LANG=C
 
 ###################################################################################
 ############################# Parse config file        ############################
@@ -264,7 +266,7 @@ while [ x"$1" != x"" ]; do
 			;;
 		"-f" | "--file" )
 			shift
-            CFGFILE=`pwd`"/$1"
+            CFGFILE="${PWD}/$1"
             parse_cfg
 			echo "Install: $DISTRO"
             break
@@ -302,6 +304,7 @@ fi
 
 TOOLS_DIR="`dirname $0`"
 cd $TOOLS_DIR/../
+PRJROOT=${PWD}
 
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
@@ -379,15 +382,15 @@ do
 		arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
 	fi
 	
-	COMPILER_DIR=`pwd`/${arm_gcc%/*}
+	COMPILER_DIR=${PWD}/${arm_gcc%/*}
 	export PATH=$COMPILER_DIR:$PATH
 
 	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnueabihf" ]; then
-		CROSS=`pwd`/${arm_gcc%g*}
+		CROSS=${PWD}/${arm_gcc%g*}
 	fi
 
 	if [ x"$TARGETARCH" = x"ARM64" ] && [ x"$cross_prefix" = x"aarch64-linux-gnu" ]; then
-		CROSS=`pwd`/${arm_gcc%g*}
+		CROSS=${PWD}/${arm_gcc%g*}
 	fi
 done
 
@@ -601,7 +604,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
         echo "Can not find uefi-tools!"
         exit 1
     fi
-    export PATH=$PATH:`pwd`/$UEFI_TOOLS
+    export PATH=$PATH:${PRJROOT}/$UEFI_TOOLS
     # Let UEFI detect the arch automatically
     export ARCH=
 
@@ -737,9 +740,9 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
-    echo path:`pwd`
+    echo "Path: ${PWD}"
     cd $grub_dir
-    absolute_dir=`pwd`
+    absolute_dir=${PWD}
     cd -
 
 	if [ x"ARM32" = x"$TARGETARCH" ]; then
@@ -795,116 +798,6 @@ if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -
 fi
 
 ###################################################################################
-##################### Build kernel from kernel source code      ###################
-###################################################################################
-# preprocess for kernel building
-BUILDFLAG=FALSE
-KERNEL_DIR=kernel
-kernel_dir=$build_dir/$KERNEL_DIR
-KERNEL_BIN=
-DTB_BIN=
-
-if [ x"" = x"$PLATFORM" ]; then
-    #do nothing
-	echo "Do not build kernel."
-elif [ x"ARM32" = x"$TARGETARCH" ]; then
-	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
-    DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
-
-	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
-		BUILDFLAG=TRUE
-
-		export ARCH=arm
-	fi
-else
-	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
-    if [ x"QEMU" = x"$PLATFORM" ]; then
-        DTB_BIN=""
-    elif [ x"HiKey" = x"$PLATFORM" ]; then
-	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
-    else
-	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
-    fi
-
-	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		BUILDFLAG=TRUE
-
-		export ARCH=arm64
-	fi
-fi
-
-if [ x"$BUILDFLAG" = x"TRUE" ]; then
-    echo "Building kernel ..."
-    mkdir -p "$kernel_dir" 2> /dev/null
-
-	pushd $KERNEL_DIR/
-	
-	make mrproper
-	make O=../$kernel_dir mrproper
-
-    # kernel building
-    if [ x"ARM32" = x"$TARGETARCH" ]; then
-		make O=../$kernel_dir hisi_defconfig
-
-#		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
-
-		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
-		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-        cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
-    else
-		make O=../$kernel_dir defconfig
-        if [ x"QEMU" = x"$PLATFORM" ]; then
-    		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
-    		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
-        fi
-		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
-
-		dtb_dir=${DTB_BIN#*arch/}
-		dtb_dir=${DTB_BIN%/*}
-		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
-
-	    mkdir -p $dtb_dir 2>/dev/null
-
-		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-    fi
-
-    # postprocess for kernel building
-	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
-		make O=../$kernel_dir -j${corenum} modules
-		make O=../$kernel_dir -j${corenum} modules_install
-		make O=../$kernel_dir -j${corenum} firmware_install
-	fi
-
-	popd
-fi
-
-if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
-	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
-
-    if [ x"D01" = x"$PLATFORM" ] && [ -f $kernel_dir/.kernel ]; then
-        cp $kernel_dir/.kernel $binary_dir/
-    fi
-fi
-
-if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
-    cp $DTB_BIN $binary_dir/
-fi
-
-###################################################################################
 ######################### Uncompress the distribution   ###########################
 ###################################################################################
 uncompress_distro()
@@ -954,6 +847,10 @@ uncompress_distro()
 	    	echo "Can not find the suitable root filesystem!"
 	        exit 1
 	    fi
+
+		echo "Remove old module files in rootfs..."
+		sudo rm -rf $distro_dir/lib/modules/*
+
 	fi
 }
 
@@ -961,6 +858,123 @@ for tmp in "${DISTROLS[@]}"
 do
 	uncompress_distro $tmp
 done
+
+###################################################################################
+##################### Build kernel from kernel source code      ###################
+###################################################################################
+# preprocess for kernel building
+BUILDFLAG=FALSE
+KERNEL_DIR=kernel
+kernel_dir=$build_dir/$KERNEL_DIR
+KERNEL_BIN=
+DTB_BIN=
+
+if [ x"" = x"$PLATFORM" ]; then
+    #do nothing
+	echo "Do not build kernel."
+elif [ x"ARM32" = x"$TARGETARCH" ]; then
+	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
+    DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+	CFG_FILE=hisi_defconfig
+
+	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
+		BUILDFLAG=TRUE
+
+		export ARCH=arm
+	fi
+else
+	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
+	CFG_FILE=defconfig
+
+    if [ x"QEMU" = x"$PLATFORM" ]; then
+        DTB_BIN=""
+    elif [ x"HiKey" = x"$PLATFORM" ]; then
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
+    else
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
+    fi
+
+	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
+		BUILDFLAG=TRUE
+
+		export ARCH=arm64
+	fi
+fi
+
+if [ x"$BUILDFLAG" = x"TRUE" ]; then
+    echo "Building kernel ..."
+    mkdir -p "$kernel_dir" 2> /dev/null
+
+	pushd $KERNEL_DIR/
+	
+	sudo make mrproper
+	sudo make O=../$kernel_dir mrproper
+
+    # kernel building
+    if [ x"ARM32" = x"$TARGETARCH" ]; then
+		make O=../$kernel_dir $CFG_FILE
+
+#		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
+
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
+        cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
+    else
+		make O=../$kernel_dir $CFG_FILE
+        if [ x"QEMU" = x"$PLATFORM" ]; then
+    		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
+    		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
+        fi
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+
+		dtb_dir=${DTB_BIN#*arch/}
+		dtb_dir=${DTB_BIN%/*}
+		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
+
+	    mkdir -p $dtb_dir 2>/dev/null
+
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
+    fi
+
+    # postprocess for kernel building
+	make O=../$kernel_dir -j${corenum} modules
+	for tmp in "${DISTROLS[@]}"
+	do
+		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
+		make O=../$kernel_dir $CFG_FILE
+		sudo make -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+		sudo make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+		sudo make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir
+	done
+
+	popd
+fi
+
+if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
+	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
+
+    if [ x"D01" = x"$PLATFORM" ] && [ -f $kernel_dir/.kernel ]; then
+        cp $kernel_dir/.kernel $binary_dir/
+    fi
+fi
+
+if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
+    cp $DTB_BIN $binary_dir/
+fi
 
 ###################################################################################
 ######################### install applications          ###########################
@@ -982,7 +996,7 @@ install_pkgs()
 		if [ x"yes" = x"$install" ]; then
 			appdir="$PACKAGES/$pkg"
 			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
-				kdir=`pwd`/$kernel_dir
+				kdir=${PRJROOT}/$kernel_dir
 				mkdir -p $build_dir/$appdir 2>/dev/null
 				if [ ! -f $build_dir/$appdir/.built ]; then
 					$appdir/build.sh $PLATFORM $1 $2 $kdir
@@ -1016,7 +1030,7 @@ install_pkgs()
 distro_postfix=".tar.gz"
 create_distro()
 {
-	distro_dir=`pwd`/$build_dir/$DISTRO_DIR/$1
+	distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		if [ ! -d $distro_dir/usr/bin/estuary ]; then
@@ -1271,7 +1285,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	CMDLINE="console=ttyAMA0 root=/dev/vda rw"
 
 # Compile qemu
-	qemu_dir=`pwd`/$build_dir/qemu
+	qemu_dir=${PRJROOT}/$build_dir/qemu
 	mkdir -p $qemu_dir 2> /dev/null
 
 	QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
@@ -1295,7 +1309,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 # Run the qemu
     echo "Starting QEMU ..."
 	$QEMU -machine virt -cpu cortex-a57 \
-	    -kernel `pwd`/$KERNEL_BIN \
+	    -kernel ${PRJROOT}/$KERNEL_BIN \
 	    -drive if=none,file=$rootfs,id=fs \
 	    -device virtio-blk-device,drive=fs \
 	    -append "$CMDLINE" \

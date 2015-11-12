@@ -7,7 +7,7 @@
 {"name":"Ubuntu","install":"yes"},
 {"name":"Debian","install":"no"},
 {"name":"Fedora","install":"no"},
-{"name":"OpenSuse","install":"yes"}
+{"name":"OpenSuse","install":"no"}
 ],
 
 "boards":[
@@ -18,7 +18,7 @@
 "packages":[
 {"name":"armor","install":"yes"},
 {"name":"lamp","install":"no"},
-{"name":"docker","install":"no"},
+{"name":"docker","install":"yes"},
 {"name":"mysql","install":"no"}
 ]
 }
