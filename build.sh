@@ -955,8 +955,7 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	for tmp in "${DISTROLS[@]}"
 	do
 		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
-		make O=../$kernel_dir $CFG_FILE
-		sudo make -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+		#make O=../$kernel_dir $CFG_FILE
 		sudo make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
 		sudo make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir
 	done
