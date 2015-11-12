@@ -438,6 +438,7 @@ sudo service tftpd-hpa start
 check_status
 echo "--------------------------------------------------------------------------------"
 
+
 sudo apt-get install nfs-kernel-server
 sudo apt-get install rpcbind
 dstdefault=/targetNFS
@@ -554,6 +555,7 @@ EOM
 
 if [ ! -d $cwd/udisk_images ]; then
     mkdir $cwd/udisk_images 2> /dev/null
+    wget -P udisk_images/ -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/udisk_rootfs.tar.gz
 else
     if [ ! -f  udisk_images/udisk_rootfs.tar.gz ]
     then
