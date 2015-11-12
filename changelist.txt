@@ -22,7 +22,9 @@ Change list for Estuary V2.1:
 
 5. Improved some documents
 
-6. Improved website
+6. Integrate HiBench and SysBench OLTP into Caliper
+
+7. Improved website
 	a. Optimized bug trucker system.
 	b. Added special binaries download page.
 	c. Fixed some issues about account register on website.
