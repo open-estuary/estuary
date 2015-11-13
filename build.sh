@@ -394,8 +394,13 @@ cd -
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
     echo "Copying toolchain to 'build' directory ..."
 	mkdir -p "$toolchain_dir" 2>/dev/null
-    cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
-    cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+    if [ x"ARM32" = x"$TARGETARCH" ]; then
+    	cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
+		ln -s ../../../$toolchain_dir/$GCC32 $binary_dir/$GCC32
+	else
+    	cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+		ln -s ../../../$toolchain_dir/$GCC64 $binary_dir/$GCC64
+	fi
 fi
 
 # Uncompress the toolchain
@@ -1090,6 +1095,8 @@ create_distro()
 		echo "Creating $image ..."
 		sudo tar -czf ../$image *
 		popd
+
+		ln -s ../../../$build_dir/$DISTRO_DIR/$image $binary_dir/$image
 	fi
 }
 
