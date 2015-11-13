@@ -396,7 +396,6 @@ done
 
 if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
 	export CROSS_COMPILE=$CROSS
-	sudo export CROSS_COMPILE=$CROSS
 fi
 
 echo "Cross compiler is $CROSS"
@@ -902,8 +901,6 @@ else
 	fi
 fi
 
-sudo export ARCH=$ARCH
-
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
     echo "Building kernel ..."
     mkdir -p "$kernel_dir" 2> /dev/null
@@ -911,7 +908,6 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	pushd $KERNEL_DIR/
 
 	make O=../$kernel_dir mrproper
-	sudo make O=../$kernel_dir mrproper
 	make O=../$kernel_dir $CFG_FILE
 
     # kernel building
@@ -955,15 +951,31 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 	for tmp in "${DISTROLS[@]}"
 	do
 		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
-		make O=../$kernel_dir $CFG_FILE
-		sudo make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
-		
-		sudo make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
-		sudo make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
+		#make O=../$kernel_dir $CFG_FILE
+		make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
+
+		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
 	done
 
 	popd
 fi
+
+#	pushd $KERNEL_DIR/
+#	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"
+#	for tmp in "${DISTROLS[@]}"
+#	do
+#		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
+#		export ARCH=arm64
+#		export CROSS_COMPILE=$CROSS_COMPILE
+#		echo "============$ARCH,$CROSS_COMPILE"
+#
+#		make O=../$kernel_dir $CFG_FILE
+#
+#		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE  make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+#		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE  make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
+#	done
+#	popd
 
 if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
 	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
