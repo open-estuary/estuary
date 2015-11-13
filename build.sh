@@ -41,6 +41,7 @@ usage()
 	echo "usage:"
 	echo -n "build.sh [ -f cfgfile.json ] [ -p "
 	echo -n ${platforms[*]} | sed "s/ / | /g"
+	echo -n " ] [ -c uefi|grub|kernel|distro "
 	echo -n " ] [ -d "
 	echo -n ${distros[*]} | sed "s/ / | /g"
 	echo -n " ] [ -i "
@@ -48,8 +49,9 @@ usage()
 	echo " ] "
 
 	echo -e "\n -h,--help: to print this message"
-	echo " -f,--file: the config json file for Estuary building"
+	echo " -f,--file: the config json file for Estuary building, all other parameters will be disabled if -f is set"
 	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
+	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
 	echo "		*for D02,HiKey, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
@@ -99,9 +101,27 @@ check_platform()
 			return
 		fi
 	done
+
 	echo -e "\033[31mError platform!\033[0m"
     usage
 	exit 1
+}
+
+###################################################################################
+############################# Clear build target  #################################
+###################################################################################
+clear_target()
+{
+	if [ x"" = x"$PLATFORM" ]; then
+		echo -e "\033[31mNo specified platform, please add -p parameter before -c.\033[0m"
+		usage
+		exit 1
+	fi
+
+	sudo rm -rf $build_dir/$PLATFORM/$1
+	echo "Cleared $1"
+
+	exit 0 
 }
 
 ###################################################################################
@@ -115,6 +135,7 @@ check_install()
 			return
 		fi
 	done
+
 	echo -e "\033[31mError install target!\033[0m"
     usage
 	exit 1
@@ -196,6 +217,11 @@ fi
 export LC_ALL=C
 export LANG=C
 
+TOOLS_DIR="`dirname $0`"
+cd $TOOLS_DIR/../
+PRJROOT=${PWD}
+build_dir=build
+
 ###################################################################################
 ############################# Parse config file        ############################
 ###################################################################################
@@ -254,6 +280,11 @@ while [ x"$1" != x"" ]; do
 			check_platform $1
 			echo "Platform: $1"
 			;;
+		"-c" | "--clear" )
+			shift
+			clear_target $1
+			echo "Clear target: $1"
+			;;
 		"-d" | "--distro" )
 			shift
 			check_distro $1
@@ -302,10 +333,6 @@ if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
     exit 1
 fi
 
-TOOLS_DIR="`dirname $0`"
-cd $TOOLS_DIR/../
-PRJROOT=${PWD}
-
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
 if [ x"$PLATFORM" = x"D01" ]; then
@@ -314,7 +341,7 @@ else
     TARGETARCH="ARM64"
 fi
 
-build_dir=build/$PLATFORM
+build_dir=$build_dir/$PLATFORM
 if [ ! -d "$build_dir" ] ; then
 	mkdir -p "$build_dir" 2> /dev/null
 fi
