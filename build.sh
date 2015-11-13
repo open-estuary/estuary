@@ -909,16 +909,13 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     mkdir -p "$kernel_dir" 2> /dev/null
 
 	pushd $KERNEL_DIR/
-	
-	make mrproper
-	sudo make mrproper
+
 	make O=../$kernel_dir mrproper
 	sudo make O=../$kernel_dir mrproper
+	make O=../$kernel_dir $CFG_FILE
 
     # kernel building
     if [ x"ARM32" = x"$TARGETARCH" ]; then
-		make O=../$kernel_dir $CFG_FILE
-
 #		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
@@ -933,7 +930,6 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
-		make O=../$kernel_dir $CFG_FILE
         if [ x"QEMU" = x"$PLATFORM" ]; then
     		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
     		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
@@ -955,14 +951,13 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
     fi
 
-    # postprocess for kernel building
+    # preprocess for kernel building
 	for tmp in "${DISTROLS[@]}"
 	do
 		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
-
-		make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
-
-		sudo make O=../$kernel_dir $CFG_FILE
+		make O=../$kernel_dir $CFG_FILE
+		sudo make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
+		
 		sudo make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
 		sudo make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
 	done
