@@ -396,6 +396,7 @@ done
 
 if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
 	export CROSS_COMPILE=$CROSS
+	sudo export CROSS_COMPILE=$CROSS
 fi
 
 echo "Cross compiler is $CROSS"
@@ -901,13 +902,17 @@ else
 	fi
 fi
 
+sudo export ARCH=$ARCH
+
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
     echo "Building kernel ..."
     mkdir -p "$kernel_dir" 2> /dev/null
 
 	pushd $KERNEL_DIR/
 	
+	make mrproper
 	sudo make mrproper
+	make O=../$kernel_dir mrproper
 	sudo make O=../$kernel_dir mrproper
 
     # kernel building
@@ -951,13 +956,15 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     fi
 
     # postprocess for kernel building
-	make O=../$kernel_dir -j${corenum} modules
 	for tmp in "${DISTROLS[@]}"
 	do
 		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
-		#make O=../$kernel_dir $CFG_FILE
+
+		make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
+
+		sudo make O=../$kernel_dir $CFG_FILE
 		sudo make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
-		sudo make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir
+		sudo make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
 	done
 
 	popd
