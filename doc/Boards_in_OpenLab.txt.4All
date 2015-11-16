@@ -14,11 +14,13 @@ Table of Contents
 
 Introduction
 
-This is a document about how to remote use the D02/other boards which located in our open lab. We have deployed multiple boards in open lab to share with you, if you are interested in accessing them for testing or sharing with development,please don’t hesitate to contact us for a special account.
+This is a document about how remotely you can use the D02/any other boards which are located in Estuary Open Lab. 
+We have deployed multiple boards in Estuary Open Lab to share with you, if you are interested in accessing them for testing or sharing with development,please don’t hesitate to contact us for a special account.
 
 (The special account approval will be sole discretion of the Estuary Team based on availability and your requirement situation)
+You can reach us via: http://open-estuary.com/contact-us/ OR openlab@open-estuary.com
 
-For local environment configuration and board hacking, please refer the hacking manuals and related documents under our documentation section.
+For local environment configuration and board hacking, please refer the hacking manuals and related documents under our documentation section
 
 ### 1. Login by Linux shell
 
@@ -101,4 +103,4 @@ press "ctrl+]" and input "quit" to quit the telnet connection
 
 A: For this issue, firstly disconnect the board. Then remove the Image and dtb file in you ftp directory. Connect to the board again, the system will use the backup Image and dtb to boot the board.
 
-4) More help, please contact Lab administrator by yaolan08@qq.com.
+4) More help, please reach us at http://open-estuary.com/contact-us/ OR openlab@open-estuary.com
