@@ -11,7 +11,8 @@ Quick Deploy System
 ### Introduction ###
 
 Above all, prepare hardware boards with SCSI disk and download Estuary source code from GitHub.
-About how to do them, please refer to ‘Get & Build Estuary yourself’ in Estuary User Manual.
+To learn more about how to do them, please visit this web site: http://open-estuary.com/estuary-user-manual/, and then refer to ‘Get & Build Estuary yourself’.
+Note: In my case, the working directory is '~/workdir'.
 
 # Deploy system via USB Disk
 
@@ -35,9 +36,13 @@ Then create USB installation disk and deploy Linux system into SCSI disk of targ
 
 # Deploy system via PXE
 
-1. Prepare hardware environment 
-    Firstly, connect Ubuntu PC and hardware boards with SCSI Disk to the network router. Secondly, connect the serial port of target boards to Ubuntu PC.
-    Add the mac address of hardware boards to the estuarycfg.json file.
+1. Prepare hardware and software environment 
+    1) Firstly, connect Ubuntu PC and hardware boards with SCSI Disk to the network router, this router should be connected to the internet. Secondly, connect the serial port of target boards to Ubuntu PC, install and configure minicom, do following commands:
+    $sudo minicom
+    2) Add the mac address of hardware boards to the estuarycfg.json file.
+    Switch on hardware boards and press anykey to enter UEFI Boot Menu. Get the MAC address of boards according to 'PXE on MAC Address:', refer to "boards" format of estuarycfg.json and add one element to "boards":
+    {"mac":"01-xx-xx-xx-xx-xx-xx"}
+    xx-xx-xx-xx-xx-xx means the MAC address of hardware board.
 
 2. Automatically setup PXE deployment environment
     Do as following steps:
