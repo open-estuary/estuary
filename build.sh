@@ -1214,7 +1214,7 @@ if [ x"" != x"$PLATFORM" ]; then
 	    fi
 	done
 
-    if [ -f $toolchain_dir/$GCC64 ]; then
+    if [ -f $toolchain_dir/$GCC64 ] || [ -f $toolchain_dir/$GCC32 ]; then
     	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
         true
     else
