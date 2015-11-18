@@ -703,7 +703,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    arm-linux-gnueabihf-objcopy -O binary loader temp
 	    python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
 
-	    sudo PTABLE=linux bash -x generate_ptable.sh
+		sudo PTABLE=linux-8G bash -x generate_ptable.sh
 	    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
 
 	    cp l-loader.bin ../../$uefi_dir/
