@@ -18,7 +18,7 @@ distros_arm64=(Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02 HiKey)
 installs=(Caliper toolchain)
 
-PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
+#PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
 #arm64 distributions
 #PATH_OPENSUSE64=http://download.opensuse.org/ports/aarch64/distribution/13.2/appliances/openSUSE-13.2-ARM-JeOS.aarch64-rootfs.aarch64-Current.tbz
 #PATH_UBUNTU64=https://cloud-images.ubuntu.com/vivid/current/vivid-server-cloudimg-arm64.tar.gz
@@ -222,6 +222,22 @@ cd $TOOLS_DIR/../
 PRJROOT=${PWD}
 build_dir=build
 
+
+###################################################################################
+############################# Set download source server ##########################
+###################################################################################
+PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro
+TOOLCHAIN_SOURCE=http://open-estuary.com/EstuaryDownloads/toolchain
+BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_2.1/rc0/binary
+if [ -f ".config" ]; then
+	. .config
+	if [ x"$country" = x"China" ]; then
+		PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist_v2.1_rc0
+		TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
+		BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.1
+	fi
+fi
+
 ###################################################################################
 ############################# Parse config file        ############################
 ###################################################################################
@@ -366,7 +382,7 @@ if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 fi
 
 # Download firstly
-TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
+#TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 echo "Checking the checksum for toolchain ..."
 check_sum "../estuary/checksum/$toolchainsum_file"
@@ -529,7 +545,7 @@ done
 ###################################################################################
 BINARY_DIR=binary
 #BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v2.0
-BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.0
+#BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.0
 binarysum_file="binaries.sum"
 binarydl_result=0
 
