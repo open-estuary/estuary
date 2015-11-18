@@ -1,1 +1,7 @@
+fb9e2cba06ac589a3963eb6d1a3ae223  CH02TEVBC_V03.bin
+8ce72d76a810dced9f446e56f13bb2c1  default.filesystem
+59bfb01df297f2399bb882dc3da5f760  default.kernel
+b89008590c740be1b3dbb722d6d2f9ed  default.monitor
+cd78b0c58124417035822d872542eab7  default.text
+51f094c42e5c44bcf888321aee7e34be  grub.cfg
 5dff90ca57dc5ced987c99363056f39e  mini-rootfs.cpio.gz
