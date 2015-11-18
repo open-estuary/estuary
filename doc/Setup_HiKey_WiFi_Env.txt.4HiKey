@@ -1,0 +1,153 @@
+This is a guide to setup a WiFi environment on your HiKey board.
+
+When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary project, you can config WiFi function. If you can not boot into this systerm, you can get more information from DeployManual.txt file.
+
+### Config WiFi On mini-rootfs systerm ###
+
+   On serial console, you should see some debug message which can show if the Hikey board have
+   boot into mini-rootfs systerm successfully. You can config this WiFi according to this follow
+   instruction:
+
+     $ echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth
+     $ ifconfig wlan0 up
+
+     ## Use the following command to know if WiFi is ok ##
+     $ iw wlan0 scan | grep SSID
+
+     ## to create a wpa_supplicant.conf ##
+     $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf 
+       eg: wpa_passphrase admin admin > /etc/wpa_supplicant.conf
+
+     $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
+
+     ## wait a while for wpa_supplicant to link ##
+     $ iw wlan0 link
+
+     ## config ip and route ##
+     $ ifconfig wlan0 <IP address>
+     $ route add default gw <IP address>
+     $ echo "nameserver <IP address>" >> /etc/resolv.conf 
+       eg: ifconfig wlan0 192.168.2.80
+       eg: route add default gw 192.168.2.1
+       eg: echo "nameserver 192.168.2.1" >> /etc/resolv.conf
+ 
+     NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to
+           verify it.
+
+### Config WiFi On Ubuntu systerm ###
+
+   On serial console, you should see some debug message which can show if the Hikey board have
+   boot into ubuntu systerm successfully. You can config this WiFi according to this follow
+   instruction:
+
+   Supposed the login user is peter.
+
+   1.Find out the wireless device name ##
+
+     $ iw dev
+
+	phy#0
+	    Interface wlan0
+		ifindex 3
+		type managed
+	The above output shows that the system has 1 physical WiFi card, designated as phy#0.
+	The device name is wlan0. The type specifies the operation mode of the wireless device.
+	managed means the device is a WiFi station or client that connects to an access point.
+
+    2. Check that the wireless device is up.
+
+	$ ip link show wlan0
+
+	3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
+	    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+	Look for the word "UP" inside the brackets in the first line of the output.
+
+     3. enable the wireless device
+
+	In the above example, wlan0 is not UP. Execute the following command to bring it up:
+
+
+	$ sudo ip link set wlan0 up
+
+	[sudo] password for peter: 
+	Note: you need root privilege for the above operation.
+
+	If you run the show link command again, you can tell that wlan0 is now UP.
+
+	$ ip link show wlan0
+
+	3: wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
+	   qlen 1000
+	    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+
+    4. Check the connection status.
+
+	$ iw wlan0 link
+
+	Not connected.
+	The above output shows that you are not connected to any network.
+	Then we should configure the WiFi network.
+
+    5. Connect to WPA/WPA2 WiFi network.
+
+	This is a 2 step process. First, you generate a configuration file for wpa_supplicant
+	that contains the pre-shared key ("passphrase") for the WiFi network.
+
+	$ sudo -s
+
+	[sudo] password for peter:
+
+	Note: you need root privilege to write to /etc/wpa_supplicant.conf.
+
+	$ wpa_passphrase hisi hellohisihelloworld >> /etc/wpa_supplicant.conf 
+
+	If you want more security, please do not input passphrase parameter in this command.
+
+	wpa_passphrase takes the SSID as the single argument. You must type in the passphrase
+	for the WiFi network after you run the command. Using that information, wpa_passphrase
+	will output the necessary configuration statements to the standard output. Those statements        are appended to the wpa_supplicant configuration file located at /etc/wpa_supplicant.conf.
+
+	Just check the output of wpa_passphrase is right:
+
+	$ cat /etc/wpa_supplicant.conf 
+	# reading passphrase from stdin
+	network={
+	    ssid="admin"
+	    #psk="password"
+	    psk=995d137......
+	}
+	The second step is to run wpa_supplicant with the new configuration file.
+
+	$ sudo wpa_supplicant -B -D nl80211 -i wlan0 -c /etc/wpa_supplicant.conf
+
+	Use the iw command to verify that you are indeed connected to the SSID.
+
+	$ iw wlan0 link
+
+	Connected to 16:75:90:69:f0:c7 (on wlan0)
+		SSID: hisi
+		freq: 2442
+		RX: 108742 bytes (589 packets)
+		TX: 5286 bytes (49 packets)
+		signal: -27 dBm
+		tx bitrate: 54.0 MBit/s
+
+		bss flags:      short-preamble short-slot-time
+		dtim period:    1
+		beacon int:     100
+
+	Obtain IP address by DHCP
+	$ sudo dhclient wlan0
+	Use the ip command to verify the IP address assigned by DHCP. The IP address is
+	192.168.1.113 from below.
+
+	$ ip addr show wlan0
+	3: wlan0:  mtu 1500 qdisc mq state UP qlen 1000
+	    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+	    inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0
+	    inet6 fe80::76e5:43ff:fea1:ce65/64 scope link 
+		valid_lft forever preferred_lft forever
+
+     NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to
+           verify it.
+
