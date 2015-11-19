@@ -5,7 +5,7 @@
 
 "distros":[
 {"name":"Ubuntu","install":"yes"},
-{"name":"Debian","install":"no"},
+{"name":"Debian","install":"yes"},
 {"name":"Fedora","install":"no"},
 {"name":"OpenSuse","install":"no"}
 ],
