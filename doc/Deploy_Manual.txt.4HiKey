@@ -31,10 +31,10 @@ The HiKey board is ready to use “out of the box” with a preinstalled version
 	1) Connect standard microUSB to USB connector between the HiKey microUSB port and Linux PC.
 	2) Connect usb to serial port to USB connector between the HiKey (UART3 J2) and Linux PC.
         3) Link 1-2 (J601) pin causes HiKey to auto-power up when power is applied.
-	4) Connect the HiKey power supply to the HiKey board (P301).
+	4) Connect the HiKey power supply to the HiKey board (Uart3 P301).
             
 	NOTE: please refer to the Hardware User Guide for more information on board link
-	      options. you can visit:///////?????????????
+	      options. you can visit: http://open-estuary.com/hikey/
 
   ## PC Environment ##
 
@@ -53,7 +53,7 @@ The HiKey board is ready to use “out of the box” with a preinstalled version
 	$ mkdir hikey-image
         $ cd hikey-image
         $ cp {pwd}/open-estuary/build/HiKey/binary/* ./  -rf
-        $ cp {pwd}/open-estuary/build/HiKey/distro/* ./  -rf
+        $ sudo cp {pwd}/open-estuary/build/HiKey/distro/* ./  -rf
 
 	NOTE: you can get more information about Image explaination from this Readme.txt document.
 
@@ -74,8 +74,6 @@ When most users get HiKey board first, they want to reload the all system image 
     internal ROM to start up in at a special "install bootloader" mode which will install a
     supplied bootloader from the microUSB OTG port into RAM, and will present itself to a connect
     PC as a ttyUSB device.
-
-    Please refer to the Hardware User Guide (xxxxxx) for more information on HiKey link options.
 
     Note: USB does NOT power the HiKey board because the power supply requirements in certain use
           cases can exceed the power supply available on a USB port. You must use an external
@@ -121,9 +119,9 @@ When most users get HiKey board first, they want to reload the all system image 
 	$ dd if=/dev/zero of=boot-fat.uefi.img bs=512 count=131072
 	$ sudo mkfs.fat -n "BOOT IMG" boot-fat.uefi.img
 	$ sudo mount -o loop,rw,sync boot-fat.uefi.img boot-fat
-	$ sudo cp -a Image_HiKey hi6220-hikey.dtb boot-fat/ || true
-	$ sudo cp -a grubaa64.efi grub.cfg boot-fat/ || true
-	$ sudo cp -a mini-rootfs.cpio.gz boot-fat/mini-rootfs.cpio.gz || true
+	$ sudo cp Image_HiKey hi6220-hikey.dtb boot-fat/ || true
+	$ sudo cp grubaa64.efi grub.cfg boot-fat/ || true
+	$ sudo cp mini-rootfs.cpio.gz boot-fat/mini-rootfs.cpio.gz || true
 	$ sudo cp AndroidFastbootApp.efi boot-fat/fastboot.efi
 	$ sudo umount boot-fat
 	$ rm -rf boot-fat
@@ -151,17 +149,17 @@ When most users get HiKey board first, they want to reload the all system image 
 
     # SD card placing this ubuntu systerm #
  
-       You should partion SD card (8G) and tar this ubuntu.XX.gz into your SD card according
+       You should partion SD card (8G) and tar this Ubuntu_ARM64.tar.gz into your SD card according
        to this instruction:
         
 	1) Insert SD card into your linux PC by card reader
         2) Grep SD card node and fdisk or partion SD card in your linux PC
            
-           $ sudo parted /dev/sdb
+           $ sudo parted /dev/sdx
               (parted) mklabel gpt
               (parted) mkpart primary ext4 1MB 7086MB
               (parted) q
-	   $ sudo mkfs.ext4 -L "ubuntu" /dev/sdb1
+	   $ sudo mkfs.ext4 -L "ubuntu" /dev/sdx1
  
         3) Remove and insert SD card in your PC
         4) Tar Ubuntu_ARM64.tar.gz into your SD card
@@ -196,9 +194,9 @@ When most users get HiKey board first, they want to reload the all system image 
 
 	  $ mount /dev/mmcblk0p8 /tmp
 	  $ cd /tmp
-	  $ false; while [ $? -ne 0 ]; do wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/
-	    Ubuntu_ARM64.tar.gz; done
+	  $ false; while [ $? -ne 0 ]; do wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Ubuntu_ARM64.tar.gz; done
 	  $ tar -xvzf Ubuntu_ARM64.tar.gz
+	  $ cd /
 	  $ mount /tmp
 
         6) Reboot HiKey board
