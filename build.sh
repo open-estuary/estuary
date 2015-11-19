@@ -705,7 +705,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 
 		git reset --hard
 		git checkout open-estuary/master
-	    git reset --hard 37500bcd263482fda9c976
+	    git reset --hard 9ad6457e013db87aba134c5021d5a1de1d278da2
 	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
 	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
 
