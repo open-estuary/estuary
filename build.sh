@@ -228,7 +228,7 @@ build_dir=build
 ###################################################################################
 PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro
 TOOLCHAIN_SOURCE=http://open-estuary.com/EstuaryDownloads/toolchain
-BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_2.1/rc0/binary
+BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_Releases/Estuary_2.1/rc0/binary
 if [ -f ".config" ]; then
 	. .config
 	if [ x"$country" = x"China" ]; then
