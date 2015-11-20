@@ -668,6 +668,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
      	echo "ARCH=ARM" >> platforms.config
      	popd
 
+    	rm `find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null` 2>/dev/null
     	# compile uefi for D01
     	pushd $UEFI_DIR/
 		# roll back to special version for D01
@@ -680,6 +681,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
 	elif [ x"D02" = x"$PLATFORM" ]; then
 		# Build UEFI for D02 platform
+    	rm `find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null` 2>/dev/null
     	pushd $UEFI_DIR/
 		# roll back to special version for D02
 		git reset --hard
@@ -697,6 +699,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 #			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
 #		fi
 	elif [ x"HiKey" = x"$PLATFORM" ]; then
+    	rm `find "$UEFI_DIR/l-loader" -name "fip.bin" 2>/dev/null` 2>/dev/null
 		# Build UEFI for D02 platform
     	pushd $UEFI_DIR/
 #		export AARCH64_TOOLCHAIN=GCC49
