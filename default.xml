@@ -53,7 +53,7 @@
 
   <!-- qemu -->
   <!-- project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" / -->
-  <project name="qemu" />
+  <project name="qemu" revision="refs/tags/estuary-v2.1-rc0" />
 
   <!-- estuary -->
   <project name="estuary" />
