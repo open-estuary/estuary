@@ -58,7 +58,4 @@
   <!-- estuary -->
   <project name="estuary" />
 
-  <!-- armor -->
-  <project name="armor" revision="" />
-
 </manifest>

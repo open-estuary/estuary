@@ -1167,15 +1167,6 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	done
 fi
 
-###################################################################################
-###################### Run packages/armor/build.sh ####################
-###################################################################################
-ARMOR_DIR=armor
-armor_build_dir=`pwd`/$build_dir/$ARMOR_DIR
-kernel_build_dir=`pwd`/$build_dir/$KERNEL_DIR
-distribution_dir=`pwd`/$distro_dir
-
-./packages/armor/build.sh  $PLATFORM $DISTRO $distribution_dir $kernel_build_dir
 
 ###################################################################################
 ########################## Check and report build resutl   ########################
@@ -1305,13 +1296,7 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	fi
 fi
 
-# Armor report
-if [ -d  $ARMOR_DIR ] ; then
-    echo -e "\033[32m Armor tools files successfully downloded and built\033[0m"
-else
-    echo -e "\033[31mFailed! Armor tools can not be found!\033[0m"
-fi
-#################################################################################
+###################################################################################
 ################ Build QEMU and start it if platform is QEMU   ####################
 ###################################################################################
 if [ x"QEMU" = x"$PLATFORM" ]; then
