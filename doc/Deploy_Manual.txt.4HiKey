@@ -24,7 +24,7 @@ Second, you also can install uefi image, boot image and Estuary Release Distribu
 
 ### Preparation ###
 
-The HiKey board is ready to use “out of the box” with a preinstalled version of the Debian Linux distribution from the factory. To get started you need power supply(9V~15V ,2A), a standard microUSB cable, usb to serial port(TTL 1.8V),SD card (8G low speed) and PC.
+The HiKey board is ready to use “out of the box” with a preinstalled version of the Debian Linux distribution from the factory. To get started you need power supply(9V~15V ,2A), a standard microUSB cable, usb to serial port(TTL 1.8V),SD card and PC.
 
   ## Hardware Connect #＃
 
@@ -165,7 +165,7 @@ When most users get HiKey board first, they want to reload the all system image 
         4) Tar Ubuntu_ARM64.tar.gz into your SD card
  
 	   $ cd hikey-image	
-	   $ tar -xvzf Ubuntu_ARM64.tar.gz -I /media/{admin}/ubuntu
+	   $ tar -xvzf Ubuntu_ARM64.tar.gz -c /media/{admin}/ubuntu
 
         5) Insert SD card into HiKey board
         6) Turn on HiKey board
