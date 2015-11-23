@@ -1,6 +1,6 @@
 {
 "system":{
-"platform":"QEMU"
+"platform":"D02"
 },
 
 "distros":[
@@ -11,14 +11,14 @@
 ],
 
 "boards":[
-{"mac":"00-00-00-00-00-01"},
-{"mac":"00-00-00-00-00-02"}
+{"mac":"01-00-18-82-05-00-7f"},
+{"mac":"01-00-18-82-05-00-68"}
 ],
 
 "packages":[
 {"name":"armor","install":"yes"},
 {"name":"lamp","install":"no"},
-{"name":"docker","install":"no"},
+{"name":"docker","install":"yes"},
 {"name":"mysql","install":"no"}
 ]
 }

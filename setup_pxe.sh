@@ -6,6 +6,8 @@
 cwd=`dirname $0`
 . $cwd/common.sh
 
+CFGFILE=$cwd/estuarycfg.json
+
 echo
 echo "--------------------------------------------------------------------------------"
 echo "Verifying Linux host distribution"
@@ -40,7 +42,7 @@ EOF
 
 entry_header
 
-packages_to_install="isc-dhcp-server syslinux apache2 tftpd-hpa tftp-hpa lftp inetutils-inetd nfs-kernel-server build-essential libncurses5-dev openbsd-inetd"
+packages_to_install="jq isc-dhcp-server syslinux tftpd-hpa tftp-hpa lftp inetutils-inetd nfs-kernel-server build-essential libncurses5-dev openbsd-inetd"
 
 cmd="sudo apt-get install "
 
@@ -84,48 +86,132 @@ fi
 exit_footer
 
 cat << EOM
-begin to parse estuary.cfg ...
+begin to parse estuarycfg.json ...
 EOM
-while read line
+build_PLATFORM=`jq -r ".system.platform" $CFGFILE`
+
+if [ "$build_PLATFORM" == "D01" ]; then
+    TARGET_ARCH=ARM32
+else
+    TARGET_ARCH=ARM64
+fi
+
+DISTROS=()
+idx=0
+idx_en=0
+install=`jq -r ".distros[$idx].install" $CFGFILE`
+while [ x"$install" != x"null" ];
 do
-    name=`echo $line | awk -F '=' '{print $1}'`
-    value=`echo $line | awk -F '=' '{print $2}'`
+    if [ x"yes" = x"$install" ]; then
+        idx_en=${#DISTROS[@]}
+        DISTROS[${#DISTROS[@]}]=`jq -r ".distros[$idx].name" $CFGFILE`
+    fi
+    name=`jq -r ".distros[$idx].name" $CFGFILE`
+    value=`jq -r ".distros[$idx].install" $CFGFILE`
     case $name in
-        "arch")
-        TARGET_ARCH=$value
-        ;;
-        "platform")
-        build_PLATFORM=$value
-        ;;
-        "distro")
-        build_DISTRO=$value
-        ;;
-        "ubuntu")
+        "Ubuntu")
         ubuntu_en=$value
         ;;
-        "opensuse")
+        "Opensuse")
         opensuse_en=$value
         ;;
-        "fedora")
+        "Fedora")
         fedora_en=$value
         ;;
-        "debian")
+        "Debian")
         debian_en=$value
-        ;;
-        "nfs_server")
-        nfs_server=$value
         ;;
         *)
         ;;
     esac
-done < estuary.cfg
+    let idx=$idx+1
+    install=`jq -r ".distros[$idx].install" $CFGFILE`
+done
 
-dhcp_interface=/etc/default/isc-dhcp-server
-cat > dhcp_interface << EOM
-INTERFACES="eth0"
+echo "Get host sever inet addr, broadcast, netmask, etc."
+netcard_count=`ifconfig -a | grep -A 1 eth | grep "inet addr" | grep -v 127.0.0.1 | grep -v "Bcast:0.0.0.0" | wc -l`
+if [ $netcard_count -gt 1 ]; then
+    echo "netcard_count=$netcard_count"
+    echo -e "\nPlease choise the network card needed: \n"
+    ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
+    echo " "
+
+    NETCARDNUMBER=
+    while true;
+    do
+        read -p 'Enter Device Number or 'n' to exit: ' NETCARDNUMBER
+        echo " "
+            if [ "$NETCARDNUMBER" = 'n' ]; then
+                    exit 1
+            fi
+
+            if [ "$NETCARDNUMBER" = "" ]; then
+                echo -e "\nPlease choise the network card needed: \n"
+                ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
+                echo " "
+                continue
+            fi
+        
+        NETCARDNAME=`ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
+        if [ -n "$NETCARDNAME" ]
+        then
+            HWaddr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $5}'`
+            inet_addr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $7}' | awk 'BEGIN{FS=":"} {print $2}'`
+            broad_cast=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $8}' | awk 'BEGIN{FS=":"} {print $2}'`
+            inet_mask=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $9}' | awk 'BEGIN{FS=":"} {print $2}'`
+            sub_net=`route | grep "$NETCARDNAME" | grep -v default | awk '{print $1}'`
+            router=`route | grep "$NETCARDNAME" | grep default | awk '{print $2}'`
+            echo "HWaddr=$HWaddr, inet_addr=$inet_addr, broad_cast=$broad_cast, inet_mask=$inet_mask, sub_net=$sub_net, router=$router"
+            break
+        else
+            echo -e "Invalid selection!"
+                echo -e "\nPlease choise the network card needed: \n"
+                ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
+                echo " "
+        fi
+    done
+
+    echo "$NETCARDNAME was selected"
+elif [ $netcard_count -eq 1 ]; then
+    echo ""
+    echo "netcard_count=$netcard_count"
+    NETCARDNUMBER=1
+    NETCARDNAME=`ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
+	if [ -n "$NETCARDNAME" ]
+	then
+        HWaddr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $5}'`
+        inet_addr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $7}' | awk 'BEGIN{FS=":"} {print $2}'`
+        broad_cast=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $8}' | awk 'BEGIN{FS=":"} {print $2}'`
+        inet_mask=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $9}' | awk 'BEGIN{FS=":"} {print $2}'`
+        sub_net=`route | grep "$NETCARDNAME" | grep -v default | awk '{print $1}'`
+        router=`route | grep "$NETCARDNAME" | grep default | awk '{print $2}'`
+        echo "HWaddr=$HWaddr, inet_addr=$inet_addr, broad_cast=$broad_cast, inet_mask=$inet_mask, sub_net=$sub_net, router=$router"
+	else
+		echo -e "$NETCARDNAME not exist !!!"
+	fi
+else
+    echo "Please setup NetCard!"
+fi
+
+pushd ..
+if [ ! -d build/$build_PLATFORM/binary ]
+then
+    # Make sure that the build.sh file exists
+    if [ -f $cwd/estuary/build.sh ]; then
+        $cwd/estuary/build.sh -p $build_PLATFORM -d Ubuntu
+        echo "execute build.sh"
+    else
+        echo "build.sh does not exist in the directory"
+        exit 1
+    fi
+fi
+popd
+
+cat > /etc/default/isc-dhcp-server << EOM
+INTERFACES="$NETCARDNAME"
 EOM
 
-net_param=${nfs_server%.*}
+net_param=${inet_addr%.*}
 cat > /etc/dhcp/dhcpd.conf << EOM
 authoritative;
 default-lease-time 600;
@@ -134,17 +220,17 @@ ping-check true;
 ping-timeout 2;
 allow booting;
 allow bootp;
-subnet ${net_param}.0 netmask 255.255.255.0 {
+subnet ${sub_net} netmask ${inet_mask} {
     range ${net_param}.210 ${net_param}.250;
-    option subnet-mask 255.255.255.0;
-    option domain-name-servers ${net_param}.1;
+    option subnet-mask ${inet_mask};
+    option domain-name-servers ${router};
     option time-offset -18000;
-    option routers ${net_param}.1;
-    option subnet-mask 255.255.255.0;
-    option broadcast-address ${net_param}.255;
+    option routers ${router};
+    option subnet-mask ${inet_mask};
+    option broadcast-address ${broad_cast};
     default-lease-time 600;
     max-lease-time 7200;
-    next-server ${nfs_server};
+    next-server ${inet_addr};
     filename "grubaa64.efi";
 }
 EOM
@@ -182,30 +268,28 @@ if [ -d $tftproot ]; then
 else
     sudo mkdir -p $tftproot
     check_status
-    sudo chmod 777 $tftproot
-    check_status
-    sudo chown nobody $tftproot
-    check_status
 fi
 sudo rm -f /var/lib/tftpboot/grub.cfg*
-mac_addr_list=`cat estuary.cfg | grep -e "^MAC_addr_boards=" | cut -d= -f2`
-mac_nums=`echo $mac_addr_list | awk -F ":" '{print NF}'`
-for (( i=1; i<=$mac_nums; i++ ))
+
+idx=0
+mac_addr=`jq -r ".boards[$idx].mac" $CFGFILE`
+while [ x"$mac_addr" != x"null" ];
 do
-    mac_addr=`echo $mac_addr_list | awk -F ":" -v j=$i '{print $j}'`
     grub_suffix=$mac_addr
 cat > /var/lib/tftpboot/grub.cfg-$grub_suffix << EOM
 set timeout=5
 set default=ubuntu
 menuentry "ubuntu" --id ubuntu {
-        set root=(tftp,$nfs_server)
-        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=$nfs_server:/targetNFS ip=::::::dhcp
+        set root=(tftp,${inet_addr})
+        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=${inet_addr}:/targetNFS ip=::::::dhcp
        devicetree /hip05-d02.dtb
 }
 EOM
+    let idx=$idx+1
+    mac_addr=`jq -r ".boards[$idx].mac" $CFGFILE`
 done
 
-platform=`cat estuary.cfg | grep -e "^platform=" | cut -d= -f2`
+platform=`jq -r ".system.platform" $CFGFILE`
 kernelimage="Image_""$platform"
 kernelimagesrc=`ls -1 $cwd/../build/$platform/binary/$kernelimage`
 if [ -f $tftproot/$kernelimage ]; then
@@ -242,7 +326,7 @@ else
     echo "Successfully copied $kernelimage to tftp root directory $tftproot"
 fi
 
-platform=`cat estuary.cfg | grep -e "^platform=" | cut -d= -f2`
+platform=`jq -r ".system.platform" $CFGFILE`
 dtbfiles=`cd $cwd/../build/$platform/binary/;ls -1 *.dtb`
 prebuiltimagesdir=`cd $cwd/../build/$platform/binary/ ; echo $PWD`
 
@@ -336,6 +420,11 @@ TFTP_ADDRESS="0.0.0.0:69"
 TFTP_OPTIONS="-l -c -s"
 EOM
 
+sudo chmod 777 -R $tftproot
+check_status
+sudo chown nobody $tftproot
+check_status
+
 echo
 echo "Restarting tftp server"
 sudo service isc-dhcp-server stop
@@ -407,19 +496,6 @@ extract_fs() {
     echo
     echo "Successfully extracted `basename $fstar` to $1"
     
-    pushd ..
-    if [ ! -d build/$build_PLATFORM/binary ]
-    then
-        # Make sure that the build.sh file exists
-        if [ -f $PWD/estuary/build.sh ]; then
-            $PWD/estuary/build.sh -p $build_PLATFORM -d Ubuntu
-            echo "execute build.sh"
-        else
-            echo "build.sh does not exist in the directory"
-            exit 1
-        fi
-    fi
-    popd
     
     mkdir -p $1/sys_setup/boot/EFI/GRUB2 2> /dev/null
     mkdir -p $1/sys_setup/distro 2> /dev/null
@@ -427,13 +503,13 @@ extract_fs() {
     cp -a $cwd/../build/$build_PLATFORM/binary/grubaa64* $1/sys_setup/boot/EFI/GRUB2
     cp -a $cwd/../build/$build_PLATFORM/binary/Image_$build_PLATFORM $1/sys_setup/boot/Image
     cp -a $cwd/../build/$build_PLATFORM/binary/hip05-d02.dtb $1/sys_setup/boot
-    if [ "$ubuntu_en" == "y" ]; then
+    if [ "$ubuntu_en" == "yes" ]; then
         mkdir -p $1/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
         TOTALSIZE=`sudo du -c ../distro/Ubuntu_"$TARGET_ARCH".tar.gz | grep total | awk {'print $1'}`
         cp -af $cwd/../distro/Ubuntu_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH &
         cp_progress $TOTALSIZE $1/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
     fi
-    if [ "$fedora_en" == "y" ]; then
+    if [ "$fedora_en" == "yes" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
@@ -442,7 +518,7 @@ extract_fs() {
         mkdir -p $1/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
         cp -a $cwd/../distro/Fedora_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
     fi
-    if [ "$debian_en" == "y" ]; then
+    if [ "$debian_en" == "yes" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d Debian
@@ -451,7 +527,7 @@ extract_fs() {
         mkdir -p $1/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH 2> /dev/null
         cp -a $cwd/../distro/Debian_"$TARGET_ARCH".tar.gz $1/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH
     fi
-    if [ "$opensuse_en" == "y" ]; then
+    if [ "$opensuse_en" == "yes" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
@@ -464,8 +540,7 @@ extract_fs() {
     cp -a sys_setup.sh $1/sys_setup/bin
     cp -a functions.sh $1/sys_setup/bin
     cp -a find_disk.sh $1/sys_setup/bin
-    cp -a estuary.cfg $1/sys_setup/bin
-    cp -a post_install.sh $1/sys_setup/bin
+    cp -a estuarycfg.json $1/sys_setup/bin
 
     touch $1/etc/profile.d/antoStartUp.sh
     chmod a+x $1/etc/profile.d/antoStartUp.sh
@@ -477,6 +552,16 @@ sudo ./sys_setup.sh
 popd
 EOM
 }
+
+if [ ! -d $cwd/udisk_images ]; then
+    mkdir $cwd/udisk_images 2> /dev/null
+    wget -P udisk_images/ -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/udisk_rootfs.tar.gz
+else
+    if [ ! -f  udisk_images/udisk_rootfs.tar.gz ]
+    then
+        wget -P udisk_images/ -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/udisk_rootfs.tar.gz
+    fi
+fi
 
 if [ -d $dst ]; then
     echo "$dst already exists"
@@ -509,7 +594,7 @@ fi
 echo $dst > $cwd/../.targetfs
 echo "--------------------------------------------------------------------------------"
 
-platform=`grep platform= $cwd/estuary.cfg | cut -d= -f2`
+platform=`jq -r ".system.platform" $CFGFILE`
 echo
 echo "--------------------------------------------------------------------------------"
 echo "This step will export your target filesystem for NFS access."

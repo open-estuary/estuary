@@ -18,7 +18,7 @@ distros_arm64=(Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02 HiKey)
 installs=(Caliper toolchain)
 
-PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
+#PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
 #arm64 distributions
 #PATH_OPENSUSE64=http://download.opensuse.org/ports/aarch64/distribution/13.2/appliances/openSUSE-13.2-ARM-JeOS.aarch64-rootfs.aarch64-Current.tbz
 #PATH_UBUNTU64=https://cloud-images.ubuntu.com/vivid/current/vivid-server-cloudimg-arm64.tar.gz
@@ -41,6 +41,7 @@ usage()
 	echo "usage:"
 	echo -n "build.sh [ -f cfgfile.json ] [ -p "
 	echo -n ${platforms[*]} | sed "s/ / | /g"
+	echo -n " ] [ -c uefi|grub|kernel|distro "
 	echo -n " ] [ -d "
 	echo -n ${distros[*]} | sed "s/ / | /g"
 	echo -n " ] [ -i "
@@ -48,8 +49,9 @@ usage()
 	echo " ] "
 
 	echo -e "\n -h,--help: to print this message"
-	echo " -f,--file: the config json file for Estuary building"
+	echo " -f,--file: the config json file for Estuary building, all other parameters will be disabled if -f is set"
 	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
+	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu, OpenSuse"
 	echo "		*for D02,HiKey, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
@@ -99,9 +101,27 @@ check_platform()
 			return
 		fi
 	done
+
 	echo -e "\033[31mError platform!\033[0m"
     usage
 	exit 1
+}
+
+###################################################################################
+############################# Clear build target  #################################
+###################################################################################
+clear_target()
+{
+	if [ x"" = x"$PLATFORM" ]; then
+		echo -e "\033[31mNo specified platform, please add -p parameter before -c.\033[0m"
+		usage
+		exit 1
+	fi
+
+	sudo rm -rf $build_dir/$PLATFORM/$1
+	echo "Cleared $1"
+
+	exit 0 
 }
 
 ###################################################################################
@@ -115,6 +135,7 @@ check_install()
 			return
 		fi
 	done
+
 	echo -e "\033[31mError install target!\033[0m"
     usage
 	exit 1
@@ -144,7 +165,7 @@ check_init()
 ###################################################################################
 ############################# Check the checksum file   ###########################
 ###################################################################################
-FAILED_STR="FAILED\|失败"
+FAILED_STR="FAILED"
 check_sum()
 {
     checksum_source=$1
@@ -192,6 +213,29 @@ if [ x"0" = x"$?" ]; then
     if [ x"$?" = x"0" ]; then
         touch ".initialized"
     fi
+fi
+export LC_ALL=C
+export LANG=C
+
+TOOLS_DIR="`dirname $0`"
+cd $TOOLS_DIR/../
+PRJROOT=${PWD}
+build_dir=build
+
+
+###################################################################################
+############################# Set download source server ##########################
+###################################################################################
+PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro
+TOOLCHAIN_SOURCE=http://open-estuary.com/EstuaryDownloads/toolchain
+BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_Releases/Estuary_2.1/rc0/binary
+if [ -f ".config" ]; then
+	. .config
+	if [ x"$country" = x"China" ]; then
+		PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist_v2.1_rc0
+		TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
+		BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.1
+	fi
 fi
 
 ###################################################################################
@@ -252,6 +296,11 @@ while [ x"$1" != x"" ]; do
 			check_platform $1
 			echo "Platform: $1"
 			;;
+		"-c" | "--clear" )
+			shift
+			clear_target $1
+			echo "Clear target: $1"
+			;;
 		"-d" | "--distro" )
 			shift
 			check_distro $1
@@ -264,7 +313,7 @@ while [ x"$1" != x"" ]; do
 			;;
 		"-f" | "--file" )
 			shift
-            CFGFILE=`pwd`"/$1"
+            CFGFILE="${PWD}/$1"
             parse_cfg
 			echo "Install: $DISTRO"
             break
@@ -300,9 +349,6 @@ if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
     exit 1
 fi
 
-TOOLS_DIR="`dirname $0`"
-cd $TOOLS_DIR/../
-
 # Detect and dertermine some environment variables
 LOCALARCH=`uname -m`
 if [ x"$PLATFORM" = x"D01" ]; then
@@ -311,7 +357,7 @@ else
     TARGETARCH="ARM64"
 fi
 
-build_dir=build/$PLATFORM
+build_dir=$build_dir/$PLATFORM
 if [ ! -d "$build_dir" ] ; then
 	mkdir -p "$build_dir" 2> /dev/null
 fi
@@ -336,7 +382,7 @@ if [ ! -d "$TOOLCHAIN_DIR" ] ; then
 fi
 
 # Download firstly
-TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
+#TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
 cd $TOOLCHAIN_DIR
 echo "Checking the checksum for toolchain ..."
 check_sum "../estuary/checksum/$toolchainsum_file"
@@ -360,12 +406,17 @@ if [ x"$?" != x"0" ]; then
 fi
 cd -
 
-# Copy to build target directory
+# Copy compiler to build target directory
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
     echo "Copying toolchain to 'build' directory ..."
 	mkdir -p "$toolchain_dir" 2>/dev/null
-    cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
-    cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+    if [ x"ARM32" = x"$TARGETARCH" ]; then
+    	cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
+		ln -s ../../../$toolchain_dir/$GCC32 $binary_dir/$GCC32
+	else
+    	cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+		ln -s ../../../$toolchain_dir/$GCC64 $binary_dir/$GCC64
+	fi
 fi
 
 # Uncompress the toolchain
@@ -379,15 +430,15 @@ do
 		arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
 	fi
 	
-	COMPILER_DIR=`pwd`/${arm_gcc%/*}
+	COMPILER_DIR=${PWD}/${arm_gcc%/*}
 	export PATH=$COMPILER_DIR:$PATH
 
 	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnueabihf" ]; then
-		CROSS=`pwd`/${arm_gcc%g*}
+		CROSS=${PWD}/${arm_gcc%g*}
 	fi
 
 	if [ x"$TARGETARCH" = x"ARM64" ] && [ x"$cross_prefix" = x"aarch64-linux-gnu" ]; then
-		CROSS=`pwd`/${arm_gcc%g*}
+		CROSS=${PWD}/${arm_gcc%g*}
 	fi
 done
 
@@ -494,7 +545,7 @@ done
 ###################################################################################
 BINARY_DIR=binary
 #BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v2.0
-BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.0
+#BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.0
 binarysum_file="binaries.sum"
 binarydl_result=0
 
@@ -524,7 +575,7 @@ if [ x"$?" != x"0" ]; then
 fi
 cd -
 
-# Copy some common to build target directory
+# Copy some common prebuilt files to build target directory
 if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
     if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ]; then
         cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
@@ -537,6 +588,13 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
     if [ x"D01" = x"$PLATFORM" ] && [ -f $BINARY_DIR/default.filesystem ]; then
         cp $BINARY_DIR/default.filesystem $binary_dir/.filesystem
     fi
+
+	if [ x"HiKey" = x"$PLATFORM" ]; then
+		HIKEY_TOOLS=tools/hikey-tools
+		if [ ! -f $binary_dir/hisi-idt.py ]; then
+	    	cp $HIKEY_TOOLS/* $binary_dir/
+		fi
+	fi
 fi
 
 ###################################################################################
@@ -572,16 +630,6 @@ if [ x"" != x"$PLATFORM" ]; then
 fi
 
 ###################################################################################
-########################### Copy prebuilt files           #########################
-###################################################################################
-if [ x"HiKey" = x"$PLATFORM" ]; then
-	HIKEY_TOOLS=tools/hikey-tools
-	if [ ! -f $binary_dir/hisi-idt.py ]; then
-    	cp $HIKEY_TOOLS/* $binary_dir/
-	fi
-fi
-
-###################################################################################
 ########################### Build UEFI from source code   #########################
 ###################################################################################
 UEFI_TOOLS=tools/uefi-tools
@@ -604,7 +652,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
         echo "Can not find uefi-tools!"
         exit 1
     fi
-    export PATH=$PATH:`pwd`/$UEFI_TOOLS
+    export PATH=$PATH:${PRJROOT}/$UEFI_TOOLS
     # Let UEFI detect the arch automatically
     export ARCH=
 
@@ -620,6 +668,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
      	echo "ARCH=ARM" >> platforms.config
      	popd
 
+    	rm `find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null` 2>/dev/null
     	# compile uefi for D01
     	pushd $UEFI_DIR/
 		# roll back to special version for D01
@@ -632,6 +681,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
 	elif [ x"D02" = x"$PLATFORM" ]; then
 		# Build UEFI for D02 platform
+    	rm `find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null` 2>/dev/null
     	pushd $UEFI_DIR/
 		# roll back to special version for D02
 		git reset --hard
@@ -649,6 +699,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 #			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $binary_dir/
 #		fi
 	elif [ x"HiKey" = x"$PLATFORM" ]; then
+    	rm `find "$UEFI_DIR/l-loader" -name "fip.bin" 2>/dev/null` 2>/dev/null
 		# Build UEFI for D02 platform
     	pushd $UEFI_DIR/
 #		export AARCH64_TOOLCHAIN=GCC49
@@ -657,7 +708,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 
 		git reset --hard
 		git checkout open-estuary/master
-	    git reset --hard 37500bcd263482fda9c976
+	    git reset --hard 9ad6457e013db87aba134c5021d5a1de1d278da2
 	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
 	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
 
@@ -671,7 +722,7 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    arm-linux-gnueabihf-objcopy -O binary loader temp
 	    python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
 
-	    sudo PTABLE=linux bash -x generate_ptable.sh
+		sudo PTABLE=linux-8G bash -x generate_ptable.sh
 	    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
 
 	    cp l-loader.bin ../../$uefi_dir/
@@ -740,9 +791,9 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
-    echo path:`pwd`
+    echo "Path: ${PWD}"
     cd $grub_dir
-    absolute_dir=`pwd`
+    absolute_dir=${PWD}
     cd -
 
 	if [ x"ARM32" = x"$TARGETARCH" ]; then
@@ -798,116 +849,6 @@ if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -
 fi
 
 ###################################################################################
-##################### Build kernel from kernel source code      ###################
-###################################################################################
-# preprocess for kernel building
-BUILDFLAG=FALSE
-KERNEL_DIR=kernel
-kernel_dir=$build_dir/$KERNEL_DIR
-KERNEL_BIN=
-DTB_BIN=
-
-if [ x"" = x"$PLATFORM" ]; then
-    #do nothing
-	echo "Do not build kernel."
-elif [ x"ARM32" = x"$TARGETARCH" ]; then
-	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
-    DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
-
-	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
-		BUILDFLAG=TRUE
-
-		export ARCH=arm
-	fi
-else
-	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
-    if [ x"QEMU" = x"$PLATFORM" ]; then
-        DTB_BIN=""
-    elif [ x"HiKey" = x"$PLATFORM" ]; then
-	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
-    else
-	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
-    fi
-
-	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		BUILDFLAG=TRUE
-
-		export ARCH=arm64
-	fi
-fi
-
-if [ x"$BUILDFLAG" = x"TRUE" ]; then
-    echo "Building kernel ..."
-    mkdir -p "$kernel_dir" 2> /dev/null
-
-	pushd $KERNEL_DIR/
-	
-	make mrproper
-	make O=../$kernel_dir mrproper
-
-    # kernel building
-    if [ x"ARM32" = x"$TARGETARCH" ]; then
-		make O=../$kernel_dir hisi_defconfig
-
-#		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
-
-		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
-		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-        cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
-    else
-		make O=../$kernel_dir defconfig
-        if [ x"QEMU" = x"$PLATFORM" ]; then
-    		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
-    		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
-        fi
-		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
-
-		dtb_dir=${DTB_BIN#*arch/}
-		dtb_dir=${DTB_BIN%/*}
-		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
-
-	    mkdir -p $dtb_dir 2>/dev/null
-
-		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-    fi
-
-    # postprocess for kernel building
-	if [ "$LOCALARCH" = "arm" -o "$LOCALARCH" = "aarch64" ]; then
-		make O=../$kernel_dir -j${corenum} modules
-		make O=../$kernel_dir -j${corenum} modules_install
-		make O=../$kernel_dir -j${corenum} firmware_install
-	fi
-
-	popd
-fi
-
-if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
-	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
-
-    if [ x"D01" = x"$PLATFORM" ] && [ -f $kernel_dir/.kernel ]; then
-        cp $kernel_dir/.kernel $binary_dir/
-    fi
-fi
-
-if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
-    cp $DTB_BIN $binary_dir/
-fi
-
-###################################################################################
 ######################### Uncompress the distribution   ###########################
 ###################################################################################
 uncompress_distro()
@@ -957,6 +898,10 @@ uncompress_distro()
 	    	echo "Can not find the suitable root filesystem!"
 	        exit 1
 	    fi
+
+		echo "Remove old module files in rootfs..."
+		sudo rm -rf $distro_dir/lib/modules/*
+
 	fi
 }
 
@@ -964,6 +909,144 @@ for tmp in "${DISTROLS[@]}"
 do
 	uncompress_distro $tmp
 done
+
+###################################################################################
+##################### Build kernel from kernel source code      ###################
+###################################################################################
+# preprocess for kernel building
+BUILDFLAG=FALSE
+KERNEL_DIR=kernel
+kernel_dir=$build_dir/$KERNEL_DIR
+KERNEL_BIN=
+DTB_BIN=
+
+if [ x"" = x"$PLATFORM" ]; then
+    #do nothing
+	echo "Do not build kernel."
+elif [ x"ARM32" = x"$TARGETARCH" ]; then
+	KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
+    DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+	CFG_FILE=hisi_defconfig
+
+	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
+		BUILDFLAG=TRUE
+	fi
+
+	export ARCH=arm
+else
+	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
+	CFG_FILE=defconfig
+
+    if [ x"QEMU" = x"$PLATFORM" ]; then
+        DTB_BIN=""
+    elif [ x"HiKey" = x"$PLATFORM" ]; then
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
+    else
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
+    fi
+
+	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
+		BUILDFLAG=TRUE
+	fi
+
+	export ARCH=arm64
+fi
+
+if [ ! -d $kernel_dir ]; then
+	mkdir -p "$kernel_dir" 2> /dev/null
+fi
+
+pushd $KERNEL_DIR/
+
+if [ x"$BUILDFLAG" = x"TRUE" ]; then
+    echo "Building kernel ..."
+
+	make O=../$kernel_dir mrproper
+	make O=../$kernel_dir $CFG_FILE
+
+    # kernel building
+    if [ x"ARM32" = x"$TARGETARCH" ]; then
+#		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
+#		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
+
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
+        cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
+    else
+        if [ x"QEMU" = x"$PLATFORM" ]; then
+    		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
+    		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
+    		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
+        fi
+		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+
+		dtb_dir=${DTB_BIN#*arch/}
+		dtb_dir=${DTB_BIN%/*}
+		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
+
+	    mkdir -p $dtb_dir 2>/dev/null
+
+		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
+    fi
+
+fi
+
+# postprocess for kernel building
+echo "Postprocess for kernel building ..."
+for tmp in "${DISTROLS[@]}"
+do
+	distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
+	modulesfile=`find ${distro_dir}/lib/modules -name modules.dep 2>/dev/null`
+
+	if [ x"" = x"$modulesfile" ]; then
+		#make O=../$kernel_dir $CFG_FILE
+		make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
+
+		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
+	fi
+done
+
+popd
+#	pushd $KERNEL_DIR/
+#	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"
+#	for tmp in "${DISTROLS[@]}"
+#	do
+#		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
+#		export ARCH=arm64
+#		export CROSS_COMPILE=$CROSS_COMPILE
+#		echo "============$ARCH,$CROSS_COMPILE"
+#
+#		make O=../$kernel_dir $CFG_FILE
+#
+#		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE  make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
+#		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE  make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
+#	done
+#	popd
+
+if [ x"" != x"$KERNEL_BIN" ] && [ -f $KERNEL_BIN ]; then
+	cp $KERNEL_BIN $binary_dir/${KERNEL_BIN##*/}"_$PLATFORM"
+
+    if [ x"D01" = x"$PLATFORM" ] && [ -f $kernel_dir/.kernel ]; then
+        cp $kernel_dir/.kernel $binary_dir/
+    fi
+fi
+
+if [ x"" != x"$DTB_BIN" ] && [ -f $DTB_BIN ]; then
+    cp $DTB_BIN $binary_dir/
+fi
 
 ###################################################################################
 ######################### install applications          ###########################
@@ -985,7 +1068,7 @@ install_pkgs()
 		if [ x"yes" = x"$install" ]; then
 			appdir="$PACKAGES/$pkg"
 			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
-				kdir=`pwd`/$kernel_dir
+				kdir=${PRJROOT}/$kernel_dir
 				mkdir -p $build_dir/$appdir 2>/dev/null
 				if [ ! -f $build_dir/$appdir/.built ]; then
 					$appdir/build.sh $PLATFORM $1 $2 $kdir
@@ -1019,7 +1102,7 @@ install_pkgs()
 distro_postfix=".tar.gz"
 create_distro()
 {
-	distro_dir=`pwd`/$build_dir/$DISTRO_DIR/$1
+	distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
 		if [ ! -d $distro_dir/usr/bin/estuary ]; then
@@ -1039,6 +1122,8 @@ create_distro()
 		echo "Creating $image ..."
 		sudo tar -czf ../$image *
 		popd
+
+		ln -s ../../../$build_dir/$DISTRO_DIR/$image $binary_dir/$image
 	fi
 }
 
@@ -1165,7 +1250,7 @@ if [ x"" != x"$PLATFORM" ]; then
 	    fi
 	done
 
-    if [ -f $toolchain_dir/$GCC64 ]; then
+    if [ -f $toolchain_dir/$GCC64 ] || [ -f $toolchain_dir/$GCC32 ]; then
     	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
         true
     else
@@ -1289,7 +1374,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 	CMDLINE="console=ttyAMA0 root=/dev/vda rw"
 
 # Compile qemu
-	qemu_dir=`pwd`/$build_dir/qemu
+	qemu_dir=${PRJROOT}/$build_dir/qemu
 	mkdir -p $qemu_dir 2> /dev/null
 
 	QEMU=`find $qemu_dir -name qemu-system-aarch64 2>/dev/null`
@@ -1313,7 +1398,7 @@ if [ x"QEMU" = x"$PLATFORM" ]; then
 # Run the qemu
     echo "Starting QEMU ..."
 	$QEMU -machine virt -cpu cortex-a57 \
-	    -kernel `pwd`/$KERNEL_BIN \
+	    -kernel ${PRJROOT}/$KERNEL_BIN \
 	    -drive if=none,file=$rootfs,id=fs \
 	    -device virtio-blk-device,drive=fs \
 	    -append "$CMDLINE" \

@@ -2,8 +2,9 @@
 
 wyl_debug=y
 
-LANG=C
+CFGFILE=$cwd/estuarycfg.json
 
+LANG=C
 
 declare -a distros=("ubuntu" "opensuse" "linaro" "fedora" "debian")
 readonly -a root_name
@@ -84,27 +85,6 @@ if [ -z "$ROOT_FS" ]; then
 	#para_sel  distros  ROOT_FS
     echo ""
 fi
-
-cat << EOM
-parsing estuary.cfg ...
-EOM
-while read line
-do
-    name=`echo $line | awk -F '=' '{print $1}'`
-    value=`echo $line | awk -F '=' '{print $2}'`
-    case $name in
-        "platform")
-        BRD_TYPE=$value
-        echo "wyl-trace -> BRD_TYPE = "$BRD_TYPE
-        ;;
-        "distro")
-        ROOT_FS=$value
-        echo "wyl-trace -> ROOT_FS = "$ROOT_FS
-        ;;
-        *)
-        ;;
-    esac
-done < estuary.cfg
 
 #echo "${distros[@]}"
 #make a choice what root fs is wanted to setup

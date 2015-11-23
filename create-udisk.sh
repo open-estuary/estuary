@@ -3,17 +3,14 @@
 #author: wangyanliang
 #date: August 12, 2015
 
+cwd=`dirname $0`
+
 export LANG=C
 
 wyl_debug=y
 en_shield=y
 
-PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
-PATH_OPENSUSE64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse.img.tar.gz
-PATH_UBUNTU64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu-vivid.img.tar.gz
-PATH_FEDORA64=http://7xjz0v.com1.z0.glb.clouddn.com/dist/fedora-22.img.tar.gz
-PATH_OPENSUSE32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/opensuse32.img.tar.gz
-PATH_UBUNTU32=http://7xjz0v.com1.z0.glb.clouddn.com/dist/ubuntu32.img.tar.gz
+CFGFILE=$cwd/estuarycfg.json
 
 # Determine the absolute path to the executable
 # EXE will have the PWD removed so we can concatenate with the PWD safely
@@ -21,6 +18,70 @@ PWD=`pwd`
 EXE=$(echo $0 | sed "s/.*\///")
 EXEPATH="$PWD"/"$EXE"
 clear
+
+entry_header() {
+cat << EOF
+-------------------------------------------------------------------------------
+setup package script
+This script will make sure you have the proper host support packages installed
+This script requires administrator priviliges (sudo access) if packages are to be installed.
+-------------------------------------------------------------------------------
+EOF
+}
+
+exit_footer() {
+cat << EOF
+--------------------------------------------------------------------------------
+Package verification and installation successfully completed
+--------------------------------------------------------------------------------
+EOF
+}
+
+entry_header
+
+packages_to_install="jq parted dosfstools"
+
+cmd="sudo apt-get install "
+
+# Check and only install the missing packages
+for i in $packages_to_install; do
+	is_it_installed=`dpkg-query -l $i 2>/dev/null`
+    if [ "$?" -ne "0" ]; then
+		needs_installation=`echo $needs_installation`" "$i
+		new_cmd=`echo $cmd`" "$i
+		cmd=$new_cmd
+	fi
+done
+
+if [ "$needs_installation" = "" ]; then
+    echo "System has required packages!"
+else
+    echo "System requires packages $needs_installation to be installed"
+
+    echo "Installation requires you to have administrator priviliges (sudo access) "
+    echo "on your host. Do you have administrator privilieges?"
+
+    # Force the user to answer.  Maybe the user does not want to continue
+    while true;
+    do
+        read -p "Type 'y' to continue or 'n' to exit the installation: " REPLY
+        if [ "$REPLY" = 'y' -o "$REPLY" = 'n' ]; then
+            break;
+        fi
+    done
+
+    if [ "$REPLY" = 'n' ]; then
+        echo "Installation is aborted by user"
+        exit 1
+    fi
+
+    echo "Performing $cmd"
+    $cmd
+    check_status
+fi
+# Print the exit statement to the console
+exit_footer
+
 cat << EOM
 
 ################################################################################
@@ -55,38 +116,43 @@ PATHVALID=0
 fi
 
 cat << EOM
-start to parse  estuary.cfg ...
+begin to parse estuarycfg.json ...
 EOM
-while read line
+build_PLATFORM=`jq -r ".system.platform" $CFGFILE`
+
+if [ "$build_PLATFORM" == "D01" ]; then
+    TARGET_ARCH=ARM32
+else
+    TARGET_ARCH=ARM64
+fi
+
+DISTROS=()
+idx=0
+idx_en=0
+install=`jq -r ".distros[$idx].install" $CFGFILE`
+while [ x"$install" != x"null" ];
 do
-    name=`echo $line | awk -F '=' '{print $1}'`
-    value=`echo $line | awk -F '=' '{print $2}'`
+    name=`jq -r ".distros[$idx].name" $CFGFILE`
+    value=`jq -r ".distros[$idx].install" $CFGFILE`
     case $name in
-        "arch")
-        TARGET_ARCH=$value
-        ;;
-        "platform")
-        build_PLATFORM=$value
-        ;;
-        "distro")
-        build_DISTRO=$value
-        ;;
-        "ubuntu")
+        "Ubuntu")
         ubuntu_en=$value
         ;;
-        "opensuse")
+        "Opensuse")
         opensuse_en=$value
         ;;
-        "fedora")
+        "Fedora")
         fedora_en=$value
         ;;
-        "debian")
+        "Debian")
         debian_en=$value
         ;;
         *)
         ;;
     esac
-done < estuary.cfg
+    let idx=$idx+1
+    install=`jq -r ".distros[$idx].install" $CFGFILE`
+done
 
 #Precentage function
 untar_progress ()
@@ -220,38 +286,22 @@ EOM
         cp -a ../build/$build_PLATFORM/binary/grubaa64* rootfs/sys_setup/boot/EFI/GRUB2
         cp -a ../build/$build_PLATFORM/binary/Image_$build_PLATFORM rootfs/sys_setup/boot/Image
         cp -a ../build/$build_PLATFORM/binary/hip05-d02.dtb rootfs/sys_setup/boot
-        
 
-if [ "0" == "1" ]; then
-        if [ "$ubuntu_en" == "y" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
-            cp -af distro/$build_PLATFORM/ubuntu$TARGET_ARCH/ubuntu"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
-        fi
-        if [ "$fedora_en" == "y" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
-            cp -a distro/$build_PLATFORM/fedora$TARGET_ARCH/fedora"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
-        fi
-        if [ "$opensuse_en" == "y" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
-            cp -a distro/$build_PLATFORM/opensuse$TARGET_ARCH/opensuse"$TARGET_ARCH"_"$build_PLATFORM".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
-        fi
-fi
-
-        if [ "$ubuntu_en" == "y" ]; then
+        if [ "$ubuntu_en" == "yes" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
             TOTALSIZE=`sudo du -c ../distro/Ubuntu_"$TARGET_ARCH".tar.gz | grep total | awk {'print $1'}`
             cp -af ../distro/Ubuntu_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH &
             cp_progress $TOTALSIZE rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
         fi
-        if [ "$fedora_en" == "y" ]; then
+        if [ "$fedora_en" == "yes" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
             cp -a ../distro/Fedora_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
         fi
-        if [ "$debian_en" == "y" ]; then
+        if [ "$debian_en" == "yes" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH 2> /dev/null
             cp -a ../distro/Debian_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH
         fi
-        if [ "$opensuse_en" == "y" ]; then
+        if [ "$opensuse_en" == "yes" ]; then
             mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
             cp -a ../distro/OpenSuse_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
         fi
@@ -259,8 +309,7 @@ fi
         cp -a sys_setup.sh rootfs/sys_setup/bin
         cp -a functions.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
-        cp -a estuary.cfg rootfs/sys_setup/bin
-        cp -a post_install.sh rootfs/sys_setup/bin
+        cp -a estuarycfg.json rootfs/sys_setup/bin
 
         touch rootfs/etc/profile.d/antoStartUp.sh
         chmod a+x rootfs/etc/profile.d/antoStartUp.sh
@@ -557,9 +606,8 @@ cat << EOM
 
 EOM
 
-
-if [ ! -d build/$build_PLATFORM/binary ]; then
 pushd ..
+if [ ! -d build/$build_PLATFORM/binary ]; then
     # Make sure that the build.sh file exists
     if [ -f $PWD/estuary/build.sh ]; then
         $PWD/estuary/build.sh -p $build_PLATFORM -d Ubuntu
@@ -568,8 +616,8 @@ pushd ..
         echo "build.sh does not exist in the directory"
         exit 1
     fi
-popd
 fi
+popd
 
 ENTERCORRECTLY=0
 while [ $ENTERCORRECTLY -ne 1 ]
@@ -593,88 +641,7 @@ then
     mkdir -p tmp/distro 2> /dev/null
     mkdir -P $PWD/distro/$build_PLATFORM 2> /dev/null
 
-if [ "0" == "1" ]; then
-    if [ "$ubuntu_en" == "y" ]; then
-        if [ ! -d $PWD/distro/$build_PLATFORM/ubuntu$TARGET_ARCH ]; then
-            mkdir $PWD/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
-            pushd distro/$build_PLATFORM/ubuntu$TARGET_ARCH
-            # Check the postfix name
-            ubuntu_source=PATH_UBUNTU$TARGET_ARCH
-            tmp_path=${!ubuntu_source}
-            postfix=${tmp_path#*.tar} 
-            if [ x"$postfix" = x"$tmp_path" ]; then
-                postfix=${tmp_path##*.} 
-            else
-                if [ x"$postfix" = x"" ]; then
-                    postfix=".tar"
-                else
-                    postfix="tar"$postfix	
-                fi
-            fi
-            #wget -P distro/$build_PLATFORM/ubuntu -c $DISTRO_SOURCE
-            wget -O ubuntu"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
-            chmod 777 ubuntu"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
-            unset ubuntu_source
-            unset tmp_path
-            unset postfix
-            popd
-        fi
-    fi
-
-    if [ "$fedora_en" == "y" ]; then
-        if [ ! -d $PWD/distro/$build_PLATFORM/fedora$TARGET_ARCH ]; then
-            mkdir $PWD/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
-            pushd distro/$build_PLATFORM/fedora$TARGET_ARCH
-            # Check the postfix name
-            fedora_source=PATH_FEDORA$TARGET_ARCH
-            tmp_path=${!fedora_source}
-            postfix=${tmp_path#*.tar} 
-            if [ x"$postfix" = x"$tmp_path" ]; then
-                postfix=${tmp_path##*.} 
-            else
-                if [ x"$postfix" = x"" ]; then
-                    postfix=".tar"
-                else
-                    postfix="tar"$postfix	
-                fi
-            fi
-            wget -O fedora"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
-            chmod 777 fedora"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
-            unset fedora_source
-            unset tmp_path
-            unset postfix
-            popd
-        fi
-    fi
-
-    if [ "$opensuse_en" == "y" ]; then
-        if [ ! -d $PWD/distro/$build_PLATFORM/opensuse$TARGET_ARCH ]; then
-            mkdir $PWD/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
-            pushd distro/$build_PLATFORM/opensuse$TARGET_ARCH
-            # Check the postfix name
-            opensuse_source=PATH_OPENSUSE$TARGET_ARCH
-            tmp_path=${!opensuse_source}
-            postfix=${tmp_path#*.tar} 
-            if [ x"$postfix" = x"$tmp_path" ]; then
-                postfix=${tmp_path##*.} 
-            else
-                if [ x"$postfix" = x"" ]; then
-                    postfix=".tar"
-                else
-                    postfix="tar"$postfix	
-                fi
-            fi
-            wget -O opensuse"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
-            chmod 777 opensuse"$TARGET_ARCH"_"$build_PLATFORM"."$postfix"
-            unset opensuse_source
-            unset tmp_path
-            unset postfix
-            popd
-        fi
-    fi
-fi
-
-    if [ "$fedora_en" == "y" ]; then
+    if [ "$fedora_en" == "yes" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
@@ -682,7 +649,7 @@ fi
         fi
         popd
     fi
-    if [ "$debian_en" == "y" ]; then
+    if [ "$debian_en" == "yes" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d Debian
@@ -691,7 +658,7 @@ fi
         popd
     fi
 
-    if [ "$opensuse_en" == "y" ]; then
+    if [ "$opensuse_en" == "yes" ]; then
         pushd ..
         if [ -f $PWD/estuary/build.sh ]; then
             $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
