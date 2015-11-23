@@ -930,9 +930,9 @@ elif [ x"ARM32" = x"$TARGETARCH" ]; then
 
 	if [ ! -f $kernel_dir/arch/arm/boot/zImage ]; then
 		BUILDFLAG=TRUE
-
-		export ARCH=arm
 	fi
+
+	export ARCH=arm
 else
 	KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
 	CFG_FILE=defconfig
@@ -947,16 +947,19 @@ else
 
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
 		BUILDFLAG=TRUE
-
-		export ARCH=arm64
 	fi
+
+	export ARCH=arm64
 fi
+
+if [ ! -d $kernel_dir ]; then
+	mkdir -p "$kernel_dir" 2> /dev/null
+fi
+
+pushd $KERNEL_DIR/
 
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
     echo "Building kernel ..."
-    mkdir -p "$kernel_dir" 2> /dev/null
-
-	pushd $KERNEL_DIR/
 
 	make O=../$kernel_dir mrproper
 	make O=../$kernel_dir $CFG_FILE
@@ -998,20 +1001,25 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
     fi
 
-    # preprocess for kernel building
-	for tmp in "${DISTROLS[@]}"
-	do
-		distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
+fi
+
+# postprocess for kernel building
+echo "Postprocess for kernel building ..."
+for tmp in "${DISTROLS[@]}"
+do
+	distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$tmp
+	modulesfile=`find ${distro_dir}/lib/modules -name modules.dep 2>/dev/null`
+
+	if [ x"" = x"$modulesfile" ]; then
 		#make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} modules INSTALL_MOD_PATH=$distro_dir
 
 		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE make O=../$kernel_dir -j${corenum} modules_install INSTALL_MOD_PATH=$distro_dir
 		sudo ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE make O=../$kernel_dir -j${corenum} firmware_install INSTALL_FW_PATH=$distro_dir/lib/firmware
-	done
+	fi
+done
 
-	popd
-fi
-
+popd
 #	pushd $KERNEL_DIR/
 #	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"
 #	for tmp in "${DISTROLS[@]}"
