@@ -26,6 +26,34 @@ check_init()
 	return 0
 }
 
+netstatus=${post_dir}/.network
+if [ ! -f ${netstatus} ]; then
+	netrst=`ping www.baidu.com -c 4`
+	rcv=`echo "$netrst" | grep -E "..received" -o`
+	if [ x"0" != x"$?" ]; then
+		exit 1
+	fi
+	rcv=`echo "$rcv" | cut -d " " -f1`
+	if [ x"0" = x"$rcv" ]; then
+		exit 1
+	fi
+fi
+
+# preprocess...
+Distribution=`cat /etc/issue| cut -d' ' -f 1`
+
+case "$Distribution" in
+    Ubuntu)
+		if [ ! -f $netstatus ]; then
+			apt-get -y update
+			echo "$netrst" > $netstatus
+		fi
+		;;
+    *)
+        echo "Not support to install packages on $Distribution"
+        exit 1
+esac
+
 for fullfile in $post_dir/*
 do
 	file=${fullfile##*/}
