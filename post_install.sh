@@ -51,7 +51,6 @@ case "$Distribution" in
 		;;
     *)
         echo "Not support to install packages on $Distribution"
-        exit 1
 esac
 
 for fullfile in $post_dir/*
