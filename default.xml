@@ -27,10 +27,10 @@
   <project name="patches" revision="refs/tags/v2.1-rc0" />
 
   <!--armor -->
-  <project name="armor" />
+  <project name="armor" revision="refs/tags/v2.1-rc0" />
 
   <!-- packages -->
-  <project name="packages" />
+  <project name="packages" revision="refs/tags/v2.1-rc0" />
 
   <!-- grub -->
   <!-- project name="grub" remote="grub" / -->
