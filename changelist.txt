@@ -3,7 +3,7 @@ Change list for Estuary V2.1:
 	a. Support to build from project config file. e.g.: ./estuary/build.sh -f estuary/estuarycfg.json
 	b. Enable more boards(HiKey).
 	c. Enable application integration solution.
-	d. Dynamically install moudles\firmwares into rootfs.
+	d. Dynamically install modules\firmwares into rootfs.
 
 2. Upgrade UEFI
     a. Resolved CPLD updating failed issue.
@@ -15,7 +15,7 @@ Change list for Estuary V2.1:
     a. Enable HiKey board.
     b. Resolved random MAC address issue.
 
-4. Firstly integrate and enable some appliations.(Currently only for Ubuntu distribution)
+4. Firstly integrate and enable some applications.(Currently only for Ubuntu distribution)
     Notes: it will take 2--4 hours for first times reboot, depending on your network status.
 	a. Armor tools, e.g.: perf, strace ...
 	b. Docker v1.6.2
