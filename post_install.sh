@@ -42,16 +42,23 @@ fi
 # preprocess...
 Distribution=`cat /etc/issue| cut -d' ' -f 1`
 
-case "$Distribution" in
-    Ubuntu)
-		if [ ! -f $netstatus ]; then
+if [ ! -f $netstatus ]; then
+	case "$Distribution" in
+	    Ubuntu)
 			apt-get -y update
-			echo "$netrst" > $netstatus
-		fi
-		;;
-    *)
-        echo "Not support to install packages on $Distribution"
-esac
+			;;
+		Fedora)
+			dnf -y  update	
+			;;
+		OpenSuse)
+			zypper -y update
+			;;
+	    *)
+	        echo "Not support to install packages on $Distribution"
+	esac
+
+	echo "$netrst" > $netstatus
+fi
 
 for fullfile in $post_dir/*
 do
