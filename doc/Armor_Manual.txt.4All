@@ -1,9 +1,95 @@
-Armor Tools Edit
+
 Introduction
+============
 
 Armor tools covers all the platform tools for debug, diagnostics and monitoring which are available in Estuary solution.
 
+Armor Release Version
+=====================
+Current Release Version- "armor-v1.0"
+
+Information of Supported Armor Tools 
+===================================
+- For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/armor-dev/doc/Armor_Tools_Basic_Info.txt.4All
+
+- Documentation for LLC support in perf https://github.com/open-estuary/armor/blob/master/testing/doc/README.perf
+
+- Documentation for using KGDB and KDB please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.kgdb.kdb
+
+- Documentation for LTTng userspace and kernel tracing, please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.lttng
  
 
-/* We are building this page! */
+Distributions
+=============
+Presently Armor tools are supported on the following distributions.
+
+Ubuntu 15.04 ARM64
+Fedora 22 ARM64
+OpenSuse 20150813 Tumbleweed ARM64
+
+Note: perf tool is auto installed only on Ubuntu currently. But User could
+install the perf tool in Fedora and OpenSuSE from the repos and use it.
+
+Installation
+============
+1. Many of the Armor tolls are already present in the rootfs of open-estuary distributions.
+
+2. Some of the Armor tools are available as package in the distribution repo.
+   Those tool's packages will be installed using the installation commands added in the open-estuary/packages/armor/armor_postinstall.sh script.
+
+   Note 1: The following steps may have to be done for the successful Armor tool's package installation using the post_install.sh script.
+   Ubuntu: please update /etc/apt/sources.list file in the rfs with the right ubuntu repo paths and run 'apt-get update' command.
+   Fedora: run 'dnf update' command.
+   OpenSuse: run 'zypper update' command.
+
+   Note 2: The Armor tool's package installation using the armor_postinstall.sh script can be enables/disabled using the flag INSTALL_ARMOR_TOOLS.
+            Default value INSTALL_ARMOR_TOOLS="YES".
+
+   Note 3: Any packages which failed during installation from armor_post_install.sh shall be known from the log file
+          /usr/bin/estuary/postinstall/armor_post_install_log. User can manually update the repo sources and retry to
+          install the failed packages.
+
+3. Also the prebuilt binary packages for some of the tools which are not present either in distribution rootfs or as package,
+   then the tools binary built from source might added in the
+   https://github.com/open-estuary/armor/tree/master/testing/binary.
+
+   These tool's binaries created as .deb package for Ubuntu or in .rpm package for Fedora/OpenSuse/RedHat or
+   as arm64 executable which can directly run.
+
+   These packages are installed to rootfs using open-estuary/packages/armor/armor_postinstall.sh script. 
+
+How to run Tool's test scripts
+==============================
+1. 
+1.a. When /packages/armor/armor_postinstall run as part of estuary build, the armor tools test scripts and test apps are copied into the /usr/local/armor folder in rootfs. 
+     Note: The armor repo will be downloaded when you build open-estuary using build.sh. 
+
+    OR 
+
+1.b Download the Armor project files from open-estuary repo either on host machine or on the terminal of your board(example - D02)
+   git clone https://github.com/open-estuary/armor
+   Copy testing/test_scripts folder to your NFS for your board. 
+   
+2. To test individual tools please run on the shell terminal
+    'sh test_<tool's name>.sh' -> to run test script of an armor tool.
+    For example, 'sh test_strace.sh' to run tests for strace.
+    The test results can be seen on the console.
+
+3. Run command 'sh auto_test_armor_tools.sh'
+   This script will run the test scripts for the list of tools supported in Armor releases.
+
+4. The test results will be displayed on the terminal.    
+   
+Known Limitations/Issues
+========================
+1. dmidecode tool does not run on open-estuary distributions with the error "/dev/mem: Operation not permitted". 
+2. sar tool does not work.
+3. KDump/Kexec may not work.
+4. Don't know how to verify fsck and iptables on D02.
+5. Perf tool installed for only Ubuntu distribution. In Fedora and openSuSE user
+need to install from the repos manually.
+
+========================================= End =============================================
+
+
 
