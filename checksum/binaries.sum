@@ -1,4 +1,6 @@
 fb9e2cba06ac589a3963eb6d1a3ae223  CH02TEVBC_V03.bin
 8ce72d76a810dced9f446e56f13bb2c1  filesystem.bin
 cbaea3e109f5fd6dc4a4a208ad480651  grub.cfg
+813e47453b5d831c0212d0164b0b9a5b  hisi-idt.py
 5dff90ca57dc5ced987c99363056f39e  mini-rootfs.cpio.gz
+d8d56cc22e6d06855b62ff4544dcc3d4  nvme.img
