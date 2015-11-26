@@ -56,28 +56,24 @@ You should change them acoording to your real local environment.
         set root=(tftp,192.168.1.107)
         linux /Image_D02 rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
         initrd /mini-rootfs.cpio.gz
-        devicetree /hip05-d02.dtb
     }
     
     # Booting from NFS with Ubuntu rootfs
     menuentry "D02 Ubuntu NFS" --id d02_ubuntu_nfs {
         set root=(tftp,192.168.1.107)
         linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
-        devicetree /hip05-d02.dtb
     }
     
     # Booting from SATA with Ubuntu rootfs in /dev/sda2
     menuentry "D02 Ubuntu SATA" --id d02_ubuntu_sata {
         set root=(hd1,gpt1)
         linux /Image_D02 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-        devicetree /hip05-d02.dtb
     }
 
     # Booting from SATA with Fedora rootfs in /dev/sda3
     menuentry "D02 Fedora SATA" --id d02_fedora_sata {
         set root=(hd1,gpt1)
         linux /Image_D02 rdinit=/init root=/dev/sda3 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-        devicetree /hip05-d02.dtb
     }
 
     # Booting from Norflash with mini rootfs
