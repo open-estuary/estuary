@@ -6,6 +6,7 @@ Preparation
     Prerequisite
     Check the hardware board
     Upgrade UEFI and trust firmware
+    Upgrade DTB image
 Bring up System
     Boot via NORFLASH
     Boot via PXE
@@ -38,23 +39,35 @@ All following sections will take the D02 board as example, other boards have the
 
     You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to UEFI_Manual.txt.
 
+# Upgrade DTB image
 
-### Bring up System ###
-
-There are several methods to bring up system, you can select following anyone fitting you to boot up.
-
-# Boot via NORFLASH
-    
-    Boot D02 to UEFI SHELL, and type the follow commands in EBL:
-    We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to UEFI_Manual.txt.
+   Because this dtb image is important to this D02 boards, you firstly must flash this DTB image into spiflash for all methods of bringing up systerm . Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to UEFI_Manual.txt.
 
     1. IP address config
     
     # Config board's IP address
     ifconfig -s eth0 <IP address> <mask> <gateway>
     e.g.: ifconfig -s eth0 192.168.1.4 255.255.255.0 192.168.1.1
+
+    2. Download dtb file from FTP
     
-    2. Download Image binary file from FTP
+    # Download fiel from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
+    # Write data into FLASH
+    spiwfmem <source address> <target address> <data length>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 100000
+          spiwfmem 100000 300000 100000
+
+### Bring up System ###
+
+There are several methods to bring up system, you can select following anyone fitting you to boot up.
+
+# Boot via NORFLASH
+
+    Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+
+    1. Download Image binary file from FTP
     
     # Download fiel from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
@@ -63,27 +76,18 @@ There are several methods to bring up system, you can select following anyone fi
     e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 100000
           norwfmem 100000 100000 1f00000
     
-    3. Download dtb file from FTP
+    2. Download rootfs file from FTP
     
-    # Download fiel from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
-    # Write data into FLASH
-    spiwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 100000
-          spiwfmem 100000 300000 100000
-    
-    4. Download rootfs file from FTP
-    
-    # Download fiel from FTP server to target board's RAM
+    # Download file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image> -a <download target address>
     # Write data into NORFLASH
     norwfmem <source address> <target address> <data length>
     e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz -a 100000
           norwfmem 100000 2000000 4000000
     
-    5. Reboot D02 and press anykey to enter UEFI Boot Menu
+    3. Reboot D02 and press anykey to enter UEFI Boot Menu
     
-    6. Select "FLASH Start OS" boot option.
+    4. Select "FLASH Start OS" boot option.
 
     To get all binaries mentioned above, please refer to Readme.txt.
     
