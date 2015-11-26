@@ -543,17 +543,17 @@ done
 ###################################################################################
 ##########  Download prebuilt binaries based on md5 checksum file    ##############
 ###################################################################################
-BINARY_DIR=binary
+PREBUILD_DIR=prebuild
 #BINARY_SOURCE=https://github.com/open-estuary/estuary/releases/download/bin-v2.0
 #BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.0
 binarysum_file="binaries.sum"
 binarydl_result=0
 
-if [ ! -d "$BINARY_DIR" ] ; then
-	mkdir -p "$BINARY_DIR" 2> /dev/null
+if [ ! -d "$PREBUILD_DIR" ] ; then
+	mkdir -p "$PREBUILD_DIR" 2> /dev/null
 fi
 
-cd $BINARY_DIR/
+cd $PREBUILD_DIR/
 echo "Checking the checksum for binaries ..."
 check_sum "../estuary/checksum/$binarysum_file"
 if [ x"$?" != x"0" ]; then
@@ -577,22 +577,25 @@ cd -
 
 # Copy some common prebuilt files to build target directory
 if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
-    if [ -f $BINARY_DIR/mini-rootfs.cpio.gz ]; then
-        cp $BINARY_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+    if [ -f $PREBUILD_DIR/mini-rootfs.cpio.gz ]; then
+        cp $PREBUILD_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
     fi
 
-    if [ x"D02" = x"$PLATFORM" ] && [ -f $BINARY_DIR/CH02TEVBC_V03.bin ]; then
-        cp $BINARY_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
+    if [ x"D02" = x"$PLATFORM" ] && [ -f $PREBUILD_DIR/CH02TEVBC_V03.bin ]; then
+        cp $PREBUILD_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
     fi
     
-    if [ x"D01" = x"$PLATFORM" ] && [ -f $BINARY_DIR/filesystem.bin ]; then
-        cp $BINARY_DIR/filesystem.bin $binary_dir/.filesystem
+    if [ x"D01" = x"$PLATFORM" ] && [ -f $PREBUILD_DIR/filesystem.bin ]; then
+        cp $PREBUILD_DIR/filesystem.bin $binary_dir/.filesystem
     fi
 
 	if [ x"HiKey" = x"$PLATFORM" ]; then
-		HIKEY_TOOLS=tools/hikey-tools
-		if [ ! -f $binary_dir/hisi-idt.py ]; then
-	    	cp $HIKEY_TOOLS/* $binary_dir/
+		if [ ! -f $PREBUILD/hisi-idt.py ]; then
+	    	cp $PREBUILD/hisi-idt.py $binary_dir/
+		fi
+
+		if [ ! -f $PREBUILD/nvme.img ]; then
+	    	cp $PREBUILD/nvme.img $binary_dir/
 		fi
 	fi
 fi
@@ -842,9 +845,9 @@ fi
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
 	cp $GRUB_BIN $binary_dir/
 
-    if [ -f $BINARY_DIR/grub.cfg ]; then
-        cp $BINARY_DIR/grub.cfg $grub_dir/ 2>/dev/null
-        cp $BINARY_DIR/grub.cfg $binary_dir/ 2>/dev/null
+    if [ -f $PREBUILD_DIR/grub.cfg ]; then
+        cp $PREBUILD_DIR/grub.cfg $grub_dir/ 2>/dev/null
+        cp $PREBUILD_DIR/grub.cfg $binary_dir/ 2>/dev/null
     fi
 fi
 
@@ -1271,7 +1274,7 @@ fi
 
 # Binaries download report
 #if [ x"0" = x"$binarydl_result" ]; then
-#	echo -e "\033[32mPrebuilt Binaries are in $BINARY_DIR.\033[0m"
+#	echo -e "\033[32mPrebuilt Binaries are in $PREBUILD_DIR.\033[0m"
 #else
 #	echo -e "\033[31mFailed! Some Binaries ($binarydl_result) can not be found!\033[0m"
 #fi
