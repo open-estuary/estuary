@@ -33,6 +33,8 @@ PATH_DEBIAN64=default
 #PATH_OPENSUSE32=default
 PATH_UBUNTU32=default
 
+DEPRECATED_PARAMETER=0
+
 ###################################################################################
 ############################# Print help information       ########################
 ###################################################################################
@@ -295,6 +297,7 @@ while [ x"$1" != x"" ]; do
 			shift
 			check_platform $1
 			echo "Platform: $1"
+			DEPRECATED_PARAMETER=`expr $DEPRECATED_PARAMETER + 1`
 			;;
 		"-c" | "--clear" )
 			shift
@@ -305,6 +308,7 @@ while [ x"$1" != x"" ]; do
 			shift
 			check_distro $1
 			echo "Distro: $1"
+			DEPRECATED_PARAMETER=`expr $DEPRECATED_PARAMETER + 1`
 			;;
 		"-i" | "--install" )
 			shift
@@ -1176,6 +1180,14 @@ fi
 ###################################################################################
 echo ""
 echo -e "\033[32m==========================================================================\033[0m"
+
+if [ x"2" = x"$DEPRECATED_PARAMETER" ]; then
+	echo -e "\033[31mParameter -p or --platform and -d or --distro is deprecated.\033[0m"
+	echo -e "\033[31mStrongly recommend to use parameter -f or --file to specify configuration file;\033[m"
+	echo -e "\033[31me.g.: ./estuary/build.sh -f ./estuary/estuarycfg.json.\033[m"
+	echo ""
+fi
+
 if [ x"" != x"$PLATFORM" ]; then
     echo "Building completed!"
     #echo "Of course, you can also find all original binaries in follows:"
