@@ -1,9 +1,5 @@
 #!/bin/bash
 
-wyl_debug=y
-
-CFGFILE=$cwd/estuarycfg.json
-
 LANG=C
 
 declare -a distros=("ubuntu" "opensuse" "linaro" "fedora" "debian")
@@ -32,13 +28,10 @@ usage()
 	echo -e "\n -h	print this message"
 	echo " -p	hardware platform"
 	echo " -d	OS distribuation"
-	#echo "		*for D01, only support Ubuntu, OpenSuse, Fedora"
-	#echo "		*for EVB, only support OpenEmbedded"
-	#echo "		*for D02, support OpenEmbedded Ubuntu, OpenSuse, Fedora"
 }
 
 #some common functions
-. functions.sh
+. common.sh
 
 #command options processing. We don't support long options now.
 while getopts ":d:p:h" optname; do
@@ -86,47 +79,11 @@ if [ -z "$ROOT_FS" ]; then
     echo ""
 fi
 
-#echo "${distros[@]}"
-#make a choice what root fs is wanted to setup
-#if [ -z "${distr_input}" ]; then
-	#para_sel  distr_input distros sel_ind
-
-	#we should choose a predefined rootfs at first
-#	select distr_input in "${distros[@]}"; do
-#		if [ -z "${distr_input}" ]; then
-#			echo "Invalid input. Please try again!"
-#		else
-		#update the root_ind to save the array index
-#			root_ind=$REPLY
-#			echo "you picked " $distr_input \($REPLY\)
-#			break
-#		fi
-#	done
-#fi
-
 (( ${ROOT_FS:=${distros[0]}} ))
 echo "Type of root filesystem is " $ROOT_FS
 
 #OK. Time to build the hard-disk system
-#1) find the new plugged hard-disk
 pushd . >/dev/null 2>&1
 . find_disk.sh
 popd >/dev/null 2>&1
 
-#wyl debud
-if [ x"n" = x"$wyl_debug" ]
-then
-echo "wyl-trace -> pwd = "$PWD
-##differentiate the shell according to the root filesystem type
-pushd .
-. make_${ROOT_FS}.sh
-[ $? ] || exit
-popd
-
-pushd .
-. build_${BRD_TYPE}.sh
-[ $? ] || exit
-popd
-
-###successful... here
-fi

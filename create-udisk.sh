@@ -4,13 +4,10 @@
 #date: August 12, 2015
 
 cwd=`dirname $0`
+. $cwd/common.sh
 
 export LANG=C
 
-wyl_debug=y
-en_shield=y
-
-CFGFILE=$cwd/estuarycfg.json
 
 # Determine the absolute path to the executable
 # EXE will have the PWD removed so we can concatenate with the PWD safely
@@ -39,46 +36,8 @@ EOF
 
 entry_header
 
-packages_to_install="jq parted dosfstools"
-
-cmd="sudo apt-get install "
-
-# Check and only install the missing packages
-for i in $packages_to_install; do
-	is_it_installed=`dpkg-query -l $i 2>/dev/null`
-    if [ "$?" -ne "0" ]; then
-		needs_installation=`echo $needs_installation`" "$i
-		new_cmd=`echo $cmd`" "$i
-		cmd=$new_cmd
-	fi
-done
-
-if [ "$needs_installation" = "" ]; then
-    echo "System has required packages!"
-else
-    echo "System requires packages $needs_installation to be installed"
-
-    echo "Installation requires you to have administrator priviliges (sudo access) "
-    echo "on your host. Do you have administrator privilieges?"
-
-    # Force the user to answer.  Maybe the user does not want to continue
-    while true;
-    do
-        read -p "Type 'y' to continue or 'n' to exit the installation: " REPLY
-        if [ "$REPLY" = 'y' -o "$REPLY" = 'n' ]; then
-            break;
-        fi
-    done
-
-    if [ "$REPLY" = 'n' ]; then
-        echo "Installation is aborted by user"
-        exit 1
-    fi
-
-    echo "Performing $cmd"
-    $cmd
-    check_status
-fi
+to_install_packages="jq parted dosfstools"
+install_packages to_install_packages
 # Print the exit statement to the console
 exit_footer
 
@@ -115,16 +74,16 @@ else
 PATHVALID=0
 fi
 
-cat << EOM
-begin to parse estuarycfg.json ...
-EOM
-build_PLATFORM=`jq -r ".system.platform" $CFGFILE`
+default_config=$cwd/estuarycfg.json
+echo "--------------------------------------------------------------------------------"
+echo "Please specify estuary config file (press return to use:$default_config)"
+read -p "[ $default_config ] " CFGFILE
 
-if [ "$build_PLATFORM" == "D01" ]; then
-    TARGET_ARCH=ARM32
-else
-    TARGET_ARCH=ARM64
+if [ ! -n "$CFGFILE" ]; then
+    CFGFILE=$default_config
 fi
+echo "--------------------------------------------------------------------------------"
+parse_config $CFGFILE
 
 DISTROS=()
 idx=0
@@ -138,7 +97,7 @@ do
         "Ubuntu")
         ubuntu_en=$value
         ;;
-        "Opensuse")
+        "OpenSuse")
         opensuse_en=$value
         ;;
         "Fedora")
@@ -154,45 +113,22 @@ do
     install=`jq -r ".distros[$idx].install" $CFGFILE`
 done
 
-#Precentage function
-untar_progress ()
-{
-    TARBALL=$1;
-    DIRECTPATH=$2;
-    BLOCKING_FACTOR=$(($(gzip --list ${TARBALL} | sed -n -e "s/.*[[:space:]]\+[0-9]\+[[:space:]]\+\([0-9]\+\)[[:space:]].*$/\1/p") / 51200 + 1));
-    tar --blocking-factor=${BLOCKING_FACTOR} --checkpoint=1 --checkpoint-action='ttyout=Written %u%  \r' -zxf ${TARBALL} -C ${DIRECTPATH}
-}
-
-#copy/paste programs
-cp_progress ()
-{
-	CURRENTSIZE=0
-	while [ $CURRENTSIZE -lt $TOTALSIZE ]
-	do
-		TOTALSIZE=$1;
-		TOHERE=$2;
-		CURRENTSIZE=`sudo du -c $TOHERE | grep total | awk {'print $1'}`
-		echo -e -n "$CURRENTSIZE /  $TOTALSIZE copied \r"
-		sleep 1
-	done
-}
-
 check_for_udisk()
 {
-        # find the avaible SD cards
-        ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-8`
-        PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
-        if [ "$PARTITION_TEST" = "" ]; then
-	        echo -e "Please insert a USB disk to continue\n"
-	        while [ "$PARTITION_TEST" = "" ]; do
-		        read -p "Type 'y' to re-detect the USB disk or 'n' to exit the script: " REPLY
-		        if [ "$REPLY" = 'n' ]; then
-		            exit 1
-		        fi
-		        ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-8`
-		        PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
-	        done
-        fi
+    # find the avaible SD cards
+    ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-8`
+    PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
+    if [ "$PARTITION_TEST" = "" ]; then
+        echo -e "Please insert a USB disk to continue\n"
+        while [ "$PARTITION_TEST" = "" ]; do
+            read -p "Type 'y' to re-detect the USB disk or 'n' to exit the script: " REPLY
+            if [ "$REPLY" = 'n' ]; then
+                exit 1
+            fi
+            ROOTDRIVE=`mount | grep 'on / ' | awk {'print $1'} |  cut -c6-8`
+            PARTITION_TEST=`cat /proc/partitions | grep -v $ROOTDRIVE | grep '\<sd.\>\|\<mmcblk.\>' | grep -n ''`
+        done
+    fi
 }
 
 populate_2_partitions() {
@@ -279,37 +215,12 @@ cat << EOM
 EOM
         untar_progress $TARBALLPATH/udisk_rootfs.tar.gz rootfs/
 
-        mkdir -p rootfs/sys_setup/boot/EFI/GRUB2 2> /dev/null
-        mkdir -p rootfs/sys_setup/distro 2> /dev/null
-        mkdir -p rootfs/sys_setup/bin 2> /dev/null
-
-        cp -a ../build/$build_PLATFORM/binary/grubaa64* rootfs/sys_setup/boot/EFI/GRUB2
-        cp -a ../build/$build_PLATFORM/binary/Image_$build_PLATFORM rootfs/sys_setup/boot/Image
-        cp -a ../build/$build_PLATFORM/binary/hip05-d02.dtb rootfs/sys_setup/boot
-
-        if [ "$ubuntu_en" == "yes" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH 2> /dev/null
-            TOTALSIZE=`sudo du -c ../distro/Ubuntu_"$TARGET_ARCH".tar.gz | grep total | awk {'print $1'}`
-            cp -af ../distro/Ubuntu_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH &
-            cp_progress $TOTALSIZE rootfs/sys_setup/distro/$build_PLATFORM/ubuntu$TARGET_ARCH
-        fi
-        if [ "$fedora_en" == "yes" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH 2> /dev/null
-            cp -a ../distro/Fedora_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/fedora$TARGET_ARCH
-        fi
-        if [ "$debian_en" == "yes" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH 2> /dev/null
-            cp -a ../distro/Debian_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/debian$TARGET_ARCH
-        fi
-        if [ "$opensuse_en" == "yes" ]; then
-            mkdir -p rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH 2> /dev/null
-            cp -a ../distro/OpenSuse_"$TARGET_ARCH".tar.gz rootfs/sys_setup/distro/$build_PLATFORM/opensuse$TARGET_ARCH
-        fi
+        cp_distros rootfs
 
         cp -a sys_setup.sh rootfs/sys_setup/bin
-        cp -a functions.sh rootfs/sys_setup/bin
+        cp -a common.sh rootfs/sys_setup/bin
         cp -a find_disk.sh rootfs/sys_setup/bin
-        cp -a estuarycfg.json rootfs/sys_setup/bin
+        cp -a $CFGFILE rootfs/sys_setup/bin/estuarycfg.json
 
         touch rootfs/etc/profile.d/antoStartUp.sh
         chmod a+x rootfs/etc/profile.d/antoStartUp.sh
@@ -641,30 +552,6 @@ then
     mkdir -p tmp/distro 2> /dev/null
     mkdir -P $PWD/distro/$build_PLATFORM 2> /dev/null
 
-    if [ "$fedora_en" == "yes" ]; then
-        pushd ..
-        if [ -f $PWD/estuary/build.sh ]; then
-            $PWD/estuary/build.sh -p $build_PLATFORM -d Fedora
-            echo ""
-        fi
-        popd
-    fi
-    if [ "$debian_en" == "yes" ]; then
-        pushd ..
-        if [ -f $PWD/estuary/build.sh ]; then
-            $PWD/estuary/build.sh -p $build_PLATFORM -d Debian
-            echo ""
-        fi
-        popd
-    fi
-
-    if [ "$opensuse_en" == "yes" ]; then
-        pushd ..
-        if [ -f $PWD/estuary/build.sh ]; then
-            $PWD/estuary/build.sh -p $build_PLATFORM -d OpenSuse
-        fi
-        popd
-    fi
     rootfs_dev2=${DRIVE}${P}2
     rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
     touch tmp/grub.cfg

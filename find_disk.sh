@@ -10,16 +10,7 @@ declare -a disk_list
 export disk_list=
 
 CFGFILE=$cwd/estuarycfg.json
-cat << EOM
-begin to parse estuarycfg.json ...
-EOM
-build_PLATFORM=`jq -r ".system.platform" $CFGFILE`
-
-if [ "$build_PLATFORM" == "D01" ]; then
-    TARGET_ARCH=ARM32
-else
-    TARGET_ARCH=ARM64
-fi
+parse_config $CFGFILE
 
 DISTROS=()
 idx=0
