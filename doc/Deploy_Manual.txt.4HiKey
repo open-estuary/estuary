@@ -194,7 +194,8 @@ When most users get HiKey board first, they want to reload the all system image 
 
 	  $ mount /dev/mmcblk0p9 /tmp
 	  $ cd /tmp
-	  $ false; while [ $? -ne 0 ]; do wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Ubuntu_ARM64.tar.gz; done
+	  $ false; while [ $? -ne 0 ]; do wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist_<version>/
+	    Ubuntu_ARM64.tar.gz; done
 	  $ tar -xvzf Ubuntu_ARM64.tar.gz
 	  $ cd /
 	  $ mount /tmp
