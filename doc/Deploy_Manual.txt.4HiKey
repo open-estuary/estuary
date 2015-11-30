@@ -165,7 +165,7 @@ When most users get HiKey board first, they want to reload the all system image 
         4) Tar Ubuntu_ARM64.tar.gz into your SD card
  
 	   $ cd hikey-image	
-	   $ tar -xvzf Ubuntu_ARM64.tar.gz -c /media/{admin}/ubuntu
+	   $ tar -xvzf Ubuntu_ARM64.tar.gz -C /media/{admin}/ubuntu
 
         5) Insert SD card into HiKey board
         6) Turn on HiKey board
@@ -192,7 +192,7 @@ When most users get HiKey board first, they want to reload the all system image 
 	4) Refer to Setup_HiKey_Wifi_Env.txt document to config WIFI link
         5) Download this ubuntu systerm into eMMC on HiKey board
 
-	  $ mount /dev/mmcblk0p8 /tmp
+	  $ mount /dev/mmcblk0p9 /tmp
 	  $ cd /tmp
 	  $ false; while [ $? -ne 0 ]; do wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Ubuntu_ARM64.tar.gz; done
 	  $ tar -xvzf Ubuntu_ARM64.tar.gz
