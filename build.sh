@@ -60,6 +60,22 @@ usage()
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
+	echo " -v,--version: to print the version of estuary project"
+}
+
+###################################################################################
+############################# Print version #######################################
+###################################################################################
+print_version()
+{
+	version_regexp="(?<=<project name=\"estuary\" revision=\")([^\"]*)(?=\")"
+	default_xml_file="`dirname $1`/default.xml"
+	current_version=`grep -Po "$version_regexp" $default_xml_file 2>/dev/null | sed 's/.*\///g' 2>/dev/null`
+	if [ x"$current_version" = x"" ]; then
+		echo "Estuary version is the latest."
+	else
+		echo "Estuary version is $current_version."
+	fi
 }
 
 ###################################################################################
@@ -292,6 +308,10 @@ while [ x"$1" != x"" ]; do
         "-h" | "--help" )
 			usage
 			exit
+			;;
+		"-v" | "--version" )
+			print_version $0
+			exit;
 			;;
 		"-p" | "--platform" )
 			shift
