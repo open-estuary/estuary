@@ -1202,7 +1202,7 @@ echo ""
 echo -e "\033[32m==========================================================================\033[0m"
 
 if [ x"2" = x"$DEPRECATED_PARAMETER" ]; then
-	echo -e "\033[31mParameter -p or --platform and -d or --distro is deprecated.\033[0m"
+	echo -e "\033[31mParameter -p or --platform and -d or --distro are deprecated.\033[0m"
 	echo -e "\033[31mStrongly recommend to use parameter -f or --file to specify configuration file.\033[m"
 	echo -e "\033[31mE.g.: ./estuary/build.sh -f ./estuary/estuarycfg.json.\033[m"
 	echo ""
