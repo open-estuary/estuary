@@ -39,12 +39,15 @@ All following sections will take the D02 board as example, other boards have the
 
     You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to UEFI_Manual.txt.
 
-# Upgrade DTB file
+# Upgrade DTB file (Necessary step) 
 
-   Because this dtb image is important to this D02 boards, you firstly must flash this DTB image into spiflash for all methods of bringing up systerm . Boot D02 to UEFI SHELL, and type the follow commands in EBL:
-We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to UEFI_Manual.txt.
+   Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
+   into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the
+   follow commands in EBL:
+   We will often do some commands in UEFI EBL shell for these methods, about how to enter it,
+   please refer to UEFI_Manual.txt.
 
-    1. IP address config
+    1. IP address config (Optional, you can ignore this step if DHCP works well)
     
     # Config board's IP address
     ifconfig -s eth0 <IP address> <mask> <gateway>
@@ -61,8 +64,7 @@ We will often do some commands in UEFI EBL shell for these methods, about how to
     
     3. Reboot your D02 board
 
-    when you finish downloading DTB file to spiflash, you must reboot your D02 board. This new DTB file will
-    be used on booting board.
+    You must reboot your D02 board after above two steps, this new DTB file will be used on booting    board.
 
 ### Bring up System ###
 
