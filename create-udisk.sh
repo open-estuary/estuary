@@ -552,6 +552,8 @@ then
     mkdir -p tmp/distro 2> /dev/null
     mkdir -P $PWD/distro/$build_PLATFORM 2> /dev/null
 
+    boot_dev=${DRIVE}${P}1
+    boot_uuid=`ls -al /dev/disk/by-uuid/ | grep "${boot_dev##*/}" | awk {'print $9'}`
     rootfs_dev2=${DRIVE}${P}2
     rootfs_partuuid=`ls -al /dev/disk/by-partuuid/ | grep "${rootfs_dev2##*/}" | awk {'print $9'}`
     touch tmp/grub.cfg
@@ -568,7 +570,7 @@ set default=ubuntu_usb
 
 # For booting GNU/Linux
 menuentry "Ubuntu USB" --id ubuntu_usb {
-	set root=(hd0,gpt1)
+    search --no-floppy --fs-uuid --set ${boot_uuid}
 	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
 	devicetree /hip05-d02.dtb
 }
