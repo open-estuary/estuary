@@ -55,7 +55,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 ### Setup TFTP server on Ubuntu ###
 # Install TFTP server and TFTP client(optional, tftp-hpa is the client package)
 
-    sudo apt-get install -y topenbsd-inetd ftpd-hpa tftp-hpa lftp
+    sudo apt-get install -y openbsd-inetd tftpd-hpa tftp-hpa lftp
 
 # Edit /etc/inetd.conf
     Remove "#" from the beginning of tftp line or add if it’s not there under “#:BOOT:” comment as follow.

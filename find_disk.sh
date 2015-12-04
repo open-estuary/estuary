@@ -385,7 +385,6 @@ if [ "$full_intallation" = "yes" ]; then
     rootfs_start=512
     rootfs_end=20
 
-
     if [ "$ubuntu_en" == "yes" ]; then
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart ubuntu ${rootfs_start}M ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
@@ -534,6 +533,8 @@ if [ "$full_intallation" = "yes" ]; then
         fi
     fi
 
+    boot_dev=/dev/${disk_list[0]}1
+    boot_uuid=`ls -al /dev/disk/by-uuid/ | grep "${boot_dev##*/}" | awk {'print $9'}`
     mkdir $PWD/boot
     sudo mount -t vfat /dev/${disk_list[0]}1 boot
     sudo rm -rf boot/*
@@ -551,7 +552,7 @@ set default=${target_system_type}_sata
 
 # For booting GNU/Linux
 menuentry "$target_system_type SATA" --id ${target_system_type}_sata {
-	set root=(hd1,gpt1)
+    search --no-floppy --fs-uuid --set ${boot_uuid}
 	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
 	devicetree /hip05-d02.dtb
 }
