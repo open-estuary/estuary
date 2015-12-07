@@ -244,17 +244,9 @@ build_dir=build
 ###################################################################################
 ############################# Set download source server ##########################
 ###################################################################################
-PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro
+PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro/pre_release/linux/v2.1/rc1
 TOOLCHAIN_SOURCE=http://open-estuary.com/EstuaryDownloads/toolchain
 BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_Releases/Estuary_2.1/rc1/prebuild
-if [ -f ".config" ]; then
-	. .config
-	if [ x"$country" = x"China" ]; then
-		PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist_v2.1_rc0
-		TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
-		BINARY_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/v2.1
-	fi
-fi
 
 ###################################################################################
 ############################# Parse config file        ############################
