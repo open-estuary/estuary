@@ -64,11 +64,25 @@ parse_config () {
     CFGFILE=$1
     build_PLATFORM=`jq -r ".system.platform" $CFGFILE`
 
-    if [ "$build_PLATFORM" == "D01" ]; then
-        TARGET_ARCH=ARM32
-    else
+    case $build_PLATFORM in
+        "D02")
         TARGET_ARCH=ARM64
-    fi
+        ;;
+        "D01")
+        echo "This script can not used for deploying $build_PLATFORM board."
+        exit 1
+        ;;
+        "QEMU")
+        echo "This script can not used for deploying $build_PLATFORM platform."
+        exit 1
+        ;;
+        "HiKey")
+        echo "This script can not used for deploying $build_PLATFORM board."
+        exit 1
+        ;;
+        *)
+        ;;
+    esac
 }
 
 cp_distros () {
