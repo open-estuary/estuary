@@ -414,7 +414,7 @@ if [ "$full_intallation" = "yes" ]; then
         ubuntu_username=""
         read -p "Please input the username which you want to create in ubuntu system :" ubuntu_username
         if [ -n "$ubuntu_username" ]; then
-            sudo useradd -m $ubuntu_username
+            sudo useradd -m $ubuntu_username -s /bin/bash
             sudo passwd $ubuntu_username
             cp -a /home/$ubuntu_username rootfs/home/
             sudo chown $ubuntu_username:$ubuntu_username rootfs/home/$ubuntu_username
