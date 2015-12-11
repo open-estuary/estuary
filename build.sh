@@ -878,48 +878,40 @@ uncompress_distro()
 	    mkdir -p "$distro_dir" 2> /dev/null
 	    
 	    echo "Uncompressing the distribution($1) ..."
-	    if [ x"${image##*.}" = x"bz2" ] ; then
-	    	TEMP=${image%.*}
-	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-	    		tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	    		echo "This is a tar.bz2 package"
-	    	else
-	    		bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	    		echo "This is a bz2 package"
-	    	fi
-	    fi
-	    if [ x"${image##*.}" = x"gz" ] ; then
-	    	TEMP=${image%.*}
-	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-	    		sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	    		echo "This is a tar.gz package"
-	    	else
-	    		gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	    		echo "This is a gz package"
-	    	fi
-	    fi
-	    if [ x"${image##*.}" = x"tar" ] ; then 
-	    	tar xvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	    	echo "This is a tar package"
-	    fi
-	    if [ x"${image##*.}" = x"xz" ] ; then 
-	    #	echo "This is a xz package"
-	    	TEMP=${image%.*}
-	    	if [ x"${TEMP##*.}" = x"tar" ] ; then
-	    		xz -d $DISTRO_DIR/$image 2> /dev/null 1>&2
-	    		tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
-	    	fi
-	    fi
-	    if [ x"${image##*.}" = x"tbz" ] ; then
-	    	tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
-	    fi
-	    if [ x"${image}" = x"" ] ; then
-	    	echo "Can not find the suitable root filesystem!"
-	        exit 1
-	    fi
+	    image_postfix=`echo "$image" | grep -Po "((\.tar)*\.(tar|bz2|gz|xz)$)" 2>/dev/null`
+	    case "$image_postfix" in
+		.tar.bz2 )
+			sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo "This is a tar.bz2 package"
+			;;
+		.bz2 )
+			bunzip2 $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo "This is a tar.bz2 package"
+			;;
+		.tar.gz )
+			sudo tar zxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo "This is a tar.gz package"
+			;;
+		.gz )
+			gunzip $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo "This is a tar.gz package"
+			;;
+		.tar.xz | .xz)
+			tar xvf $DISTRO_DIR/$TEMP -C $distro_dir 2> /dev/null 1>&2
+			echo "This is a xz package"
+			;;
+		.tbz )
+			tar jxvf $DISTRO_DIR/$image -C $distro_dir 2> /dev/null 1>&2
+			echo "This is a tbz package"
+			;;
+		* )
+			echo "Can not find the suitable root filesystem!"
+			exit 1
+			;;
+	    esac
 
-		echo "Remove old module files in rootfs..."
-		sudo rm -rf $distro_dir/lib/modules/*
+	    echo "Remove old module files in rootfs..."
+	    sudo rm -rf $distro_dir/lib/modules/*
 
 	fi
 }
