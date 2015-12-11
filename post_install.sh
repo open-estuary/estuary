@@ -73,3 +73,5 @@ do
 		fi
 	fi
 done
+#enable function_graph as default tracer
+echo function_graph > /sys/kernel/debug/tracing/current_tracer
