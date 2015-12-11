@@ -1111,8 +1111,37 @@ install_pkgs()
 ######################### create distribution           ###########################
 ###################################################################################
 distro_postfix=".tar.gz"
+
+rc_local_template="#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will \"exit 0\" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+exit 0"
+
 create_distro()
 {
+	local rc_local_file=
+	case "$1" in
+		OpenSuse )
+			rc_local_file=rc.d/boot.local
+			;;
+		Fedora )
+			rc_local_file=rc.d/rc.local
+			;;
+		* )
+			rc_local_file=rc.local
+			;;
+	esac
+
 	distro_dir=${PRJROOT}/$build_dir/$DISTRO_DIR/$1
 	image="$1_$TARGETARCH$distro_postfix"
 	if [ x"" != x"$1" ] && [ x"" != x"$image" ] && [ ! -f "$build_dir/$DISTRO_DIR/$image" ]; then
@@ -1124,9 +1153,20 @@ create_distro()
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
 		sudo cp estuary/post_install.sh $distro_dir/usr/bin/estuary/
 		sudo chmod 755 $distro_dir/usr/bin/estuary/post_install.sh
-		grep "/usr/bin/estuary/post_postinstall.sh" $distro_dir/etc/rc.local >/dev/null
+		if [ ! -f $distro_dir/etc/$rc_local_file ]
+			echo "$rc_local_template" | sudo tee $distro_dir/etc/$rc_local_file >/dev/null
+			sudo chown root:root $distro_dir/etc/$rc_local_file
+			sudo chmod 755 $distro_dir/etc/$rc_local_file
+		fi
+		
+		grep "/usr/bin/estuary/post_install.sh" $distro_dir/etc/$rc_local_file >/dev/null
 		if [ x"$?" != x"0" ]; then
-			sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" $distro_dir/etc/rc.local
+			grep -E "^(exit)" $distro_dir/etc/$rc_local_file >/dev/null
+			if [ x"$?" = x"0" ]; then
+				sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" $distro_dir/etc/$rc_local_file
+			else
+				sudo sed -i '$ a /usr/bin/estuary/post_install.sh' $distro_dir/etc/$rc_local_file
+			fi
 		fi
 
 		pushd $distro_dir/
