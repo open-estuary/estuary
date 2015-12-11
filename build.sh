@@ -606,11 +606,11 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
     fi
 
 	if [ x"HiKey" = x"$PLATFORM" ]; then
-		if [ ! -f $PREBUILD/hisi-idt.py ]; then
+		if [ -f $PREBUILD/hisi-idt.py ] && [ ! -f $binary_dir/hisi-idt.py ]; then
 	    	cp $PREBUILD/hisi-idt.py $binary_dir/
 		fi
 
-		if [ ! -f $PREBUILD/nvme.img ]; then
+		if [ -f $PREBUILD/nvme.img ] && [ ! -f $binary_dir/nvme.img ]; then
 	    	cp $PREBUILD/nvme.img $binary_dir/
 		fi
 	fi
