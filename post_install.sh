@@ -40,7 +40,12 @@ if [ ! -f ${netstatus} ]; then
 fi
 
 # preprocess...
-Distribution=`cat /etc/issue| cut -d' ' -f 1`
+Distribution=`sed -n 1p /etc/issue| cut -d' ' -f 1`
+# Temp fix for OpenSuse distribution as the format of /etc/issue in OpenSuse is different
+if [ "$Distribution" = 'Welcome' ]; then
+    Distribution=`sed -n 1p /etc/issue| cut -d' ' -f 3`
+fi
+
 
 if [ ! -f $netstatus ]; then
 	case "$Distribution" in
