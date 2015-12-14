@@ -12,7 +12,7 @@
 ###################################################################################
 #core number for building
 corenum=36
-distros=(OpenEmbedded Debian Ubuntu OpenSuse Fedora)
+distros=(Ubuntu OpenSuse Fedora Debian)
 distros_arm32=(Ubuntu)
 distros_arm64=(Ubuntu OpenSuse Fedora Debian)
 platforms=(QEMU D01 D02 HiKey)
@@ -55,8 +55,8 @@ usage()
 	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
 	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
-	echo "		*for D01, only support Ubuntu, OpenSuse"
-	echo "		*for D02,HiKey, support OpenEmbedded, Ubuntu, OpenSuse, Fedora"
+	echo "		*for D01, only support Ubuntu"
+	echo "		*for D02,HiKey, support Ubuntu, OpenSuse, Fedora, Debian"
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
