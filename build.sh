@@ -72,7 +72,7 @@ print_version()
 	default_xml_file="`dirname $1`/default.xml"
 	current_version=`grep -Po "$version_regexp" $default_xml_file 2>/dev/null | sed 's/.*\///g' 2>/dev/null`
 	if [ x"$current_version" = x"" ]; then
-		echo "Estuary version is the latest."
+		echo "This is a developing version."
 	else
 		echo "Estuary version is $current_version."
 	fi
