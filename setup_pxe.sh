@@ -538,7 +538,7 @@ extract_fs() {
     fi
 
     cp -a sys_setup.sh $1/sys_setup/bin
-    cp -a functions.sh $1/sys_setup/bin
+    cp -a common.sh $1/sys_setup/bin
     cp -a find_disk.sh $1/sys_setup/bin
     cp -a estuarycfg.json $1/sys_setup/bin
 
