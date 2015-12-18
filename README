@@ -1,4 +1,4 @@
-******  Estuary release 2.0 ******
+******  Estuary release 2.1 ******
 
 These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
 
@@ -7,22 +7,22 @@ These are the release notes for the Estuary new version. Please read them carefu
 =================
 
   Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
-  More detail information about Estuary, please refer to http://open-estuary.com/estuary.
+  More detail information about Estuary, please refer to http://open-estuary.org/estuary.
 
 2. Obtain and build
 ================
-  To obtain and build system, please refer to http://open-estuary.com/estuary-user-manual/.
+  To obtain and build system, please refer to http://open-estuary.org/estuary-user-manual/.
 
 3. Deployment
 ================
   More detail information about deployment, please refer to documents in "<project root>/build/<platform>/doc" directory after building.
 
 4. Prebuilt binaries
-  To use prebuilt binaries directly, please refer to http://open-estuary.com/estuary-download.
+  To use prebuilt binaries directly, please refer to http://open-estuary.org/estuary-download.
 
 5. Contact us
 ================
-  About the technical support, you can contact us by http://open-estuary.com/contact-us.
+  About the technical support, you can contact us by http://open-estuary.org/contact-us.
 
 6.Change list compared with previous version
   Please refer to "changelist.txt" in this project.
@@ -31,4 +31,4 @@ These are the release notes for the Estuary new version. Please read them carefu
 ================
   Further more platforms will be supported in the esturay.
   More detail information about estuary, please refer to
-  http://open-estuary.com
+  http://open-estuary.org
