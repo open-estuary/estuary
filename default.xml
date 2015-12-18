@@ -18,7 +18,7 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project name="kernel" />
+  <project name="kernel" revision="lts-4.1.6" />
 
   <!-- uefi -->
   <project name="uefi" />

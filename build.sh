@@ -246,7 +246,7 @@ build_dir=build
 ###################################################################################
 PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro/pre_release/linux/v2.1/rc1
 TOOLCHAIN_SOURCE=http://open-estuary.com/EstuaryDownloads/toolchain
-BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_Releases/Estuary_2.1/rc1/prebuild
+BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_Releases/Estuary_2.1/prebuild
 
 ###################################################################################
 ############################# Parse config file        ############################
