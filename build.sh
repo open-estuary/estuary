@@ -606,12 +606,12 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
     fi
 
 	if [ x"HiKey" = x"$PLATFORM" ]; then
-		if [ -f $PREBUILD/hisi-idt.py ] && [ ! -f $binary_dir/hisi-idt.py ]; then
-	    	cp $PREBUILD/hisi-idt.py $binary_dir/
+		if [ -f $PREBUILD_DIR/hisi-idt.py ] && [ ! -f $binary_dir/hisi-idt.py ]; then
+	    	cp $PREBUILD_DIR/hisi-idt.py $binary_dir/
 		fi
 
-		if [ -f $PREBUILD/nvme.img ] && [ ! -f $binary_dir/nvme.img ]; then
-	    	cp $PREBUILD/nvme.img $binary_dir/
+		if [ -f $PREBUILD_DIR/nvme.img ] && [ ! -f $binary_dir/nvme.img ]; then
+	    	cp $PREBUILD_DIR/nvme.img $binary_dir/
 		fi
 	fi
 fi
@@ -1153,7 +1153,7 @@ create_distro()
 		sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" estuary/post_install.sh
 		sudo cp estuary/post_install.sh $distro_dir/usr/bin/estuary/
 		sudo chmod 755 $distro_dir/usr/bin/estuary/post_install.sh
-		if [ ! -f $distro_dir/etc/$rc_local_file ]
+		if [ ! -f $distro_dir/etc/$rc_local_file ]; then
 			echo "$rc_local_template" | sudo tee $distro_dir/etc/$rc_local_file >/dev/null
 			sudo chown root:root $distro_dir/etc/$rc_local_file
 			sudo chmod 755 $distro_dir/etc/$rc_local_file
