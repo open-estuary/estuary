@@ -10,6 +10,7 @@
 ###################################################################################
 ############################# Variables definition         ########################
 ###################################################################################
+LOCALARCH=`uname -m`
 #core number for building
 corenum=36
 distros=(Ubuntu OpenSuse Fedora Debian)
@@ -218,6 +219,26 @@ check_sum()
 ###################################################################################
 ############################# Setup host environment ##############################
 ###################################################################################
+install_development_tools()
+{
+	if [ x"$LOCALARCH" = x"x86_64" ]; then
+		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq"
+	else
+		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq"
+	fi
+
+	sudo apt-get install -y --force-yes $development_tools
+}
+
+update_acpica_tools()
+{
+	if [ ! -d acpica ]; then
+		git clone https://github.com/acpica/acpica.git
+	fi
+
+	(cd acpica/generate/unix && make -j${corenum} && sudo make install)
+}
+
 automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
 if [ x"$?" = x"1" ]; then
 	sudo apt-get remove -y --purge automake*
@@ -227,11 +248,27 @@ fi
 check_init ".initialized" $lastupdate
 if [ x"0" = x"$?" ]; then
 	sudo apt-get update
-    sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq
-    if [ x"$?" = x"0" ]; then
-        touch ".initialized"
-    fi
+	
+	# Install development tools
+	install_development_tools
+	if [ x"$?" != x"0" ]; then
+		echo -e "\033[31mError! Failed to install development tools!\033[0m"
+		exit 1
+	fi
+
+	# Check if iasl needs to update
+	iasl_version=`iasl -v 2>/dev/null | grep -Po "(?<=version )(\d+)(?=.*)" 2>/dev/null`
+	if [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]] && [[ x"$iasl_version" < x"20150214" ]]; then
+		update_acpica_tools
+		if [ x"$?" != x"0" ]; then
+			echo -e "\033[31mError! Failed to update iasl!\033[0m"
+			exit 1
+		fi
+	fi
+
+	touch ".initialized"
 fi
+
 export LC_ALL=C
 export LANG=C
 
@@ -244,9 +281,9 @@ build_dir=build
 ###################################################################################
 ############################# Set download source server ##########################
 ###################################################################################
-PATH_DISTRO=http://open-estuary.com/EstuaryDownloads/cleandistro/pre_release/linux/v2.1/rc1
-TOOLCHAIN_SOURCE=http://open-estuary.com/EstuaryDownloads/toolchain
-BINARY_SOURCE=http://open-estuary.com/EstuaryDownloads/Estuary_Releases/Estuary_2.1/prebuild
+PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.1/rc1
+TOOLCHAIN_SOURCE=http://open-estuary.org/EstuaryDownloads/toolchain
+BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/Estuary_Releases/Estuary_2.1/prebuild
 
 ###################################################################################
 ############################# Parse config file        ############################
@@ -366,7 +403,6 @@ if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
 fi
 
 # Detect and dertermine some environment variables
-LOCALARCH=`uname -m`
 if [ x"$PLATFORM" = x"D01" ]; then
     TARGETARCH="ARM32"
 else
@@ -392,78 +428,78 @@ GCC32=gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux.tar.xz
 GCC64=gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
 toolchainsum_file="toolchain.sum"
 
-
-if [ ! -d "$TOOLCHAIN_DIR" ] ; then
-	mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
-fi
-
-# Download firstly
-#TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
-cd $TOOLCHAIN_DIR
-echo "Checking the checksum for toolchain ..."
-check_sum "../estuary/checksum/$toolchainsum_file"
-if [ x"$?" != x"0" ]; then
-	TEMPFILE=tempfile
-	md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep "$FAILED_STR" | cut -d : -f 1 > $TEMPFILE
-	while read LINE
-	do
-	    if [ x"$LINE" != x"" ]; then
-	        echo "Downloading the toolchain ..."
-			rm -rf $LINE 2>/dev/null
-		    wget -c $TOOLCHAIN_SOURCE/$LINE
-			if [ x"$?" != x"0" ]; then
-				rm -rf $toolchainsum_file $LINE $TEMPFILE 2>/dev/null
-				echo "Download toolchain $LINE failed!"
-				exit 1
-			fi
-	    fi
-	done  < $TEMPFILE
-	rm $TEMPFILE
-fi
-cd -
-
-# Copy compiler to build target directory
-if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
-    echo "Copying toolchain to 'build' directory ..."
-	mkdir -p "$toolchain_dir" 2>/dev/null
-    if [ x"ARM32" = x"$TARGETARCH" ]; then
-    	cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
-		ln -s ../../../$toolchain_dir/$GCC32 $binary_dir/$GCC32
-	else
-    	cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
-		ln -s ../../../$toolchain_dir/$GCC64 $binary_dir/$GCC64
-	fi
-fi
-
-# Uncompress the toolchain
-for	cross_prefix in arm-linux-gnueabihf aarch64-linux-gnu
-do
-	arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
-	if [ x"" = x"$arm_gcc" ]; then 
-		package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
-		echo "Uncompressing the toolchain ..."
-		tar Jxf $package -C $TOOLCHAIN_DIR
-		arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+if [[ $LOCALARCH != arm* && $LOCALARCH != aarch64 ]]; then
+	if [ ! -d "$TOOLCHAIN_DIR" ] ; then
+		mkdir -p "$TOOLCHAIN_DIR" 2> /dev/null
 	fi
 	
-	COMPILER_DIR=${PWD}/${arm_gcc%/*}
-	export PATH=$COMPILER_DIR:$PATH
+	# Download firstly
+	# TOOLCHAIN_SOURCE=http://7xjz0v.com1.z0.glb.clouddn.com/tools
+	cd $TOOLCHAIN_DIR
+	echo "Checking the checksum for toolchain ..."
+	check_sum "../estuary/checksum/$toolchainsum_file"
+	if [ x"$?" != x"0" ]; then
+		TEMPFILE=tempfile
+		md5sum --quiet --check $toolchainsum_file 2>/dev/null | grep "$FAILED_STR" | cut -d : -f 1 > $TEMPFILE
+		while read LINE
+		do
+		    if [ x"$LINE" != x"" ]; then
+			echo "Downloading the toolchain ..."
+				rm -rf $LINE 2>/dev/null
+			    wget -c $TOOLCHAIN_SOURCE/$LINE
+				if [ x"$?" != x"0" ]; then
+					rm -rf $toolchainsum_file $LINE $TEMPFILE 2>/dev/null
+					echo "Download toolchain $LINE failed!"
+					exit 1
+				fi
+		    fi
+		done  < $TEMPFILE
+		rm $TEMPFILE
+	fi
+	cd -
 
-	if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnueabihf" ]; then
-		CROSS=${PWD}/${arm_gcc%g*}
+	# Copy compiler to build target directory
+	if [ x"" != x"$PLATFORM" ] && [ ! -d "$toolchain_dir" ] ; then
+	    echo "Copying toolchain to 'build' directory ..."
+		mkdir -p "$toolchain_dir" 2>/dev/null
+	    if [ x"ARM32" = x"$TARGETARCH" ]; then
+	    	cp $TOOLCHAIN_DIR/$GCC32 $toolchain_dir/
+			ln -s ../../../$toolchain_dir/$GCC32 $binary_dir/$GCC32
+		else
+	    	cp $TOOLCHAIN_DIR/$GCC64 $toolchain_dir/
+			ln -s ../../../$toolchain_dir/$GCC64 $binary_dir/$GCC64
+		fi
 	fi
 
-	if [ x"$TARGETARCH" = x"ARM64" ] && [ x"$cross_prefix" = x"aarch64-linux-gnu" ]; then
-		CROSS=${PWD}/${arm_gcc%g*}
-	fi
-done
+	# Uncompress the toolchain
+	for	cross_prefix in arm-linux-gnueabihf aarch64-linux-gnu
+	do
+		arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+		if [ x"" = x"$arm_gcc" ]; then 
+			package=`ls $TOOLCHAIN_DIR/*.xz | grep "$cross_prefix"`
+			echo "Uncompressing the toolchain ..."
+			tar Jxf $package -C $TOOLCHAIN_DIR
+			arm_gcc=`find $TOOLCHAIN_DIR -name $cross_prefix"-gcc" 2>/dev/null`
+		fi
+	
+		COMPILER_DIR=${PWD}/${arm_gcc%/*}
+		export PATH=$COMPILER_DIR:$PATH
 
-if [ "$LOCALARCH" != "arm" -a "$LOCALARCH" != "aarch64" ]; then
-	export CROSS_COMPILE=$CROSS
+		if [ x"$TARGETARCH" = x"ARM32" ] && [ x"$cross_prefix" = x"arm-linux-gnueabihf" ]; then
+			CROSS=${PWD}/${arm_gcc%g*}
+		fi
+
+		if [ x"$TARGETARCH" = x"ARM64" ] && [ x"$cross_prefix" = x"aarch64-linux-gnu" ]; then
+			CROSS=${PWD}/${arm_gcc%g*}
+		fi
+	done
+
+	if [[ $LOCALARCH != arm* && $LOCALARCH != aarch64 ]]; then
+		export CROSS_COMPILE=$CROSS
+	fi
+
+	echo "Cross compiler is $CROSS"
 fi
-
-echo "Cross compiler is $CROSS"
-
 
 ###################################################################################
 ######## Download distribution according to special PLATFORM and DISTRO ###########
@@ -709,6 +745,12 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		git apply HwPkg/Patch/*.patch
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
+
+    	grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" HwProductsPkg/D02/Pv660D02.dsc
+    	if [ x"$?" != x"0" ] && [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]]; then
+    		sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' HwProductsPkg/D02/Pv660D02.dsc
+    	fi
+
     	uefi-tools/uefi-build.sh d02
     	popd
     	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
@@ -1300,13 +1342,15 @@ if [ x"" != x"$PLATFORM" ]; then
 	    fi
 	done
 
-    if [ -f $toolchain_dir/$GCC64 ] || [ -f $toolchain_dir/$GCC32 ]; then
-    	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
-        true
-    else
-    	echo -e "\033[31mFailed! toolchain    can not be found!\033[0m"
-        build_error=1
-    fi
+	if [[ $LOCALARCH != arm* && $LOCALARCH != aarch64 ]]; then
+	    if [ -f $toolchain_dir/$GCC64 ] || [ -f $toolchain_dir/$GCC32 ]; then
+	    	#echo -e "\033[32mtoolchain    is in $toolchain_dir.\033[0m"
+	        true
+	    else
+	    	echo -e "\033[31mFailed! toolchain    can not be found!\033[0m"
+	        build_error=1
+	    fi
+	fi
 
     if [ $build_error = 0 ]; then
         echo -e "\033[32mAll binaries are ready in $binary_dir.\033[0m"
