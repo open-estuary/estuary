@@ -25,18 +25,23 @@ do
     fi
     name=`jq -r ".distros[$idx].name" $CFGFILE`
     value=`jq -r ".distros[$idx].install" $CFGFILE`
+    capacity=`jq -r ".distros[$idx].capacity" $CFGFILE`
     case $name in
         "Ubuntu")
         ubuntu_en=$value
+        ubuntu_partition_size=$capacity
         ;;
-        "Opensuse")
+        "OpenSuse")
         opensuse_en=$value
+        opensuse_partition_size=$capacity
         ;;
         "Fedora")
         fedora_en=$value
+        fedora_partition_size=$capacity
         ;;
         "Debian")
         debian_en=$value
+        debian_partition_size=$capacity
         ;;
         *)
         ;;
@@ -382,11 +387,12 @@ if [ "$full_intallation" = "yes" ]; then
         echo "existed boot partition will be updated"
     fi
 
-    rootfs_start=512
-    rootfs_end=20
+    rootfs_start=1
 
     if [ "$ubuntu_en" == "yes" ]; then
-        cmd_str="sudo parted /dev/${disk_list[0]} mkpart ubuntu ${rootfs_start}M ${rootfs_end}G"
+        ubuntu_partition_size_int=${ubuntu_partition_size%G*}
+        rootfs_end=$(( rootfs_start + ubuntu_partition_size_int ))
+        cmd_str="sudo parted /dev/${disk_list[0]} mkpart ubuntu ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
         eval $cmd_str
         [ $? ] || { echo " ERR"; exit; }
@@ -398,7 +404,6 @@ if [ "$full_intallation" = "yes" ]; then
         NEWRT_IDX=${cur_idx[0]}
 
         rootfs_start=$rootfs_end
-        rootfs_end=$(( rootfs_start + 20 ))
 
         #we always re-format the root partition
         mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
@@ -414,7 +419,7 @@ if [ "$full_intallation" = "yes" ]; then
         ubuntu_username=""
         read -p "Please input the username which you want to create in ubuntu system :" ubuntu_username
         if [ -n "$ubuntu_username" ]; then
-            sudo useradd -m $ubuntu_username -s /bin/bash
+            sudo useradd -m $ubuntu_username
             sudo passwd $ubuntu_username
             cp -a /home/$ubuntu_username rootfs/home/
             sudo chown $ubuntu_username:$ubuntu_username rootfs/home/$ubuntu_username
@@ -437,7 +442,8 @@ if [ "$full_intallation" = "yes" ]; then
         fi
     fi
     if [ "$fedora_en" == "yes" ]; then
-    
+        fedora_partition_size_int=${fedora_partition_size%G*}
+        rootfs_end=$(( rootfs_start + fedora_partition_size_int ))
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart fedora ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
         eval $cmd_str
@@ -450,7 +456,6 @@ if [ "$full_intallation" = "yes" ]; then
         NEWRT_IDX=${cur_idx[0]}
 
         rootfs_start=$rootfs_end
-        rootfs_end=$(( rootfs_start + 20 ))
 
         #we always re-format the root partition
         mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
@@ -469,7 +474,8 @@ if [ "$full_intallation" = "yes" ]; then
         fi
     fi
     if [ "$debian_en" == "yes" ]; then
-    
+        debian_partition_size_int=${debian_partition_size%G*}
+        rootfs_end=$(( rootfs_start + debian_partition_size_int ))
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart debian ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
         eval $cmd_str
@@ -482,7 +488,6 @@ if [ "$full_intallation" = "yes" ]; then
         NEWRT_IDX=${cur_idx[0]}
 
         rootfs_start=$rootfs_end
-        rootfs_end=$(( rootfs_start + 20 ))
 
         #we always re-format the root partition
         mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
@@ -501,7 +506,8 @@ if [ "$full_intallation" = "yes" ]; then
         fi
     fi
     if [ "$opensuse_en" == "yes" ]; then
-    
+        opensuse_partition_size_int=${opensuse_partition_size%G*}
+        rootfs_end=$(( rootfs_start + opensuse_partition_size_int ))
         cmd_str="sudo parted /dev/${disk_list[0]} mkpart opensuse ${rootfs_start}G ${rootfs_end}G"
         echo -n "make root partition by "$cmd_str
         eval $cmd_str
@@ -514,7 +520,6 @@ if [ "$full_intallation" = "yes" ]; then
         NEWRT_IDX=${cur_idx[0]}
 
         rootfs_start=$rootfs_end
-        rootfs_end=$(( rootfs_start + 20 ))
 
         #we always re-format the root partition
         mkfs -t ext3 /dev/${disk_list[0]}$NEWRT_IDX
