@@ -11,11 +11,11 @@ Ubuntu
 1) Perf integrated with LLC
    version - 3.19.8
 2) strace - trace system calls and signals
-   version - 11.0.1
+   version - 4.8
 3) ltrace - library call tracer.
    version - 0.7.3
 4) netstat   
-   version - 1.60
+   version - 1.6
 5) top - display Linux tasks. 
    version - 3.3.9 
 6) pidstat - Report statistics for Linux tasks.
@@ -56,7 +56,7 @@ Ubuntu
 24) tail - this utility outputs the last part of the files. 
     version - 8.23 
 25) grep - tool searches the named input files for lines contains a match to the given pattern.   
-    version - 2.20 
+    version - 2.2 
 26) awk - pattern scanning and processing language.
     version - 1.3.3 
 27) sed - is a stream editor, used to perform basic text transformations.
@@ -94,7 +94,7 @@ Ubuntu
 45) slabtop - display kernel slab cache information.
     version - procps-ng 3.3.9
 46) ktap - script based dynamic tracing tool for Linux.
-    version - TBD
+    version - 0.4
 47) gprof - performance analysis tool.
     version - 2.25
 48) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc. 
@@ -104,9 +104,9 @@ Ubuntu
 Fedora
 ======
 1) Perf integrated with LLC
-   version - 4.1
+   version - 4.0.4-301.fc22.aarch64
 2) strace - trace system calls and signals
-   version - 11.1.2
+   version - 4.1
 3) ltrace - library call tracer.
    version - 0.7.91
 4) netstat  
@@ -159,7 +159,7 @@ Fedora
 28) dstat - versatile tool for generating system resource statistics. Replacement for vmstat, iostat and ifstat.
     version - 0.7.2
 29) procps - procps is the package that has a bunch of small useful utilities that give information about processes using the /proc filesystem.
-    version - TBD 
+    version - 3.3.10 
 30) tiptop - display hardware performance counters for Linux tasks.
     version - 2.3
 31) iotop - simple top-like I/O monitor.
@@ -183,46 +183,45 @@ Fedora
 42) memwatch - memory leak detection tool.
     version - 2.69
 43) LTTNG - Linux Trace Toolkit Next Generation.
-    version - TBD 
+    version - 2.6.0 - Gaia 
 44) powertop - program help to analyse the power consumption.
-    version - TBD 
+    version - 2.8 
 45) slabtop - display kernel slab cache information.
-    version - TBD 
+    version - procps-ng  3.3.10 
 46) ktap - script based dynamic tracing tool for Linux.
-    version - TBD
+    version - 0.4
 47) gprof - performance analysis tool.
-    version - TBD
+    version - 2.25-8.fc22 
 48) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
-    version - TBD
-
+    version - 3.10.1
 
 OpenSuse
 ========
 1) Perf integrated with LLC
-   version - 4.1
+   version - 4.2.3
 2) strace - trace system calls and signals
-   version - 11.0.6
+   version - 4.1
 3) ltrace - library call tracer.
    version - 0.7.91
 4) netstat
-   version - 1.60
+   version - 1.42
 5) top - display Linux tasks.
-   version - 3.3.10 
+   version - 3.3.11 
 6) pidstat - Report statistics for Linux tasks.
-   version - 11.0.6 
+   version - 11.0.8(sysstat
 7) vmstat - Report virtual memory statistics.
    version - 3.3.11 
 8) ftrace
 9) iostat -  Report CPU statistics and input/output statistics for devices, partitions and network filesystems (NFS).
-   version - 11.0.6
+   version - 11.0.8(systat)
 10) tcpdump - dump traffic on a network.
    version - 4.7.4
 11) ethtool - query or control network driver and hardware settings, particularly for wired Ethernet devices.
-   version - 4.0
+   version - 4.2
 12) swapon, swapoff : enable/disable devices and files for paging and swapping.
     version - 2.27.1  
 13) gdb: gnu debugger
-    version - 7.90  
+    version - 7.9 
 14) iptables - administration tool for IPv4 packet filtering and NAT.
     version - 1.4.21  
 15) mkfs - build a Linux file system on a device, usually a hard disk partition.
@@ -234,19 +233,19 @@ OpenSuse
 18) df - report file system disk space usage.
     version - 8.24  
 19) dmidecode - DMI table decoder(Presently not working because of some system issue)
-    version - 3.00  
+    version - 3.0  
 20) fsck - is used to check and optionally repair a Linux file system.
-    version - 2.26.2  
+    version - 2.27.1  
 21) lscpu - display information about the CPU architecture.
-    version - 2.26.2  
+    version - 2.27.1  
 22) lspci - List all PCI devices.
-    version - 3.3.0  
+    version - 3.4  
 23) setpci - utility for querying and configuring PCI devices.
-    version - 3.3.0  
+    version - 3.4  
 24) tail - this utility outputs the last part of the files.
-    version - 8.23  
+    version - 8.24  
 25) grep - tool searches the named input files for lines contains a match to the given pattern.
-    version - 2.21  
+    version - 2.22  
 26) awk - pattern scanning and processing language.
     version - 4.1.3  
 27) sed - is a stream editor, used to perform basic text transformations.
@@ -278,13 +277,13 @@ OpenSuse
 42) memwatch - memory leak detection tool.
     version - 2.69
 43) LTTNG - Linux Trace Toolkit Next Generation.
-    version - TBD 
+    version - 2.8.0-pre/2.7.0-rc1-354  
 44) powertop - program help to analyse the power consumption.
     version - 2.8 
 45) slabtop - display kernel slab cache information.
     version - procps-ng 3.3.11 
 46) ktap - script based dynamic tracing tool for Linux.
-    version - TBD 
+    version - 0.4 
 47) gprof - performance analysis tool.
     version - 2.25 
 48) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
