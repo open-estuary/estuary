@@ -1,0 +1,42 @@
+Readme for Ubuntu ARM64
+
+Install the latest perf binary*
+$# sudo apt-get  install linux-tools-3.19.0-23
+
+*- The latest version availabe can be installed.
+
+Now use the perf tool installed in /usr/lib/linux-tools-3.19.0-23/perf
+
+$# /usr/lib/linux-tools-3.19.0-23/perf stat -e L1-dcache-stores ls -l
+
+Run perf to know LLC event status.
+The 22 LLC events are added as RAW events starting from r300 to r315
+
+LLC_READ_ALLOCATE 	= r300
+LLC_WRITE_ALLOCATE 	= r301
+LLC_READ_NOALLOCATE	= r302
+LLC_WRITE_NOALLOCATE	= r303
+LLC_READ_HIT		= r304
+LLC_WRITE_HIT		= r305
+LLC_CMO_REQUEST         = r306
+LLC_COPYBACK_REQ        = r307
+LLC_HCCS_SNOOP_REQ      = r308
+LLC_SMMU_REQ            = r309
+LLC_EXCL_SUCCESS        = r30A
+LLC_EXCL_FAIL           = r30B
+LLC_CACHELINE_OFLOW     = r30C
+LLC_RECV_ERR            = r30D
+LLC_RECV_PREFETCH       = r30E
+LLC_RETRY_REQ           = r30F
+LLC_DGRAM_2B_ECC               = r310
+LLC_TGRAM_2B_ECC               = r311
+LLC_SPECULATE_SNOOP            = r312
+LLC_SPECULATE_SNOOP_SUCCESS    = r313
+LLC_TGRAM_1B_ECC               = r314
+LLC_DGRAM_1B_ECC               = r315
+
+# To count LLC_WRITE_NOALLOCATE and LLC_READ_ALLOCATE
+$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r303 -e r300 ls -l
+
+# To count LLC_READ_HIT and LLC_WRITE_HIT for a process with pid
+$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r304,r305 -p <pid>
