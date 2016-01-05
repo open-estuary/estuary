@@ -258,7 +258,7 @@ if [ x"0" = x"$?" ]; then
 
 	# Check if iasl needs to update
 	iasl_version=`iasl -v 2>/dev/null | grep -Po "(?<=version )(\d+)(?=.*)" 2>/dev/null`
-	if [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]] && [[ x"$iasl_version" < x"20150214" ]]; then
+	if [[ x"$iasl_version" < x"20150214" ]]; then
 		update_acpica_tools
 		if [ x"$?" != x"0" ]; then
 			echo -e "\033[31mError! Failed to update iasl!\033[0m"
@@ -741,8 +741,8 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		# roll back to special version for D02
 		git reset --hard
 		git checkout open-estuary/master
-	    git reset --hard 37500bcd263482fda9c976
-		git apply HwPkg/Patch/*.patch
+	    # git reset --hard 2a5f3aa0b5fa92ed421840
+		# git apply HwPkg/Patch/*.patch
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
 
