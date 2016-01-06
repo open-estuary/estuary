@@ -282,7 +282,6 @@ set default=ubuntu
 menuentry "ubuntu" --id ubuntu {
         set root=(tftp,${inet_addr})
         linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=${inet_addr}:/targetNFS ip=::::::dhcp
-       devicetree /hip05-d02.dtb
 }
 EOM
     let idx=$idx+1
