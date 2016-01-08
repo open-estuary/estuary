@@ -302,7 +302,7 @@ There are several methods to bring up system, you can select following anyone fi
         bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
     (2) Modify defconfig file at kernel/arch/arm64/configs directory as follow:
         CONFIG_SCSI_HISI_SAS=y
-        CONFIG_ATA=m
+        CONFIG_ATA=y
     After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "Boot via NORFLASH".
 
     3. start up system
