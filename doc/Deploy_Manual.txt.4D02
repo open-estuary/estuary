@@ -302,7 +302,7 @@ There are several methods to bring up system, you can select following anyone fi
         bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
     (2) Modify defconfig file at kernel/arch/arm64/configs directory as follow:
         CONFIG_SCSI_HISI_SAS=y
-        CONFIG_ATA=m
+        CONFIG_ATA=y
     After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "Boot via NORFLASH".
 
     3. start up system
@@ -312,39 +312,14 @@ There are several methods to bring up system, you can select following anyone fi
     (2) Select boot from FLASH Start OS
 
 # Boot via ACPI
-    
-    D02 also supports booting via ACPI, and the steps are as follows:
 
-    1. Power on and enter UEFI SHELL
+   D02 also supports booting via ACPI, you can bring up this systerm which is
+   similar with this DT mode, you must fix some point as follow:
 
-    2. IP address config
-    
-    ifconfig -s eth0 <IP address> <mask> <gateway>
-    e.g.: ifconfig -s eth0 192.168.1.4 255.255.255.0 192.168.1.1
-    
-    3. Burn the kernel from FTP
-    
-    provision <server address> -u <ftp user name> -p <ftp password> -f <kernel image> -a <download target address>
-    mdfile \<kernel image> <source address> <imagesize>
-    e.g.: provision 192.168.1.107 -u d02 -p 123456 -f Image_D02 -a 0x80000
-          mdfile \Image_D02 0x80000 0x82A000
-    
-    Note: imagesize must be the real Image size which can be gotten from previous command.
-    
-    4. Burn the filesystem from FTP
-    
-    provision <server address> -u <ftp user name> -p <ftp password> -f <rootfs image> -a <download target address>
-    mdfile \<rootfs image> <source address> <imagesize>
-    e.g.: provision 192.168.1.107 -u d02 -p 123456 -f mini-rootfs.cpio.gz -a 0x7000000
-          mdfile \mini-rootfs.cpio.gz 0x7000000 0x1845F12
-    
-    Note: imagesize must be the real Image size which can be gotten from previous command
-    
-    5. Get into target directory to check whether the files downloaded above are there.
-    
-        cd fs0:
-        dir
-    
-    6. Set the parameters of booting via ACPI
-    
-        start Image_D02 "acpi=fore console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 initrd=mini-rootfs.cpio.gz"
+   1. delete DTB file and don't burn DTB file
+
+   2. Set the parameters of booting via ACPI
+    you must add "acpi=force" property in "linux=...." line for "grub.cfg" file; while you delete DTB line
+    for "grub.cfg" file.
+
+	NOTE: you can get more information about setting grub.cfg from Grub_Manual.txt
