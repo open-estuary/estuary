@@ -559,7 +559,6 @@ set default=${target_system_type}_sata
 menuentry "$target_system_type SATA" --id ${target_system_type}_sata {
     search --no-floppy --fs-uuid --set ${boot_uuid}
 	linux /Image rdinit=/init root=PARTUUID=$rootfs_partuuid rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=::::::dhcp
-	devicetree /hip05-d02.dtb
 }
 EOM
 
