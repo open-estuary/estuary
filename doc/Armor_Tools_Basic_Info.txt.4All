@@ -178,6 +178,18 @@ d) LLC statistics registers integration to perf for P660.
 
 44) memwatch: A memory leak detection tool. memwatch source files to be integrated and build as part of the code to be tested.
 
+45) LTTNG: Linux Trace Toolkit Next Generation. LTTng consists of kernel modules (for Linux kernel tracing) and dynamically loaded libraries (for user application and library tracing). 
+    It is controlled by a session daemon, which receives commands from a command line interface.
+
+46) powertop: program help to analyse the power consumption.
+
+47) slabtop: display kernel slab cache information.
+
+48) ktap: script based dynamic tracing tool for Linux.
+
+49) gprof: performance analysis tool.
+
+50) valgrind: instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
 
 #More tools will be added here...
 

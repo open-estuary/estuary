@@ -10,25 +10,24 @@ Current Release Version- "armor-v1.0"
 
 Information of Supported Armor Tools 
 ===================================
-- For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/armor-dev/doc/Armor_Tools_Basic_Info.txt.4All
+– For the supported tools in Armor on different distributions, please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Supported.txt.4All
 
-- Documentation for LLC support in perf https://github.com/open-estuary/armor/blob/master/testing/doc/README.perf
+– For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Basic_Info.txt.4All
 
-- Documentation for using KGDB and KDB please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.kgdb.kdb
+– Documentation for LLC support in perf https://github.com/open-estuary/estuary/blob/master/doc/README.armor.perf
 
-- Documentation for LTTng userspace and kernel tracing, please refer https://github.com/open-estuary/armor/blob/master/testing/doc/README.lttng
- 
+– Documentation for using KGDB and KDB please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.kgdb.kdb
+
+– Documentation for LTTng user space tracing and kernel tracing, please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.lttng
+
+– Documentation for how to verify iptables tool, please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.iptables
 
 Distributions
 =============
 Presently Armor tools are supported on the following distributions.
-
 Ubuntu 15.04 ARM64
 Fedora 22 ARM64
 OpenSuse 20150813 Tumbleweed ARM64
-
-Note: perf tool is auto installed only on Ubuntu currently. But User could
-install the perf tool in Fedora and OpenSuSE from the repos and use it.
 
 Installation
 ============
@@ -83,11 +82,8 @@ How to run Tool's test scripts
 Known Limitations/Issues
 ========================
 1. dmidecode tool does not run on open-estuary distributions with the error "/dev/mem: Operation not permitted". 
-2. sar tool does not work.
-3. KDump/Kexec may not work.
-4. Don't know how to verify fsck and iptables on D02.
-5. Perf tool installed for only Ubuntu distribution. In Fedora and openSuSE user
-need to install from the repos manually.
+2. KDump/Kexec may not work.
+3. Don't know how to verify fsck on D02.
 
 ========================================= End =============================================
 
