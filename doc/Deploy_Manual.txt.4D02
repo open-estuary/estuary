@@ -8,6 +8,7 @@ Preparation
     Upgrade UEFI and trust firmware
     Upgrade DTB file
 Bring up System
+    Boot via ESL
     Boot via NORFLASH
     Boot via PXE
     Boot via NFS
@@ -70,7 +71,40 @@ All following sections will take the D02 board as example, other boards have the
 
 There are several methods to bring up system, you can select following anyone fitting you to boot up.
 
+# Boot via ESL
+
+    In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.
+    After reboot or power off, all downloaded data will be lost.
+    This boot mode is just used for debugging.
+
+    Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+
+    1. Download Image binary file from FTP server
+
+    # Download Image binary file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x80000
+
+    2. Download dtb file from FTP server
+
+    # Download dtb file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x06000000
+    
+    3. Download rootfs file from FTP server
+
+    # Download rootfs file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hulk-hip05.cpio.gz -a 0x07000000
+    
+    4. Start operator system
+    
+    Type "exit" to exit EBL. Select "ESL Start OS" menu to start operator system.
+
 # Boot via NORFLASH
+
+    In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
+    Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
 
     Boot D02 to UEFI SHELL, and type the follow commands in EBL:
 
@@ -99,7 +133,10 @@ There are several methods to bring up system, you can select following anyone fi
     To get all binaries mentioned above, please refer to Readme.txt.
     
 # Boot via PXE
-    
+
+    In this boot mode, the UEFI will get grub from PXE server.
+    The grub will get the configuration file from TFTP service configured by PXE server.
+
     1. Setup PXE environment on host
 
     Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
@@ -113,7 +150,10 @@ There are several methods to bring up system, you can select following anyone fi
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
 # Boot via NFS
-    
+
+    In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server.
+    You can use "showmount -e <server ip address>" to list the exported NFS directories on the NFS server.
+
     D02 supports booting via NFS, you can try it as following steps:
 
     1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
@@ -126,6 +166,9 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via HD
     
+    In this boot mode, the UEFI will get the grub from the EFI system partition on the hard disk.
+    The grub will load the grub configuration file from the EFI system partition as well.
+
     This part will tell you how to boot D02 via hardware disk with kernel image, dtb file, grub in it.
     In my case, my hardware disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
     
@@ -198,6 +241,9 @@ There are several methods to bring up system, you can select following anyone fi
     6. Press arrow key up or down to select grub boot option to decide which distribution should boot.
 
 # Boot via USB
+
+    In this boot mode, the UEFI will get the grub from the EFI system partition on the USB disk.
+    The grub will load the grub configuration file from the EFI system partition as well.
 
     This part will tell you how to boot D02 via GRUB from USB disk. For example, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
     1. Partition and format USB disk
@@ -272,6 +318,9 @@ There are several methods to bring up system, you can select following anyone fi
     6. select the USB selection of grub boot menu
 
 # Boot via SAS
+
+    In this boot mode, the kernel image and dtb file will be loaded from NORFLASH into RAM on target board.
+    The root parameter passed to the kernel will be specified in hip05-d02.dts and it will point to the root partition on SAS hard disk.
 
     So far, D02 board still don't support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
 
