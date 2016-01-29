@@ -58,6 +58,9 @@ if [ ! -f $netstatus ]; then
 		OpenSuse)
 			zypper -y update
 			;;
+		Debian)
+			apt-get -y update
+			;;
 	    *)
 	        echo "Not support to install packages on $Distribution"
 	esac
