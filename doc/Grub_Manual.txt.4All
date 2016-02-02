@@ -124,4 +124,5 @@ Note: In case of booting by PXE mode:
     1. The gurb binary and grub.cfg files must be placed in the TFTP root directory.
     2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
     3. The grub binary name (grubxxx.efi) must be consistent with the "filename" in /etc/dhcp/dhcpd.conf, for more detail, please refer to Setup_PXE_Env_on_Host.txt.
-    4. If you use D02 board, you must flash this "hip05-d02.dtb" file into norflash and will avoid Mac address problem. you can	get more information from Deploy_Manual.txt guide.
+    4. If you use D02 board, you should not input DTB in the grub.cfg but you must flash the DTB file into spiflash to avoid a known Mac address duplicate issue.
+       You can get more information from the Deploy_Manual.txt guide.

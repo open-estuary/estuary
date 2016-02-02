@@ -64,7 +64,11 @@ All following sections will take the D02 board as example, other boards have the
     
     3. Reboot your D02 board
 
-    You must reboot your D02 board after above two steps, this new DTB file will be used on booting    board.
+    You must reboot your D02 board after above two steps, this new DTB file will be used on booting board.
+
+    Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.
+          Also it is to be noted that the DTB file should not be input in the Grub config file. So if you
+          wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
 
 ### Bring up System ###
 
@@ -76,7 +80,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     1. Download Image binary file from FTP
     
-    # Download fiel from FTP server to target board's RAM
+    # Download file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
     # Write data into NORFLASH
     norwfmem <source address> <target address> <data length>
@@ -251,16 +255,15 @@ There are several methods to bring up system, you can select following anyone fi
     #
     # Sample GRUB configuration file
     #
-    # Boot automatically after 0 secs.
+    # Boot automatically after 5 secs.
     set timeout=5
-    # By default, boot the Euler/Linux
+    # By default, boot the Estuary with Ubuntu filesystem
     set default=ubuntu
     # For booting GNU/Linux
 
     menuentry "ubuntu" --id ubuntu {
         set root=(hd0,gpt1)
         linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-        devicetree /hip05-d02.dtb
     }
 
     Note: 
