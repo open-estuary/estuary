@@ -40,31 +40,7 @@ if [ ! -f ${netstatus} ]; then
 fi
 
 # preprocess...
-Distribution=`sed -n 1p /etc/issue| cut -d' ' -f 1`
-# Temp fix for OpenSuse distribution as the format of /etc/issue in OpenSuse is different
-if [ "$Distribution" = 'Welcome' ]; then
-    Distribution=`sed -n 1p /etc/issue| cut -d' ' -f 3`
-fi
-
-
 if [ ! -f $netstatus ]; then
-	case "$Distribution" in
-	    Ubuntu)
-			apt-get -y update
-			;;
-		Fedora)
-			dnf -y  update	
-			;;
-		OpenSuse)
-			zypper -y update
-			;;
-		Debian)
-			apt-get -y update
-			;;
-	    *)
-	        echo "Not support to install packages on $Distribution"
-	esac
-
 	echo "$netrst" > $netstatus
 fi
 
