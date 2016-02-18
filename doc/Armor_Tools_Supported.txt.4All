@@ -83,7 +83,9 @@ Ubuntu
     version - 2.25
 40) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc. 
     version - 3.10.1
-
+41) pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+    Sample scripts are available online.
+42) packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
 
 Fedora
 ======
@@ -162,6 +164,9 @@ Fedora
     version - 2.25-8.fc22 
 40) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
     version - 3.10.1
+41) pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+    Sample scripts are available online.
+42) packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
 
 OpenSuse
 ========
@@ -240,6 +245,9 @@ OpenSuse
     version - 2.25 
 40) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
     version - 3.10.1 
+41) pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+    Sample scripts are available online.
+42) packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
 
 Debian 
 ======
@@ -323,6 +331,9 @@ Debian
     version - 3.10.0
 41) sysdig  
     version - 0.1.89
+42) pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+    Sample scripts are available online.
+43) packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
 
 Miscelleneous Tools
 ===================
