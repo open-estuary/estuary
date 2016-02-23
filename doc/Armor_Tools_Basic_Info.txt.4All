@@ -191,6 +191,13 @@ d) LLC statistics registers integration to perf for P660.
 
 50) valgrind: instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
 
+51) pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+    Sample scripts are available online.
+
+52) packETHcli - packETHcli is the command line packet generator tool for ethernet. 
+    It allows you to create and send any possible packet or sequence of packets on the ethernet link.
+
+
 #More tools will be added here...
 
 
