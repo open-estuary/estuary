@@ -1,0 +1,435 @@
+Deploy Estuary into D03 board
+
+Table of Contents:
+Introduction
+Preparation
+    Prerequisite
+    Check the hardware board
+    Upgrade UEFI and trust firmware
+    Upgrade DTB file
+Bring up System
+    Boot via ESL
+    Boot via NORFLASH
+    Boot via PXE
+    Boot via NFS
+    Boot via HD
+        Preprocess when the disk can’t be identified
+    boot via USB
+    boot via SAS
+    boot via PCIE card to SATA
+    Boot via ACPI
+
+### Introduction ###
+
+This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
+
+All following sections will take the D03 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
+ 
+### Preparation ###
+
+# Prerequisite
+
+    Local network: To connect hardware boards and host machine, so that they can communicate each other.
+    
+    Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
+
+# Check the hardware board
+
+    Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d03-2/.
+
+# Upgrade UEFI and trust firmware
+
+    You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to UEFI_Manual.txt.
+
+# Upgrade DTB file (Necessary step) 
+
+   Because this dtb file is important to this D03 boards, firstly you must flash this DTB file
+   into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the
+   follow commands in EBL:
+   We will often do some commands in UEFI EBL shell for these methods, about how to enter it,
+   please refer to UEFI_Manual.txt.
+
+    1. IP address config (Optional, you can ignore this step if DHCP works well)
+    the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
+    # Config board's IP address
+    ifconfig -s eth0 static <IP address> <mask> <gateway>
+    e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
+
+    2. Download dtb file from FTP
+    
+    # Download file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
+    # Write data into FLASH
+    spiwfmem <source address> <target address> <data length>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 100000
+          spiwfmem 100000 300000 100000
+    
+    3. Reboot your D03 board
+
+    You must reboot your D03 board after above two steps, this new DTB file will be used on booting board.
+
+    Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.
+          Also it is to be noted that the DTB file should not be input in the Grub config file. So if you
+          wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
+
+### Bring up System ###
+
+There are several methods to bring up system, you can select following anyone fitting you to boot up.
+
+# Boot via ESL
+
+    In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.
+    After reboot or power off, all downloaded data will be lost.
+    This boot mode is just used for debugging.
+
+    Boot D03 to UEFI SHELL, and type the follow commands in EBL:
+
+    1. Download Image binary file from FTP server
+
+    # Download Image binary file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 0x80000
+
+    2. Download dtb file from FTP server
+
+    # Download dtb file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x06000000
+    
+    3. Download rootfs file from FTP server
+
+    # Download rootfs file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hulk-hip05.cpio.gz -a 0x07000000
+    
+    4. Start operator system
+    
+    Type "exit" to exit EBL. Select "ESL Start OS" menu to start operator system.
+
+# Boot via NORFLASH
+
+    In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
+    Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
+
+    Boot D03 to UEFI SHELL, and type the follow commands in EBL:
+
+    1. Download Image binary file from FTP
+    
+    # Download file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
+    # Write data into NORFLASH
+    norwfmem <source address> <target address> <data length>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 100000
+          norwfmem 100000 100000 1f00000
+    
+    2. Download rootfs file from FTP
+    
+    # Download file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image> -a <download target address>
+    # Write data into NORFLASH
+    norwfmem <source address> <target address> <data length>
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz -a 100000
+          norwfmem 100000 2000000 4000000
+    
+    3. Reboot D03 and press anykey to enter UEFI Boot Menu
+    
+    4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
+
+    To get all binaries mentioned above, please refer to Readme.txt.
+    
+# Boot via PXE
+
+    In this boot mode, the UEFI will get grub from PXE server.
+    The grub will get the configuration file from TFTP service configured by PXE server.
+
+    1. Setup PXE environment on host
+
+    Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
+
+    2. Reboot and press anykey to enter UEFI Boot Menu
+    
+    3. Select boot option "Boot Manager"->"PXE on MAC Address: " with your board's MAC address as the end.
+    
+    4. After several seconds, D03 will boot by PXE automatically.
+    
+    To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
+
+# Boot via NFS
+
+    In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server.
+    You can use "showmount -e <server ip address>" to list the exported NFS directories on the NFS server.
+
+    D03 supports booting via NFS, you can try it as following steps:
+
+    1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
+
+    2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
+
+    3. Reboot D03 and press anykey to enter UEFI Boot Menu
+
+    4. Select boot option "Boot Manager"->"PXE on MAC Address: " with your board's MAC address as the end.
+
+# Boot via HD
+    
+    In this boot mode, the UEFI will get the grub from the EFI system partition on the hard disk.
+    The grub will load the grub configuration file from the EFI system partition as well.
+
+    This part will tell you how to boot D03 via hardware disk with kernel image, grub in it.
+    In my case, my hardware disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
+    
+    1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
+
+    2. Part and format hardware disk
+
+    Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Part hardware disk with "sudo fdisk /dev/sda" as follow:
+    
+    +---------+-----------+--------------+------------------+
+    | Name    |   Size    |    Type      |   Tag            |
+    +---------+-----------+--------------+------------------+
+    | sda1    |   200M    |  EFI system  |   EFI            |
+    +---------+-----------+--------------+------------------+
+    | sda2    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    | sda3    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    
+    Note: EFI partition must be a fat filesystem, so you should format sda1 with “sudo mkfs.vfat /dev/sda1″.
+
+    *** Preprocess when the disk can’t be identified ***
+    
+        When the disk is not identified by D03, you can try the following step to process the disk. (for some specfic disk eg seagate disk made by samsung, it can be useful)
+        
+        a. Find a PC or another board which can identify this disk
+        You should find a PC or another board which can identify this disk, and the system of PC or board should be linux system. For us,we can use D01 board.
+        
+        b. Use tool fdisk to process this disk
+        
+        format the disk firstly: 
+                            sudo mkfs.ext4 /dev/sda
+        add a gpt to this disk : 
+                            fdisk /dev/sda
+                            g-------add a gpt partition
+        add some EFI partition : 
+                            n-------add a partition
+                            1-------the number of partition
+                            +200M---------size of partition
+                            t-------change the type of partition
+                            EFI system
+        add some anther partition  ...
+        save the change           : w
+        formate EFI partition  : sudo mkfs.vfat /dev/sda1
+        
+        Then this disk can be identified by D03 board.
+    
+    3. Download files and store them into hardware disk as below.
+        sda1: -------EFI
+              |       |
+              |       GRUB2------grubaa64.efi  //grub binary file
+              |
+              |-------------grub.cfg           //grub config file
+              |
+              |-------------Image_D03          //kernel binary Image
+        sda2: Ubuntu distribution
+        sda3: Fedora distribution
+
+    To get kernel image and dtb file, please refer to Readme.txt.
+    To get and config grub and grub.cfg, please refer to Grub_Manual.txt.
+    To get different distributions, please refer to Distributions_Guider.txt.
+    
+    4. Reboot and press anykey to enter UEFI Boot Menu.
+
+    5. Select boot from hardware disk
+
+    6. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+
+# Boot via USB
+
+    In this boot mode, the UEFI will get the grub from the EFI system partition on the USB disk.
+    The grub will load the grub configuration file from the EFI system partition as well.
+
+    This part will tell you how to boot D03 via GRUB from USB disk. For example, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
+    1. Partition and format USB disk
+    Format USB disk: mkfs -t ext4 /dev/sda
+    Partition USB disk as follow:
+    +---------+-----------+--------------+------------------+
+    | Name    |   Size    |    Type      |   Tag            |
+    +---------+-----------+--------------+------------------+
+    | sda1    |   200M    |  EFI system  |   EFI            |
+    +---------+-----------+--------------+------------------+
+    | sda2    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    Note: EFI system should have a fat filesystem, so we must format sda1 with “mkfs.vfat /dev/sda1″. 
+    operate typically as follows:
+    a. Use "fdisk" to partition this disk in a Ubuntu machine
+    format the disk firstly: 
+                        mkfs.ext4 /dev/sda
+    add a gpt to this disk : 
+                        fdisk /dev/sda
+                        g-------add a gpt partition
+    add some EFI partition : 
+                        n-------add a partition
+                        1-------the number of partition
+                        +200M---------size of partition
+                        t-------change the type of partition
+                        EFI system
+    add ubuntu distribution partition  ...
+                n-------add a partition
+                        2-------the number of partition
+                        +10G---------size of partition
+    save the change           : w
+    formate EFI partition  : mkfs.vfat /dev/sda1
+    formate ubuntu distribution partition: mkfs -t ext4 /dev/sda2
+
+    2. Related files are placed as follow:
+
+        sda1: -------EFI
+              |       |
+              |       GRUB2------grubaa64.efi  //grub binary file
+              |
+              |-------------grub.cfg           //grub config file
+              |
+              |-------------Image              //kernel binary Image
+        sda2: ubuntu distribution
+
+    3. modify grub config file
+    And the context of grub.cfg file is as follow:
+
+    #
+    # Sample GRUB configuration file
+    #
+    # Boot automatically after 5 secs.
+    set timeout=5
+    # By default, boot the Estuary with Ubuntu filesystem
+    set default=ubuntu
+    # For booting GNU/Linux
+
+    menuentry "ubuntu" --id ubuntu {
+        set root=(hd0,gpt1)
+        linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+    }
+
+	    Note:
+	    1. XXX means the PARTUUID of that partition which your linux distribution is located in. 
+	    2. If you want to use another linux distribution, please refer above steps.
+
+    4. Reboot and press any key into enter UEFI menu
+    5. Select "Boot Manager"-> "USB disk" boot option
+    6. select the USB selection of grub boot menu
+
+# Boot via SAS
+
+    In this boot mode, the UEFI will get the grub from the EFI system partition on the SAS disk.
+    The grub will load the grub configuration file from the EFI system partition as well.
+
+    This part will tell you how to boot D03 via SAS disk with kernel image, grub in it.
+    In my case, my SAS disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
+
+    1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
+
+    2. Part and format SAS disk
+
+    Format SAS disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Part SAS disk with "sudo fdisk /dev/sda" as follow:
+
+    +---------+-----------+--------------+------------------+
+    | Name    |   Size    |    Type      |   Tag            |
+    +---------+-----------+--------------+------------------+
+    | sda1    |   200M    |  EFI system  |   EFI            |
+    +---------+-----------+--------------+------------------+
+    | sda2    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    | sda3    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+
+    Note: EFI partition must be a fat filesystem, so you should format sda1 with “sudo mkfs.vfat /dev/sda1″.
+
+	Use tool fdisk to process this disk
+
+        format the disk firstly:
+                            sudo mkfs.ext4 /dev/sda
+        add a gpt to this disk :
+                            fdisk /dev/sda
+                            g-------add a gpt partition
+        add some EFI partition :
+                            n-------add a partition
+                            1-------the number of partition
+                            +200M---------size of partition
+                            t-------change the type of partition
+                            EFI system
+        add some anther partition  ...
+        save the change           : w
+        formate EFI partition  : sudo mkfs.vfat /dev/sda1
+
+    3. Download files and store them into SAS disk as below.
+        sda1: -------EFI
+              |       |
+              |       GRUB2------grubaa64.efi  //grub binary file
+              |
+              |-------------grub.cfg           //grub config file
+              |
+              |-------------Image_D03          //kernel binary Image
+        sda2: Ubuntu distribution
+        sda3: Fedora distribution
+
+    To get kernel image and dtb file, please refer to Readme.txt.
+    To get and config grub and grub.cfg, please refer to Grub_Manual.txt.
+    To get different distributions, please refer to Distributions_Guider.txt.
+
+    4. Reboot and press any key into enter UEFI menu
+
+    5. Select "Boot Manager"->"SAS disk" boot option and press "Enter"
+
+    6. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+
+# Boot via PCIE card to SATA
+
+    In this boot mode, the kernel image will be loaded from NORFLASH into RAM on target board.
+    The root parameter passed to the kernel will be specified in hip06-d03.dts and it will point to the root partition on SATA disk.
+
+    1. plug SATA disk into PCIE card connecting this D03 board by PCIE interface
+    2. Partition SATA disk in nfs evironment
+    SATA disk may be partitioned into fews parts:
+    +---------+-----------+--------------+------------------+
+    | Name    |   Size    |    Type      |   Tag            |
+    +---------+-----------+--------------+------------------+
+    | sda1    |   200M    |  EFI system  |   EFI            |
+    +---------+-----------+--------------+------------------+
+    | sda2    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    | sda3    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    | sda4    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    | sda5    |rest space |    ext4      | linux swap       |
+    +---------+-----------+--------------+------------------+ 
+    Linux distribution are placed as follow:
+        sda1: null
+        sda2: ubuntu distribution
+        sda3: OpenSUSE distribution
+        sda4: miniDistribution
+        sda5: reserved for user
+
+    3. Build the kernel
+     Modify hip06-d03.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
+        bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+    After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "Boot via NORFLASH".
+
+    NOTE: above this grub.cfg it will boot ubuntu distribution (sda2), if you want to boot other distribution, you should fix "root=/dev/sdaX" iterm.
+
+    4. Reboot and press any key into enter UEFI menu
+
+    5. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
+
+# Boot via ACPI
+
+   D03 also supports booting via ACPI, you can bring up this systerm which is
+   similar with this DT mode, you must fix some point as follow:
+
+   1. delete DTB file and don't burn DTB file
+
+   2. Set the parameters of booting via ACPI
+    you must add "acpi=force" property in "linux=...." line for "grub.cfg" file; while you delete DTB line
+    for "grub.cfg" file.
+
+	NOTE: you can get more information about setting grub.cfg from Grub_Manual.txt
