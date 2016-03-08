@@ -13,10 +13,10 @@
 LOCALARCH=`uname -m`
 #core number for building
 corenum=36
-distros=(Ubuntu OpenSuse Fedora Debian)
+distros=(Ubuntu OpenSuse Fedora Debian CentOS)
 distros_arm32=(Ubuntu)
-distros_arm64=(Ubuntu OpenSuse Fedora Debian)
-platforms=(QEMU D01 D02 HiKey)
+distros_arm64=(Ubuntu OpenSuse Fedora Debian CentOS)
+platforms=(QEMU D01 D02 D03 HiKey)
 installs=(Caliper toolchain)
 
 #PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -35,6 +35,12 @@ PATH_DEBIAN64=default
 PATH_UBUNTU32=default
 
 DEPRECATED_PARAMETER=0
+
+CREATE_INSTALL_MEDIUM=
+CREATE_INST_ISOIMG=no
+CREATE_INST_UDISK=no
+INSTALL_UDISK_DEVICE=
+INSTALL_DISK_LABEL=Estuary
 
 ###################################################################################
 ############################# Print help information       ########################
@@ -57,10 +63,12 @@ usage()
 	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu"
-	echo "		*for D02,HiKey, support Ubuntu, OpenSuse, Fedora, Debian"
+	echo "		*for D02,D03,HiKey, support Ubuntu, OpenSuse, Fedora, Debian, CentOS"
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
+	echo " -o: create install disk or isoimage"
+	echo " --device: specify which usb disk to install"
 	echo " -v,--version: to print the version of estuary project"
 }
 
@@ -127,18 +135,45 @@ check_platform()
 }
 
 ###################################################################################
+############################# Check install parameter ########################
+###################################################################################
+check_install_param()
+{
+	if [ x"$CREATE_INSTALL_MEDIUM" = x"yes" ]; then
+		if [ x"$INSTALL_UDISK_DEVICE" = x"" ]; then
+			CREATE_INST_ISOIMG=yes
+		else
+			CREATE_INST_UDISK=yes
+		fi
+	fi
+
+	if [[ x"$PLATFORM" = x"D02" || x"$PLATFORM" = x"D03" ]]; then
+		if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
+			if [ x"$INSTALL_UDISK_DEVICE" = x"" ] ||  [ ! -b "$INSTALL_UDISK_DEVICE" ]; then
+				return 1
+			fi
+		fi
+	elif [[ x"$CREATE_INST_ISOIMG" = x"yes" || x"$CREATE_INST_UDISK" = x"yes" || x"$CREATE_INSTALL_MEDIUM" = x"yes" ]]; then
+		echo "Error! Unsupport create install image or disk for platfrom $PLATFORM!"
+		return 1
+	fi
+	
+	
+	return 0
+}
+
+###################################################################################
 ############################# Clear build target  #################################
 ###################################################################################
 clear_target()
 {
 	if [ x"" = x"$PLATFORM" ]; then
-		echo -e "\033[31mNo specified platform, please add -p parameter before -c.\033[0m"
-		usage
-		exit 1
+		sudo rm -rf $build_dir
+		echo "Cleared all"
+	else
+		sudo rm -rf $build_dir/$PLATFORM/$1
+		echo "Cleared $1"
 	fi
-
-	sudo rm -rf $build_dir/$PLATFORM/$1
-	echo "Cleared $1"
 
 	exit 0 
 }
@@ -281,9 +316,9 @@ build_dir=build
 ###################################################################################
 ############################# Set download source server ##########################
 ###################################################################################
-PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.1/rc1
+PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.2/rc0
 TOOLCHAIN_SOURCE=http://open-estuary.org/EstuaryDownloads/toolchain
-BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/Estuary_Releases/Estuary_2.1/prebuild
+BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/prebuild/v2.2/rc0
 
 ###################################################################################
 ############################# Parse config file        ############################
@@ -327,6 +362,23 @@ parse_cfg()
 	done
 
 	DISTRO=$DISTROLS
+
+	idx=0
+	install=`jq -r ".setup[$idx].install" $CFGFILE`
+	while [ x"$install" != x"null" ];
+	do
+		if [ x"yes" = x"$install" ]; then
+			install_type=`jq -r ".setup[$idx].type" $CFGFILE`
+			if [ x"iso" = x"$install_type" ]; then
+				CREATE_INST_ISOIMG=yes
+			else
+				CREATE_INST_UDISK=yes
+				INSTALL_UDISK_DEVICE=`jq -r ".setup[$idx].device" $CFGFILE`
+			fi
+		fi
+		let idx=$idx+1
+		install=`jq -r ".setup[$idx].install" $CFGFILE`
+	done
 }
 
 ###################################################################################
@@ -371,6 +423,15 @@ while [ x"$1" != x"" ]; do
 			echo "Install: $DISTRO"
             break
 			;;
+		"-o")
+			CREATE_INSTALL_MEDIUM=yes
+			shift
+			;;
+		"--device")
+			shift
+			INSTALL_UDISK_DEVICE=$1
+			echo "udisk device: $1"
+			;;
 		* )
 			echo "unknown arg $1"
 			usage
@@ -400,6 +461,11 @@ fi
 if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
     usage
     exit 1
+fi
+
+# Check if the install parameters are correct.
+if !(check_install_param); then
+	exit 1
 fi
 
 # Detect and dertermine some environment variables
@@ -629,11 +695,17 @@ cd -
 
 # Copy some common prebuilt files to build target directory
 if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
-    if [ -f $PREBUILD_DIR/mini-rootfs.cpio.gz ]; then
-        cp $PREBUILD_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+    if [ x"$TARGETARCH" = x"ARM32" ]; then
+	if [ -f $PREBUILD_DIR/mini-rootfs.cpio.gz ]; then
+	    cp $PREBUILD_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+	fi
+    else
+	if [ -f $PREBUILD_DIR/mini-rootfs-arm64.cpio.gz ]; then
+	    cp $PREBUILD_DIR/mini-rootfs-arm64.cpio.gz $binary_dir/ 2>/dev/null
+	fi
     fi
 
-    if [ x"D02" = x"$PLATFORM" ] && [ -f $PREBUILD_DIR/CH02TEVBC_V03.bin ]; then
+    if [[ x"D02" = x"$PLATFORM" || x"D03" = x"$PLATFORM" ]] && [ -f $PREBUILD_DIR/CH02TEVBC_V03.bin ]; then
         cp $PREBUILD_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
     fi
     
@@ -728,32 +800,38 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	pushd $UEFI_DIR/
 		# roll back to special version for D01
 		git reset --hard
+		git clean -fdx
 		git checkout open-estuary/old
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d01
     	../$UEFI_TOOLS/uefi-build.sh -b DEBUG d01
     	popd
     	UEFI_BIN=`find "$UEFI_DIR/Build/D01" -name "*.fd" 2>/dev/null`
-	elif [ x"D02" = x"$PLATFORM" ]; then
-		# Build UEFI for D02 platform
-    	rm `find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null` 2>/dev/null
+	elif [[ x"D02" = x"$PLATFORM" || x"D03" = x"$PLATFORM" ]]; then
+		# Build UEFI for D02/D03 platform
+		rm `find "$UEFI_DIR/Build/Pv660$PLATFORM" -name "*.fd" 2>/dev/null` 2>/dev/null
     	pushd $UEFI_DIR/
-		# roll back to special version for D02
+		# roll back to special version for D02/D03
 		git reset --hard
+		git clean -fdx
 		git checkout open-estuary/master
-	    # git reset --hard 2a5f3aa0b5fa92ed421840
-		# git apply HwPkg/Patch/*.patch
+		git submodule init
+		git submodule update
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
 
-    	grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" HwProductsPkg/D02/Pv660D02.dsc
+		grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" HwProductsPkg/$PLATFORM/Pv660$PLATFORM.dsc
     	if [ x"$?" != x"0" ] && [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]]; then
-    		sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' HwProductsPkg/D02/Pv660D02.dsc
+			sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' HwProductsPkg/$PLATFORM/Pv660$PLATFORM.dsc
     	fi
-
-    	uefi-tools/uefi-build.sh d02
+		platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
+		uefi-tools/uefi-build.sh -c LinaroPkg/platforms.config $platform
     	popd
-    	UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+		if [ x"D02" = x"$PLATFORM" ]; then
+			UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
+		else
+			UEFI_BIN=`find "$UEFI_DIR/Build/D03" -name "*.fd" 2>/dev/null`
+		fi
 
 #		if [ x"$UEFI_BIN" != x"" ]; then
 #			cp $UEFI_DIR/HwProductsPkg/D02/*.bin $uefi_dir/
@@ -769,22 +847,22 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 
 		git reset --hard
 		git checkout open-estuary/master
-	    git reset --hard 9ad6457e013db87aba134c5021d5a1de1d278da2
-	    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
+		git submodule init
+		git submodule update
 	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
 
 	    cd l-loader
 	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/bl1.bin ./
 	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/fip.bin ./
 
-	    arm-linux-gnueabihf-gcc -c -o start.o start.S
-	    arm-linux-gnueabihf-gcc -c -o debug.o debug.S
-	    arm-linux-gnueabihf-ld -Bstatic -Tl-loader.lds -Ttext 0xf9800800 start.o debug.o -o loader
-	    arm-linux-gnueabihf-objcopy -O binary loader temp
-	    python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
+		# arm-linux-gnueabihf-gcc -c -o start.o start.S
+		# arm-linux-gnueabihf-gcc -c -o debug.o debug.S
+		# arm-linux-gnueabihf-ld -Bstatic -Tl-loader.lds -Ttext 0xf9800800 start.o debug.o -o loader
+		# arm-linux-gnueabihf-objcopy -O binary loader temp
+		# python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
 
-		sudo PTABLE=linux-8G bash -x generate_ptable.sh
-	    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
+		# sudo PTABLE=linux-8G bash -x generate_ptable.sh
+		# python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
 
 	    cp l-loader.bin ../../$uefi_dir/
 #	    cp fip.bin      ../../$uefi_dir/
@@ -995,7 +1073,8 @@ else
     elif [ x"HiKey" = x"$PLATFORM" ]; then
 	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
     else
-	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
+	    platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-$platform.dtb
     fi
 
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
@@ -1042,6 +1121,11 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
     		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
     		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
     		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
+        else
+			sed -i 's/\(CONFIG_CDROM_PKTCDVD=\)\(.*\)/\1y/' ../$kernel_dir/.config
+			sed -i 's/\(CONFIG_ISO9660_FS=\)\(.*\)/\1y/' ../$kernel_dir/.config
+			sed -i 's/\(CONFIG_BLK_DEV_SR=\)\(.*\)/\1y/' ../$kernel_dir/.config
+			sed -i 's/\(CONFIG_CHR_DEV_SG=\)\(.*\)/\1y/' ../$kernel_dir/.config
         fi
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
@@ -1123,12 +1207,7 @@ install_pkgs()
 			if [ -d "$appdir" ] && [ -f "$appdir/build.sh" ]; then
 				kdir=${PRJROOT}/$kernel_dir
 				mkdir -p $build_dir/$appdir 2>/dev/null
-				if [ ! -f $build_dir/$appdir/.built ]; then
-					$appdir/build.sh $PLATFORM $1 $2 $kdir
-					if [ x"0" = x"$?" ]; then
-						touch $build_dir/$appdir/.built
-					fi
-				fi
+				$appdir/build.sh $PLATFORM $1 $2 $kdir
 
 				for cpfile in postinstall remove
 				do
@@ -1174,7 +1253,7 @@ create_distro()
 	local rc_local_file=
 	case "$1" in
 		OpenSuse )
-			rc_local_file=rc.d/boot.local
+			rc_local_file=rc.d/after.local
 			;;
 		Fedora )
 			rc_local_file=rc.d/rc.local
@@ -1260,6 +1339,34 @@ if [ x"toolchain" = x"$INSTALL" ]; then
 	done
 fi
 
+###################################################################################
+################## Create install iso image #######################################
+###################################################################################
+if [ x"$CREATE_INST_ISOIMG" = x"yes" ] && [ ! -f $binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso ]; then
+	echo "Start to create install iso image ......"
+	if (./estuary/mkisoimg.sh --disklabel=$INSTALL_DISK_LABEL --bindir=$binary_dir --confdir=./estuary --grubdir=$build_dir/grub); then
+		echo "move ${INSTALL_DISK_LABEL}.iso to $binary_dir/$binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso ......"
+		mv ${INSTALL_DISK_LABEL}.iso $binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso
+		echo -e "\033[32mCreate install iso image successfully!\033[0m"
+	else
+		echo -e "\033[31mCreate install iso image failed!\033[0m"
+	fi
+fi
+
+###################################################################################
+################### Create usb install disk #######################################
+###################################################################################
+usb_result=0
+if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
+	install_device=$INSTALL_UDISK_DEVICE
+	echo "Start to create usb install disk ......"
+	if (./estuary/mkusbinstall.sh --disk=$install_device --disklabel=$INSTALL_DISK_LABEL --bindir=$binary_dir --confdir=./estuary); then
+		echo -e "\033[32mCreate usb install disk successfully!\033[0m"
+	else
+		echo -e "\033[31mCreate usb install disk failed!\033[0m"
+		usb_result=1
+	fi
+fi
 
 ###################################################################################
 ########################## Check and report build resutl   ########################
@@ -1369,6 +1476,22 @@ if [ x"" != x"$PLATFORM" ]; then
         if [ $build_error = 0 ]; then
     	    echo -e "\033[32mPlease follow the instructions in $doc_dir/Readme.txt to use the binaries for your purpose.\033[0m"
         fi
+    fi
+
+    if [ x"$CREATE_INST_ISOIMG" = x"yes" ]; then
+	if [ -f $binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso ]; then
+    	    echo -e "\033[32mInstall iso image ${INSTALL_DISK_LABEL}_${PLATFORM}.iso created.\033[0m"
+	else
+    	    echo -e "\033[31mFailed! File ${INSTALL_DISK_LABEL}_${PLATFORM}.iso can not be found!\033[0m"
+	fi
+    fi
+
+    if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
+        if [ $usb_result = 0]; then
+    	    echo -e "\033[32mCreate usb install disk on device INSTALL_UDISK_DEVICE.\033[0m"
+		else
+    	    echo -e "\033[31mFailed! Create usb install disk return error!\033[0m"
+		fi
     fi
 fi
 
