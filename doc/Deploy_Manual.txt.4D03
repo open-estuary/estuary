@@ -1,4 +1,4 @@
-Deploy Estuary into D02 board
+Deploy Estuary into D03 board
 
 Table of Contents:
 Introduction
@@ -23,7 +23,7 @@ Bring up System
 
 This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
 
-All following sections will take the D02 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
+All following sections will take the D03 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
  
 ### Preparation ###
 
@@ -35,7 +35,7 @@ All following sections will take the D02 board as example, other boards have the
 
 # Check the hardware board
 
-    Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d02-2/.
+    Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d03-2/.
 
 # Upgrade UEFI and trust firmware
 
@@ -43,8 +43,8 @@ All following sections will take the D02 board as example, other boards have the
 
 # Upgrade DTB file (Necessary step) 
 
-   Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
-   into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the
+   Because this dtb file is important to this D03 boards, firstly you must flash this DTB file
+   into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the
    follow commands in EBL:
    We will often do some commands in UEFI EBL shell for these methods, about how to enter it,
    please refer to UEFI_Manual.txt.
@@ -61,12 +61,12 @@ All following sections will take the D02 board as example, other boards have the
     provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
     # Write data into FLASH
     spiwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 100000
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 100000
           spiwfmem 100000 300000 100000
     
-    3. Reboot your D02 board
+    3. Reboot your D03 board
 
-    You must reboot your D02 board after above two steps, this new DTB file will be used on booting board.
+    You must reboot your D03 board after above two steps, this new DTB file will be used on booting board.
 
     Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.
           Also it is to be noted that the DTB file should not be input in the Grub config file. So if you
@@ -82,19 +82,19 @@ There are several methods to bring up system, you can select following anyone fi
     After reboot or power off, all downloaded data will be lost.
     This boot mode is just used for debugging.
 
-    Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+    Boot D03 to UEFI SHELL, and type the follow commands in EBL:
 
     1. Download Image binary file from FTP server
 
     # Download Image binary file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x80000
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 0x80000
 
     2. Download dtb file from FTP server
 
     # Download dtb file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x06000000
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x06000000
     
     3. Download rootfs file from FTP server
 
@@ -111,7 +111,7 @@ There are several methods to bring up system, you can select following anyone fi
     In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
     Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
 
-    Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+    Boot D03 to UEFI SHELL, and type the follow commands in EBL:
 
     1. Download Image binary file from FTP
     
@@ -119,7 +119,7 @@ There are several methods to bring up system, you can select following anyone fi
     provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
     # Write data into NORFLASH
     norwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 100000
+    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 100000
           norwfmem 100000 100000 1f00000
     
     2. Download rootfs file from FTP
@@ -131,7 +131,7 @@ There are several methods to bring up system, you can select following anyone fi
     e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz -a 100000
           norwfmem 100000 2000000 4000000
     
-    3. Reboot D02 and press anykey to enter UEFI Boot Menu
+    3. Reboot D03 and press anykey to enter UEFI Boot Menu
     
     4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
 
@@ -150,7 +150,7 @@ There are several methods to bring up system, you can select following anyone fi
     
     3. Select boot option "Boot Manager"->"PXE on MAC Address: " with your board's MAC address as the end.
     
-    4. After several seconds, D02 will boot by PXE automatically.
+    4. After several seconds, D03 will boot by PXE automatically.
     
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
@@ -159,13 +159,13 @@ There are several methods to bring up system, you can select following anyone fi
     In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server.
     You can use "showmount -e <server ip address>" to list the exported NFS directories on the NFS server.
 
-    D02 supports booting via NFS, you can try it as following steps:
+    D03 supports booting via NFS, you can try it as following steps:
 
     1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
 
     2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
 
-    3. Reboot D02 and press anykey to enter UEFI Boot Menu
+    3. Reboot D03 and press anykey to enter UEFI Boot Menu
 
     4. Select boot option "Boot Manager"->"PXE on MAC Address: " with your board's MAC address as the end.
 
@@ -174,7 +174,7 @@ There are several methods to bring up system, you can select following anyone fi
     In this boot mode, the UEFI will get the grub from the EFI system partition on the hard disk.
     The grub will load the grub configuration file from the EFI system partition as well.
 
-    This part will tell you how to boot D02 via hardware disk with kernel image, grub in it.
+    This part will tell you how to boot D03 via hardware disk with kernel image, grub in it.
     In my case, my hardware disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
     
     1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
@@ -198,7 +198,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     *** Preprocess when the disk can’t be identified ***
     
-        When the disk is not identified by D02, you can try the following step to process the disk. (for some specfic disk eg seagate disk made by samsung, it can be useful)
+        When the disk is not identified by D03, you can try the following step to process the disk. (for some specfic disk eg seagate disk made by samsung, it can be useful)
         
         a. Find a PC or another board which can identify this disk
         You should find a PC or another board which can identify this disk, and the system of PC or board should be linux system. For us,we can use D01 board.
@@ -220,7 +220,7 @@ There are several methods to bring up system, you can select following anyone fi
         save the change           : w
         formate EFI partition  : sudo mkfs.vfat /dev/sda1
         
-        Then this disk can be identified by D02 board.
+        Then this disk can be identified by D03 board.
     
     3. Download files and store them into hardware disk as below.
         sda1: -------EFI
@@ -229,7 +229,7 @@ There are several methods to bring up system, you can select following anyone fi
               |
               |-------------grub.cfg           //grub config file
               |
-              |-------------Image_D02          //kernel binary Image
+              |-------------Image_D03          //kernel binary Image
         sda2: Ubuntu distribution
         sda3: Fedora distribution
 
@@ -248,7 +248,7 @@ There are several methods to bring up system, you can select following anyone fi
     In this boot mode, the UEFI will get the grub from the EFI system partition on the USB disk.
     The grub will load the grub configuration file from the EFI system partition as well.
 
-    This part will tell you how to boot D02 via GRUB from USB disk. For example, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
+    This part will tell you how to boot D03 via GRUB from USB disk. For example, USB disk may be partitioned into two parts:sda1(EFI part),sda2(ubuntu release).
     1. Partition and format USB disk
     Format USB disk: mkfs -t ext4 /dev/sda
     Partition USB disk as follow:
@@ -322,7 +322,7 @@ There are several methods to bring up system, you can select following anyone fi
     In this boot mode, the UEFI will get the grub from the EFI system partition on the SAS disk.
     The grub will load the grub configuration file from the EFI system partition as well.
 
-    This part will tell you how to boot D02 via SAS disk with kernel image, grub in it.
+    This part will tell you how to boot D03 via SAS disk with kernel image, grub in it.
     In my case, my SAS disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
 
     1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
@@ -368,7 +368,7 @@ There are several methods to bring up system, you can select following anyone fi
               |
               |-------------grub.cfg           //grub config file
               |
-              |-------------Image_D02          //kernel binary Image
+              |-------------Image_D03          //kernel binary Image
         sda2: Ubuntu distribution
         sda3: Fedora distribution
 
@@ -385,9 +385,9 @@ There are several methods to bring up system, you can select following anyone fi
 # Boot via PCIE card to SATA
 
     In this boot mode, the kernel image will be loaded from NORFLASH into RAM on target board.
-    The root parameter passed to the kernel will be specified in hip05-d02.dts and it will point to the root partition on SATA disk.
+    The root parameter passed to the kernel will be specified in hip06-d03.dts and it will point to the root partition on SATA disk.
 
-    1. plug SATA disk into PCIE card connecting this D02 board by PCIE interface
+    1. plug SATA disk into PCIE card connecting this D03 board by PCIE interface
     2. Partition SATA disk in nfs evironment
     SATA disk may be partitioned into fews parts:
     +---------+-----------+--------------+------------------+
@@ -411,7 +411,7 @@ There are several methods to bring up system, you can select following anyone fi
         sda5: reserved for user
 
     3. Build the kernel
-     Modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
+     Modify hip06-d03.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
         bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
     After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "Boot via NORFLASH".
 
@@ -423,7 +423,7 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via ACPI
 
-   D02 also supports booting via ACPI, you can bring up this systerm which is
+   D03 also supports booting via ACPI, you can bring up this systerm which is
    similar with this DT mode, you must fix some point as follow:
 
    1. delete DTB file and don't burn DTB file

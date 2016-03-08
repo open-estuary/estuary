@@ -1,0 +1,62 @@
+
+Quick Deploy Estuary into D03 board
+
+Table of Contents:
+Introduction
+Quick Deploy System
+    Deploy system via USB Disk
+    Deploy system via PXE
+    
+
+### Introduction ###
+
+Above all, prepare hardware boards with SCSI disk and download Estuary source code from GitHub.
+To learn more about how to do them, please visit this web site: http://open-estuary.com/estuary-user-manual/, and then refer to ‘Get & Build Estuary yourself’.
+Note: In my case, the working directory is '~/workdir'.
+
+# Deploy system via USB Disk
+
+Then create USB installation disk and deploy Linux system into SCSI disk of target board as following steps.
+
+1. Plug USB Disk into Ubuntu 14.04 PC
+    Prepare a USB Disk with no less than 8G bytes and do following commands:
+    $cd ~/workdir/estuary
+    $sudo ./create-udisk.sh 
+
+    Afterwards, make selection according to prompt information.
+    After all these, USB intallation disk may be created successfully.
+
+2. Plug USB Disk to target board
+    Power on the target board after plugging USB disk created before, and select USB startup option in UEFI shell, and sys_setup.sh will be execute after ubuntu is started up.
+    Afterwards, make selection according to prompt information.
+    At last, the SCSI Disk of target board will be successfully deployed with the Linux system selected.
+
+3. Reboot the target board again
+    Unplug USB Disk after power off, and power on it again, then select SCSI Disk startup selection in UEFI shell, and Linux system will boot up from SCSI disk.
+
+# Deploy system via PXE
+
+1. Prepare hardware and software environment 
+    1) Firstly, connect Ubuntu PC and hardware boards with SCSI Disk to the network router, this router should be connected to the internet. Secondly, connect the serial port of target boards to Ubuntu PC, install and configure minicom, do following commands:
+    $sudo minicom
+    2) Add the mac address of hardware boards to the estuarycfg.json file.
+    Switch on hardware boards and press anykey to enter UEFI Boot Menu. Get the MAC address of boards according to 'PXE on MAC Address:', refer to "boards" format of estuarycfg.json and add one element to "boards":
+    {"mac":"01-xx-xx-xx-xx-xx-xx"}
+    xx-xx-xx-xx-xx-xx means the MAC address of hardware board.
+
+2. Automatically setup PXE deployment environment
+    Do as following steps:
+    You must disabled the DHCP server of the router.
+    $cd ~/workdir/estuary
+    $sudo ./setup_pxe.sh
+
+    Afterwards, make selection according to prompt information.
+    After all these, PXE deployment environment may be setuped successfully.
+
+3. Power on the target boards 
+    In UEFI shell, select PXE bootup selection. Afterwards, make selection according to prompt information. After this, the Linux system selected is deployed into the SCSI Disk of the target boards.
+
+4. Reboot the target boards
+    Now, you should enable the DHCP server of the router.
+    Power on again, then select SCSI Disk startup selection in UEFI shell, and Linux system will boot up from SCSI disk.
+
