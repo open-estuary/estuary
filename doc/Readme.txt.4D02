@@ -14,14 +14,14 @@ build commands(supposedly, you are in <project root> currently:
     # roll back to special version for D02
     git reset --hard
     git checkout open-estuary/master
-    git apply HwPkg/Patch/*.patch
     # build uefi
-    export LC_CTYPE=C 
-    make -C BaseTools 
-    source edksetup.sh 
-    build -a AARCH64 -b RELEASE -t ARMLINUXGCC -p HwProductsPkg/D02/Pv660D02.dsc
+    export LC_CTYPE=C
+    git submodule init
+    git submodule update
 
-    cp Build/Pv660D02/RELEASE_ARMLINUXGCC/FV/PV660D02.fd ../build/D02/binary/UEFI_D02.fd
+    uefi-tools/uefi-build.sh -c LinaroPkg/platforms.config d02
+
+    cp Build/Pv660D02/RELEASE_GCC49/FV/PV660D02.fd ../build/D02/binary/UEFI_D02.fd
     popd
 
 Then you will find *.fd in <project root>/uefi/Build and the other trust firmware binaries in <project root>/HwProductsPkg.

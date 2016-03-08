@@ -16,6 +16,7 @@ Bring up System
         Preprocess when the disk can’t be identified
     boot via USB
     boot via SAS
+    boot via PCIE card to SATA
     Boot via ACPI
 
 ### Introduction ###
@@ -49,10 +50,10 @@ All following sections will take the D02 board as example, other boards have the
    please refer to UEFI_Manual.txt.
 
     1. IP address config (Optional, you can ignore this step if DHCP works well)
-    
+    the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
     # Config board's IP address
-    ifconfig -s eth0 <IP address> <mask> <gateway>
-    e.g.: ifconfig -s eth0 192.168.1.4 255.255.255.0 192.168.1.1
+    ifconfig -s eth0 static <IP address> <mask> <gateway>
+    e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
 
     2. Download dtb file from FTP
     
@@ -132,7 +133,7 @@ There are several methods to bring up system, you can select following anyone fi
     
     3. Reboot D02 and press anykey to enter UEFI Boot Menu
     
-    4. Select "FLASH Start OS" boot option.
+    4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
 
     To get all binaries mentioned above, please refer to Readme.txt.
     
@@ -147,7 +148,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     2. Reboot and press anykey to enter UEFI Boot Menu
     
-    3. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.
+    3. Select boot option "Boot Manager"->"PXE on MAC Address: " with your board's MAC address as the end.
     
     4. After several seconds, D02 will boot by PXE automatically.
     
@@ -164,16 +165,16 @@ There are several methods to bring up system, you can select following anyone fi
 
     2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
 
-    3. Reboot D02 and press anyke to enter UEFI Boot Menu
+    3. Reboot D02 and press anykey to enter UEFI Boot Menu
 
-    4. Select boot option "PXE on MAC Address: " with your board's MAC address as the end.
+    4. Select boot option "Boot Manager"->"PXE on MAC Address: " with your board's MAC address as the end.
 
 # Boot via HD
     
     In this boot mode, the UEFI will get the grub from the EFI system partition on the hard disk.
     The grub will load the grub configuration file from the EFI system partition as well.
 
-    This part will tell you how to boot D02 via hardware disk with kernel image, dtb file, grub in it.
+    This part will tell you how to boot D02 via hardware disk with kernel image, grub in it.
     In my case, my hardware disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
     
     1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
@@ -229,8 +230,6 @@ There are several methods to bring up system, you can select following anyone fi
               |-------------grub.cfg           //grub config file
               |
               |-------------Image_D02          //kernel binary Image
-              |
-              |-------------hip05-d02.dtb      //device tree binary
         sda2: Ubuntu distribution
         sda3: Fedora distribution
 
@@ -291,8 +290,6 @@ There are several methods to bring up system, you can select following anyone fi
               |-------------grub.cfg           //grub config file
               |
               |-------------Image              //kernel binary Image
-              |
-              |-------------hip05-d02.dtb      //device tree binary
         sda2: ubuntu distribution
 
     3. modify grub config file
@@ -312,23 +309,87 @@ There are several methods to bring up system, you can select following anyone fi
         linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
     }
 
-    Note: 
-    1. XXX means the PARTUUID of that partition which your linux distribution is located in. 
-    2. If you want to use another linux distribution, please refer above steps.
+	    Note:
+	    1. XXX means the PARTUUID of that partition which your linux distribution is located in. 
+	    2. If you want to use another linux distribution, please refer above steps.
 
-    4. Reboot and enter UEFI menu
-    5. Select boot from USB disk
+    4. Reboot and press any key into enter UEFI menu
+    5. Select "Boot Manager"-> "USB disk" boot option
     6. select the USB selection of grub boot menu
 
 # Boot via SAS
 
-    In this boot mode, the kernel image and dtb file will be loaded from NORFLASH into RAM on target board.
-    The root parameter passed to the kernel will be specified in hip05-d02.dts and it will point to the root partition on SAS hard disk.
+    In this boot mode, the UEFI will get the grub from the EFI system partition on the SAS disk.
+    The grub will load the grub configuration file from the EFI system partition as well.
 
-    So far, D02 board still don't support boot from SAS disk. Therefore, the temporary solution is adopted as follows.
+    This part will tell you how to boot D02 via SAS disk with kernel image, grub in it.
+    In my case, my SAS disk will be partitioned into 3 parts: sda1(EFI part),sda2(Ubuntu rootfs),sda3(Fedora release).
 
-    1. Partition SAS disk in nfs evironment
-    SAS disk may be partitioned into fews parts:
+    1. Boot by NORFLASH, PXE or NFS firstly according above descriptions.
+
+    2. Part and format SAS disk
+
+    Format SAS disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
+    Part SAS disk with "sudo fdisk /dev/sda" as follow:
+
+    +---------+-----------+--------------+------------------+
+    | Name    |   Size    |    Type      |   Tag            |
+    +---------+-----------+--------------+------------------+
+    | sda1    |   200M    |  EFI system  |   EFI            |
+    +---------+-----------+--------------+------------------+
+    | sda2    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+    | sda3    |   10G     |    ext4      | linux filesystem |
+    +---------+-----------+--------------+------------------+
+
+    Note: EFI partition must be a fat filesystem, so you should format sda1 with “sudo mkfs.vfat /dev/sda1″.
+
+	Use tool fdisk to process this disk
+
+        format the disk firstly:
+                            sudo mkfs.ext4 /dev/sda
+        add a gpt to this disk :
+                            fdisk /dev/sda
+                            g-------add a gpt partition
+        add some EFI partition :
+                            n-------add a partition
+                            1-------the number of partition
+                            +200M---------size of partition
+                            t-------change the type of partition
+                            EFI system
+        add some anther partition  ...
+        save the change           : w
+        formate EFI partition  : sudo mkfs.vfat /dev/sda1
+
+    3. Download files and store them into SAS disk as below.
+        sda1: -------EFI
+              |       |
+              |       GRUB2------grubaa64.efi  //grub binary file
+              |
+              |-------------grub.cfg           //grub config file
+              |
+              |-------------Image_D02          //kernel binary Image
+        sda2: Ubuntu distribution
+        sda3: Fedora distribution
+
+    To get kernel image and dtb file, please refer to Readme.txt.
+    To get and config grub and grub.cfg, please refer to Grub_Manual.txt.
+    To get different distributions, please refer to Distributions_Guider.txt.
+
+    4. Reboot and press any key into enter UEFI menu
+
+    5. Select "Boot Manager"->"SAS disk" boot option and press "Enter"
+
+    6. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+
+# Boot via PCIE card to SATA
+
+    In this boot mode, the kernel image will be loaded from NORFLASH into RAM on target board.
+    The root parameter passed to the kernel will be specified in hip05-d02.dts and it will point to the root partition on SATA disk.
+
+    1. plug SATA disk into PCIE card connecting this D02 board by PCIE interface
+    2. Partition SATA disk in nfs evironment
+    SATA disk may be partitioned into fews parts:
     +---------+-----------+--------------+------------------+
     | Name    |   Size    |    Type      |   Tag            |
     +---------+-----------+--------------+------------------+
@@ -349,19 +410,16 @@ There are several methods to bring up system, you can select following anyone fi
         sda4: miniDistribution
         sda5: reserved for user
 
-    2. Build the kernel
-    (1) Modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
+    3. Build the kernel
+     Modify hip05-d02.dts file at arch/arm64/boot/dts/hisilicon/ directory as follow:
         bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
-    (2) Modify defconfig file at kernel/arch/arm64/configs directory as follow:
-        CONFIG_SCSI_HISI_SAS=y
-        CONFIG_ATA=y
     After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "Boot via NORFLASH".
 
-    3. start up system
-    Please plug this SAS disk into D02 board.
-    Note: At this time, Other Disk (eg: SATA\SAS disk, USB disk) can not connect to D02 board.  
-    (1) Boot and enter UEFI menu
-    (2) Select boot from FLASH Start OS
+    NOTE: above this grub.cfg it will boot ubuntu distribution (sda2), if you want to boot other distribution, you should fix "root=/dev/sdaX" iterm.
+
+    4. Reboot and press any key into enter UEFI menu
+
+    5. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
 
 # Boot via ACPI
 
