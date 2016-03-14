@@ -855,14 +855,14 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/bl1.bin ./
 	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/fip.bin ./
 
-		# arm-linux-gnueabihf-gcc -c -o start.o start.S
-		# arm-linux-gnueabihf-gcc -c -o debug.o debug.S
-		# arm-linux-gnueabihf-ld -Bstatic -Tl-loader.lds -Ttext 0xf9800800 start.o debug.o -o loader
-		# arm-linux-gnueabihf-objcopy -O binary loader temp
-		# python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
+		arm-linux-gnueabihf-gcc -c -o start.o start.S
+		arm-linux-gnueabihf-gcc -c -o debug.o debug.S
+		arm-linux-gnueabihf-ld -Bstatic -Tl-loader.lds -Ttext 0xf9800800 start.o debug.o -o loader
+		arm-linux-gnueabihf-objcopy -O binary loader temp
+		python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
 
-		# sudo PTABLE=linux-8G bash -x generate_ptable.sh
-		# python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
+		sudo PTABLE=linux-8G bash -x generate_ptable.sh
+		python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
 
 	    cp l-loader.bin ../../$uefi_dir/
 #	    cp fip.bin      ../../$uefi_dir/
@@ -1072,9 +1072,10 @@ else
         DTB_BIN=""
     elif [ x"HiKey" = x"$PLATFORM" ]; then
 	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
+    elif [ x"D02" = x"$PLATFORM" ]; then
+            DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-d02.dtb
     else
-	    platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
-	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip05-$platform.dtb
+	    DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip06-d03.dtb
     fi
 
 	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
@@ -1487,7 +1488,7 @@ if [ x"" != x"$PLATFORM" ]; then
     fi
 
     if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
-        if [ $usb_result = 0]; then
+        if [ $usb_result = 0 ]; then
     	    echo -e "\033[32mCreate usb install disk on device INSTALL_UDISK_DEVICE.\033[0m"
 		else
     	    echo -e "\033[31mFailed! Create usb install disk return error!\033[0m"

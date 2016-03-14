@@ -22,9 +22,10 @@
 {"name":"docker","install":"no"},
 {"name":"mysql","install":"yes"},
 {"name":"odp","install":"yes"}
+],
 
 "setup":[
-{"type":"iso","install":"no"},
+{"type":"iso","install":"yes"},
 {"type":"usb","install":"no","device":"/dev/sdd"}
 ]
 
