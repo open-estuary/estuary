@@ -9,34 +9,63 @@ Now use the perf tool installed in /usr/lib/linux-tools-3.19.0-23/perf
 
 $# /usr/lib/linux-tools-3.19.0-23/perf stat -e L1-dcache-stores ls -l
 
-Run perf to know LLC event status.
-The 22 LLC events are added as RAW events starting from r300 to r315
+The LLC and MN are added as RAW events.
+The RAW event encoding format is as below
+<die ID(4 bit)><Module ID(4 bit)><Bank(4 bit)><event code(12 bit)>
 
-LLC_READ_ALLOCATE 	= r300
-LLC_WRITE_ALLOCATE 	= r301
-LLC_READ_NOALLOCATE	= r302
-LLC_WRITE_NOALLOCATE	= r303
-LLC_READ_HIT		= r304
-LLC_WRITE_HIT		= r305
-LLC_CMO_REQUEST         = r306
-LLC_COPYBACK_REQ        = r307
-LLC_HCCS_SNOOP_REQ      = r308
-LLC_SMMU_REQ            = r309
-LLC_EXCL_SUCCESS        = r30A
-LLC_EXCL_FAIL           = r30B
-LLC_CACHELINE_OFLOW     = r30C
-LLC_RECV_ERR            = r30D
-LLC_RECV_PREFETCH       = r30E
-LLC_RETRY_REQ           = r30F
-LLC_DGRAM_2B_ECC               = r310
-LLC_TGRAM_2B_ECC               = r311
-LLC_SPECULATE_SNOOP            = r312
-LLC_SPECULATE_SNOOP_SUCCESS    = r313
-LLC_TGRAM_1B_ECC               = r314
-LLC_DGRAM_1B_ECC               = r315
+Ex: For LLC_READ_ALLOCATE event for TotemC will be 0x24f300, where
+0x2 is DieID for TotemC, 0x4 is the ModuleID of LLC, 0xf is for all
+LLC banks, 0x300 is the event code for LLC_READ_ALLOCATE
 
-# To count LLC_WRITE_NOALLOCATE and LLC_READ_ALLOCATE
-$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r303 -e r300 ls -l
+The DieID for the CPU Die are as below
+SOC0_TOTEMA = 0x1 /* TOTEM A in Socket 0 */
+SOC0_TOTEMC = 0x2
+SOC0_TOTEMB = 0x3
+SOC1_TOTEMA = 0x4
+SOC1_TOTEMC = 0x5
+SOC1_TOTEMB = 0x6
+
+The 22 LLC events are added as RAW events starting from 0x300 to 0x315
+and the event codes for the 9 MN events are also listed below
+
+LLC_READ_ALLOCATE 		= 0x300
+LLC_WRITE_ALLOCATE 		= 0x301
+LLC_READ_NOALLOCATE		= 0x302
+LLC_WRITE_NOALLOCATE		= 0x303
+LLC_READ_HIT			= 0x304
+LLC_WRITE_HIT			= 0x305
+LLC_CMO_REQUEST			= 0x306
+LLC_COPYBACK_REQ		= 0x307
+LLC_HCCS_SNOOP_REQ		= 0x308
+LLC_SMMU_REQ			= 0x309
+LLC_EXCL_SUCCESS		= 0x30A
+LLC_EXCL_FAIL			= 0x30B
+LLC_CACHELINE_OFLOW		= 0x30C
+LLC_RECV_ERR			= 0x30D
+LLC_RECV_PREFETCH		= 0x30E
+LLC_RETRY_REQ			= 0x30F
+LLC_DGRAM_2B_ECC		= 0x310
+LLC_TGRAM_2B_ECC		= 0x311
+LLC_SPECULATE_SNOOP		= 0x312
+LLC_SPECULATE_SNOOP_SUCCESS	= 0x313
+LLC_TGRAM_1B_ECC		= 0x314
+LLC_DGRAM_1B_ECC		= 0x315
+
+MN_EO_BARR_REQ			= 0x316
+MN_EC_BARR_REQ			= 0x317
+MN_DVM_OP_REQ			= 0x318
+MN_DVM_SYNC_REQ			= 0x319
+MN_READ_REQ			= 0x31A
+MN_WRITE_REQ			= 0x31B
+MN_COPYBK_REQ			= 0x31C
+MN_OTHER_REQ			= 0x31D
+MN_RETRY_REQ			= 0x31E
+
+# To count LLC_WRITE_NOALLOCATE and LLC_READ_ALLOCATE for TotemC
+$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r24f303 -e r24f300 ls -l
+
+# To count LLC_WRITE_NOALLOCATE and LLC_READ_ALLOCATE for TotemA
+$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r14f303 -e r14f300 ls -l
 
 # To count LLC_READ_HIT and LLC_WRITE_HIT for a process with pid
-$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r304,r305 -p <pid>
+$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r24f304,r24f305 -p <pid>
