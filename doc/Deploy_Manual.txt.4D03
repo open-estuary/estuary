@@ -9,7 +9,6 @@ Preparation
     Upgrade DTB file
 Bring up System
     Boot via ESL
-    Boot via NORFLASH
     Boot via PXE
     Boot via NFS
     Boot via HD
@@ -106,37 +105,6 @@ There are several methods to bring up system, you can select following anyone fi
     
     Type "exit" to exit EBL. Select "ESL Start OS" menu to start operator system.
 
-# Boot via NORFLASH
-
-    In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
-    Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
-
-    Boot D03 to UEFI SHELL, and type the follow commands in EBL:
-
-    1. Download Image binary file from FTP
-    
-    # Download file from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
-    # Write data into NORFLASH
-    norwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 100000
-          norwfmem 100000 100000 1f00000
-    
-    2. Download rootfs file from FTP
-    
-    # Download file from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image> -a <download target address>
-    # Write data into NORFLASH
-    norwfmem <source address> <target address> <data length>
-    e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs.cpio.gz -a 100000
-          norwfmem 100000 2000000 4000000
-    
-    3. Reboot D03 and press anykey to enter UEFI Boot Menu
-    
-    4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
-
-    To get all binaries mentioned above, please refer to Readme.txt.
-    
 # Boot via PXE
 
     In this boot mode, the UEFI will get grub from PXE server.
