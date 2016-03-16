@@ -15,20 +15,20 @@ description: l-loader.bin - used to switch from aarch32 to aarch64 and boot, fip
 target: <project root>/build/HiKey/binary/
 source: <project root>/uefi
 build commands(supposedly, you are in <project root> currently:
-    export ARCH=
+    BUILD_OPTION=DEBUG
+    BUILD_PATH=${PWD}
+    EDK2_DIR=${BUILD_PATH}
+    EDK2_OUTPUT_DIR=${EDK2_DIR}/Build/HiKey/${BUILD_OPTION}_${AARCH64_TOOLCHAIN}
+
     export AARCH64_TOOLCHAIN=GCC49
-    export EDK2_DIR=${PWD}/uefi
-    export UEFI_TOOLS_DIR=${PWD}/uefi/uefi-tools
+    export UEFI_TOOLS_DIR=${BUILD_PATH}/uefi-tools
+    export EDK2_DIR
 
-    cd ${EDK2_DIR}
+    ${UEFI_TOOLS_DIR}/uefi-build.sh -b ${BUILD_OPTION} -a ./arm-trusted-firmware hikey
 
-    git reset --hard [commit id]
-    git am --keep-cr HisiPkg/HiKeyPkg/Patches/*.patch
-    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
-
-    cd l-loader
-    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/bl1.bin ./
-    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/fip.bin ./
+    cd ${BUILD_PATH}/l-loader
+    cp ${EDK2_OUTPUT_DIR}/FV/bl1.bin ./
+    cp ${EDK2_OUTPUT_DIR}/FV/fip.bin ./
 
     arm-linux-gnueabihf-gcc -c -o start.o start.S
     arm-linux-gnueabihf-gcc -c -o debug.o debug.S
@@ -36,8 +36,8 @@ build commands(supposedly, you are in <project root> currently:
     arm-linux-gnueabihf-objcopy -O binary loader temp
     python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
 
-    sudo PTABLE=linux bash -x generate_ptable.sh
-    python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
+    sudo PTABLE=linux-8g bash -x generate_ptable.sh
+    python gen_loader.py -o ptable.img --img_prm_ptable=prm_ptable.img --img_sec_ptable=sec_ptable.img
 
     cp l-loader.bin build/HiKey/binary/
     cp fip.bin      build/HiKey/binary/
