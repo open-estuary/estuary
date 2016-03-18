@@ -4,6 +4,8 @@
 #   ./build.sh -h:                  to get help information for this script
 #   ./build.sh -p D02 -d Ubuntu:    to build Ubuntu distribution for D02 platform
 #   ./build.sh -f estuarycfg.json:  to build target system according to estuarycfg.json
+#   ./build.sh -p D02 -d Ubuntu -s usb:/dev/sdb:    to build Ubuntu distribution for D02 platform and create install disk on usb device /dev/sdb
+#   ./build.sh -p D02 -d Ubuntu -s iso:Estuary.iso: to build Ubuntu distribution for D02 platform and create install iso image Estuary.iso
 #Author: Justin Zhao
 #Date: August 7, 2015
 
@@ -36,11 +38,9 @@ PATH_UBUNTU32=default
 
 DEPRECATED_PARAMETER=0
 
-CREATE_INSTALL_MEDIUM=
-CREATE_INST_ISOIMG=no
-CREATE_INST_UDISK=no
-INSTALL_UDISK_DEVICE=
-INSTALL_DISK_LABEL=Estuary
+DEFAULT_ISO_FILE="Estuary.iso"
+INSTALL_ISO_IMG=
+INSTALL_UDISK_DEV=
 
 ###################################################################################
 ############################# Print help information       ########################
@@ -55,7 +55,8 @@ usage()
 	echo -n ${distros[*]} | sed "s/ / | /g"
 	echo -n " ] [ -i "
 	echo -n ${installs[*]} | sed "s/ / | /g"
-	echo " ] "
+	echo -n " ] "
+	echo "[ -s usb:/dev/sdx ] [ -s iso[:Estuary.iso]]"
 
 	echo -e "\n -h,--help: to print this message"
 	echo " -f,--file: the config json file for Estuary building, all other parameters will be disabled if -f is set"
@@ -67,7 +68,8 @@ usage()
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
 	echo "		*for toolchain, to install ARM cross compiler"
-	echo " -o: create install disk or isoimage"
+	echo " -s,--setup: to create install usb disk or iso image"
+	echo "		*only support D02, D03"
 	echo " --device: specify which usb disk to install"
 	echo " -v,--version: to print the version of estuary project"
 }
@@ -135,30 +137,27 @@ check_platform()
 }
 
 ###################################################################################
-############################# Check install parameter ########################
+############################# Check setup parameter ########################
 ###################################################################################
-check_install_param()
+check_setup_param()
 {
-	if [ x"$CREATE_INSTALL_MEDIUM" = x"yes" ]; then
-		if [ x"$INSTALL_UDISK_DEVICE" = x"" ]; then
-			CREATE_INST_ISOIMG=yes
-		else
-			CREATE_INST_UDISK=yes
+	if [ x"$INSTALL_ISO_IMG" != x"" ]; then
+		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
+			return 1
 		fi
 	fi
 
-	if [[ x"$PLATFORM" = x"D02" || x"$PLATFORM" = x"D03" ]]; then
-		if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
-			if [ x"$INSTALL_UDISK_DEVICE" = x"" ] ||  [ ! -b "$INSTALL_UDISK_DEVICE" ]; then
-				return 1
-			fi
+	if [ x"$INSTALL_UDISK_DEV" != x"" ]; then
+		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
+			return 1
 		fi
-	elif [[ x"$CREATE_INST_ISOIMG" = x"yes" || x"$CREATE_INST_UDISK" = x"yes" || x"$CREATE_INSTALL_MEDIUM" = x"yes" ]]; then
-		echo "Error! Unsupport create install image or disk for platfrom $PLATFORM!"
-		return 1
+		
+		if [ ! -b "$INSTALL_UDISK_DEV" ]; then
+			echo "Error! Device $INSTALL_UDISK_DEV not exist!"
+			return 1
+		fi
 	fi
-	
-	
+
 	return 0
 }
 
@@ -214,6 +213,46 @@ check_init()
     fi
 
     return 0
+}
+
+###################################################################################
+########################### Get setup iso/usb args ################################
+###################################################################################
+get_setup_args()
+{
+	local arg=$1
+	local setup_type=`echo "$arg" | awk -F ':' '{print $1}'`
+	local output_dev=`echo "$arg" | awk -F ':' '{print $2}'`
+	if [ x"iso" = x"$setup_type" ]; then
+		if [ x"$output_dev" = x"" ]; then
+			INSTALL_ISO_IMG=$output_dev
+		else
+			INSTALL_ISO_IMG=$DEFAULT_ISO_FILE
+		fi
+	else
+		if [ x"" != x"$output_dev" ]; then
+			INSTALL_UDISK_DEV=$output_dev
+		else
+			return 1
+		fi
+	fi
+
+	return 0
+}
+
+###################################################################################
+####################### Get first usb storage device ##############################
+###################################################################################
+get_1st_usb_storage()
+{
+	local root_dev=$(mount | grep " / " | grep  -Po "(/dev/sd[^ ]*)")
+	if [ x"" = x"$root_dev" ]; then
+		root_dev="/dev/sdx"
+	fi
+	
+	local usb_devs=()
+	read -a usb_devs <<< $(sudo lshw | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | grep -v $root_dev | grep -Po "(/dev/sd.*)" | sort)
+	echo ${usb_devs[0]}
 }
 
 ###################################################################################
@@ -370,10 +409,21 @@ parse_cfg()
 		if [ x"yes" = x"$install" ]; then
 			install_type=`jq -r ".setup[$idx].type" $CFGFILE`
 			if [ x"iso" = x"$install_type" ]; then
-				CREATE_INST_ISOIMG=yes
+				INSTALL_ISO_IMG=$DEFAULT_ISO_FILE
+				iso_image=`jq -r ".setup[$idx].name" $CFGFILE`
+				if [ x"null" != x"$iso_image" ]; then
+					INSTALL_ISO_IMG=$iso_image
+				fi
 			else
-				CREATE_INST_UDISK=yes
-				INSTALL_UDISK_DEVICE=`jq -r ".setup[$idx].device" $CFGFILE`
+				INSTALL_UDISK_DEV=`jq -r ".setup[$idx].device" $CFGFILE`
+				if [ ! -b "$INSTALL_UDISK_DEV" ]; then
+					INSTALL_UDISK_DEV=`get_1st_usb_storage`
+				fi
+				
+				if [ x"$INSTALL_UDISK_DEV" = x"" ]; then
+					INSTALL_UDISK_DEV="/dev/sdx"
+					echo "Error! Can't find usb storage disk!"
+				fi
 			fi
 		fi
 		let idx=$idx+1
@@ -423,14 +473,10 @@ while [ x"$1" != x"" ]; do
 			echo "Install: $DISTRO"
             break
 			;;
-		"-o")
-			CREATE_INSTALL_MEDIUM=yes
+		"-s" | "--setup" )
 			shift
-			;;
-		"--device")
+			get_setup_args $1 || exit 1
 			shift
-			INSTALL_UDISK_DEVICE=$1
-			echo "udisk device: $1"
 			;;
 		* )
 			echo "unknown arg $1"
@@ -464,7 +510,7 @@ if [ x"$PLATFORM" = x"" -a x"$DISTRO" = x"" -a x"$INSTALL" = x"" ]; then
 fi
 
 # Check if the install parameters are correct.
-if !(check_install_param); then
+if !(check_setup_param); then
 	exit 1
 fi
 
@@ -1343,11 +1389,11 @@ fi
 ###################################################################################
 ################## Create install iso image #######################################
 ###################################################################################
-if [ x"$CREATE_INST_ISOIMG" = x"yes" ] && [ ! -f $binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso ]; then
+if [ x"$INSTALL_ISO_IMG" != x"" ] && [ ! -f $binary_dir/${INSTALL_ISO_IMG} ]; then
 	echo "Start to create install iso image ......"
-	if (./estuary/mkisoimg.sh --disklabel=$INSTALL_DISK_LABEL --bindir=$binary_dir --confdir=./estuary --grubdir=$build_dir/grub); then
-		echo "move ${INSTALL_DISK_LABEL}.iso to $binary_dir/$binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso ......"
-		mv ${INSTALL_DISK_LABEL}.iso $binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso
+	if (./estuary/mkisoimg.sh --disklabel=Estuary --bindir=$binary_dir --confdir=./estuary --grubdir=$build_dir/grub); then
+		echo "move $INSTALL_ISO_IMG to $binary_dir/$INSTALL_ISO_IMG ......"
+		mv Estuary.iso $binary_dir/${INSTALL_ISO_IMG}
 		echo -e "\033[32mCreate install iso image successfully!\033[0m"
 	else
 		echo -e "\033[31mCreate install iso image failed!\033[0m"
@@ -1358,10 +1404,10 @@ fi
 ################### Create usb install disk #######################################
 ###################################################################################
 usb_result=0
-if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
-	install_device=$INSTALL_UDISK_DEVICE
+if [ x"$INSTALL_UDISK_DEV" != x"" ]; then
+	install_device=$INSTALL_UDISK_DEV
 	echo "Start to create usb install disk ......"
-	if (./estuary/mkusbinstall.sh --disk=$install_device --disklabel=$INSTALL_DISK_LABEL --bindir=$binary_dir --confdir=./estuary); then
+	if (./estuary/mkusbinstall.sh --disk=$install_device --disklabel=Estuary --bindir=$binary_dir --confdir=./estuary); then
 		echo -e "\033[32mCreate usb install disk successfully!\033[0m"
 	else
 		echo -e "\033[31mCreate usb install disk failed!\033[0m"
@@ -1479,15 +1525,15 @@ if [ x"" != x"$PLATFORM" ]; then
         fi
     fi
 
-    if [ x"$CREATE_INST_ISOIMG" = x"yes" ]; then
-	if [ -f $binary_dir/${INSTALL_DISK_LABEL}_${PLATFORM}.iso ]; then
-    	    echo -e "\033[32mInstall iso image ${INSTALL_DISK_LABEL}_${PLATFORM}.iso created.\033[0m"
+    if [ x"$INSTALL_ISO_IMG" != x"" ]; then
+	if [ -f $binary_dir/${INSTALL_ISO_IMG} ]; then
+    	    echo -e "\033[32mInstall iso image ${INSTALL_ISO_IMG} created.\033[0m"
 	else
-    	    echo -e "\033[31mFailed! File ${INSTALL_DISK_LABEL}_${PLATFORM}.iso can not be found!\033[0m"
+    	    echo -e "\033[31mFailed! File ${INSTALL_ISO_IMG} can not be found!\033[0m"
 	fi
     fi
 
-    if [ x"$CREATE_INST_UDISK" = x"yes" ]; then
+    if [ x"$INSTALL_UDISK_DEV" = x"yes" ]; then
         if [ $usb_result = 0 ]; then
     	    echo -e "\033[32mCreate usb install disk on device INSTALL_UDISK_DEVICE.\033[0m"
 		else

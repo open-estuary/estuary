@@ -9,6 +9,7 @@ CONF_DIR=
 DISK=
 BOOT_PARTITION_SIZE=200
 
+PLATFORM=
 WORKSPACE="Workspace"
 
 ###################################################################################
@@ -176,6 +177,15 @@ sudo rm -rf rootfs
 ###################################################################################
 # Create grub.cfg
 ###################################################################################
+PLATFORM=`jq -r ".system.platform" ./estuarycfg.json`
+platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
+
+if [ x"D02" = x"$PLATFORM" ]; then
+	cmd_line="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+else
+	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8"
+fi
+
 Image="`ls Image*`"
 Dtb="`ls hip*.dtb`"
 Initrd="`ls initrd*.gz`"
@@ -189,11 +199,11 @@ cat > grub.cfg << EOF
 set timeout=3
 
 # By default, boot the Euler/Linux
-set default=d02_minilinux
+set default=${platform}_minilinux
 
 # Booting from PXE with mini rootfs
-menuentry "D02 minilinux" --id d02_minilinux {
-    linux /$Image rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+menuentry "${PLATFORM} minilinux" --id ${platform}_minilinux {
+    linux /$Image $cmd_line
     initrd /$Initrd
     devicetree /$Dtb
 }
@@ -203,8 +213,8 @@ EOF
 ###################################################################################
 # Create EFI System
 ###################################################################################
-mkdir -p EFI/GRUB2/
-cp grubaa64.efi EFI/GRUB2/
+mkdir -p EFI/BOOT/
+cp grubaa64.efi EFI/BOOT/BOOTAA64.EFI
 
 sudo mount ${DISK}1 /mnt/
 sudo cp -r EFI /mnt/
@@ -226,4 +236,6 @@ sudo umount ${DISK}2
 sudo rm -rf $WORKSPACE 2>/dev/null
 echo "Write to USB disk successful!"
 echo ""
+
+exit 0
 
