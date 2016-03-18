@@ -119,11 +119,10 @@ When most users get HiKey board first, they want to reload the all system image 
 	$ dd if=/dev/zero of=boot-fat.uefi.img bs=512 count=131072
 	$ sudo mkfs.fat -n "BOOT IMG" boot-fat.uefi.img
 	$ sudo mount -o loop,rw,sync boot-fat.uefi.img boot-fat
-	$ sudo mkdir -p boot-fat/EFI/BOOT
 	$ sudo cp Image_HiKey hi6220-hikey.dtb boot-fat/ || true
-	$ sudo cp grubaa64.efi grub.cfg boot-fat/EFI/BOOT || true
-	$ sudo cp mini-rootfs.cpio.gz boot-fat/mini-rootfs.cpio.gz || true
-	$ sudo cp AndroidFastbootApp.efi boot-fat/EFI/BOOT/fastboot.efi
+	$ sudo cp grubaa64.efi grub.cfg boot-fat/ || true
+	$ sudo cp mini-rootfs-arm64.cpio.gz boot-fat/mini-rootfs.cpio.gz || true
+	$ sudo cp AndroidFastbootApp.efi boot-fat/fastboot.efi
 	$ sudo umount boot-fat
 	$ rm -rf boot-fat
 
