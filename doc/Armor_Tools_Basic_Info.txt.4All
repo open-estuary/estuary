@@ -6,8 +6,8 @@ This document presents the basic information of the supported Armor tools.
 List of Tools
 =============
 
-1) Perf integrated with LLC
-a) Integrated LLC statistics registers access via perf, including DDR bandwidth information. 
+1) Perf integrated with LLC, MN and DDR
+a) Integrated LLC statistics registers access via perf, including DDR counter information. 
 b) Support counter overflow interrupt support for LLC counters. 
 c) Register Read/Get interface from Linux Kernel for LLC and Bus Registers for P660.
 d) LLC statistics registers integration to perf for P660.
