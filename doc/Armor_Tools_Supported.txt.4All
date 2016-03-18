@@ -8,7 +8,7 @@ List of supported Tools in Armor
 
 Ubuntu 
 ======
-1) Perf integrated with LLC
+1) Perf integrated with LLC, MN and DDR
    version - 3.19.8
 2) strace - trace system calls and signals
    version - 4.8
