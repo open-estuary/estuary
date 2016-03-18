@@ -145,8 +145,8 @@ echo "Install grub and kernel to $BOOT_DEV ......"
 pushd /scratch
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
-mkdir -p /boot/EFI/GRUB2/
-cp grub*.efi /boot/EFI/GRUB2/
+mkdir -p /boot/EFI/BOOT/
+cp grub*.efi /boot/EFI/BOOT/BOOTAA64.EFI
 cp Image* /boot/
 cp hip*.dtb /boot/
 
@@ -220,6 +220,14 @@ sleep 1s
 # Update grub configuration file
 ###################################################################################
 echo "Update grub configuration file ......"
+PLATFORM=`jq -r ".system.platform" $INSTALL_CFG`
+platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
+
+if [ x"D02" = x"$PLATFORM" ]; then
+	cmd_line="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+else
+	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8"
+fi
 
 boot_dev_info=`blkid -s UUID $BOOT_DEV 2>/dev/null | grep -o "UUID=.*" | sed 's/\"//g'`
 boot_dev_uuid=`expr "${boot_dev_info}" : '[^=]*=\(.*\)'`
@@ -239,7 +247,7 @@ do
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
-	linux_arg="/$Image rdinit=/init root=$root_dev_info rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
 	device_tree_arg="/$Dtb"
 
 	distro_name=${INSTALL_DISTRO[$index]}
@@ -247,7 +255,7 @@ do
 
 cat >> /boot/grub.cfg << EOF
 # Booting from SATA with $distro_name rootfs
-menuentry "D02 $distro_name SATA" --id d02_${distro_name}_sata {
+menuentry "${PLATFORM} $distro_name SATA" --id ${platform}_${distro_name}_sata {
     set root=(hd0,gpt1)
     search --no-floppy --fs-uuid --set=root $boot_dev_uuid
     linux $linux_arg
@@ -259,7 +267,7 @@ EOF
 done
 
 # Set the first distribution to default
-default_menuentry_id="d02_""${INSTALL_DISTRO[0]}""_sata"
+default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}""_sata"
 sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub.cfg
 
 echo "Update grub configuration file done!"
