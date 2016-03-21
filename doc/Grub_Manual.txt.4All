@@ -30,6 +30,7 @@ You should change them acoording to your real local environment.
     
     # Booting from eMMC with mini rootfs
     menuentry "Hikey minilinux eMMC" --id HiKey_minilinux_eMMC {
+        set root=(hd0,gpt6)
 	linux /Image_Hikey rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime
         initrd /mini-rootfs.cpio.gz
         devicetree /hi6220-hikey.dtb
@@ -37,17 +38,20 @@ You should change them acoording to your real local environment.
     
     # Booting from eMMC with Ubuntu
     menuentry "Hikey Ubuntu eMMC" --id HiKey_Ubuntu_eMMC {
+        set root=(hd0,gpt6)
 	linux /Image_Hikey rdinit=/init console=tty0 console=ttyAMA3,115200 root=/dev/mmcblk0p7 rootwait rw loglevel=8 efi=noruntime
         devicetree /hi6220-hikey.dtb
     }
     
     # Booting from SD card with Ubuntu
     menuentry "Hikey Ubuntu SD card" --id HiKey_Ubuntu_SD {
+        set root=(hd0,gpt6)
 	linux /Image_Hikey rdinit=/init console=tty0 console=ttyAMA3,115200 root=/dev/mmcblk1p1 rootwait rw loglevel=8 efi=noruntime
         devicetree /hi6220-hikey.dtb
     }
 
     menuentry 'HiKey Fastboot mode' {
+        set root=(hd0,gpt6)
         chainloader (hd0,gpt6)/fastboot.efi
     }    
 
