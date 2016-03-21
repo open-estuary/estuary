@@ -895,11 +895,11 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		git checkout open-estuary/master
 		git submodule init
 		git submodule update
-	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b RELEASE -a arm-trusted-firmware hikey
+	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b DEBUG -a arm-trusted-firmware hikey
 
 	    cd l-loader
-	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/bl1.bin ./
-	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/FV/fip.bin ./
+	    cp ${EDK2_DIR}/Build/HiKey/DEBUG_GCC49/FV/bl1.bin ./
+	    cp ${EDK2_DIR}/Build/HiKey/DEBUG_GCC49/FV/fip.bin ./
 
 		arm-linux-gnueabihf-gcc -c -o start.o start.S
 		arm-linux-gnueabihf-gcc -c -o debug.o debug.S
@@ -907,13 +907,13 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		arm-linux-gnueabihf-objcopy -O binary loader temp
 		python gen_loader.py -o l-loader.bin --img_loader=temp --img_bl1=bl1.bin
 
-		sudo PTABLE=linux-8G bash -x generate_ptable.sh
-		python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img
+		sudo PTABLE=linux-8g bash -x generate_ptable.sh
+		python gen_loader.py -o ptable-linux.img --img_prm_ptable=prm_ptable.img --img_sec_ptable=sec_ptable.img
 
 	    cp l-loader.bin ../../$uefi_dir/
-#	    cp fip.bin      ../../$uefi_dir/
+	    cp fip.bin      ../../$uefi_dir/
 	    cp ptable-linux.img ../../$uefi_dir/
-	    cp ${EDK2_DIR}/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi ../../$uefi_dir/
+	    cp ${EDK2_DIR}/Build/HiKey/DEBUG_GCC49/AARCH64/AndroidFastbootApp.efi ../../$uefi_dir/
 		cd ..
 		# roll back to special version for D02
     	popd
