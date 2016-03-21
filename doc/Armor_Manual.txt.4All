@@ -27,6 +27,7 @@ Ubuntu 15.04 ARM64
 Fedora 22 ARM64
 OpenSuse 20150813 Tumbleweed ARM64
 Debian Jessie 8.2 ARM64
+CentOS Linux release 7.2.1511 (AltArch)
  
 Installation
 ============
@@ -35,8 +36,9 @@ Installation
 2. On first time bootup, user must run update commands before try install or run any Armor tool.   
    Ubuntu: run 'apt-get -y update' command.
    Fedora: run 'dnf -y update' command.
-   OpenSuse: run 'zypper -y update' command.i
+   OpenSuse: run 'zypper -y update' command.
    Debian: run 'apt-get -y update' and 'apt-get install -f -y' commands. 
+   CentOS: run 'yum -y update' command.
 
 3. On target board, Run 'armor_utility', which will provide information of the supported Armor tools, installation status and how to install on the distribution if it is not already present.   
 

@@ -335,6 +335,88 @@ Debian
     Sample scripts are available online.
 43) packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
 
+
+CentOS
+======
+1) Perf integrated with LLC
+   version - 4.2.0.26.el7.1.aarch64.debug.gbbb5
+2) strace - trace system calls and signals
+   version - 4.8
+3) ltrace - library call tracer.
+   version - 0.7.91
+4) netstat  
+   version - net-tools 2.10-alpha
+5) top - display Linux tasks.
+   version - 3.3.10(proc-ps-ng) 
+6) pidstat - Report statistics for Linux tasks.
+   version - 10.1.5 
+7) vmstat - Report virtual memory statistics.
+   version - 3.3.10(proc-ps-ng) 
+8) ftrace
+9) iostat -  Report CPU statistics and input/output statistics for devices, partitions and network filesystems (NFS).
+   version - 10.1.5
+10) tcpdump - dump traffic on a network.
+   version - 4.5.1
+11) ethtool - query or control network driver and hardware settings, particularly for wired Ethernet devices. 
+   version - 3.15
+12) swapon, swapoff : enable/disable devices and files for paging and swapping.
+   version - util-linux 2.26.2 
+13) gdb: gnu debugger
+   version - 7.6.1-80.el7 
+14) iptables - administration tool for IPv4 packet filtering and NAT.
+   version - 1.4.21 
+15) dmidecode - DMI table decoder
+   version - 2.12 
+16) fsck - is used to check and optionally repair a Linux file system.
+   version - util-linux 2.23.2 
+17) lscpu - display information about the CPU architecture.
+   version - util-linux 2.23.2 
+18) lspci - List all PCI devices.
+   version - 3.2.1 
+19) setpci - utility for querying and configuring PCI devices.
+   version - 3.2.1 
+20) dstat - versatile tool for generating system resource statistics. Replacement for vmstat, iostat and ifstat.
+    version - 0.7.2
+21) procps - procps is the package that has a bunch of small useful utilities that give information about processes using the /proc filesystem.
+    version - 3.3.10 
+22) tiptop - display hardware performance counters for Linux tasks.
+    version - 2.3
+23) iotop - simple top-like I/O monitor.
+    version - 0.6
+24) blktrace - generate traces of the i/o traffic on block devices.
+    version - 2.0
+25) nicstat - Show Network Interface Card Statistics.
+    version - 1.95
+26) lldptool - manage the LLDP settings and status of lldpad (Link Layer Discovery Protocol).
+    version - 1.0.1-2
+27) oprofile - a system-wide profiler, capable of profiling all running code at low overhead.
+    version - 0.9.9
+28) latencytop - a tool for developers to visualize system latencies.
+    version - 0.5
+29) kgdb: Kernel gnu debugger.
+30) kdb: kernel debugger.
+31) systemtap - SystemTap provides free software (GPL) infrastructure to simplify the gathering of information about the running Linux system.
+    version - 2.8
+32) kprobes
+33) crash - Analyze Linux crash dump data or a live system.
+    version - 7.1.2
+34) memwatch - memory leak detection tool.
+    version - 2.69
+35) powertop - program help to analyse the power consumption.
+    version - 2.8 
+36) slabtop - display kernel slab cache information.
+    version - procps-ng 3.3.10 
+37) ktap - script based dynamic tracing tool for Linux.
+    version - 0.4
+38) gprof - performance analysis tool.
+    version - 2.23.52.0.1 
+39) valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc.
+    version - 3.10.0
+40) pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+    Sample scripts are available online.
+41) packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
+
+
 Miscelleneous Tools
 ===================
 1) mkfs - build a Linux file system on a device, usually a hard disk partition.
