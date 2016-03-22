@@ -26,6 +26,15 @@ mkdir /scratch 2>/dev/null
 # Find install disk and mount it to /scratch
 ###################################################################################
 disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
+for ((index=0; index<45; index++))
+do
+	if [ x"$disk_info" != x"" ]; then
+		break
+	fi
+	sleep 1
+	disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
+done
+
 if [ x"$disk_info" = x"" ]; then
 	echo "Cann't find install disk!"
 	exit 1

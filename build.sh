@@ -1140,6 +1140,7 @@ pushd $KERNEL_DIR/
 if [ x"$BUILDFLAG" = x"TRUE" ]; then
     echo "Building kernel ..."
 
+	sudo rm -rf ../$kernel_dir/*
 	make O=../$kernel_dir mrproper
 	make O=../$kernel_dir $CFG_FILE
 
