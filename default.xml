@@ -57,6 +57,6 @@
   <project name="qemu" revision="refs/tags/v2.2-rc0" />
 
   <!-- estuary -->
-  <project name="estuary" />
+  <project name="estuary" revision="refs/tags/v2.2-rc0" />
 
 </manifest>
