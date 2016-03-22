@@ -1,7 +1,7 @@
 Change list for Estuary v2.2-rc0:
 1. Support D03 (Just an engineering board currently)
 2. Completely compatible for HiKey\D01\D02 and D03 boards.
-3. Firstly support to boot system from SAS disk for D02.
+3. Firstly support booting system from SAS disk for D02 by default.
 4. Upgrade kernel to v4.4.
 5. Partly enabled ACPI (Only D02).
 6. Support native building.
@@ -10,3 +10,4 @@ Change list for Estuary v2.2-rc0:
 9. Enabled CentOS firstly.
 10. Firstly integrated ODP and MySQL into Estuary.
 11. Added feature about collaboration in website.
+12. Enabled Docker & Armor tools for all distributions.
