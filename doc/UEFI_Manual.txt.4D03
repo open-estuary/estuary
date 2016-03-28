@@ -26,20 +26,19 @@ FTP protocol is used for downloading between hardware boards and local network. 
         a. Connect the board's UART port to a host machine with a serial cable.
         b. Install a serial port application in host machine, e.g.: kermit or minicom.
         c. Config serial port setting:115200/8/N/1 on host machine.
-        d. Reboot the board and press any key to enter Boot Option Menu.
-        c. Select "Boot Manager"->"ebl" boot option and press "Enter".
+        d. Reboot the board and press any key except "enter" to enter Boot Option Menu.
     
     Then the board will enter the UEFI SHELL mode.
 
 #3. Update UEFI files
 
     a. IP address config
-    the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
+    the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
     ifconfig -s eth0 static <IP address> <mask> <gateway>
     e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
     
     b. Burn BIOS file
-    
+    After setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)
     # Download file from FTP server to board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
     # Write the data into NORFLASH

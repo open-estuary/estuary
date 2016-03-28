@@ -111,7 +111,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
 
-    2. Reboot and press anykey to enter UEFI Boot Menu
+    2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
     
     3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
     
@@ -130,7 +130,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
 
-    3. Reboot D03 and press anykey to enter UEFI Boot Menu
+    3. Reboot D03 and press anykey except "enter" to enter UEFI Boot Menu
 
     4. Select boot option "Boot Manager"->"EFI Network" boot option to enter.
 
@@ -215,7 +215,7 @@ There are several methods to bring up system, you can select following anyone fi
 	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    2. If you want to use another linux distribution, please refer above steps.
 
-       b. Reboot and press any key to enter UEFI menu.
+       b. Reboot and press anykey except "enter" to enter UEFI menu.
 
        c. Select "Boot Manager"-> "Boot Maintenance Manager"-> "Boot From File" boot option to select corresponding disk.
           Press arrow key up or down to select grub boot option to decide which distribution should boot.

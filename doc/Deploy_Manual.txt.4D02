@@ -47,6 +47,7 @@ All following sections will take the D02 board as example, other boards have the
 
     1. IP address config (Optional, you can ignore this step if DHCP works well)
     the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
+    after setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)
     # Config board's IP address
     ifconfig -s eth0 static <IP address> <mask> <gateway>
     e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
@@ -127,7 +128,7 @@ There are several methods to bring up system, you can select following anyone fi
     e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 100000
           norwfmem 100000 2000000 4000000
     
-    3. Reboot D02 and press anykey to enter UEFI Boot Menu
+    3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
     
     4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
 
@@ -142,7 +143,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
 
-    2. Reboot and press anykey to enter UEFI Boot Menu
+    2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
     
     3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
     
@@ -161,7 +162,7 @@ There are several methods to bring up system, you can select following anyone fi
 
     2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
 
-    3. Reboot D02 and press anykey to enter UEFI Boot Menu
+    3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
 
     4. Select boot option "Boot Manager"->"EFI Network" boot option to enter.
 
@@ -274,7 +275,7 @@ There are several methods to bring up system, you can select following anyone fi
 	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    2. If you want to use another linux distribution, please refer above steps.
 
-      b. Reboot and press any key into enter UEFI menu.
+      b. Reboot and press any key except "enter" into enter UEFI menu.
 
       c. Select "Boot Manager"-> "Boot Maintenance Manager"-> "Boot From File" boot option to select corresponding disk.
          Press arrow key up or down to select grub boot option to decide which distribution should boot.
@@ -346,7 +347,7 @@ There are several methods to bring up system, you can select following anyone fi
 
       f. Burn Image, dtb file and UEFI into NorFlash. About how to burn, please refer to "Boot via NORFLASH" and UEFI_Manual.txt.4D02.
 	
-      g. Reboot and press any key to enter UEFI menu.
+      g. Reboot and press any key except "enter" to enter UEFI menu.
 
       h. Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
 
