@@ -26,8 +26,27 @@ You should change them acoording to your real local environment.
     set timeout=5
     
     # By default, boot the Euler/Linux
-    set default=d02_ubuntu_sata
-    
+    set default=d03_ubuntu_hd
+     
+    # Booting from PXE with mini rootfs
+    menuentry "D03-test-minilinux" --id d03-minilinux {
+       set root=(tftp,192.168.1.107)
+       linux /Image_D03 rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
+       initrd /mini-rootfs-arm64.cpio.gz
+    }
+
+   # Booting from NFS with Ubuntu rootfs
+   menuentry "D03-nfs" --id d03-NFS {
+       set root=(tftp,192.168.1.107)
+       linux /Image_D03 rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/user/ubuntu64 ip=dhcp
+    }
+
+   # Booting from disk with ubuntu rootfs
+   menuentry "D03 Ubuntu HD" --id d03_ubuntu_hd {
+        set root=(hd0,gpt1)
+        linux /Image_D03 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8  ip=dhcp
+   }
+
     # Booting from eMMC with mini rootfs
     menuentry "Hikey minilinux eMMC" --id HiKey_minilinux_eMMC {
         set root=(hd0,gpt6)
@@ -112,9 +131,10 @@ Normally they are placed into bootable partition as following structure.
 
 -------EFI
 |       |
-|       GRUB2------grubaa64.efi # grub binary file only for ARM64 architecture
-|
-|-------------grubarm32.efi     # grub binary file only for ARM32 architecture
+|       BOOT------BOOTAA64.EFI(rename grubaa64.efi as BOOTAA64.EFI ) # grub binary file only for ARM64 architecture
+|           |
+|           |
+|           ------BOOTARM.EFI(rename grubarm32.efi as BOOTARM.EFI ) # grub binary file only for ARM32 architecture
 |
 |-------------grub.cfg          # grub config file
 |

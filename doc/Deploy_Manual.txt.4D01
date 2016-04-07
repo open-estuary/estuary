@@ -110,7 +110,7 @@ There are several methods to bring up system, you can select following anyone fi
         5      #Return to main menu
         2      #Boot from PXE
     
-    4. After several seconds, D01 will boot by PXE automatically.
+    3. After several seconds, D01 will boot by PXE automatically.
     
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
@@ -203,7 +203,9 @@ There are several methods to bring up system, you can select following anyone fi
     1. Part and format the hardware disk firstly just like above section "Boot via NORFLASH with HD as rootfs".
 
     3. Download the corresponding files from ftp and store them into hardware disk as below.
-        sda1: |-------------grubarm32.efi      //grub binary file for ARM32 architecture
+        sda1: |-----EFI
+              |       |
+              |     BOOT-----BOOTARM.EFI(rename "grubarm32.efi" as "BOOTARM.EFI" )      //grub binary file for ARM32 architecture
               |
               |-------------grub.cfg           //grub config file
               |
@@ -221,7 +223,7 @@ There are several methods to bring up system, you can select following anyone fi
         2      //Boot Manager
         1      //Add Boot Device Entry
         2      //Pci(0x0,0x0)/Sata(0x1,0x0,0x0)...
-        GRUB2  //File path of the EFI Application or the kernel
+        grubarm32.efi  //File path of the EFI Application or the kernel
         y      //Is an EFI Application? [y/n]
         y      //Is your application is an OS loader? [y/n]
         5      //Return to main menu

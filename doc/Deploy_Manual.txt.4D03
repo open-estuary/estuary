@@ -12,20 +12,19 @@ Bring up System
     Boot via PXE
     Boot via NFS
     Boot via DISK(SAS/USB/SATA) 
-    Boot via ACPI
 
 ### Introduction ###
 
 This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
 
 All following sections will take the D03 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
- 
+
 ### Preparation ###
 
 # Prerequisite
 
     Local network: To connect hardware boards and host machine, so that they can communicate each other.
-    
+
     Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
 
 # Check the hardware board
@@ -51,7 +50,7 @@ All following sections will take the D03 board as example, other boards have the
     e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
 
     2. Download dtb file from FTP
-    
+
     # Download file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
     # Write data into FLASH
@@ -59,7 +58,7 @@ All following sections will take the D03 board as example, other boards have the
     e.g.: provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 100000
           sfcerase 0x7C0000 0x10000
           sfcwrite 0x100000 0x7C0000 0x10000
-    
+
     3. Reboot your D03 board
 
     You must reboot your D03 board after above two steps, this new DTB file will be used on booting board.
@@ -74,11 +73,13 @@ There are several methods to bring up system, you can select following anyone fi
 
 # Boot via ESL
 
-    In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.
+    In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into
+    RAM at first and then start the system by ESL.
     After reboot or power off, all downloaded data will be lost.
     This boot mode is just used for debugging.
 
-    Boot D03 to UEFI SHELL, and type the follow commands in EBL:
+    Boot D03 to UEFI menu. Select "Boot Manager"->"Eebedded Boot Loader(EBL)" and type the
+    follow commands in EBL:
 
     1. Download Image binary file from FTP server
 
@@ -97,9 +98,9 @@ There are several methods to bring up system, you can select following anyone fi
     # Download rootfs file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
     e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000
-    
+
     4. Start operator system
-    
+
     Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operator system.
 
 # Boot via PXE
@@ -112,11 +113,11 @@ There are several methods to bring up system, you can select following anyone fi
     Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
 
     2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
-    
+
     3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
-    
+
     4. After several seconds, D03 will boot by PXE automatically.
-    
+
     To config the grub.cfg to support PXE boot, please refer to Grub_Manual.txt.
 
 # Boot via NFS
@@ -140,7 +141,7 @@ There are several methods to bring up system, you can select following anyone fi
     The grub will load the grub configuration file from the EFI system partition. So grubaa64.efi, grub.cfg, Image and different estuary release 
     distributions are stored on disk.
 
-    1. Boot by PXE (please refer to "# Boot via PXE") to part and format hardware disk before booting D03 board
+    1. Boot by PXE (please refer to "#Boot via PXE") to part and format hardware disk before booting D03 board
 
       Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2
       Part hardware disk with "sudo fdisk /dev/sda" as follow:
@@ -159,7 +160,7 @@ There are several methods to bring up system, you can select following anyone fi
         formate ext4 partition : sudo mkfs.ext4 /dev/sda2
 
         +---------+-----------+--------------+------------------+
-        | Name    |   Size    |    Type      |   USB/SAS/SATA   | 
+        | Name    |   Size    |    Type      |   USB/SAS/SATA   |
         +---------+-----------+--------------+------------------+
         | sda1    |   200M    |  EFI system  |   EFI            |
         +---------+-----------+--------------+------------------+
@@ -172,14 +173,14 @@ There are several methods to bring up system, you can select following anyone fi
         | sda5    |rest space |    ext4      | linux swap       |
         +---------+-----------+--------------+------------------+
          Note: EFI partition must be a fat filesystem, so you should format sda1 with “sudo mkfs.vfat /dev/sda1″.
-　　
+
 　　  2. Download files and store them into hardware disk as below.
 
-        （SAS/USB/SATA）Related files are placed as follow:                                             
- 
+        （SAS/USB/SATA）Related files are placed as follow:                                     
+
         sda1: -------EFI
               |       |
-              |       GRUB2------grubaa64.efi  //grub binary file
+              |       BOOT------BOOTAA64.EFI(rename "grubaa64.efi" as BOOTAA64.EFI)   //grub binary file
               |
               |-------------grub.cfg           //grub config file
               |
@@ -187,48 +188,37 @@ There are several methods to bring up system, you can select following anyone fi
         sda2: Ubuntu distribution
         sda3: Fedora distribution
 
-
        To get kernel image and dtb file, please refer to Readme.txt.
        To get and config grub and grub.cfg, please refer to Grub_Manual.txt.
-       To get different distributions, please refer to Distributions_Guider.txt.                     
-                                                                                                                                                                      
+       To get different distributions, please refer to Distributions_Guider.txt.                
      3. Boot the board via SAS/USB/SATA 
 
-      a. Modify grub config file(please refer to Grub_Manual.txt.4All)
-         
+        a. Modify grub config file(please refer to Grub_Manual.txt.4All)
+
           e.g.: the context of grub.cfg file is modified as follow:
-	    #
-	    # Sample GRUB configuration file
-	    #
-	    # Boot automatically after 5 secs.
-	    set timeout=5
-	    # By default, boot the Estuary with Ubuntu filesystem
-	    set default=ubuntu
-	    # For booting GNU/Linux
+	        #
+	        # Sample GRUB configuration file
+	        #
+	        # Boot automatically after 5 secs.
+	        set timeout=5
+	        # By default, boot the Estuary with Ubuntu filesystem
+	        set default=ubuntu
+	        # For booting GNU/Linux
 
-	    menuentry "ubuntu" --id ubuntu {
-		set root=(hd0,gpt1)
-		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-	    }
+           menuentry "ubuntu" --id ubuntu {
+           search --no-floppy --fs-uuid --set=root <UUID>
+           linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+            }
 
-	    Note:
-	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
-	    2. If you want to use another linux distribution, please refer above steps.
+          Note:
+            1. <UUID> means the UUID of that partition which your EFI System is located in.
+               <PARTUUID> means the PARTUUID of that partition which your linux distribution is located in. 
+               To see the values of UUID and PARTUUID, please use the command:$blkid.
+            2. If you want to use another linux distribution, please refer above steps.
 
-       b. Reboot and press anykey except "enter" to enter UEFI menu.
+        b. Reboot and press anykey except "enter" to enter UEFI menu.
 
-       c. Select "Boot Manager"-> "Boot Maintenance Manager"-> "Boot From File" boot option to select corresponding disk.
-          Press arrow key up or down to select grub boot option to decide which distribution should boot.
-      
-# Boot via ACPI
+        c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+          For SAS/SATA: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
 
-   D03 also supports booting via ACPI, you can bring up this systerm which is
-   similar with this DT mode, you must fix some point as follow:
-
-   1. delete DTB file and don't burn DTB file
-
-   2. Set the parameters of booting via ACPI
-    you must add "acpi=force" property in "linux=...." line for "grub.cfg" file; while you delete DTB line
-    for "grub.cfg" file.
-
-	NOTE: you can get more information about setting grub.cfg from Grub_Manual.txt
+        d. Press arrow key up or down to select grub boot option to decide which distribution should boot.

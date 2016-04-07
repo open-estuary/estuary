@@ -5,6 +5,7 @@ Table of Contents:
 Introduction
 Quick Deploy System
     Deploy system via USB Disk
+    Deploy system via DVD
     Deploy system via PXE
     
 
@@ -16,23 +17,37 @@ Note: In my case, the working directory is '~/workdir'.
 
 # Deploy system via USB Disk
 
-Then create USB installation disk and deploy Linux system into SCSI disk of target board as following steps.
+1. Prepare usb install disk.
+    1) Modify estuary/estuarycfg.json. Make sure the platform, distros are all right.
+    2) Change the value of "install" to "yes" in object "setup" for usb and the value "device" to your USB install disk.
+    (Notice: if the specified usb device does not exist, the first usb device will be selected by default.)
+    3) Use build.sh to create the usb install disk.
+       eg: ./estuary/build.sh -f estuary/estuarycfg.json
+2. Connect the usb install disk to the board.
 
-1. Plug USB Disk into Ubuntu 14.04 PC
-    Prepare a USB Disk with no less than 8G bytes and do following commands:
-    $cd ~/workdir/estuary
-    $sudo ./create-udisk.sh 
+3. Reboot the board.
 
-    Afterwards, make selection according to prompt information.
-    After all these, USB intallation disk may be created successfully.
+4. Boot from the usb device. (About how to boot from USB device, please refer to the UEFI related manual.)
 
-2. Plug USB Disk to target board
-    Power on the target board after plugging USB disk created before, and select USB startup option in UEFI shell, and sys_setup.sh will be execute after ubuntu is started up.
-    Afterwards, make selection according to prompt information.
-    At last, the SCSI Disk of target board will be successfully deployed with the Linux system selected.
+5. According to the prompt to deploy the system.
 
-3. Reboot the target board again
-    Unplug USB Disk after power off, and power on it again, then select SCSI Disk startup selection in UEFI shell, and Linux system will boot up from SCSI disk.
+#  Deploy system via DVD
+
+1. Prepare ISO image and install disk.
+    1) Modify estuary/estuarycfg.json. Make sure the platform, distros are all right.
+    2) Change the value of "install" to "yes" in object "setup" for iso and the value "name" to your target iso image file name.
+    3) Use build.sh to create the target install iso image file.
+       eg: ./estuary/build.sh -f estuary/estuarycfg.json
+    4) Burn the iso image file to DVD disk if you use the physical DVD driver.
+
+2. Connect the physical DVD driver to the board, plug in the install DVD disk.
+
+3. Reboot the board.
+
+4. Boot from the DVD device. (About how to boot from DVD device, please refer to the UEFI related manual.)
+
+5. According to the prompt to deploy the system.
+
 
 # Deploy system via PXE
 
