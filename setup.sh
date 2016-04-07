@@ -57,6 +57,10 @@ disk_sector_info=()
 install_disk_dev=`echo "${INSTALL_DISK}" | sed 's/[0-9]*$//g'`
 read -a disk_list <<< $(lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}')
 
+if [[ ${#disk_list[@]} = 0 ]]; then
+	echo "Error! Can't find disk to install distributions!" ; exit 1
+fi
+
 for disk in ${disk_list[@]}
 do
 	disk_model_info[${#disk_model_info[@]}]=`parted -s /dev/$disk print 2>/dev/null | grep "Model: "`
@@ -235,7 +239,7 @@ platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
 if [ x"D02" = x"$PLATFORM" ]; then
 	cmd_line="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
 else
-	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8"
+	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp"
 fi
 
 boot_dev_info=`blkid -s UUID $BOOT_DEV 2>/dev/null | grep -o "UUID=.*" | sed 's/\"//g'`
@@ -289,4 +293,7 @@ umount $BOOT_DEV
 ###################################################################################
 cd ~
 umount /scratch
+echo "The system will restart in 3 seconds ......"
+sleep 3
+reboot
 

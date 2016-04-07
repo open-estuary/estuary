@@ -5,7 +5,9 @@
 #   ./build.sh -p D02 -d Ubuntu:    to build Ubuntu distribution for D02 platform
 #   ./build.sh -f estuarycfg.json:  to build target system according to estuarycfg.json
 #   ./build.sh -p D02 -d Ubuntu -s usb:/dev/sdb:    to build Ubuntu distribution for D02 platform and create install disk on usb device /dev/sdb
-#   ./build.sh -p D02 -d Ubuntu -s iso:Estuary.iso: to build Ubuntu distribution for D02 platform and create install iso image Estuary.iso
+#   ./build.sh -p D02 -d Ubuntu -s usb:    to build Ubuntu distribution for D02 platform and create install disk on first usb device
+#   ./build.sh -p D02 -d Ubuntu -s iso:Estuary_D02.iso: to build Ubuntu distribution for D02 platform and create install iso image Estuary_D02.iso
+#   ./build.sh -p D02 -d Ubuntu -s iso: to build Ubuntu distribution for D02 platform and create install iso image Estuary.iso (default iso image name is Estuary.iso)
 #Author: Justin Zhao
 #Date: August 7, 2015
 
@@ -57,12 +59,12 @@ usage()
 	echo -n " ] [ -i "
 	echo -n ${installs[*]} | sed "s/ / | /g"
 	echo -n " ] "
-	echo "[ -s usb:/dev/sdx ] [ -s iso[:Estuary.iso]]"
+	echo "[ -s usb[:/dev/sdx] ] [ -s iso[:Estuary.iso]]"
 
 	echo -e "\n -h,--help: to print this message"
 	echo " -f,--file: the config json file for Estuary building, all other parameters will be disabled if -f is set"
 	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
-	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it"
+	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it if the platform is specified"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
 	echo "		*for D01, only support Ubuntu"
 	echo "		*for D02,D03,HiKey, support Ubuntu, OpenSuse, Fedora, Debian, CentOS"
@@ -71,7 +73,8 @@ usage()
 	echo "		*for toolchain, to install ARM cross compiler"
 	echo " -s,--setup: to create install usb disk or iso image"
 	echo "		*only support D02, D03"
-	echo " --device: specify which usb disk to install"
+	echo "		*for usb device, you can use -s usb:/dev/sdx to create the install disk on /dev/sdx or -s usb to create install disk on the first usb device"
+	echo "		*for iso, you can use -s iso:Estuary_D02.iso to create the install iso image Estuary_D02.iso or -s iso to create Estuary.iso by default"
 	echo " -v,--version: to print the version of estuary project"
 }
 
@@ -152,11 +155,6 @@ check_setup_param()
 		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
 			return 1
 		fi
-		
-		if [ ! -b "$INSTALL_UDISK_DEV" ]; then
-			echo "Error! Device $INSTALL_UDISK_DEV not exist!"
-			return 1
-		fi
 	fi
 
 	return 0
@@ -176,6 +174,39 @@ clear_target()
 	fi
 
 	exit 0 
+}
+
+###################################################################################
+########################### Check build log ######################################
+###################################################################################
+check_build_log()
+{
+	local module_src=$1
+	local binary_output_dir=$2
+	local module_build_dir=$3
+	local last_build_commit=`cat "${binary_output_dir}/.${module_src}.bld" 2>/dev/null`
+	pushd $module_src
+	local current_commit=`git log -n 1 | grep -Po "^(commit ).*" | grep -Po "(?<=commit )(.*)"`
+	popd
+	if [ x"$current_commit" != x"$last_build_commit" ]; then
+		sudo rm -rf $module_build_dir/*
+		return 1
+	fi
+
+	return 0
+}
+
+###################################################################################
+########################### Create build log ######################################
+###################################################################################
+create_build_log()
+{
+	local module_src=$1
+	local binary_output_dir=$2
+	pushd $module_src
+	local current_commit=`git log -n 1 | grep -Po "^(commit ).*" | grep -Po "(?<=commit )(.*)"`
+	popd
+	echo "$current_commit" > ${binary_output_dir}/.${module_src}.bld
 }
 
 ###################################################################################
@@ -225,17 +256,28 @@ get_setup_args()
 	local setup_type=`echo "$arg" | awk -F ':' '{print $1}'`
 	local output_dev=`echo "$arg" | awk -F ':' '{print $2}'`
 	if [ x"iso" = x"$setup_type" ]; then
-		if [ x"$output_dev" = x"" ]; then
+		if [ x"$output_dev" != x"" ]; then
 			INSTALL_ISO_IMG=$output_dev
 		else
 			INSTALL_ISO_IMG=$DEFAULT_ISO_FILE
 		fi
 	else
-		if [ x"" != x"$output_dev" ]; then
+		if [ x"$output_dev" != x"" ]; then
 			INSTALL_UDISK_DEV=$output_dev
+			if [ ! -b "$INSTALL_UDISK_DEV" ]; then
+				echo -e "\033[31mError! Device $INSTALL_UDISK_DEV is not exist!\033[0m" ; return 1
+			fi
+
+			sudo lshw | grep "bus info: usb" -A 12 | grep "logical name: $INSTALL_UDISK_DEV"
+			if [ x"$?" != x"0" ]; then
+				echo -e "\033[31mError! Device $INSTALL_UDISK_DEV is not an usb disk!\033[0m" ; return 1
+			fi 
 		else
-			return 1
-		fi
+			INSTALL_UDISK_DEV=`get_1st_usb_storage`
+			if [ x"$INSTALL_UDISK_DEV" = x"" ]; then
+				echo -e "\033[31mError! Can't find usb storage disk!\033[0m" ; return 1
+			fi
+		fi 
 	fi
 
 	return 0
@@ -297,9 +339,9 @@ check_sum()
 install_development_tools()
 {
 	if [ x"$LOCALARCH" = x"x86_64" ]; then
-		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq"
+		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage"
 	else
-		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq"
+		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage"
 	fi
 
 	sudo apt-get install -y --force-yes $development_tools
@@ -361,6 +403,52 @@ TOOLCHAIN_SOURCE=http://open-estuary.org/EstuaryDownloads/toolchain
 BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/prebuild/v2.2/rc0
 
 ###################################################################################
+############################# Get setup parameter #################################
+###################################################################################
+get_setup_parameter()
+{
+	local cfg_file=$1
+	local install_type=
+	local iso_image=
+	local idx=0
+	local install=`jq -r ".setup[$idx].install" $cfg_file`
+	while [ x"$install" != x"null" ];
+	do
+		if [ x"yes" = x"$install" ]; then
+			install_type=`jq -r ".setup[$idx].type" $cfg_file`
+			if [ x"iso" = x"$install_type" ]; then
+				INSTALL_ISO_IMG=$DEFAULT_ISO_FILE
+				iso_image=`jq -r ".setup[$idx].name" $cfg_file`
+				if [ x"null" != x"$iso_image" ]; then
+					INSTALL_ISO_IMG=$iso_image
+				fi
+			else
+				INSTALL_UDISK_DEV=`jq -r ".setup[$idx].device" $cfg_file`
+				if [ x"$INSTALL_UDISK_DEV" = x"/dev/sdx" ]; then
+					INSTALL_UDISK_DEV=`get_1st_usb_storage`
+					if [ x"$INSTALL_UDISK_DEV" = x"" ]; then
+						echo -e "\033[31mError! Can't find available usb storage!\033[0m" ; return 1
+					fi
+				else
+					if [ ! -b "$INSTALL_UDISK_DEV" ]; then
+						echo -e "\033[31mError! Device $INSTALL_UDISK_DEV is not exist!\033[0m" ; return 1
+					fi
+
+					sudo lshw | grep "bus info: usb" -A 12 | grep "logical name: $INSTALL_UDISK_DEV"
+					if [ x"$?" != x"0" ]; then
+						echo -e "\033[31mError! Device $INSTALL_UDISK_DEV is not an usb disk!\033[0m" ; return 1
+					fi
+				fi
+			fi
+		fi
+		let idx=$idx+1
+		install=`jq -r ".setup[$idx].install" $cfg_file`
+	done
+
+	return 0
+}
+
+###################################################################################
 ############################# Parse config file        ############################
 ###################################################################################
 PLATFORM=
@@ -403,33 +491,10 @@ parse_cfg()
 
 	DISTRO=$DISTROLS
 
-	idx=0
-	install=`jq -r ".setup[$idx].install" $CFGFILE`
-	while [ x"$install" != x"null" ];
-	do
-		if [ x"yes" = x"$install" ]; then
-			install_type=`jq -r ".setup[$idx].type" $CFGFILE`
-			if [ x"iso" = x"$install_type" ]; then
-				INSTALL_ISO_IMG=$DEFAULT_ISO_FILE
-				iso_image=`jq -r ".setup[$idx].name" $CFGFILE`
-				if [ x"null" != x"$iso_image" ]; then
-					INSTALL_ISO_IMG=$iso_image
-				fi
-			else
-				INSTALL_UDISK_DEV=`jq -r ".setup[$idx].device" $CFGFILE`
-				if [ ! -b "$INSTALL_UDISK_DEV" ]; then
-					INSTALL_UDISK_DEV=`get_1st_usb_storage`
-				fi
-				
-				if [ x"$INSTALL_UDISK_DEV" = x"" ]; then
-					INSTALL_UDISK_DEV="/dev/sdx"
-					echo "Error! Can't find usb storage disk!"
-				fi
-			fi
-		fi
-		let idx=$idx+1
-		install=`jq -r ".setup[$idx].install" $CFGFILE`
-	done
+	get_setup_parameter $CFGFILE
+	if [ x"$?" != x"0" ]; then
+		exit 1
+	fi
 }
 
 ###################################################################################
@@ -812,6 +877,7 @@ fi
 UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
+uefi_update_flag=0
 
 if [ x"QEMU" = x"$PLATFORM" ]; then
     uefi_bin=
@@ -819,8 +885,8 @@ else
     uefi_bin=`find $uefi_dir -name *.fd 2>/dev/null`
 fi
 
-# Build UEFI for D01 platform
-if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+build_uefi()
+{
 	if [ ! -d "$uefi_dir" ] ; then
 		mkdir -p "$uefi_dir" 2>/dev/null
 	fi
@@ -869,13 +935,19 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		git submodule update
 
     	#env CROSS_COMPILE_32=$CROSS uefi-tools/uefi-build.sh -b DEBUG d02
+    	if [ x"D02" = x"$PLATFORM" ]; then
+			dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D02/Pv660D02.dsc"
+    	else
+			dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dsc"
+    	fi
 
-		grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" HwProductsPkg/$PLATFORM/Pv660$PLATFORM.dsc
+		grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" $dsc_file
     	if [ x"$?" != x"0" ] && [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]]; then
-			sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' HwProductsPkg/$PLATFORM/Pv660$PLATFORM.dsc
+			sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' $dsc_file
     	fi
 		platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
 		uefi-tools/uefi-build.sh -c LinaroPkg/platforms.config $platform
+		git submodule deinit -f .
     	popd
 		if [ x"D02" = x"$PLATFORM" ]; then
 			UEFI_BIN=`find "$UEFI_DIR/Build/Pv660D02" -name "*.fd" 2>/dev/null`
@@ -899,6 +971,12 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		git checkout open-estuary/master
 		git submodule init
 		git submodule update
+
+	    grep -P "PLATFORM_FLAGS.*-fno-stack-protector" OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
+	    if [ x"$?" != x"0" ] && [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]]; then
+	    	sed -i '/_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
+	    fi
+
 	    ${UEFI_TOOLS_DIR}/uefi-build.sh -b DEBUG -a arm-trusted-firmware hikey
 
 	    cd l-loader
@@ -919,18 +997,33 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 	    cp ptable-linux.img ../../$uefi_dir/
 	    cp ${EDK2_DIR}/Build/HiKey/DEBUG_GCC49/AARCH64/AndroidFastbootApp.efi ../../$uefi_dir/
 		cd ..
-		# roll back to special version for D02
+
+	    uefi_hikey_bin=`find "${EDK2_DIR}/l-loader" -name "fip.bin" 2>/dev/null`
+	    if [ x"$uefi_hikey_bin" != x"" ]; then
+			cp $uefi_hikey_bin ${EDK2_DIR}/Build/HiKey/DEBUG_GCC49/AARCH64/
+			UEFI_BIN=${EDK2_DIR}/Build/HiKey/DEBUG_GCC49/AARCH64/fip.bin
+	    fi
+	    # roll back to special version for D02
+	    git submodule deinit -f .
     	popd
-    	UEFI_BIN=`find "$UEFI_DIR/l-loader" -name "fip.bin" 2>/dev/null`
     fi
 	if [ x"$UEFI_BIN" != x"" ]; then
 		uefi_bin=$uefi_dir"/UEFI_"$PLATFORM".fd"
     	cp $UEFI_BIN $uefi_bin
 	fi
+}
+
+# Build UEFI for D01 platform
+check_build_log $UEFI_DIR $binary_dir $uefi_dir
+uefi_update_flag=$?
+
+if [[ x"" = x"$uefi_bin" && x"" != x"$PLATFORM" && x"QEMU" != x"$PLATFORM" ]] || [ x"$uefi_update_flag" != x"0" ]; then
+	build_uefi
 fi
 
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
+    create_build_log $UEFI_DIR $binary_dir
 fi
 
 ###################################################################################
@@ -939,6 +1032,7 @@ fi
 if [ x"D01" = x"$PLATFORM" ]; then
     WRAPPER_DIR=bootwrapper
     wrapper_dir=$build_dir/$WRAPPER_DIR
+    check_build_log $WRAPPER_DIR $binary_dir $wrapper_dir
 
     if [ ! -d "$wrapper_dir" ] ; then 
     	mkdir -p "$wrapper_dir" 2> /dev/null
@@ -961,6 +1055,11 @@ if [ x"D01" = x"$PLATFORM" ]; then
         cp $WRAPPER_DIR/.monitor $wrapper_dir/
         cp $WRAPPER_DIR/.monitor $binary_dir/
     fi
+
+    if [ -f $wrapper_dir/.text ] && [ -f $wrapper_dir/.monitor ]; then
+	create_build_log $WRAPPER_DIR $binary_dir
+    fi
+
 fi
 
 ###################################################################################
@@ -975,8 +1074,8 @@ else
     GRUB_BIN=`find $grub_dir -name *.efi 2>/dev/null`
 fi
 
-# Build grub for D01 platform
-if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+build_grub()
+{
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
@@ -991,6 +1090,7 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
         git reset --hard
 		git checkout grub/master
 		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
+		git am ../patches/0002-D01-fix-dtb-load-address.patch
 
     	make distclean
     	./autogen.sh
@@ -1026,6 +1126,14 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	cd -
     fi
     GRUB_BIN=`find "$grub_dir" -name "*.efi" 2>/dev/null`
+}
+
+# Build grub for D01 platform
+check_build_log $GRUB_DIR $binary_dir $grub_dir
+grub_update_flag=$?
+
+if [[ x"" = x"$GRUB_BIN" && x"" != x"$PLATFORM" && x"QEMU" != x"$PLATFORM" ]] || [ x"$grub_update_flag" != x"0" ]; then
+	build_grub
 fi
 
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
@@ -1035,6 +1143,7 @@ if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -
         cp $PREBUILD_DIR/grub.cfg $grub_dir/ 2>/dev/null
         cp $PREBUILD_DIR/grub.cfg $binary_dir/ 2>/dev/null
     fi
+    create_build_log $GRUB_DIR $binary_dir
 fi
 
 ###################################################################################
@@ -1101,6 +1210,9 @@ kernel_dir=$build_dir/$KERNEL_DIR
 KERNEL_BIN=
 DTB_BIN=
 
+check_build_log $KERNEL_DIR $binary_dir $kernel_dir
+kernel_update_flag=$?
+
 if [ x"" = x"$PLATFORM" ]; then
     #do nothing
 	echo "Do not build kernel."
@@ -1141,7 +1253,8 @@ fi
 
 pushd $KERNEL_DIR/
 
-if [ x"$BUILDFLAG" = x"TRUE" ]; then
+build_kernel()
+{
     echo "Building kernel ..."
 
 	sudo rm -rf ../$kernel_dir/*
@@ -1189,7 +1302,16 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
     fi
+}
 
+if [ x"$BUILDFLAG" = x"TRUE" ] || [ x"$kernel_update_flag" != x"0" ]; then
+	build_kernel
+	echo "PWD `pwd`"
+	if [ x"" != x"$KERNEL_BIN" ] && [ -f ../$KERNEL_BIN ]; then
+		pushd ..
+		create_build_log $KERNEL_DIR $binary_dir
+		popd
+	fi
 fi
 
 # postprocess for kernel building
