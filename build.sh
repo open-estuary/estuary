@@ -177,6 +177,39 @@ clear_target()
 }
 
 ###################################################################################
+########################### Check build log ######################################
+###################################################################################
+check_build_log()
+{
+	local module_src=$1
+	local binary_output_dir=$2
+	local module_build_dir=$3
+	local last_build_commit=`cat "${binary_output_dir}/.${module_src}.bld" 2>/dev/null`
+	pushd $module_src
+	local current_commit=`git log -n 1 | grep -Po "^(commit ).*" | grep -Po "(?<=commit )(.*)"`
+	popd
+	if [ x"$current_commit" != x"$last_build_commit" ]; then
+		sudo rm -rf $module_build_dir/*
+		return 1
+	fi
+
+	return 0
+}
+
+###################################################################################
+########################### Create build log ######################################
+###################################################################################
+create_build_log()
+{
+	local module_src=$1
+	local binary_output_dir=$2
+	pushd $module_src
+	local current_commit=`git log -n 1 | grep -Po "^(commit ).*" | grep -Po "(?<=commit )(.*)"`
+	popd
+	echo "$current_commit" > ${binary_output_dir}/.${module_src}.bld
+}
+
+###################################################################################
 ############################# Check install parameter  ###########################
 ###################################################################################
 check_install()
@@ -844,6 +877,7 @@ fi
 UEFI_TOOLS=tools/uefi-tools
 UEFI_DIR=uefi
 uefi_dir=$build_dir/$UEFI_DIR
+uefi_update_flag=0
 
 if [ x"QEMU" = x"$PLATFORM" ]; then
     uefi_bin=
@@ -851,8 +885,8 @@ else
     uefi_bin=`find $uefi_dir -name *.fd 2>/dev/null`
 fi
 
-# Build UEFI for D01 platform
-if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+build_uefi()
+{
 	if [ ! -d "$uefi_dir" ] ; then
 		mkdir -p "$uefi_dir" 2>/dev/null
 	fi
@@ -977,10 +1011,19 @@ if [ x"" = x"$uefi_bin" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
 		uefi_bin=$uefi_dir"/UEFI_"$PLATFORM".fd"
     	cp $UEFI_BIN $uefi_bin
 	fi
+}
+
+# Build UEFI for D01 platform
+check_build_log $UEFI_DIR $binary_dir $uefi_dir
+uefi_update_flag=$?
+
+if [[ x"" = x"$uefi_bin" && x"" != x"$PLATFORM" && x"QEMU" != x"$PLATFORM" ]] || [ x"$uefi_update_flag" != x"0" ]; then
+	build_uefi
 fi
 
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$uefi_bin" ] && [ -f $uefi_bin ] && [ -d $binary_dir ]; then
     cp $uefi_dir/* $binary_dir/
+    create_build_log $UEFI_DIR $binary_dir
 fi
 
 ###################################################################################
@@ -989,6 +1032,7 @@ fi
 if [ x"D01" = x"$PLATFORM" ]; then
     WRAPPER_DIR=bootwrapper
     wrapper_dir=$build_dir/$WRAPPER_DIR
+    check_build_log $WRAPPER_DIR $binary_dir $wrapper_dir
 
     if [ ! -d "$wrapper_dir" ] ; then 
     	mkdir -p "$wrapper_dir" 2> /dev/null
@@ -1011,6 +1055,11 @@ if [ x"D01" = x"$PLATFORM" ]; then
         cp $WRAPPER_DIR/.monitor $wrapper_dir/
         cp $WRAPPER_DIR/.monitor $binary_dir/
     fi
+
+    if [ -f $wrapper_dir/.text ] && [ -f $wrapper_dir/.monitor ]; then
+	create_build_log $WRAPPER_DIR $binary_dir
+    fi
+
 fi
 
 ###################################################################################
@@ -1025,8 +1074,8 @@ else
     GRUB_BIN=`find $grub_dir -name *.efi 2>/dev/null`
 fi
 
-# Build grub for D01 platform
-if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM" ]; then
+build_grub()
+{
     if [ ! -d "$grub_dir" ] ; then 
     	mkdir -p "$grub_dir" 2> /dev/null
 	fi
@@ -1041,6 +1090,7 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
         git reset --hard
 		git checkout grub/master
 		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
+		git am ../patches/0002-D01-fix-dtb-load-address.patch
 
     	make distclean
     	./autogen.sh
@@ -1076,6 +1126,14 @@ if [ x"" = x"$GRUB_BIN" ] && [ x"" != x"$PLATFORM" ] && [ x"QEMU" != x"$PLATFORM
     	cd -
     fi
     GRUB_BIN=`find "$grub_dir" -name "*.efi" 2>/dev/null`
+}
+
+# Build grub for D01 platform
+check_build_log $GRUB_DIR $binary_dir $grub_dir
+grub_update_flag=$?
+
+if [[ x"" = x"$GRUB_BIN" && x"" != x"$PLATFORM" && x"QEMU" != x"$PLATFORM" ]] || [ x"$grub_update_flag" != x"0" ]; then
+	build_grub
 fi
 
 if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -d $binary_dir ]; then
@@ -1085,6 +1143,7 @@ if [ x"" != x"$PLATFORM" ] && [ x"" != x"$GRUB_BIN" ] && [ -f $GRUB_BIN ] && [ -
         cp $PREBUILD_DIR/grub.cfg $grub_dir/ 2>/dev/null
         cp $PREBUILD_DIR/grub.cfg $binary_dir/ 2>/dev/null
     fi
+    create_build_log $GRUB_DIR $binary_dir
 fi
 
 ###################################################################################
@@ -1151,6 +1210,9 @@ kernel_dir=$build_dir/$KERNEL_DIR
 KERNEL_BIN=
 DTB_BIN=
 
+check_build_log $KERNEL_DIR $binary_dir $kernel_dir
+kernel_update_flag=$?
+
 if [ x"" = x"$PLATFORM" ]; then
     #do nothing
 	echo "Do not build kernel."
@@ -1191,7 +1253,8 @@ fi
 
 pushd $KERNEL_DIR/
 
-if [ x"$BUILDFLAG" = x"TRUE" ]; then
+build_kernel()
+{
     echo "Building kernel ..."
 
 	sudo rm -rf ../$kernel_dir/*
@@ -1239,7 +1302,16 @@ if [ x"$BUILDFLAG" = x"TRUE" ]; then
 
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
     fi
+}
 
+if [ x"$BUILDFLAG" = x"TRUE" ] || [ x"$kernel_update_flag" != x"0" ]; then
+	build_kernel
+	echo "PWD `pwd`"
+	if [ x"" != x"$KERNEL_BIN" ] && [ -f ../$KERNEL_BIN ]; then
+		pushd ..
+		create_build_log $KERNEL_DIR $binary_dir
+		popd
+	fi
 fi
 
 # postprocess for kernel building
