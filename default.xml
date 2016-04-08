@@ -18,32 +18,32 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project name="kernel" />
+  <project name="kernel" revision="refs/tags/v2.2-rc1" />
 
   <!-- uefi -->
-  <project name="uefi" />
+  <project name="uefi" revision="refs/tags/v2.2-rc1" />
 
   <!-- patches -->
-  <project name="patches" />
+  <project name="patches" revision="refs/tags/v2.2-rc1" />
 
   <!--armor -->
-  <project name="armor" />
+  <project name="armor" revision="refs/tags/v2.2-rc1" />
 
   <!-- packages -->
-  <project name="packages" />
+  <project name="packages" revision="refs/tags/v2.2-rc1" />
 
   <!-- grub -->
   <!-- project name="grub" remote="grub" / -->
-  <project name="grub" />
+  <project name="grub" revision="refs/tags/v2.2-rc1" />
 
   <!-- bootwrapper -->
-  <project name="bootwrapper" />
+  <project name="bootwrapper" revision="refs/tags/v2.2-rc1" />
 
   <!-- caliper -->
-  <project name="caliper" />
+  <project name="caliper" revision="refs/tags/v2.2-rc1" />
   
   <!-- tools -->
-  <project name="tools" />
+  <project name="tools" revision="refs/tags/v2.2-rc1" />
 
   <!-- toolchain -->
   <!-- project path="toolchain" name="estuary-toolchain" revision="refs/tags/estuary-v1.0" groups="linaro" / -->
@@ -54,9 +54,9 @@
 
   <!-- qemu -->
   <!-- project name="qemu" remote="qemu" revision="refs/tags/v2.2.0" / -->
-  <project name="qemu" />
+  <project name="qemu" revision="refs/tags/v2.2-rc1" />
 
   <!-- estuary -->
-  <project name="estuary" />
+  <project name="estuary" revision="refs/tags/v2.2-rc1" />
 
 </manifest>
