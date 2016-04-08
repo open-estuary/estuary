@@ -158,8 +158,8 @@ echo "Install grub and kernel to $BOOT_DEV ......"
 pushd /scratch
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
-mkdir -p /boot/EFI/BOOT/
-cp grub*.efi /boot/EFI/BOOT/BOOTAA64.EFI
+mkdir -p /boot/EFI/GURB2/
+cp grub*.efi /boot/EFI/GRUB2/grubaa64.efi
 cp Image* /boot/
 cp hip*.dtb /boot/
 

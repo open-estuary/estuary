@@ -185,8 +185,8 @@ EOF
 ###################################################################################
 # Create EFI System
 ###################################################################################
-mkdir -p EFI/BOOT/
-$GRUB_DIR/bin/grub-mkimage -v -o EFI/BOOT/BOOTAA64.EFI -O arm64-efi -p / boot chain configfile configfile efinet ext2 fat \
+mkdir -p EFI/GRUB2/
+$GRUB_DIR/bin/grub-mkimage -v -o EFI/GRUB2/grubaa64.efi -O arm64-efi -p / boot chain configfile configfile efinet ext2 fat \
 iso9660 gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file \
 search_fs_uuid search_label terminal terminfo tftp linux >/dev/null 2>&1
 
