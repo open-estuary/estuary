@@ -205,7 +205,7 @@ There are several methods to bring up system, you can select following anyone fi
     3. Download the corresponding files from ftp and store them into hardware disk as below.
         sda1: |-----EFI
               |       |
-              |     GRUB2-----grubaa32.efi      //grub binary file for ARM32 architecture
+              |     GRUB2-----grubarm32.efi      //grub binary file for ARM32 architecture
               |
               |-------------grub.cfg           //grub config file
               |
