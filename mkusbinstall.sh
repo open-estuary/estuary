@@ -213,8 +213,8 @@ EOF
 ###################################################################################
 # Create EFI System
 ###################################################################################
-mkdir -p EFI/BOOT/
-cp grubaa64.efi EFI/BOOT/BOOTAA64.EFI
+mkdir -p EFI/GRUB2/
+cp grubaa64.efi EFI/GRUB2/grubaa64.efi
 
 sudo mount ${DISK}1 /mnt/
 sudo cp -r EFI /mnt/

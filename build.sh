@@ -398,9 +398,9 @@ build_dir=build
 ###################################################################################
 ############################# Set download source server ##########################
 ###################################################################################
-PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.2/rc0
+PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.2/rc1
 TOOLCHAIN_SOURCE=http://open-estuary.org/EstuaryDownloads/toolchain
-BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/prebuild/v2.2/rc0
+BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/prebuild/v2.2/rc1
 
 ###################################################################################
 ############################# Get setup parameter #################################
@@ -811,8 +811,8 @@ cd -
 # Copy some common prebuilt files to build target directory
 if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then 
     if [ x"$TARGETARCH" = x"ARM32" ]; then
-	if [ -f $PREBUILD_DIR/mini-rootfs.cpio.gz ]; then
-	    cp $PREBUILD_DIR/mini-rootfs.cpio.gz $binary_dir/ 2>/dev/null
+	if [ -f $PREBUILD_DIR/mini-rootfs-arm32.cpio.gz ]; then
+	    cp $PREBUILD_DIR/mini-rootfs-arm32.cpio.gz $binary_dir/ 2>/dev/null
 	fi
     else
 	if [ -f $PREBUILD_DIR/mini-rootfs-arm64.cpio.gz ]; then
@@ -1257,9 +1257,10 @@ build_kernel()
 {
     echo "Building kernel ..."
 
+	git clean -fdx
+	git reset --hard
 	sudo rm -rf ../$kernel_dir/*
 	make O=../$kernel_dir mrproper
-	make O=../$kernel_dir $CFG_FILE
 
     # kernel building
     if [ x"ARM32" = x"$TARGETARCH" ]; then
@@ -1272,7 +1273,8 @@ build_kernel()
 #		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
-
+		git am ../patches/d01-kernel-ethernet/*.patch
+		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
@@ -1292,6 +1294,7 @@ build_kernel()
 			sed -i 's/\(CONFIG_BLK_DEV_SR=\)\(.*\)/\1y/' ../$kernel_dir/.config
 			sed -i 's/\(CONFIG_CHR_DEV_SG=\)\(.*\)/\1y/' ../$kernel_dir/.config
         fi
+		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
 		dtb_dir=${DTB_BIN#*arch/}
