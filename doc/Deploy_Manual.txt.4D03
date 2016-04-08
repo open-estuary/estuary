@@ -180,7 +180,7 @@ There are several methods to bring up system, you can select following anyone fi
 
         sda1: -------EFI
               |       |
-              |       BOOT------BOOTAA64.EFI(rename "grubaa64.efi" as BOOTAA64.EFI)   //grub binary file
+              |       GRUB2------grubaa64.efi  //grub binary file
               |
               |-------------grub.cfg           //grub config file
               |
