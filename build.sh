@@ -1261,7 +1261,6 @@ build_kernel()
 	git reset --hard
 	sudo rm -rf ../$kernel_dir/*
 	make O=../$kernel_dir mrproper
-	make O=../$kernel_dir $CFG_FILE
 
     # kernel building
     if [ x"ARM32" = x"$TARGETARCH" ]; then
@@ -1274,7 +1273,8 @@ build_kernel()
 #		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
-		git apply ../patches/d01-kernel-ethernet/*.patch
+		git am ../patches/d01-kernel-ethernet/*.patch
+		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
@@ -1294,6 +1294,7 @@ build_kernel()
 			sed -i 's/\(CONFIG_BLK_DEV_SR=\)\(.*\)/\1y/' ../$kernel_dir/.config
 			sed -i 's/\(CONFIG_CHR_DEV_SG=\)\(.*\)/\1y/' ../$kernel_dir/.config
         fi
+		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
 		dtb_dir=${DTB_BIN#*arch/}
