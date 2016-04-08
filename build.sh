@@ -1273,7 +1273,7 @@ build_kernel()
 #		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
 #		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
-		git am ../patches/d01-kernel-ethernet/*.patch
+		git apply ../patches/d01-kernel-ethernet/*.patch
 		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
