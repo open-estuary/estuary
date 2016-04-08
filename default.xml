@@ -27,14 +27,14 @@
   <project name="patches" revision="refs/tags/v2.2-rc1" />
 
   <!--armor -->
-  <project name="armor" revision="refs/tags/v2.2-rc0" />
+  <project name="armor" revision="refs/tags/v2.2-rc1" />
 
   <!-- packages -->
   <project name="packages" revision="refs/tags/v2.2-rc1" />
 
   <!-- grub -->
   <!-- project name="grub" remote="grub" / -->
-  <project name="grub" revision="refs/tags/v2.2-rc0" />
+  <project name="grub" revision="refs/tags/v2.2-rc1" />
 
   <!-- bootwrapper -->
   <project name="bootwrapper" revision="refs/tags/v2.2-rc1" />
