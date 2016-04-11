@@ -147,12 +147,14 @@ check_setup_param()
 {
 	if [ x"$INSTALL_ISO_IMG" != x"" ]; then
 		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
+			echo -e "\033[31mError! Unsupported platform $PLATFORM for iso image!\033[0m"
 			return 1
 		fi
 	fi
 
 	if [ x"$INSTALL_UDISK_DEV" != x"" ]; then
 		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
+			echo -e "\033[31mError! Unsupported platform $PLATFORM for usb install disk!\033[0m"
 			return 1
 		fi
 	fi
