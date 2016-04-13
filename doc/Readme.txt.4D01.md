@@ -59,9 +59,9 @@ grub.cfg is used by grubaa64.efi to config boot options.
     
 More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.md.4All).
     
-**target**: ｀<project root>/build/D01/grub/｀
+**target**:`<project root>/build/D01/grub/`
 
-**source**: ｀<project root>/grub｀
+**source**:`<project root>/grub`
 
 build commands(supposedly, you are in `project root` currently:
 
