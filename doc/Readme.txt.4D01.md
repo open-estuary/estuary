@@ -4,6 +4,7 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 ### UEFI_D01.fd
 
 <font color=gray ># compile uefi for D01</font>
+<table><tr><td bgcolor=#7FFFD4>这里的背景色是：Aquamarine，  十六进制颜色值：#7FFFD4， rgb(127, 255, 212)</td></tr></table>
 
 **description**: UEFI_D01.fd is the UEFI bios for D01 platform.
 
