@@ -1,6 +1,8 @@
+
 After you do "./estuary/build.sh -p D01 -d Ubuntu", all targets files will be produced into <project root>/build/D01 directory, they are:
 
 **UEFI_D01.fd** 
+
 description: UEFI_D01.fd is the UEFI bios for D01 platform.
 target: <project root>/build/D01/binary/
 source: <project root>/uefi
@@ -30,6 +32,7 @@ build commands(supposedly, you are in <project root> currently:
     ```
 **.text**
 **.monitor**
+
 description: boot wrapper files to take responsible of switching into HYP mode.
 target: <project root>/build/D01/bootwrapper/
 source: <project root>/bootwrapper
@@ -38,6 +41,7 @@ source: <project root>/bootwrapper
    
 **grubarm32.efi**
 **grub.cfg**
+
 description:
     grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
     grub.cfg is used by grubaa64.efi to config boot options.
@@ -70,6 +74,7 @@ build commands(supposedly, you are in <project root> currently:
 **hip04-d01.dtb**
 **.kernel**
 **.filesystem**
+
 descriptions:
     zImage is the compressed kernel executable program.
     hip04-d01.dtb is the device tree binary.
@@ -109,7 +114,7 @@ build commands(supposedly, you are in <project root> currently:
     cp .kernel ../build/D01/binary/
     popd
   ```
-More detail about distributions, please refer to [Distributions_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.md.4All)
+More detail about distributions, please refer to [Distributions_Guide.md](https://baidu.com)
 More detail about toolchains, please refer to [Toolchains_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.md.4All)
 More detail about how to deploy target system into D01 board, please refer to [Deployment_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.md.4D01).
 More detail about how to debug, analyse, diagnose system, please refer to [Armor_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.md.4All)
