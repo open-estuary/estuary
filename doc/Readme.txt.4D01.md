@@ -91,21 +91,23 @@ build commands(supposedly, you are in <project root> currently:
 
 *descriptions*:
 
- zImage is the compressed kernel executable program.
+  zImage is the compressed kernel executable program.
     
- hip04-d01.dtb is the device tree binary.
+  hip04-d01.dtb is the device tree binary.
    
- .kernel is the file combining zImage and hip04-d01.dtb.
+  .kernel is the file combining zImage and hip04-d01.dtb.
    
   .filesystem is a special rootfs for D01 booting from NORFLASH.
    
-*target*: zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
+*target*:
 
-hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
+ zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
+
+ hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
         
-    .kernel in <project root>/build/D01/kernel/.kernel
+ .kernel in <project root>/build/D01/kernel/.kernel
         
-     .filesystem in <project root>/build/D01/binary/.filesystem
+ .filesystem in <project root>/build/D01/binary/.filesystem
         
 *source*: <project root>/kernel
 
