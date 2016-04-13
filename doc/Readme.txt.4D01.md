@@ -1,13 +1,13 @@
 
 After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be produced into `<project root>/build/D01` directory, they are:
 
-**UEFI_D01.fd**
+## UEFI_D01.fd
 
-*description*: UEFI_D01.fd is the UEFI bios for D01 platform.
+**description**: UEFI_D01.fd is the UEFI bios for D01 platform.
 
-*target*: `<project root>/build/D01/binary/`
+**target**: `<project root>/build/D01/binary/`
 
-*source*: `<project root>/uefi`
+**source**: `<project root>/uefi`
 
 build commands(supposedly, you are in `project root` currently):
 
