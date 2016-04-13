@@ -1,5 +1,5 @@
 
-*After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be produced into `<project root>/build/D01` directory, they are:*
+After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be produced into `<project root>/build/D01` directory, they are:
 
 **UEFI_D01.fd** 
 
