@@ -3,7 +3,7 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 
 ### UEFI_D01.fd
 ---
-
+<font color= # compile uefi for D01>color=gray</font>
 **description**: UEFI_D01.fd is the UEFI bios for D01 platform.
 
 **target**: `<project root>/build/D01/binary/`
@@ -24,7 +24,7 @@ build commands(supposedly, you are in `<project root>` currently):
     echo "ARCH=ARM" >> platforms.config
     popd
    
-    <font color= # compile uefi for D01>color=gray</font>
+    
     # compile uefi for D01
     pushd uefi
     # roll back to special version for D01
