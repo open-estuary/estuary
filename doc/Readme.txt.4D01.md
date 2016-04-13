@@ -34,7 +34,7 @@ build commands(supposedly, you are in `<project root>` currently):
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
   ```
   
-###.text**<br>
+###.text
 ###.monitor
 
 **description**: boot wrapper files to take responsible of switching into HYP mode.
