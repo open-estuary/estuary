@@ -3,7 +3,7 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 
 ### UEFI_D01.fd
 ---
-<!--zhushi-->
+<!--nihaoaaaaaa-->
 **description**: UEFI_D01.fd is the UEFI bios for D01 platform.
 
 **target**: `<project root>/build/D01/binary/`
