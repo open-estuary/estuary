@@ -1,13 +1,13 @@
 
 After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be produced into `<project root>/build/D01` directory, they are:
 
-***UEFI_D01.fd*** 
+**UEFI_D01.fd**
 
-**description**: UEFI_D01.fd is the UEFI bios for D01 platform.
+*description*: UEFI_D01.fd is the UEFI bios for D01 platform.
 
-**target**: `<project root>/build/D01/binary/`
+*target*: `<project root>/build/D01/binary/`
 
-**source**: `<project root>/uefi`
+*source*: `<project root>/uefi`
 
 build commands(supposedly, you are in <project root> currently:
 
@@ -34,22 +34,22 @@ build commands(supposedly, you are in <project root> currently:
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
   ```
   
-***.text***<br>
-***.monitor***
+**.text**<br>
+**.monitor**
 
-**description**: boot wrapper files to take responsible of switching into HYP mode.
+*description*: boot wrapper files to take responsible of switching into HYP mode.
 
-**target**: `<project root>/build/D01/bootwrapper/`
+*target*: `<project root>/build/D01/bootwrapper/`
 
-**source**: `<project root>/bootwrapper`
+*source*: `<project root>/bootwrapper`
 
  `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
-***grubarm32.efi***<br>
-***grub.cfg***
+**grubarm32.efi**<br>
+**grub.cfg**
 
-**description:**
+*description:*
 
 grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
     
@@ -57,9 +57,9 @@ grub.cfg is used by grubaa64.efi to config boot options.
     
 More detail about them, please refer to Grub_Manual.txt.
     
-**target**: ｀<project root>/build/D01/grub/｀
+*target*: ｀<project root>/build/D01/grub/｀
 
-**source**: ｀<project root>/grub｀
+*source*: ｀<project root>/grub｀
 
 build commands(supposedly, you are in <project root> currently:
 
@@ -84,12 +84,12 @@ build commands(supposedly, you are in <project root> currently:
     popd
 ```
     
-***zImage***<br>
-***hip04-d01.dtb***<br>
-***.kernel***<br>
-***.filesystem***
+**zImage**<br>
+**hip04-d01.dtb**<br>
+**.kernel**<br>
+**.filesystem**
 
-**descriptions**:
+*descriptions*:
 
   zImage is the compressed kernel executable program.
     
@@ -99,7 +99,7 @@ build commands(supposedly, you are in <project root> currently:
    
   .filesystem is a special rootfs for D01 booting from NORFLASH.
    
-**target**:
+*target*:
 
  zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
 
@@ -109,7 +109,7 @@ build commands(supposedly, you are in <project root> currently:
         
  .filesystem in <project root>/build/D01/binary/.filesystem
         
-**source**: <project root>/kernel
+*source*: <project root>/kernel
 
 build commands(supposedly, you are in <project root> currently:
  ```
