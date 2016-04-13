@@ -1,6 +1,6 @@
 After you do "./estuary/build.sh -p D01 -d Ubuntu", all targets files will be produced into <project root>/build/D01 directory, they are:
 
-**UEFI_D01.fd 
+**UEFI_D01.fd** 
 description: UEFI_D01.fd is the UEFI bios for D01 platform.
 target: <project root>/build/D01/binary/
 source: <project root>/uefi
@@ -28,16 +28,16 @@ build commands(supposedly, you are in <project root> currently:
     
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
     ```
-** .text 
-**.monitor 
+** .text **
+**.monitor **
 description: boot wrapper files to take responsible of switching into HYP mode.
 target: <project root>/build/D01/bootwrapper/
 source: <project root>/bootwrapper
    `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
-** grubarm32.efi 
-** grub.cfg 
+** grubarm32.efi **
+** grub.cfg **
 description:
     grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
     grub.cfg is used by grubaa64.efi to config boot options.
@@ -66,10 +66,10 @@ build commands(supposedly, you are in <project root> currently:
     popd
     ```
     
-** zImage 
-** hip04-d01.dtb 
-** .kernel 
-** .filesystem 
+** zImage **
+** hip04-d01.dtb **
+** .kernel **
+** .filesystem **
 descriptions:
     zImage is the compressed kernel executable program.
     hip04-d01.dtb is the device tree binary.
