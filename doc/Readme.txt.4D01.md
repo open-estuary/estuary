@@ -71,7 +71,7 @@ build commands(supposedly, you are in `project root` currently:
 ```
     export CROSS_COMPILE=arm-linux-gnueabihf-
     pushd grub
-    # rollbak the grub master
+    #rollbak the grub master
     git reset --hard
     git checkout grub/master
     git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
@@ -94,9 +94,6 @@ build commands(supposedly, you are in `project root` currently:
 ###hip04-d01.dtb
 ###.kernel
 ###.filesystem
-
-<big>zImage</big>
-<big>hip04-d01.dtb</big>
 
 **descriptions**:
 
