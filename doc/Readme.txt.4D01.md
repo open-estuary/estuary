@@ -94,8 +94,10 @@ build commands(supposedly, you are in `project root` currently:
 ###hip04-d01.dtb
 ###.kernel
 ###.filesystem
+
 <big>zImage</big>
 <big>hip04-d01.dtb</big>
+
 **descriptions**:
 
   zImage is the compressed kernel executable program.
