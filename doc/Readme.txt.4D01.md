@@ -34,6 +34,7 @@ build commands(supposedly, you are in `<project root>` currently):
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
   ```
   
+  
 ###.text
 ###.monitor
 
@@ -45,7 +46,8 @@ build commands(supposedly, you are in `<project root>` currently):
 
  `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
-   
+
+
 ###grubarm32.efi
 ###grub.cfg
 
@@ -83,6 +85,7 @@ build commands(supposedly, you are in `project root` currently:
     ./bin/grub-mkimage -v -o grubarm32.efi -O arm-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     popd
 ```
+ 
     
 ###zImage
 ###hip04-d01.dtb
