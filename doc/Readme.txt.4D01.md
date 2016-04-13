@@ -103,15 +103,15 @@ build commands(supposedly, you are in `project root` currently:
    
 **target**:
 
- zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
+ zImage in `<project root>/build/D01/kernel/arch/arm/boot/zImage`
 
- hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
+ hip04-d01.dtb in `<project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb`
         
- .kernel in <project root>/build/D01/kernel/.kernel
+ .kernel in `<project root>/build/D01/kernel/.kernel`
         
- .filesystem in <project root>/build/D01/binary/.filesystem
+ .filesystem in `<project root>/build/D01/binary/.filesystem`
         
-**source**: <project root>/kernel
+**source**: `<project root>/kernel`
 
 build commands(supposedly, you are in `project root` currently:
  ```
