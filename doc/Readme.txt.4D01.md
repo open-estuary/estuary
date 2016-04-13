@@ -46,7 +46,7 @@ build commands(supposedly, you are in `<project root>` currently):
  `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
-###grubarm32.efi<br>
+###grubarm32.efi
 ###grub.cfg
 
 **description:**
@@ -84,9 +84,9 @@ build commands(supposedly, you are in `project root` currently:
     popd
 ```
     
-###zImage<br>
-###hip04-d01.dtb<br>
-###.kernel<br>
+###zImage
+###hip04-d01.dtb
+###.kernel
 ###.filesystem
 
 **descriptions**:
