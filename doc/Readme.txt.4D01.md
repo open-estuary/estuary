@@ -61,7 +61,7 @@ More detail about them, please refer to Grub_Manual.txt.
 
 *source*: ｀<project root>/grub｀
 
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `project root` currently:
 
 ```
     export CROSS_COMPILE=arm-linux-gnueabihf-
@@ -111,7 +111,7 @@ build commands(supposedly, you are in <project root> currently:
         
 *source*: <project root>/kernel
 
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `project root` currently:
  ```
     export ARCH=arm
     export CROSS_COMPILE=arm-linux-gnueabihf-
