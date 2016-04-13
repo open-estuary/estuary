@@ -79,7 +79,7 @@ build commands(supposedly, you are in <project root> currently:
     pushd /home/user/grubbuild
     ./bin/grub-mkimage -v -o grubarm32.efi -O arm-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     popd
-    ```
+```
     
 **zImage**<br>
 **hip04-d01.dtb**<br>
