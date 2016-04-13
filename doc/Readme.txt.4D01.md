@@ -30,7 +30,7 @@ build commands(supposedly, you are in <project root> currently:
     
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
     ```
-**.text**
+**.text**<br>
 **.monitor**
 
 description: boot wrapper files to take responsible of switching into HYP mode.
@@ -39,7 +39,7 @@ source: <project root>/bootwrapper
    `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
-**grubarm32.efi**
+**grubarm32.efi**<br>
 **grub.cfg**
 
 description:
@@ -70,9 +70,9 @@ build commands(supposedly, you are in <project root> currently:
     popd
     ```
     
-**zImage**
-**hip04-d01.dtb**
-**.kernel**
+**zImage**<br>
+**hip04-d01.dtb**<br>
+**.kernel**<br>
 **.filesystem**
 
 descriptions:
@@ -114,6 +114,8 @@ build commands(supposedly, you are in <project root> currently:
     cp .kernel ../build/D01/binary/
     popd
   ```
+  
+  
   
 More detail about distributions, please refer to [Distributions_Guide.md](//github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.md.4All)
 More detail about toolchains, please refer to [Toolchains_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.md.4All)
