@@ -3,14 +3,15 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 
 **UEFI_D01.fd** 
 
-description: UEFI_D01.fd is the UEFI bios for D01 platform.
+*description*: UEFI_D01.fd is the UEFI bios for D01 platform.
 
-target: <project root>/build/D01/binary/
+*target*: `<project root>/build/D01/binary/`
 
-source: <project root>/uefi
+*source*: `<project root>/uefi`
 
 build commands(supposedly, you are in <project root> currently:
-    ```
+
+ ```
     export ARCH=
     export CROSS_COMPILE=arm-linux-gnueabihf-
     # prepare uefi-tools
@@ -21,8 +22,7 @@ build commands(supposedly, you are in <project root> currently:
     echo "DSC=HisiPkg/D01BoardPkg/D01BoardPkg.dsc" >> platforms.config
     echo "ARCH=ARM" >> platforms.config
     popd
-    ```
-    ```
+   
     # compile uefi for D01
     pushd uefi
     # roll back to special version for D01
@@ -32,34 +32,37 @@ build commands(supposedly, you are in <project root> currently:
     ../tools/uefi-tools/uefi-build.sh -b DEBUG d01
     
     cp Build/D01/DEBUG_GCC49/FV/D01.fd ../build/D01/binary/UEFI_D01.fd
-    ```
+  ```
+  
 **.text**<br>
 **.monitor**
 
-description: boot wrapper files to take responsible of switching into HYP mode.
+*description*: boot wrapper files to take responsible of switching into HYP mode.
 
-target: <project root>/build/D01/bootwrapper/
+*target*: `<project root>/build/D01/bootwrapper/`
 
-source: <project root>/bootwrapper
+*source*: `<project root>/bootwrapper`
 
-  `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
+ `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
 **grubarm32.efi**<br>
 **grub.cfg**
 
-description:
-    grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
-    
-    grub.cfg is used by grubaa64.efi to config boot options.
-    
-    More detail about them, please refer to Grub_Manual.txt.
-    
-target: <project root>/build/D01/grub/
+*description:*
 
-source: <project root>/grub
+grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+    
+grub.cfg is used by grubaa64.efi to config boot options.
+    
+More detail about them, please refer to Grub_Manual.txt.
+    
+*target*: ｀<project root>/build/D01/grub/｀
+
+*source*: ｀<project root>/grub｀
 
 build commands(supposedly, you are in <project root> currently:
+
 ```
     export CROSS_COMPILE=arm-linux-gnueabihf-
     pushd grub
@@ -86,17 +89,17 @@ build commands(supposedly, you are in <project root> currently:
 **.kernel**<br>
 **.filesystem**
 
-descriptions:
+*descriptions*:
 
-  zImage is the compressed kernel executable program.
+ zImage is the compressed kernel executable program.
     
-   hip04-d01.dtb is the device tree binary.
+ hip04-d01.dtb is the device tree binary.
    
-   .kernel is the file combining zImage and hip04-d01.dtb.
+ .kernel is the file combining zImage and hip04-d01.dtb.
    
-   .filesystem is a special rootfs for D01 booting from NORFLASH.
+  .filesystem is a special rootfs for D01 booting from NORFLASH.
    
-target: zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
+*target*: zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
 
 hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
         
@@ -104,10 +107,10 @@ hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d0
         
      .filesystem in <project root>/build/D01/binary/.filesystem
         
-source: <project root>/kernel
+*source*: <project root>/kernel
 
 build commands(supposedly, you are in <project root> currently:
-  ```
+ ```
     export ARCH=arm
     export CROSS_COMPILE=arm-linux-gnueabihf-
 
@@ -134,8 +137,7 @@ build commands(supposedly, you are in <project root> currently:
     cp arch/arm/boot/dts/hip04-d01.dtb ../build/D01/binary/
     cp .kernel ../build/D01/binary/
     popd
-  ```
-  
+ ```
   
   
 More detail about distributions, please refer to [Distributions_Guide.md](//github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.md.4All)
