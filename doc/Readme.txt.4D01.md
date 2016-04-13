@@ -9,7 +9,7 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 
 **source**: `<project root>/uefi`
 
-build commands(supposedly, you are in `project root` currently):
+build commands(supposedly, you are in `<project root>` currently):
 
  ```
     export ARCH=
@@ -35,7 +35,7 @@ build commands(supposedly, you are in `project root` currently):
   ```
   
 ###.text**<br>
-###.monitor**
+###.monitor
 
 **description**: boot wrapper files to take responsible of switching into HYP mode.
 
@@ -46,8 +46,8 @@ build commands(supposedly, you are in `project root` currently):
  `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
-###grubarm32.efi**<br>
-###grub.cfg**
+###grubarm32.efi<br>
+###grub.cfg
 
 **description:**
 
