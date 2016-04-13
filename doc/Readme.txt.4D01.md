@@ -9,7 +9,7 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 
 *source*: `<project root>/uefi`
 
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `project root` currently):
 
  ```
     export ARCH=
