@@ -4,8 +4,11 @@ After you do "./estuary/build.sh -p D01 -d Ubuntu", all targets files will be pr
 **UEFI_D01.fd** 
 
 description: UEFI_D01.fd is the UEFI bios for D01 platform.
+
 target: <project root>/build/D01/binary/
+
 source: <project root>/uefi
+
 build commands(supposedly, you are in <project root> currently:
     ```
     export ARCH=
@@ -34,9 +37,12 @@ build commands(supposedly, you are in <project root> currently:
 **.monitor**
 
 description: boot wrapper files to take responsible of switching into HYP mode.
+
 target: <project root>/build/D01/bootwrapper/
+
 source: <project root>/bootwrapper
-   `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
+
+  `export CROSS_COMPILE=arm-linux-gnueabihf-make`   
    
    
 **grubarm32.efi**<br>
@@ -44,10 +50,15 @@ source: <project root>/bootwrapper
 
 description:
     grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+    
     grub.cfg is used by grubaa64.efi to config boot options.
+    
     More detail about them, please refer to Grub_Manual.txt.
+    
 target: <project root>/build/D01/grub/
+
 source: <project root>/grub
+
 build commands(supposedly, you are in <project root> currently:
 ```
     export CROSS_COMPILE=arm-linux-gnueabihf-
@@ -76,15 +87,25 @@ build commands(supposedly, you are in <project root> currently:
 **.filesystem**
 
 descriptions:
-    zImage is the compressed kernel executable program.
-    hip04-d01.dtb is the device tree binary.
-    .kernel is the file combining zImage and hip04-d01.dtb.
-    .filesystem is a special rootfs for D01 booting from NORFLASH.
+
+  zImage is the compressed kernel executable program.
+    
+   hip04-d01.dtb is the device tree binary.
+   
+   .kernel is the file combining zImage and hip04-d01.dtb.
+   
+   .filesystem is a special rootfs for D01 booting from NORFLASH.
+   
 target: zImage in <project root>/build/D01/kernel/arch/arm/boot/zImage
-        hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
-        .kernel in <project root>/build/D01/kernel/.kernel
-        .filesystem in <project root>/build/D01/binary/.filesystem
+
+hip04-d01.dtb in <project root>/build/D01/kernel/arch/arch/arm/boot/dts/hip04-d01.dtb
+        
+    .kernel in <project root>/build/D01/kernel/.kernel
+        
+     .filesystem in <project root>/build/D01/binary/.filesystem
+        
 source: <project root>/kernel
+
 build commands(supposedly, you are in <project root> currently:
   ```
     export ARCH=arm
