@@ -114,7 +114,8 @@ build commands(supposedly, you are in <project root> currently:
     cp .kernel ../build/D01/binary/
     popd
   ```
-More detail about distributions, please refer to [Distributions_Guide.md](https://baidu.com)
+  
+More detail about distributions, please refer to [Distributions_Guide.md](//github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.md.4All)
 More detail about toolchains, please refer to [Toolchains_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.md.4All)
 More detail about how to deploy target system into D01 board, please refer to [Deployment_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.md.4D01).
 More detail about how to debug, analyse, diagnose system, please refer to [Armor_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.md.4All)
