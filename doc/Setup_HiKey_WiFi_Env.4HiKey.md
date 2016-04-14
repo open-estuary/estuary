@@ -12,8 +12,8 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
  On serial console, you should see some debug message which can show if the Hikey board have
    boot into mini-rootfs systerm successfully. You can config this WiFi according to this follow
    instruction:
-```shell
- $ echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth
+   ```shell
+     $ echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth
      $ ifconfig wlan0 up
 
      ## Use the following command to know if WiFi is ok ##
@@ -21,8 +21,10 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
      ## to create a wpa_supplicant.conf ##
      $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf
-       eg: wpa_passphrase admin admin > /etc/wpa_supplicant.conf
-
+    ``` 
+   eg: wpa_passphrase admin admin > /etc/wpa_supplicant.conf
+   
+   ```shell
      $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
 
      ## wait a while for wpa_supplicant to link ##
@@ -32,14 +34,14 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
      $ ifconfig wlan0 <IP address>
      $ route add default gw <IP address>
      $ echo "nameserver <IP address>" >> /etc/resolv.conf
-       eg: ifconfig wlan0 192.168.2.80
-       eg: route add default gw 192.168.2.1
+    ```
+       eg: ifconfig wlan0 192.168.2.80<br>
+       eg: route add default gw 192.168.2.1<br>
        eg: echo "nameserver 192.168.2.1" >> /etc/resolv.conf
-```
-     NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to
-           verify it.
 
-<h2 id="1">Config WiFi On Ubuntu & Debian systerm</h2>
+   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
+
+<h2 id="2">Config WiFi On Ubuntu & Debian systerm</h2>
 
  On serial console, you should see some debug message which can show if the Hikey board have
    boot into ubuntu systerm successfully. You can config this WiFi according to this follow
@@ -60,26 +62,27 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	The device name is wlan0. The type specifies the operation mode of the wireless device.
 	managed means the device is a WiFi station or client that connects to an access point.
 	
-	2. configure the wifi data for the wifi device you selected
+   2.configure the wifi data for the wifi device you selected
+   
 	```shell
 	 cd /etc/wpa_supplicant
-    vi wpa_supplicant.con
-  ```
+         vi wpa_supplicant.con
+       ```
    then you should remove all the existed entries parenthesized by'network={'; those entries are original configures, probably not suitable
-    for your network environment, so you can delete them.
+   for your network environment, so you can delete them.
     
-  Now, you can configure your own wifi data:
+   Now, you can configure your own wifi data:
   
   `wpa_passphrase CTS 88888888 >> /etc/wpa_supplicant/wpa_supplicant.conf`
   
-  Please note that you should replace the 'CTS', '88888888' with your AP
+    Please note that you should replace the 'CTS', '88888888' with your AP
     configuring parameters. If you want to more info about this command,
     please refer to wpa_passphrase manual.
     
-  To be more security, you can remove the '#psk=xxxx' from the
+    To be more security, you can remove the '#psk=xxxx' from the
     wpa_supplicant.conf;
     
-   If your AP is hidden SSID, add thise option just following the configure
+    If your AP is hidden SSID, add thise option just following the configure
     line of 'ssid="???"' :
     scan_ssid=1
 3. configure the wifi interface
@@ -128,20 +131,20 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
    b. enable the wireless device
 
-      In the above example, wlan0 is not UP. Execute the following command to bring it up:
+   In the above example, wlan0 is not UP. Execute the following command to bring it up:
 
-	    $ sudo ip link set wlan0 up
+	  `$ sudo ip link set wlan0 up`
 
      `[sudo] password for peter`:
      
    Note: you need root privilege for the above operation.
 
-	If you run the show link command again, you can tell that wlan0 is now UP.
+   If you run the show link command again, you can tell that wlan0 is now UP.
 
 	 `$ ip link show wlan0`
-
-         wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
-	 qlen 1000
+	 
+        wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
+	qlen 1000
 	link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
       
    c. Check the connection status.
@@ -156,9 +159,9 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	   link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
 	   inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0
 	   inet6 fe80::76e5:43ff:fea1:ce65/64 scope link
-	  valid_lft forever preferred_lft forever
+	   valid_lft forever preferred_lft forever
 	  
-NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
+   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
 
 <h2 id="2">Fedora && CentOS wifi configure</h2>
 
