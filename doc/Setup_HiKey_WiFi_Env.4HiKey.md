@@ -245,7 +245,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
 2. reboot the system and verify it
 
-Same as the operation on other distributions.
+   Same as the operation on other distributions.
 
 All the above configure should be done for the first time. If you change the AP configurations, please
 update those configure files above with correct options. Otherwise, the wifi
