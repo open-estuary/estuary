@@ -12,36 +12,35 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    On serial console, you should see some debug message which can show if the Hikey board have
    boot into mini-rootfs systerm successfully. You can config this WiFi according to this follow
    instruction:
-   ```shell
-     $ echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth
-     $ ifconfig wlan0 up
-
-     ## Use the following command to know if WiFi is ok ##
-     $ iw wlan0 scan | grep SSID
-
-     ## to create a wpa_supplicant.conf ##
-     $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf
-    ``` 
-    
-   eg: wpa_passphrase admin admin > /etc/wpa_supplicant.conf
-   
    
    ```shell
-     $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
+    $ echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth
+    $ ifconfig wlan0 up
 
-     ## wait a while for wpa_supplicant to link ##
-     $ iw wlan0 link
+    ## Use the following command to know if WiFi is ok ##
+    $ iw wlan0 scan | grep SSID
 
-     ## config ip and route ##
-     $ ifconfig wlan0 <IP address>
-     $ route add default gw <IP address>
-     $ echo "nameserver <IP address>" >> /etc/resolv.conf
-    ```
-     eg: ifconfig wlan0 192.168.2.80<br>
-     eg: route add default gw 192.168.2.1<br>
-     eg: echo "nameserver 192.168.2.1" >> /etc/resolv.conf
+    ## to create a wpa_supplicant.conf ##
+    $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf
+   ``` 
+  eg: wpa_passphrase admin admin > /etc/wpa_supplicant.conf
+   
+  ```shell
+   $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
 
-   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
+   ## wait a while for wpa_supplicant to link ##
+   $ iw wlan0 link
+
+   ## config ip and route ##
+   $ ifconfig wlan0 <IP address>
+   $ route add default gw <IP address>
+   $ echo "nameserver <IP address>" >> /etc/resolv.conf
+  ```
+   eg: ifconfig wlan0 192.168.2.80<br>
+   eg: route add default gw 192.168.2.1<br>
+   eg: echo "nameserver 192.168.2.1" >> /etc/resolv.conf
+
+  NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
 
 <h2 id="2">Config WiFi On Ubuntu & Debian systerm</h2>
 
