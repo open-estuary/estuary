@@ -13,7 +13,9 @@ After you do `./estuary/build.sh -p HiKey -d Ubuntu`, all targets files will be 
 ### AndroidFastbootApp.efi 
 
 **description**: l-loader.bin - used to switch from aarch32 to aarch64 and boot, fip.bin - firmware package, ptable-linux.img - partition tables for Linux images. 
+
 **target**: `<project root>/build/HiKey/binary/`
+
 **source**: `<project root>/uefi`
 
 build commands(supposedly, you are in `<project root>` currently:
@@ -49,7 +51,7 @@ build commands(supposedly, you are in `<project root>` currently:
 
     cd ../
   ```
-The files fip.bin, l-loader.bin and ptable-linux.img are now built. All the image files are in $BUILD/l-loader directory. The Fastboot App is at adk2/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi
+The files fip.bin, l-loader.bin and ptable-linux.img are now built. All the image files are in `$BUILD/l-loader` directory. The Fastboot App is at `adk2/Build/HiKey/RELEASE_GCC49/AARCH64/AndroidFastbootApp.efi`
 
 ### grubaa64.efi 
 ### grub.cfg 
