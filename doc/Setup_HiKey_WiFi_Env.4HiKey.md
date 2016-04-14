@@ -86,14 +86,15 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     If your AP is hidden SSID, add thise option just following the configure
     line of 'ssid="???"' :
     scan_ssid=1
-3. configure the wifi interface
+    
+ 3. configure the wifi interface
 
    You must configure a corresponding wifi interface to make wifi enabled during the booting.
    ```shell
    cd /etc/network/interfaces.d
    cp -Pp wlan0.cfg.template xxxx.cfg
   ```
-  You should replace the 'xxxx' as your wifi device name, such as wlan0.
+    You should replace the 'xxxx' as your wifi device name, such as wlan0.
     Modify the new xxx.cfg, add these configurations:
     ```shell
     auto xxxx
@@ -115,7 +116,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     If your envinorment has not any wired network device, you can rename the
     eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
     
-4. reboot the system adn verify the wifi status
+ 4. reboot the system adn verify the wifi status
 
    At first, please reboot the system.
 
