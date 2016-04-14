@@ -66,11 +66,11 @@ FTP protocol is used for downloading between hardware boards and local network. 
      # Write the data into NORFLASH
      updatecpld <target address>
      ```
-     e.g.: 
-     ```
+       e.g.: 
+       ```
       provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 100000
       updatecpld 100000
-    ```
+      ```
  d. Power off and reboot board again
 
 <h2 id="2">Recover the UEFI when it broke</h2>
