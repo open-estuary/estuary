@@ -98,6 +98,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
    Proto Recv-Q Send-Q Local Address           Foreign Address         State 
     udp        0      0 *:tftp                  *:*                          
    ```
+   
 <h2 id="4">Put files in the TFTP root path</h2>
 
 Put the corresponding files into TFTP root directory, they are:
@@ -106,13 +107,15 @@ The files include: grub binary file, grub configure file, kernel Image and dtb f
 In my case, they are grubaa64.efi, Image_D02 and grub.cfg-01-xx-xx-xx-xx-xx-xx, hip05-d02.dtb.
 
 Note: 
-    1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in /etc/dhcp/dhcpd.conf.<br>
-    2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.<br>
-    3. The gurb binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.<br>
-    4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.<br>
 
-To get and config grub and grub config files, please refer to [Grub_Manual.md]().
-To get kernel and dtb file, please refer to [Readme.md]().
+   1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in `/etc/dhcp/dhcpd.conf`.<br>
+   2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.<br>
+   3. The gurb binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.<br>
+   4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.<br>
+
+To get and config grub and grub config files, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
+
+To get kernel and dtb file, please refer to Readme.md.
 
 <h2 id="5">Setup NFS server on Ubuntu</h2>
 
@@ -120,17 +123,17 @@ To get kernel and dtb file, please refer to [Readme.md]().
         
     sudo apt-get install nfs-kernel-server nfs-common portmap
                 
-* Modify configure file /etc/exports for NFS server
+* Modify configure file `/etc/exports` for NFS server
 
     Add following contents at the end of this file.
                       
     </rootnfs> *(rw,sync,no_root_squash)
                                     
-    Note: </rootnfs> is your real shared directory of rootfs of distributions for NFS server.
+    Note: `</rootnfs>` is your real shared directory of rootfs of distributions for NFS server.
 
-* Uncompress a distribution to </rootnfs>
+* Uncompress a distribution to `</rootnfs>`
 
-    To get them, please refer to Distributions_Guider.txt
+    To get them, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md)
 
 * Restart NFS service
     
