@@ -51,17 +51,15 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    Supposed the login user is peter.
    
   1.Find out the wireless device name ##
-
      `$ iw dev`
-
-	   >  phy#0
-	   >  Interface wlan0
-	  >	ifindex 3
-	   >	type managed
+      >  phy#0
+      >  Interface wlan0
+      >	 ifindex 3
+      >	 type managed
 	   
-	The above output shows that the system has 1 physical WiFi card, designated as phy#0.
-	The device name is wlan0. The type specifies the operation mode of the wireless device.
-	managed means the device is a WiFi station or client that connects to an access point.
+   The above output shows that the system has 1 physical WiFi card, designated as phy#0.
+   The device name is wlan0. The type specifies the operation mode of the wireless device.
+   managed means the device is a WiFi station or client that connects to an access point.
 	
    2.configure the wifi data for the wifi device you selected
      ```shell
@@ -86,24 +84,24 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     line of 'ssid="???"' :
     scan_ssid=1
     
-  3.configure the wifi interface
+ 3.configure the wifi interface
 
    You must configure a corresponding wifi interface to make wifi enabled during the booting.
     ```shell
    cd /etc/network/interfaces.d
    cp -Pp wlan0.cfg.template xxxx.cfg
    ```
-    You should replace the 'xxxx' as your wifi device name, such as wlan0.
-    Modify the new xxx.cfg, add these configurations:
+   You should replace the 'xxxx' as your wifi device name, such as wlan0.
+   Modify the new xxx.cfg, add these configurations:
     ```shell
     auto xxxx
     iface xxxx inet dhcp
     ```
-     You also need to replace the 'xxxx' with your wifi device name.
+   You also need to replace the 'xxxx' with your wifi device name.
     Here, we only use dhcp as the defualt network mode, if you want to
     configure others, please do it yourself.
 
-   You also need to update the configure relevant to the sys configure file
+  You also need to update the configure relevant to the sys configure file
     of sleep_auth, just modify the file path correspond to your wifi device:
    `pre-up echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth`
 
@@ -112,10 +110,10 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     here, xxxx is the wifi device name), you can find what is the phy index,
     then replace the phy0 with the correct phy index.
 
-    If your envinorment has not any wired network device, you can rename the
+   If your envinorment has not any wired network device, you can rename the
     eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
     
-  4.reboot the system adn verify the wifi status
+ 4.reboot the system adn verify the wifi status
 
    At first, please reboot the system.
 
