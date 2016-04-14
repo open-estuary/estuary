@@ -161,19 +161,19 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	  
   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
    
-<h2 id="2">Fedora && CentOS wifi configure</h2>
+<h2 id="3">Fedora && CentOS wifi configure</h2>
 
-Please run 'iw dev' to collect the wifi device information as the first step.
-You at least need to know what is the device name of your wifi.
+ Please run 'iw dev' to collect the wifi device information as the first step.
+ You at least need to know what is the device name of your wifi.
 
- 1. configure the wpa_supplicant environment
+1. configure the wpa_supplicant environment
    ```shell
    cd /etc/sysconfig
 
     vi wpa_supplicant
   ```
-  You should add your wifi device name and the relative driver in that file,
-  such as -iwlan0, -Dnl80211;
+   You should add your wifi device name and the relative driver in that file,
+   such as -iwlan0, -Dnl80211;
 
 2. Configure the wpa_supplicant.conf
 
@@ -203,7 +203,7 @@ You at least need to know what is the device name of your wifi.
   wpa_supplicant.conf is not needed since it will disclose to the others. It is
   better to remove that line in /etc/wpa_supplicant/wpa_supplicant.conf
 
---remove that line '#psk="88888888"'
+  --remove that line '#psk="88888888"'
 
 4. reboot your system and verify it
 
