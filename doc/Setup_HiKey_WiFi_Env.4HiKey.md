@@ -51,7 +51,9 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    Supposed the login user is peter.
    
 1. Find out the wireless device name ##
+
      `$ iw dev`
+     
       >  phy#0
       >  Interface wlan0
       >	 ifindex 3
@@ -62,6 +64,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    managed means the device is a WiFi station or client that connects to an access point.
 	
 2. configure the wifi data for the wifi device you selected
+
      ```shell
 	 cd /etc/wpa_supplicant
          vi wpa_supplicant.con
