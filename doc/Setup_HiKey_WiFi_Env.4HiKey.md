@@ -113,8 +113,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    If your envinorment has not any wired network device, you can rename the
     eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
     
-    
-4.reboot the system adn verify the wifi status
+ 4.reboot the system adn verify the wifi status
 
    At first, please reboot the system.
 
@@ -161,8 +160,8 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	   inet6 fe80::76e5:43ff:fea1:ce65/64 scope link
 	   valid_lft forever preferred_lft forever
 	  
-   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
-
+  NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
+   
 <h2 id="2">Fedora && CentOS wifi configure</h2>
 
 Please run 'iw dev' to collect the wifi device information as the first step.
