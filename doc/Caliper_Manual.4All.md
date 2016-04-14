@@ -82,27 +82,27 @@ The config file locate in the config and test_cases_cfg directories under the Ca
 
 1. Configure the target
 
-Configure the config/client_config.cfg file to set up the target.
+   Configure the config/client_config.cfg file to set up the target.
 
-This part includes three sections. CLIENT is the information for Host to connect the Target. The SERVER is the host ip address which is used for connecting the Target. BMCER is used for rebooting the Target: the command is for rebooting the target; the host is the machine which it can execute the command; the user, port and password are used for logging the host. If you don’t want to record your password in the config file, you can copy the pubilc-key of Host to the target and the machine which execute the reboot command.
+   This part includes three sections. CLIENT is the information for Host to connect the Target. The SERVER is the host ip address which is used for connecting the Target. BMCER is used for rebooting the Target: the command is for rebooting the target; the host is the machine which it can execute the command; the user, port and password are used for logging the host. If you don’t want to record your password in the config file, you can copy the pubilc-key of Host to the target and the machine which execute the reboot command.
 
 2. Configure the mail list
 
-Configure the config/email_config.cfg file to determine who will send and receive the mails, the mail contents will be the test reports.
+  Configure the config/email_config.cfg file to determine who will send and receive the mails, the mail contents will be the test reports.
 
-The email_info include the information of the mail, this includes the ‘From’, ‘To’, ‘Subject’ and ‘text’. The login_info is mainly for the user to login his/her mailbox to send test results. This section includes ‘user’, ‘password’ and ‘server’. For 163 mailbox, the server address is ‘smtp.163.com’.
+  The email_info include the information of the mail, this includes the ‘From’, ‘To’, ‘Subject’ and ‘text’. The login_info is mainly for the user to login his/her mailbox to send test results. This section includes ‘user’, ‘password’ and ‘server’. For 163 mailbox, the server address is ‘smtp.163.com’.
 
 3. Configure the execution way
 
-This means when the processes of building and running occurred error, if caliper will be stopped. The default value of the sections’ key are True.
+   This means when the processes of building and running occurred error, if caliper will be stopped. The default value of the sections’ key are True.
 
 4. Select the benchmarks you want to run
 
-Configure the config files located in test_cases_cfg/XXXX_cases_cfg.cfg(XXXX can be android, server, arm and common) to select the benchmarks you want to run. When you comment the corresponding sections in XXXX_cases_cfg.cfg, the tools won’t be selected.
+   Configure the config files located in test_cases_cfg/XXXX_cases_cfg.cfg(XXXX can be android, server, arm and common) to select the benchmarks you want to run. When you comment the corresponding sections in XXXX_cases_cfg.cfg, the tools won’t be selected.
 
 5. Configure the test cases you want to run in a benchmark
 
-Configure the test_cases_cfg/XXXX/benchmark_name/benchmark_name_run.cfg(XXXX can be android, server, arm and common) files to select the test cases you want to run.When you comment the corresponding sections in benchmark_name_run.cfg, the test cases of the tools won’t be run.
+   Configure the test_cases_cfg/XXXX/benchmark_name/benchmark_name_run.cfg(XXXX can be android, server, arm and common) files to select the test cases you want to run.When you comment the corresponding sections in benchmark_name_run.cfg, the test cases of the tools won’t be run.
 
 <h3 id="3.2">Run Caliper</h3>
 
