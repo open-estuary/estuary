@@ -357,10 +357,10 @@ If the command is executed successfully, the function of parser return a float n
 
 <h4 id="4.2.6">‘compute the score’ for the benchmark</h4>
 
-6.1 For latency, we can provide the exp_score_compute to compute, it has two parameter, one is base, and the other is a index.
+ * For latency, we can provide the exp_score_compute to compute, it has two parameter, one is base, and the other is a index.
 It has the function of score = (value/(10**base))** index, the index is a negtive number.
 
-6.2 For the values that is the more, the better, we provide the function of compute_speed_score, it has the same function of score = value / (10**parameter)
+ * For the values that is the more, the better, we provide the function of compute_speed_score, it has the same function of score = value / (10**parameter)
 
 <h4 id="4.2.7">Generate the yaml file</h4>
 
