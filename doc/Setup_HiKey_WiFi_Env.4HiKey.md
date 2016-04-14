@@ -87,7 +87,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
  3.configure the wifi interface
 
   You must configure a corresponding wifi interface to make wifi enabled during the booting.
-    ```shell
+  ```shell
    cd /etc/network/interfaces.d
    cp -Pp wlan0.cfg.template xxxx.cfg
    ```
