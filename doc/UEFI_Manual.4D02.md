@@ -74,7 +74,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
     ```
 d. Power off and reboot board again
 
-<h2 id="2">Recover the UEFI when it broke</h2>
+<h2 id="3">Recover the UEFI when it broke</h2>
 
 Actually the board can restore two UEFI in case of the default one breaks, then you can restore it as following way:
 
