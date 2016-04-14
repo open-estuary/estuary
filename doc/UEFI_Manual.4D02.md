@@ -57,21 +57,21 @@ FTP protocol is used for downloading between hardware boards and local network. 
     ```
    c. Burn CPLD file
     
-     	Notes: This is a very dangerous operation, please don't do it when not necessary.
+     Notes: This is a very dangerous operation, please don't do it when not necessary.
      	
-     	If you really want to do it, please make sure the power can **NOT** be shut off suddenly during updating CPLD.
+     If you really want to do it, please make sure the power can **NOT** be shut off suddenly during updating CPLD.
      	
-     	```shell
+    ```shell
      # Download file from FTP server to board's RAM
       provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
      # Write the data into NORFLASH
      updatecpld <target address>
+    ```
+     e.g.: 
      ```
-       e.g.: 
-       ```
       provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 100000
       updatecpld 100000
-      ```
+    ```
 d. Power off and reboot board again
 
 <h2 id="2">Recover the UEFI when it broke</h2>
