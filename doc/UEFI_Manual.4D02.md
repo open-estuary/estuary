@@ -11,7 +11,7 @@ Normally, there are some trust firmware will be produce from UEFI building, they
  UEFI_D02.fd      //UEFI executable binary file.
  CH02TEVBC_V03.bin   // CPLD binary to control power supplier.
 
-Where to get them, please refer to [Readme.md](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D02.md).
+Where to get them, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md).
 
 <h2 id="2">Upgrade UEFI</h2>
 
