@@ -133,32 +133,32 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	    $ sudo ip link set wlan0 up
 
      `[sudo] password for peter`:
-    Note: you need root privilege for the above operation.
+     
+   Note: you need root privilege for the above operation.
 
 	If you run the show link command again, you can tell that wlan0 is now UP.
 
 	 `$ ip link show wlan0`
 
-    ```wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
-	   qlen 1000
-	    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
-	    ```
-
+         wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
+	 qlen 1000
+	link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+      
    c. Check the connection status.
 
-	  `$ iw wlan0 link`
-
-   	you can found the connect is ok now.
+	 `$ iw wlan0 link`
+	 
+     you can found the connect is ok now.
 
 	  `$ ip addr show wlan0`
-	  ```
-	     wlan0:  mtu 1500 qdisc mq state UP qlen 1000
-	    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
-	    inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0
-	    inet6 fe80::76e5:43ff:fea1:ce65/64 scope link
-	  	valid_lft forever preferred_lft forever
-```
-  NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
+	  
+	   wlan0:  mtu 1500 qdisc mq state UP qlen 1000
+	   link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+	   inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0
+	   inet6 fe80::76e5:43ff:fea1:ce65/64 scope link
+	  valid_lft forever preferred_lft forever
+	  
+NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
 
 <h2 id="2">Fedora && CentOS wifi configure</h2>
 
@@ -166,11 +166,11 @@ Please run 'iw dev' to collect the wifi device information as the first step.
 You at least need to know what is the device name of your wifi.
 
  1. configure the wpa_supplicant environment
- ```shell
-  cd /etc/sysconfig
+   ```shell
+   cd /etc/sysconfig
 
-  vi wpa_supplicant
-```
+    vi wpa_supplicant
+  ```
   You should add your wifi device name and the relative driver in that file,
   such as -iwlan0, -Dnl80211;
 
@@ -223,27 +223,26 @@ You at least need to know what is the device name of your wifi.
 
   cp -Pp template-ifcfg-wlan0 ifcfg-xxx
  ```
-you should replace xxx with your wifi device name you pick up.
+  you should replace xxx with your wifi device name you pick up.
 
-update these configure items with your local AP settings:
+  update these configure items with your local AP settings:
 
-```shell
-  WIRELESS_ESSID='xxxx'
-  WIRELESS_WPA_PSK='yyyyyyyy'
-```
+   ```shell
+   WIRELESS_ESSID='xxxx'
+   WIRELESS_WPA_PSK='yyyyyyyy'
+   ```
 
-The 'xxxx' 'yyyyyyyy' should be replaced with your wifi SSID and KEY.
-If your AP is hidden ssid, add this option:
-WIRELESS_HIDDEN_SSID='yes'
+   The 'xxxx' 'yyyyyyyy' should be replaced with your wifi SSID and KEY.
+   If your AP is hidden ssid, add this option:
+   WIRELESS_HIDDEN_SSID='yes'
 
-Please note that, the current configuration in ifcfg-xxx is for PSK. If your
-wifi AP configuration is different, please make the relevant modifications by
-yourself.
+   Please note that, the current configuration in ifcfg-xxx is for PSK. If your
+  wifi AP configuration is different, please make the relevant modifications by
+  yourself.
 
 2. reboot the system and verify it
 
 Same as the operation on other distributions.
-
 
 All the above configure should be done for the first time. If you change the AP configurations, please
 update those configure files above with correct options. Otherwise, the wifi
