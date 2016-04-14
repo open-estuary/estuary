@@ -69,34 +69,35 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 
   Remove "#" from the beginning of tftp line or add if it’s not there under “#:BOOT:” comment as follow.
  
-  tftp    dgram   udp wait    root    /usr/sbin/in.tftpd  /usr/sbin/in.tftpd -s /var/lib/tftpboot
+  `tftp    dgram   udp wait    root    /usr/sbin/in.tftpd  /usr/sbin/in.tftpd -s /var/lib/tftpboot`
  
 * Enable boot service for inetd
   `sudo update-inetd --enable BOOT`
   
 * Configure the TFTP server, update /etc/default/tftpd-hpa like follows:
-
+  ```shell
     TFTP_USERNAME="tftp"
     TFTP_ADDRESS="0.0.0.0:69"
     TFTP_DIRECTORY="/var/lib/tftpboot"
     TFTP_OPTIONS="-l -c -s"
-
+ ```
 * Set up TFTP server directory
-
+  ```shell
     sudo mkdir /var/lib/tftpboot
     sudo chmod -R 777 /var/lib/tftpboot/
-
+  ```
 * Restart inet & TFTP server
-
+  ```shell
     sudo service openbsd-inetd restart
     sudo service tftpd-hpa restart
-    
+   ``` 
     Check status with "netstat -lu"
     
     Expected output:
-    Proto Recv-Q Send-Q Local Address           Foreign Address         State 
+    ```
+   Proto Recv-Q Send-Q Local Address           Foreign Address         State 
     udp        0      0 *:tftp                  *:*                          
-
+   ```
 <h2 id="4">Put files in the TFTP root path</h2>
 
 Put the corresponding files into TFTP root directory, they are:
