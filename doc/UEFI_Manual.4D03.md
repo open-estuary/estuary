@@ -38,7 +38,9 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
     a. IP address config
     the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
+    
     `ifconfig -s eth0 static <IP address> <mask> <gateway>`
+    
     e.g.: `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
     b. Burn BIOS file
