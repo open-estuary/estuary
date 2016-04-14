@@ -12,7 +12,7 @@ UEFI is a kind of BIOS to boot system and provide runtime service to OS which ca
 
 UEFI_D01.fd         //UEFI executable binary file for D01 board.
 
-Where to get them, please refer to [Readme.txt](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D01.md).
+Where to get them, please refer to [Readme.md](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D01.md).
 
 <h2 id="2">Upgrade UEFI</h2>
 
@@ -64,10 +64,10 @@ FTP protocol is used for downloading between hardware boards and local network. 
        spiwfmem <source address> <target address> <data length>
        ```
        e.g.: 
-       
+       ```shell
        provision 192.168.1.107 -u sch -p aaa -f UEFI_D01.fd
        updateL1 UEFI_D01.fd
-
+      ```
    d. Power off and reboot board again
 
 <h2 id="3">Recover the UEFI when it broke</h2>
@@ -86,7 +86,7 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
 
 <h3 id="4.1">Compile BootWrapper</h3>
 
- Download BootWrapper source code and build according [Readme.txt](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D01.md) to produce .text and .monitor
+ Download BootWrapper source code and build according [Readme.md](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D01.md) to produce .text and .monitor
 
 <h3 id="4.1">Upgrade Bootwrapper</h3>
 1. Boot D01 to enter UEFI "EBL" as above description.
@@ -94,7 +94,7 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
 2. IP address config:
     `ifconfig -s eth0 <IP address> <mask> <gateway>`
 
-    eg. ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1
+    eg. `ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1`
     
 3. Download BootWrapper binary from FTP server
         
@@ -103,8 +103,8 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
     provision <server IP> -u <user name> -p <password> -f .text
     provision <server IP> -u <user name> -p <password> -f .monitor
     ```
-    e.g.: provision 192.168.1.107 -u dj -p dj -f .text
+    e.g.: `provision 192.168.1.107 -u dj -p dj -f .text`
     
-    e.g.: provision 192.168.1.107 -u dj -p dj -f .monitor
+    e.g.: `provision 192.168.1.107 -u dj -p dj -f .monitor`
 
 4. Reboot the board again.
