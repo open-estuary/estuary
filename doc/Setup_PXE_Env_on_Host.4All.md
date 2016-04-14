@@ -15,11 +15,11 @@ PXE boot depends on DHCP, TFTP and NFS services. So before verifing PXE, you nee
 
 Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified direction, try these steps:
 
-1. Install DHCP server package
+* Install DHCP server package
 
 `sudo apt-get install -y isc-dhcp-server syslinux`
 
-2. Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
+* Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
 
    Make sure filename is consistent with the file in tftp root directory. 
     Here is an example: This will enable board to load "grubaa64.efi" from TFTP root to target board and run it, when you boot from PXE in UEFI Boot Menu. 
@@ -46,16 +46,16 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
     }
     #
     
-3. Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd should listen to. By default it listens to eth0.
+* Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd should listen to. By default it listens to eth0.
 
    INTERFACES=""
    
-4. Use these commands to start and check DHCP service
+* Use these commands to start and check DHCP service
   sudo service isc-dhcp-server restart
 
     Check status with "netstat -lu"
 
-    Expected output:
+   Expected output:
     Proto Recv-Q Send-Q Local Address           Foreign Address         State      
     udp        0      0 *:bootpc                *:*                                
 
@@ -113,7 +113,7 @@ Note:
 To get and config grub and grub config files, please refer to [Grub_Manual.md]().
 To get kernel and dtb file, please refer to [Readme.md]().
 
-<h2 id="1">Setup NFS server on Ubuntu</h2>
+<h2 id="5">Setup NFS server on Ubuntu</h2>
 
 * Install NFS server package
         
