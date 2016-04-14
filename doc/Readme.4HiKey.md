@@ -58,11 +58,11 @@ The files fip.bin, l-loader.bin and ptable-linux.img are now built. All the imag
 
 **description**: 
 
-    grubaa64.efi is used to load kernel image and dtb files from SD card, nandflash into RAM and start the kernel.
+grubaa64.efi is used to load kernel image and dtb files from SD card, nandflash into RAM and start the kernel.
     
-    grub.cfg is used by grubaa64.efi to config boot options.
+grub.cfg is used by grubaa64.efi to config boot options.
     
-    More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
+More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
     
 **target**: `<project root>/build/HiKey/grub/`
 
@@ -118,9 +118,14 @@ build commands(supposedly, you are in `<project root>` currently:
 ```
 If you get more information about uefi, please visit https://github.com/96boards/documentation/wiki/HiKeyUEFI
 
-More detail information about how to deploy target system into HiKey board, please refer to Deploy_Manual.txt.
-More detail information about how to config this WiFi function into HiKey board, please refer to Setup_HiKey_Wifi_Env.txt.
-More detail information about distributions, please refer to Distributions_Guider.txt
-More detail information about toolchains, please refer to Toolchains_Guider.txt
-More detail information about how to benchmark system, please refer to Caliper_Manual.txt
-More detail information about how to access remote boards in OpenLab, please refer to Boards_in_OpenLab.txt
+More detail information about how to deploy target system into HiKey board, please refer to [Deploy_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4HiKey.md).
+
+More detail information about how to config this WiFi function into HiKey board, please refer to [Setup_HiKey_Wifi_Env.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.4HiKey.md).
+
+More detail information about distributions, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).
+
+More detail information about toolchains, please refer to [Toolchains_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md).
+
+More detail information about how to benchmark system, please refer to [Caliper_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.4All.md).
+
+More detail information about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.txt.4All).
