@@ -37,14 +37,14 @@ Then you will find *.fd in <project root>/uefi/Build and the other trust firmwar
 **description**: 
     grubaa64.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
     grub.cfg is used by grubaa64.efi to config boot options.
-    More detail about them, please refer to [Grub_Manual.md]().
+    More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
     
 **target**: `<project root>/build/D02/grub/`
 
 **source**: `<project root>/grub`
 
-build commands(supposedly, you are in <project root> currently:
-```
+build commands(supposedly, you are in `<project root>` currently:
+```shell
     export CROSS_COMPILE=aarch64-linux-gnu-
     pushd grub
     # Apply patch for boot from indicated MAC address
@@ -92,9 +92,14 @@ build commands(supposedly, you are in <project root> currently:
     cp arch/arm64/boot/dts/hisilicon/hip05-d02.dtb ../build/D02/binary
     popd
 ```
-More detail about distributions, please refer to Distributions_Guide.txt
-More detail about toolchains, please refer to Toolchains_Guide.txt
-More detail about how to deploy target system into D02 board, please refer to Deployment_Manual.txt.
-More detail about how to debug, analyse, diagnose system, please refer to Armor_Manual.txt
-More detail about how to benchmark system, please refer to Caliper_Manual.txt
-More detail about how to access remote boards in OpenLab, please refer to Boards_in_OpenLab.txt
+More detail about distributions, please refer to [Distributions_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).
+
+More detail about toolchains, please refer to [Toolchains_Guide.md]().
+
+More detail about how to deploy target system into D02 board, please refer to [Deployment_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md).
+
+More detail about how to debug, analyse, diagnose system, please refer to [Armor_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md).
+
+More detail about how to benchmark system, please refer to [Caliper_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.4All.md).
+
+More detail about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.txt.4All).
