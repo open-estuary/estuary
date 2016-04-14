@@ -27,10 +27,10 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
     Follow below steps to UEFI SHELL:
     
-        a. Connect the board's UART port to a host machine with a serial cable.
-        b. Install a serial port application in host machine, e.g.: kermit or minicom.
-        c. Config serial port setting:115200/8/N/1 on host machine.
-        d. Reboot the board and press any key except "enter" to enter Boot Option Menu.
+      a. Connect the board's UART port to a host machine with a serial cable.
+      b. Install a serial port application in host machine, e.g.: kermit or minicom.
+      c. Config serial port setting:115200/8/N/1 on host machine.
+      d. Reboot the board and press any key except "enter" to enter Boot Option Menu.
     
     Then the board will enter the UEFI SHELL mode.
 
