@@ -11,7 +11,7 @@ After you do `./estuary/build.sh -p D01 -d Ubuntu`, all targets files will be pr
 
 build commands(supposedly, you are in `<project root>` currently):
 
- ```
+ ```shell
     export ARCH=
     export CROSS_COMPILE=arm-linux-gnueabihf-
     # prepare uefi-tools
@@ -66,7 +66,7 @@ More detail about them, please refer to [Grub_Manual.md](https://github.com/open
 
 build commands(supposedly, you are in `project root` currently:
 
-```
+```shell
     export CROSS_COMPILE=arm-linux-gnueabihf-
     pushd grub
     #rollbak the grub master
@@ -116,7 +116,7 @@ build commands(supposedly, you are in `project root` currently:
 **source**: `<project root>/kernel`
 
 build commands(supposedly, you are in `project root` currently:
- ```
+ ```shell
     export ARCH=arm
     export CROSS_COMPILE=arm-linux-gnueabihf-
 
