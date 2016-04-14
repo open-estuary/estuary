@@ -23,7 +23,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 
    Make sure filename is consistent with the file in tftp root directory. 
     Here is an example: This will enable board to load "grubaa64.efi" from TFTP root to target board and run it, when you boot from PXE in UEFI Boot Menu. 
-
+    ```
     $ cat /etc/dhcp/dhcpd.conf
     # Sample /etc/dhcpd.conf
     # (add your comments here)
@@ -45,7 +45,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
         #next-server 192.168.1.107
     }
     #
-    
+    ```
 * Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd should listen to. By default it listens to eth0.
 
    INTERFACES=""
