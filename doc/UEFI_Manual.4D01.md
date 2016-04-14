@@ -22,22 +22,27 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
 1. Prepare files about UEFI on local computer
 
-All files mentioned above should be ready firstly, then put them in the root directory of FTP.
+  All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
 2. Boot board into UEFI Boot Menu and EBL
 
-Follow below steps to enter UEFI "Boot Menu" and "EBL":
+  Follow below steps to enter UEFI "Boot Menu" and "EBL":
 
   a. Make sure Jumper J39 is in position 1 and 2.
      This means to use custom UEFI, If position 2 and 3 are connected, it will boot with the default UEFI, which could never be flashed.
+     
   b. Connect the board's UART port to a host machine with a serial cable.
+  
   c. Install a serial port application in host machine, e.g.: kermit or minicom.
+  
   d. Config serial port setting:115200/8/N/1 on host machine.
+  
   e. Keep pressing ‘s’ in minicom or other serial port application to start UEFI "Boot Menu".
+  
   f. Select "EBL" boot option and press "Enter".
     Type "help" to see all commands supported in EBL.
       
-Then the board will enter the UEFI SHELL mode.
+  Then the board will enter the UEFI SHELL mode.
 
 3. Update UEFI files
 
