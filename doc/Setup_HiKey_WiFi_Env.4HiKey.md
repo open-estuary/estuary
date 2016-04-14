@@ -66,40 +66,40 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	 cd /etc/wpa_supplicant
          vi wpa_supplicant.con
        ```
-    then you should remove all the existed entries parenthesized by'network={'; those entries are original configures, probably not suitable
-    for your network environment, so you can delete them.
+   then you should remove all the existed entries parenthesized by'network={'; those entries are original configures, probably not suitable
+   for your network environment, so you can delete them.
     
     Now, you can configure your own wifi data:
   
    `wpa_passphrase CTS 88888888 >> /etc/wpa_supplicant/wpa_supplicant.conf`
   
-    Please note that you should replace the 'CTS', '88888888' with your AP
-    configuring parameters. If you want to more info about this command,
-    please refer to wpa_passphrase manual.
+   Please note that you should replace the 'CTS', '88888888' with your AP
+   configuring parameters. If you want to more info about this command,
+   please refer to wpa_passphrase manual.
     
-    To be more security, you can remove the '#psk=xxxx' from the
-    wpa_supplicant.conf;
+   To be more security, you can remove the '#psk=xxxx' from the
+   wpa_supplicant.conf;
     
-    If your AP is hidden SSID, add thise option just following the configure
-    line of 'ssid="???"' :
-    scan_ssid=1
+   If your AP is hidden SSID, add thise option just following the configure
+   line of 'ssid="???"' :
+   scan_ssid=1
     
  3.configure the wifi interface
 
-   You must configure a corresponding wifi interface to make wifi enabled during the booting.
+  You must configure a corresponding wifi interface to make wifi enabled during the booting.
     ```shell
    cd /etc/network/interfaces.d
    cp -Pp wlan0.cfg.template xxxx.cfg
    ```
-   You should replace the 'xxxx' as your wifi device name, such as wlan0.
-   Modify the new xxx.cfg, add these configurations:
+  You should replace the 'xxxx' as your wifi device name, such as wlan0.
+  Modify the new xxx.cfg, add these configurations:
     ```shell
     auto xxxx
     iface xxxx inet dhcp
     ```
-   You also need to replace the 'xxxx' with your wifi device name.
-    Here, we only use dhcp as the defualt network mode, if you want to
-    configure others, please do it yourself.
+  You also need to replace the 'xxxx' with your wifi device name.
+  Here, we only use dhcp as the defualt network mode, if you want to
+  configure others, please do it yourself.
 
   You also need to update the configure relevant to the sys configure file
     of sleep_auth, just modify the file path correspond to your wifi device:
@@ -113,26 +113,27 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    If your envinorment has not any wired network device, you can rename the
     eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
     
- 4.reboot the system adn verify the wifi status
+    
+4.reboot the system adn verify the wifi status
 
    At first, please reboot the system.
 
-    After the system is ready, you can check whether the wifi is ready:
+   After the system is ready, you can check whether the wifi is ready:
     
    a. Check whether the wireless device is up.
 
-    	$ ip link show wlan0
-
-	   ` 3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
-	    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff`
+   `$ ip link show wlan0`
+   
+      3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
+     link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
 	    
-    	Look for the word "UP" inside the brackets in the first line of the output.
+    Look for the word "UP" inside the brackets in the first line of the output.
 
    b. enable the wireless device
 
    In the above example, wlan0 is not UP. Execute the following command to bring it up:
 
-	  `$ sudo ip link set wlan0 up`
+     `$ sudo ip link set wlan0 up`
 
      `[sudo] password for peter`:
      
