@@ -9,7 +9,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
 <h2 id="1">Config WiFi On mini-rootfs systerm</h2>
 
- On serial console, you should see some debug message which can show if the Hikey board have
+   On serial console, you should see some debug message which can show if the Hikey board have
    boot into mini-rootfs systerm successfully. You can config this WiFi according to this follow
    instruction:
    ```shell
@@ -22,7 +22,9 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
      ## to create a wpa_supplicant.conf ##
      $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf
     ``` 
+    
    eg: wpa_passphrase admin admin > /etc/wpa_supplicant.conf
+   
    
    ```shell
      $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
@@ -35,9 +37,9 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
      $ route add default gw <IP address>
      $ echo "nameserver <IP address>" >> /etc/resolv.conf
     ```
-       eg: ifconfig wlan0 192.168.2.80<br>
-       eg: route add default gw 192.168.2.1<br>
-       eg: echo "nameserver 192.168.2.1" >> /etc/resolv.conf
+     eg: ifconfig wlan0 192.168.2.80<br>
+     eg: route add default gw 192.168.2.1<br>
+     eg: echo "nameserver 192.168.2.1" >> /etc/resolv.conf
 
    NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
 
