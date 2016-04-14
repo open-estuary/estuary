@@ -10,7 +10,16 @@
   * [Caliper output](#3.3)
     * [The Format of Yaml](#3.3.1)
 * [Architecture & Contribute more benchmarks](#4)
-   
+  * [The architecture of Caliper](#4.1)
+  * [Add benchmarks to Caliper](#4.2)
+    * [the structure of test cases definition](#4.2.1)
+    * [Define the benchmark](#4.2.2)
+    * [‘Build’ the benchmark](#4.2.3)
+    * [‘Run’ the benchmark](#4.2.4)
+    * [‘Parser’ the benchmark](#4.2.5)
+    * [‘compute the score’ for the benchmark](#4.2.6)
+    * [Generate the yaml file](#4.2.7)
+
 <h2 id="1">How to Use Caliper?</h2>
 
 The test suite mainly includes performance test cases, it can be used to test the performance of machine, and now we have not integrated many functional tests. The test suite can run on Linux, the machines can belong to x86_64, arm_32, arm_64. Here is steps to setup testbed.
@@ -171,10 +180,11 @@ test_cases_cfg: benchmarks which will be compiled and run are defined in this di
 <h3 id="4.2"> Add benchmarks to Caliper</h3>
 
 If a benchmark need to be added in Caliper, some steps should be done.
-1.the structure of test cases definition
+
+<h4 id="4.2.1">the structure of test cases definition</h4>
 
 The directory named of test_cases_def is the key of how to build, run and parser. The tree of it is listed in the follow. If you want to add a benchmark, you not only need to add the section about it in XXX_cases_def.cfg (XXX can be common, server arm, or android, this depends on your classfication of the test cases), but also need to define the build process of build, the config file of run, and the parser scripts used to get results.
-
+```
 .
 ├── android
 ├── android_cases_def.cfg
@@ -185,9 +195,9 @@ The directory named of test_cases_def is the key of how to build, run and parser
 ├── README
 ├── server
 └── server_cases_def.cfg
-
+```
 The architecture of common directory looks like below. Namely, the build script, the run config file should be added in the directory. If the test cases need server and client, then you need to have a more XXX_server_run.cfg, it is used to run the server’s commands. In addition, the parser file of a benchmark, which named iperf_parser.py or something like that, should be added in the client/parser/.
-
+```
 .
 ├── iperf
 │   ├── iperf_build.sh
@@ -196,8 +206,8 @@ The architecture of common directory looks like below. Namely, the build script,
 └── rttest
     ├── rttest_build.sh
     └── rttest_run.cfg
-
-2. Define the benchmark
+```
+<h4 id="4.2.2">Define the benchmark</h4>
 
 Add the corresponding information in test_cases_cfg/test_cases_define.cfg. The format of the info is listed below.
 
@@ -207,12 +217,13 @@ run = lmbench_run.cfg
 parser = lmbench_parser.py
 
 The options of build, run and parser are indispensable. The values in the section are all files which need to be located in the classfication folder(common, arm, server and so on).
-3. ‘Build’ the benchmark
+
+<h4 id="4.2.3">‘Build’ the benchmark</h4>
 
 The script file which is specified by the build option can compile the benchmark. The exsiting shell script of other benchmarks can be referenced. The path should be taken into consideration. Take the scimark build for example.
 
 the scimark build scripts:
-
+```
 1 build_scimark() {
 2     set -e
 3     SrcPath=${BENCH_PATH}"402.scimark"
@@ -244,20 +255,23 @@ the scimark build scripts:
 29 }
 30 
 31 build_scimark
+```
 
 You should change the value of SrcPath and myOBJPATH, to use your benchmaarks name to replace 402.scimarkand use your expected name to resplace bin.
 Then you can define the build commands in the later space. For different arch, you can use different commands.
-4. ‘Run’ the benchmark
+
+ <h4 id="4.2.4">‘Run’ the benchmark</h4>
+ 
 When you run caliper, if the build process finished, caliper will scp the binary files to the remote target, and then run the commans you defined in the XXX_run.cfg on the remote target. The run option illustrates the configuration of running the benchmark.
 
 The content of the configuration file is like this:
-
+```
 1 [scimark]
 2 category = Performance cpu multicore_float scimark
 3 scores_way =  compute_speed_score 1
 4 command = ./bin/scimark2
 5 parser = scimark_parser
-
+```
 Each section in the configuration is a Test Case. The category key set the value of the Test Cases category. The scores_way is set to compute the score of the Test Case. The method set in the scores_way can be found in scores_method.py in the compute_model directory which locates in server directory. New computation method can be added in that file. The command is the instruction which will be run on the target. The parser set the method to parser the output of the command, the parser must be implemented in the parser file.
 
 Note: the commands in the command must can be found in the binary files directory, it should have the expected name in the commands.
@@ -265,37 +279,38 @@ Note: the commands in the command must can be found in the binary files director
 Also, we support the different length of category. Why we use so many kinds of category, it is because one test case may include many values which belong to different kinds of categories.
 
 1). One
-
+```
 1 [lmbench]
 2 category = Performance     (lmbench covers some subsytem, such as cpu, network, and so on)
 3 scores_way = compute_speed_score 2
 4 command = 'cd lmbench; ./lmbench CONFIG'
 5 parser = lmbench_parser
-
+```
 2).Two
-
+```
 1 [nbench]
 2 category = Performance cpu  (nbench covers sincore_int and sincore_float)
 3 scores_way =  compute_speed_score 1
 4 command = "pushd nbench; ./nbench; popd"
 5 parser = nbench_parser
-
+```
 3).Three
-
+```
 1 [iozone]
 2 category = Performance disk bandwidth  (iozone cover the read, write and so on in bandwidth)
 3 scores_way =  compute_speed_score 5
 4 command = "cd bin; ./iozone -s5g -r1M -I; cd .."
 5 parser = iozone_parser
+```
 4).Four
-
+```
 1 [scimark]
 2 category = Performance cpu multicore_float scimark
 3 scores_way =  compute_speed_score 1
 4 command = ./bin/scimark2
 5 parser = scimark_parser
-
-5. ‘Parser’ the benchmark
+```
+<h4 id="4.2.5">‘Parser’ the benchmark</h4>
 
 The parser method has been set, and it must be implemented, in the above example of code, the function of scimark_parser must be in the file of scimark_parser.py. This file should be located in the client/parser folder.
 
@@ -339,12 +354,14 @@ The parser will return a dictionary, it looks like {‘read’:’1234’, ‘wr
 2 category = Performance cpu multicore_float scimark
 3 scores_way =  compute_speed_score 1
 If the command is executed successfully, the function of parser return a float number; or the 0 should be returned.
-6. ‘compute the score’ for the benchmark
+
+<h4 id="4.2.6">‘compute the score’ for the benchmark</h4>
 
 6.1 For latency, we can provide the exp_score_compute to compute, it has two parameter, one is base, and the other is a index.
 It has the function of score = (value/(10**base))** index, the index is a negtive number.
 
 6.2 For the values that is the more, the better, we provide the function of compute_speed_score, it has the same function of score = value / (10**parameter)
-7. Generate the yaml file
+
+<h4 id="4.2.7">Generate the yaml file</h4>
 
 The values generated by the run and parser will be stored in the yaml file, the hoatname.yaml store the original values. the hostname_score.yaml store the normalized values, the compute method is defined in the scores_way = compute_speed_score 5. The hostname_score_post.yaml has got the total value from each point scores. It will be used for drawing graph.
