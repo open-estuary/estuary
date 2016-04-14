@@ -1,6 +1,7 @@
 This is the guide for toolchains
 
 If your host machine and target machine have the different architecture, you have to prepare toolchains before you build any target binaries.
+
 E.g. if you are building an arm-based target binary on Intel machine, you must use them in your host machine.
 By default, after you do `./esutary/build.sh -i toolchain`, the toolchain will be install your host machine's `/opt` directory.
 
