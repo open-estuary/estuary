@@ -97,23 +97,22 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     auto xxxx
     iface xxxx inet dhcp
     ```
-  You also need to replace the 'xxxx' with your wifi device name.
-  Here, we only use dhcp as the defualt network mode, if you want to
-  configure others, please do it yourself.
+ You also need to replace the 'xxxx' with your wifi device name.
+ Here, we only use dhcp as the defualt network mode, if you want to
+ configure others, please do it yourself.
 
-  You also need to update the configure relevant to the sys configure file
-  of sleep_auth, just modify the file path correspond to your wifi device:
-  `pre-up echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth`
+ You also need to update the configure relevant to the sys configure file
+ of sleep_auth, just modify the file path correspond to your wifi device:
+ `pre-up echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth`
 
-  This configure matchs to wlan0. If your device is not wlan0, please check
-  what is the right path based on the output of the above 'iw dev xxxx' (
-  here, xxxx is the wifi device name), you can find what is the phy index,
-  then replace the phy0 with the correct phy index.
+ This configure matchs to wlan0. If your device is not wlan0, please check
+ what is the right path based on the output of the above 'iw dev xxxx' (
+ here, xxxx is the wifi device name), you can find what is the phy index,
+ then replace the phy0 with the correct phy index.
 
-  If your envinorment has not any wired network device, you can rename the eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
+ If your envinorment has not any wired network device, you can rename the eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
     
-    
-4.reboot the system adn verify the wifi status
+4. reboot the system adn verify the wifi status
 
    At first, please reboot the system.
 
