@@ -50,7 +50,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
    Supposed the login user is peter.
    
-  1. Find out the wireless device name ##
+1. Find out the wireless device name ##
      `$ iw dev`
       >  phy#0
       >  Interface wlan0
@@ -61,7 +61,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    The device name is wlan0. The type specifies the operation mode of the wireless device.
    managed means the device is a WiFi station or client that connects to an access point.
 	
-   2. configure the wifi data for the wifi device you selected
+2. configure the wifi data for the wifi device you selected
      ```shell
 	 cd /etc/wpa_supplicant
          vi wpa_supplicant.con
@@ -83,8 +83,8 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    If your AP is hidden SSID, add thise option just following the configure
    line of 'ssid="???"' :
    scan_ssid=1
-    
- 3. configure the wifi interface
+   
+3. configure the wifi interface
 
   You must configure a corresponding wifi interface to make wifi enabled during the booting.
   ```shell
