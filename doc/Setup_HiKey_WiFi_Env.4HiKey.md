@@ -64,17 +64,16 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	managed means the device is a WiFi station or client that connects to an access point.
 	
    2.configure the wifi data for the wifi device you selected
-   
-	```shell
+     ```shell
 	 cd /etc/wpa_supplicant
          vi wpa_supplicant.con
        ```
-   then you should remove all the existed entries parenthesized by'network={'; those entries are original configures, probably not suitable
-   for your network environment, so you can delete them.
+    then you should remove all the existed entries parenthesized by'network={'; those entries are original configures, probably not suitable
+    for your network environment, so you can delete them.
     
-   Now, you can configure your own wifi data:
+    Now, you can configure your own wifi data:
   
-  `wpa_passphrase CTS 88888888 >> /etc/wpa_supplicant/wpa_supplicant.conf`
+   `wpa_passphrase CTS 88888888 >> /etc/wpa_supplicant/wpa_supplicant.conf`
   
     Please note that you should replace the 'CTS', '88888888' with your AP
     configuring parameters. If you want to more info about this command,
@@ -87,13 +86,13 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     line of 'ssid="???"' :
     scan_ssid=1
     
- 3. configure the wifi interface
+  3.configure the wifi interface
 
    You must configure a corresponding wifi interface to make wifi enabled during the booting.
-   ```shell
+    ```shell
    cd /etc/network/interfaces.d
    cp -Pp wlan0.cfg.template xxxx.cfg
-  ```
+   ```
     You should replace the 'xxxx' as your wifi device name, such as wlan0.
     Modify the new xxx.cfg, add these configurations:
     ```shell
@@ -104,11 +103,11 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     Here, we only use dhcp as the defualt network mode, if you want to
     configure others, please do it yourself.
 
-    You also need to update the configure relevant to the sys configure file
+   You also need to update the configure relevant to the sys configure file
     of sleep_auth, just modify the file path correspond to your wifi device:
-   ` pre-up echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth`
+   `pre-up echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth`
 
-    This configure matchs to wlan0. If your device is not wlan0, please check
+   This configure matchs to wlan0. If your device is not wlan0, please check
     what is the right path based on the output of the above 'iw dev xxxx' (
     here, xxxx is the wifi device name), you can find what is the phy index,
     then replace the phy0 with the correct phy index.
@@ -116,7 +115,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     If your envinorment has not any wired network device, you can rename the
     eth3.cfg in `/etc/network/interfaces.d` as eth3.cfg.template;
     
- 4. reboot the system adn verify the wifi status
+  4.reboot the system adn verify the wifi status
 
    At first, please reboot the system.
 
