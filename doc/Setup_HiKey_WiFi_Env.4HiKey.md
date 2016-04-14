@@ -54,10 +54,10 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
      `$ iw dev`
      
-      >  phy#0
-      >  Interface wlan0
-      >	 ifindex 3
-      >	 type managed
+     phy#0
+     Interface wlan0
+     ifindex 3
+     type managed
 	   
    The above output shows that the system has 1 physical WiFi card, designated as phy#0.
    The device name is wlan0. The type specifies the operation mode of the wireless device.
@@ -80,8 +80,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    configuring parameters. If you want to more info about this command,
    please refer to wpa_passphrase manual.
     
-   To be more security, you can remove the '#psk=xxxx' from the
-   wpa_supplicant.conf;
+   To be more security, you can remove the '#psk=xxxx' from the wpa_supplicant.conf;
     
    If your AP is hidden SSID, add thise option just following the configure
    line of 'ssid="???"' :
@@ -123,10 +122,10 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     
    a. Check whether the wireless device is up.
 
-   `$ ip link show wlan0`
+     `$ ip link show wlan0`
    
-      3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
-     link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+     `3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
+     link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff`
 	    
     Look for the word "UP" inside the brackets in the first line of the output.
 
@@ -142,7 +141,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
    If you run the show link command again, you can tell that wlan0 is now UP.
 
-	 `$ ip link show wlan0`
+	`$ ip link show wlan0`
 	 
         wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
 	qlen 1000
@@ -150,11 +149,11 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
       
    c. Check the connection status.
 
-	 `$ iw wlan0 link`
+	`$ iw wlan0 link`
 	 
      you can found the connect is ok now.
 
-	  `$ ip addr show wlan0`
+	 `$ ip addr show wlan0`
 	  
 	   wlan0:  mtu 1500 qdisc mq state UP qlen 1000
 	   link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
