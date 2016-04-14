@@ -12,7 +12,7 @@ UEFI is a kind of BIOS to boot system and provide runtime service to OS which ca
 
 UEFI_D01.fd         //UEFI executable binary file for D01 board.
 
-Where to get them, please refer to [Readme.md](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D01.md).
+Where to get them, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D01.md).
 
 <h2 id="2">Upgrade UEFI</h2>
 
