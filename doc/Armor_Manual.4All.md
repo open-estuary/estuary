@@ -5,6 +5,7 @@
 * [How to run Tool's test scripts](#5)
 
 <h2 id="1">Introduction</h2>
+
 Armor tools supports a list of the platform tools for debug, diagnostics and monitoring and those are available in Open-Estuary Solution.
 
 Current Release Version- "armor-v1.1"
