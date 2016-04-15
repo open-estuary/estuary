@@ -152,13 +152,13 @@ Note: in some key-value pairs, the value of ‘0’ means that the test case is 
 <h3 id="4.1">The architecture of Caliper</h3>
 
 There are several files and folders in the test suite, they are listed in the follow.
-benchmarks client common.pyc frontend README.md setup.py caliper common.py config __init__.py server test_cases_cfg
+`benchmarks`,`client` ,`common.pyc` `frontend`, `README.md`,`setup.py`, `caliper`, `common.py`,`config __init__.py`,`server test_cases_cfg`
 
-benchmarks: store the benchmarks, they can be downloaded or written by yourself.
+**benchmarks**: store the benchmarks, they can be downloaded or written by yourself.
 
-caliper: run ./caliper, the benchmarks which was configured in the test_cases_cfg/XXXX_cases_def.cfg(XXXX can be common and some like that) will be compiled and generate the executable files in the build directory. Then the Host will scp the generated execution files to the Target, and then control the Target to run the commands which has been configured in the test_cases_cfg/XXXX/benchmark_name/benchmark_name_run.cfg and get the results of the command, then the host will parser the outputs. Caliper will run the commands and parser the commands one by one
+**caliper**: run `./caliper`, the benchmarks which was configured in the `test_cases_cfg/XXXX_cases_def.cfg`(XXXX can be common and some like that) will be compiled and generate the executable files in the build directory. Then the Host will scp the generated execution files to the Target, and then control the Target to run the commands which has been configured in the `test_cases_cfg/XXXX/benchmark_name/benchmark_name_run.cfg` and get the results of the command, then the host will parser the outputs. Caliper will run the commands and parser the commands one by one
 
-server: This directory contains the scripts for dispatching the build, run and parser on the Host and remote login in the Target. Also part of scripts in server directory will use the function in the directory named of client. The thought of clientand server is borrowed from the Autotest.
+**server**: This directory contains the scripts for dispatching the build, run and parser on the Host and remote login in the Target. Also part of scripts in server directory will use the function in the directory named of client. The thought of clientand server is borrowed from the Autotest.
 ```
 .
 ├── build
@@ -172,8 +172,11 @@ server: This directory contains the scripts for dispatching the build, run and p
 └── utils.py
 ```
 The build directory is for building the benchmarks in Caliper.
+
 The compute_model directory mainly include the method to get the score from the parser output, the method of scoring mainly in the scores_method.py. The parser_process is mainly about the process of parsering the output of benchmarks, traverse the output to the score and draw the diagrams for Caliper.
+
 The run directory mainly includes the test_run.py, it is the main code to execute the commands in benchmarks and the parser function defined by each benchmarks.
+
 The hosts directory mainly contains the class of hosts and how to use hosts.
 
 test_cases_cfg: benchmarks which will be compiled and run are defined in this directory.
