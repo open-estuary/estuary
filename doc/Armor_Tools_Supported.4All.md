@@ -619,7 +619,7 @@
 
    version - 2.69
     
-35) LTTNG - Linux Trace Toolkit Next Generation.
+35. LTTNG - Linux Trace Toolkit Next Generation.
 
    version - 2.5.0
    
