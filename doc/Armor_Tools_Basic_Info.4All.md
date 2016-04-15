@@ -36,7 +36,7 @@ This document presents the basic information of the supported Armor tools.
 
 5. sar : Collect, report, or save system activity information.
 
-6). top : display Linux tasks. 
+6. top : display Linux tasks. 
    top shows how much CPU processing power and memory are being used, as well as other information about the running processes.
 
 7. pidstat: Report statistics for Linux tasks.
