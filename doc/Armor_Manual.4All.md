@@ -8,13 +8,13 @@
 
 Armor tools supports a list of the platform tools for debug, diagnostics and monitoring and those are available in Open-Estuary Solution.
 
-Current Release Version- "armor-v1.1"
+Current Release Version- `armor-v1.1`
 
 <h2 id="2">Information of Supported Armor Tools/h2>
 
-For the supported tools in Armor on different distributions, please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Supported.txt.4All
+For the supported tools in Armor on different distributions, please refer  https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Supported.4All.md
 
-For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Basic_Info.txt.4All
+For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Basic_Info.4All.md
 
 Documentation for LLC support in perf https://github.com/open-estuary/estuary/blob/master/doc/README.armor.perf
 
@@ -28,11 +28,11 @@ Documentation for how to verify iptables tool, please refer https://github.com/o
 
 Presently Armor tools are supported on the following distributions.
 
-**Ubuntu 15.04 ARM64**
-**Fedora 22 ARM64**
-**OpenSuse 20150813 Tumbleweed ARM64**
-**Debian Jessie 8.2 ARM64**
-**CentOS Linux release 7.2.1511 (AltArch)**
+*Ubuntu 15.04 ARM64*
+*Fedora 22 ARM64*
+*OpenSuse 20150813 Tumbleweed ARM64*
+*Debian Jessie 8.2 ARM64*
+*CentOS Linux release 7.2.1511 (AltArch)*
  
 <h2 id="4">Installation/h2>
 
@@ -45,7 +45,7 @@ Presently Armor tools are supported on the following distributions.
    Debian: run 'apt-get -y update' and 'apt-get install -f -y' commands. 
    CentOS: run 'yum -y update' command.
 
-3. On target board, Run 'armor_utility', which will provide information of the supported Armor tools, installation status and how to install on the distribution if it is not already present.   
+3. On target board, Run 'armor_utility', which will provide information of the supported Armor tools, installation status     and how to install on the distribution if it is not already present.   
 
 <h2 id="5">How to run Tool's test scripts/h2>
 
