@@ -52,121 +52,121 @@
 
      version - 4.6.2
     
-11. ethtool - query or control network driver and hardware settings, particularly for wired Ethernet devices. 
+ 11. ethtool - query or control network driver and hardware settings, particularly for wired Ethernet devices. 
 
     version - 3.16    
     
-12. swapon, swapoff : enable/disable devices and files for paging and swapping. 
+ 12. swapon, swapoff : enable/disable devices and files for paging and swapping. 
 
     version - 2.25.2   
     
-13. gdb: gnu debugger
+ 13. gdb: gnu debugger
 
     version - 7.9
    
-14. iptables - administration tool for IPv4 packet filtering and NAT.
+ 14. iptables - administration tool for IPv4 packet filtering and NAT.
 
     version - 1.4.21
     
-15. dmidecode - DMI table decoder
+ 15. dmidecode - DMI table decoder
 
     version - 2.12
    
-16. fsck - is used to check and optionally repair a Linux file system.
+ 16. fsck - is used to check and optionally repair a Linux file system.
 
    version - 2.25.2
     
-17. lscpu - display information about the CPU architecture. 
+ 17. lscpu - display information about the CPU architecture. 
 
     version - 2.25.2 
    
-18. lspci - List all PCI devices. 
+ 18. lspci - List all PCI devices. 
 
     version - 3.2.1 
    
-19. setpci - utility for querying and configuring PCI devices.  
+ 19. setpci - utility for querying and configuring PCI devices.  
 
    version - 3.2.1 
    
-20. dstat - versatile tool for generating system resource statistics. Replacement for vmstat, iostat and ifstat.
+ 20. dstat - versatile tool for generating system resource statistics. Replacement for vmstat, iostat and ifstat.
 
     version - 0.7.2
    
-21. procps - procps is the package that has a bunch of small useful utilities that give information about processes using the /proc filesystem.
+ 21. procps - procps is the package that has a bunch of small useful utilities that give information about processes using the /proc filesystem.
 
     version - 3.3.9
    
-22. tiptop - display hardware performance counters for Linux tasks.
+ 22. tiptop - display hardware performance counters for Linux tasks.
 
     version - 2.3
    
-23. iotop - simple top-like I/O monitor.
+ 23. iotop - simple top-like I/O monitor.
 
     version - 0.6
    
-24. blktrace - generate traces of the i/o traffic on block devices.
+ 24. blktrace - generate traces of the i/o traffic on block devices.
 
    version - 2.0.0
    
-25. nicstat - Show Network Interface Card Statistics.
+ 25. nicstat - Show Network Interface Card Statistics.
 
     version - 1.95
     
-26. lldptool - manage the LLDP settings and status of lldpad (Link Layer Discovery Protocol).
+ 26. lldptool - manage the LLDP settings and status of lldpad (Link Layer Discovery Protocol).
 
     version - 0.9.46
     
-27. oprofile - a system-wide profiler, capable of profiling all running code at low overhead.
+ 27. oprofile - a system-wide profiler, capable of profiling all running code at low overhead.
 
     version - 1.0.0
    
-28. latencytop - a tool for developers to visualize system latencies.
+ 28. latencytop - a tool for developers to visualize system latencies.
 
     version - 0.5
    
-29. kgdb: Kernel gnu debugger.
+ 29. kgdb: Kernel gnu debugger.
 
-30. kdb: kernel debugger.
+ 30. kdb: kernel debugger.
 
-31. systemtap - SystemTap provides free software (GPL) infrastructure to simplify the gathering of information about the running Linux system. 
+ 31. systemtap - SystemTap provides free software (GPL) infrastructure to simplify the gathering of information about the running Linux system. 
 
-32. kprobes  
+ 32. kprobes  
 
-33. crash - Analyze Linux crash dump data or a live system.
+ 33. crash - Analyze Linux crash dump data or a live system.
 
     version - 7.1.3
    
-34. memwatch - memory leak detection tool.
+ 34. memwatch - memory leak detection tool.
 
     version - 2.69
    
-35. LTTNG - Linux Trace Toolkit Next Generation.
+ 35. LTTNG - Linux Trace Toolkit Next Generation.
 
     version - 2.5.0
    
-36. powertop - program help to analyse the power consumption.
+ 36. powertop - program help to analyse the power consumption.
 
    version - 2.6.1
    
-37. slabtop - display kernel slab cache information.
+ 37. slabtop - display kernel slab cache information.
 
    version - procps-ng 3.3.9
    
-38. ktap - script based dynamic tracing tool for Linux.
+ 38. ktap - script based dynamic tracing tool for Linux.
 
    version - 0.4
    
-39. gprof - performance analysis tool.
+ 39. gprof - performance analysis tool.
 
    version - 2.25
    
-40. valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc. 
+ 40. valgrind - instrumentation framework for buiding dynamic analysis tools, which can detect memory management and threading bugs,does profiling etc. 
 
    version - 3.10.1
    
-41. pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
+ 41. pktgen - Linux packet generator is a tool to generate packets at very high speed in the kernel.Monitoring and controlling is done via /proc.
 
   Sample scripts are available online.
   
-42. packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
+ 42. packETHcli - packETHcli is the command line packet generator tool for ethernet. It allows you to create and send any possible packet or sequence of packets on the ethernet link. 
 
