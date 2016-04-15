@@ -190,7 +190,7 @@ This document presents the basic information of the supported Armor tools.
 
 46. powertop: program help to analyse the power consumption.
 
-47) slabtop: display kernel slab cache information.
+47. slabtop: display kernel slab cache information.
 
 48. ktap: script based dynamic tracing tool for Linux.
 
