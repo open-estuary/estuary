@@ -56,7 +56,7 @@ Presently Armor tools are supported on the following distributions.
 
 3. On target board, Run `armor_utility`, which will provide information of the supported Armor tools, installation status     and how to install on the distribution if it is not already present.   
 
-<h2 id="4">How to run Tool's test scripts</h2>
+<h2 id="5">How to run Tool's test scripts</h2>
 
 1. Go to the `/usr/local/armor/test_scripts` on the target terminal. 
    
