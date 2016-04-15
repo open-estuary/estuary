@@ -313,47 +313,48 @@ Also, we support the different length of category. Why we use so many kinds of c
 ```
 <h4 id="4.2.5">‘Parser’ the benchmark</h4>
 
-The parser method has been set, and it must be implemented, in the above example of code, the function of scimark_parser must be in the file of scimark_parser.py. This file should be located in the client/parser folder.
-
+The parser method has been set, and it must be implemented, in the above example of code, the function of scimark_parser must be in the file of scimark_par`ser.py. This file should be located in the client/parser folder.
+```
 8 def scimark_parser(content, outfp):
 9     value = -1
      ...
 22    return value
-
+```
 Notes: the funtion of parser must have two args: the first represents the output of executing commands, it is come from fd.read(); the second is the file pointer which writes the parser log file. In addtion the parser must return an number, which is needed for the later score computing.
 
 Notes: According to the length of the category in XXX_run.cfg, the parser needs to return different values.
 
 1) Return Three embedded dictionary (the length of category is 1)
-
+```
 1 [lmbench]
 2 category = Performance   
 3 scores_way = compute_speed_score 2
-
+```
 The parser need to return a dictionary. the CPU part is dic[‘cpu’], memory is dic[‘memory’], etc. Each element of the list is a dictionary, it looks like this: {multicore_int:{key1:value1, key2: value2 …}, multicore_float:{}}.
 
 But if some values are about latency while others are about bandwidth in the dictionary, it is not scientific to use one formula to get the score for latency and bandwidth, they need different compute methods. The function of compute_speed_score is suitable for the bandwidth and is not suitable for latency.
 
 2) Return Two embedded dictionary (the length of category is 2)
-
+```
 1 [nbench]
 2 category = Performance cpu
-
+```
 In this kind, the category only shows it belongs to the ‘Performance cpu’, the parser will return a dictionary, the dictionary looks like ‘{‘sincore_int’:{key1:value1, key2: value2 ….}}’, so that in yaml file, the category can be interpreted to ‘performance cpu sincore_int key1’. If the parser return a dictionary, then all values in the dictionary will use the function to do the normalisation.
 
 3) Return a dictionary (the length of category is 3)
-
+```
 1 [iozone]
 2 category = Performance disk bandwidth  (iozone cover the read, write and so on in bandwidth)
 3 scores_way =  compute_speed_score 5 
-
+```
 The parser will return a dictionary, it looks like {‘read’:’1234’, ‘write’: ‘780’, …}. All the value in the dictionary will be computed by the ‘compute_speed_score 5 ‘ later.
 
 4) Return a number (the length of category is 4)
-
+```
 1 [scimark]
 2 category = Performance cpu multicore_float scimark
 3 scores_way =  compute_speed_score 1
+```
 If the command is executed successfully, the function of parser return a float number; or the 0 should be returned.
 
 <h4 id="4.2.6">‘compute the score’ for the benchmark</h4>
