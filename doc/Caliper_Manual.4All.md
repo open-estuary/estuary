@@ -58,17 +58,17 @@ Note: Current building for x86_32 platform is not supported now. For cross compi
 
 <h2 id="2">Download and Install</h2>
 
-git clone http://github.com/HTSAT/caliper.git
+`git clone http://github.com/HTSAT/caliper.git`
 
 This will download a directory named caliper in your current operation directory.
 
 Enter the test suite:
-
+```shell
 cd caliper
-
+```
 Install Caliper (Optional):
 
-sudo python setup.py install
+`sudo python setup.py install`
 
 When you install Caliper in your system, the config files locate in the `/etc/caliper/config/` and `/etc/caliper/test_cases_cfg/`.
 
@@ -82,13 +82,13 @@ The config file locate in the config and test_cases_cfg directories under the Ca
 
 1. Configure the target
 
-   Configure the config/client_config.cfg file to set up the target.
+   Configure the `config/client_config.cfg` file to set up the target.
 
    This part includes three sections. CLIENT is the information for Host to connect the Target. The SERVER is the host ip address which is used for connecting the Target. BMCER is used for rebooting the Target: the command is for rebooting the target; the host is the machine which it can execute the command; the user, port and password are used for logging the host. If you don’t want to record your password in the config file, you can copy the pubilc-key of Host to the target and the machine which execute the reboot command.
 
 2. Configure the mail list
 
-  Configure the config/email_config.cfg file to determine who will send and receive the mails, the mail contents will be the test reports.
+  Configure the `config/email_config.cfg` file to determine who will send and receive the mails, the mail contents will be the test reports.
 
   The email_info include the information of the mail, this includes the ‘From’, ‘To’, ‘Subject’ and ‘text’. The login_info is mainly for the user to login his/her mailbox to send test results. This section includes ‘user’, ‘password’ and ‘server’. For 163 mailbox, the server address is ‘smtp.163.com’.
 
@@ -98,29 +98,29 @@ The config file locate in the config and test_cases_cfg directories under the Ca
 
 4. Select the benchmarks you want to run
 
-   Configure the config files located in test_cases_cfg/XXXX_cases_cfg.cfg(XXXX can be android, server, arm and common) to select the benchmarks you want to run. When you comment the corresponding sections in XXXX_cases_cfg.cfg, the tools won’t be selected.
+   Configure the config files located in `test_cases_cfg/XXXX_cases_cfg.cfg`(XXXX can be android, server, arm and common) to select the benchmarks you want to run. When you comment the corresponding sections in XXXX_cases_cfg.cfg, the tools won’t be selected.
 
 5. Configure the test cases you want to run in a benchmark
 
-   Configure the test_cases_cfg/XXXX/benchmark_name/benchmark_name_run.cfg(XXXX can be android, server, arm and common) files to select the test cases you want to run.When you comment the corresponding sections in benchmark_name_run.cfg, the test cases of the tools won’t be run.
+   Configure the `test_cases_cfg/XXXX/benchmark_name/benchmark_name_run.cfg`(XXXX can be android, server, arm and common) files to select the test cases you want to run.When you comment the corresponding sections in benchmark_name_run.cfg, the test cases of the tools won’t be run.
 
 <h3 id="3.2">Run Caliper</h3>
 
-If you have configured your environment, you can enter the commands of caliperto run caliper, it will compile and execute test cases, parser the output and get the summarization of the outputs.
-The command is caliper. You can use caliper -h to show all the commands options. After the process finished, you can view the generated files, including the log files, binary files, test results and so on. The logs and the test results will locate in the ~/.caliper if you have installed caliper. Otherwise, they will locate in the Caliper root directory when you run caliper from the Caliper source code.
+If you have configured your environment, you can enter the commands of `caliper` to run caliper, it will compile and execute test cases, parser the output and get the summarization of the outputs.
+The command is `caliper`. You can use `caliper -h` to show all the commands options. After the process finished, you can view the generated files, including the log files, binary files, test results and so on. The logs and the test results will locate in the `~/.caliper` if you have installed caliper. Otherwise, they will locate in the Caliper root directory when you run caliper from the Caliper source code.
 
 <h3 id="3.3">Caliper output</h3>
 
-After the caliper -option command has been finished, the results generated are
+After the `caliper -option` command has been finished, the results generated are
 in the results folder, the results folder contains all the results. The logs
-will be in caliper_build and caliper_exec folder. Each benchmarks has two
-related log files about the execution and parsering, named XXX_output.log and
-XXX_parser.log. In addtion, all result of selected benchmarks’ test points are
-stored in the yaml file, which located in results/yaml.
+will be in `caliper_build` and `caliper_exec` folder. Each benchmarks has two
+related log files about the execution and parsering, named `XXX_output.log` and
+`XXX_parser.log`. In addtion, all result of selected benchmarks’ test points are
+stored in the yaml file, which located in `results/yaml`.
 
-You can see the comparision figures in the results/test_results.tar.gz, the tarball is a webpage tarball. If it is not there, maybe you have a wrong when generating the webpages or you have not select the option to generate the webpage. Or you can see the specific values of Test Cases and scores in results/yaml/your_machine_name.yaml,
-results/yaml/your_machine_name_score.yaml and
-results/yaml/your_machine_name_score_post.yaml.
+You can see the comparision figures in the `results/test_results.tar.gz`, the tarball is a webpage tarball. If it is not there, maybe you have a wrong when generating the webpages or you have not select the option to generate the webpage. Or you can see the specific values of Test Cases and scores in `results/yaml/your_machine_name.yaml`,
+`results/yaml/your_machine_name_score.yaml` and
+`results/yaml/your_machine_name_score_post.yaml`.
 
 <h4 id="3.3.1">The Format of Yaml</h4>
 ```
