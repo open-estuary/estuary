@@ -29,9 +29,13 @@ Documentation for how to verify iptables tool, please refer https://github.com/o
 Presently Armor tools are supported on the following distributions.
 
 *Ubuntu 15.04 ARM64*
+
 *Fedora 22 ARM64*
+
 *OpenSuse 20150813 Tumbleweed ARM64*
+
 *Debian Jessie 8.2 ARM64*
+
 *CentOS Linux release 7.2.1511 (AltArch)*
  
 <h2 id="4">Installation</h2>
