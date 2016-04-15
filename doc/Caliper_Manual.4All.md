@@ -123,6 +123,7 @@ results/yaml/your_machine_name_score.yaml and
 results/yaml/your_machine_name_score_post.yaml.
 
 <h4 id="3.3.1">The Format of Yaml</h4>
+```
 name: your_machine_name
 ......
 results:
@@ -142,7 +143,7 @@ results:
           lat_connect: 0
           lat_pipe: 2.97
           ......
-
+```
 The Performance means a Test Item; the latency, memory and network are Test Sub-Items which belong to the Performance; In the Test Sub-Item of memory, the bandwidth is a Test Point; in bandwidth, some Test Cases has been tested, so in the Point Scores has some key-value pairs, such as bw_mem_bzero: 246.7238.
 Note: in some key-value pairs, the value of ‘0’ means that the test case is failed.
 
