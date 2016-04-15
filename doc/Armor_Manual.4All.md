@@ -34,7 +34,7 @@ Presently Armor tools are supported on the following distributions.
 *Debian Jessie 8.2 ARM64*
 *CentOS Linux release 7.2.1511 (AltArch)*
  
-<h2 id="4">Installation/h2>
+<h2 id="4">Installation</h2>
 
 1. Default Armor tools are installed onto the rootfs during open-estuary build process.
 
@@ -47,7 +47,7 @@ Presently Armor tools are supported on the following distributions.
 
 3. On target board, Run 'armor_utility', which will provide information of the supported Armor tools, installation status     and how to install on the distribution if it is not already present.   
 
-<h2 id="5">How to run Tool's test scripts/h2>
+<h2 id="4">How to run Tool's test scripts</h2>
 
 1. Go to the /usr/local/armor/test_scripts on the target terminal. 
    
