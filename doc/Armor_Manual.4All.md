@@ -11,7 +11,6 @@ Armor tools supports a list of the platform tools for debug, diagnostics and mon
 Current Release Version- `armor-v1.1`
 
 <h2 id="2">Information of Supported Armor Tools/h2>
-
 For the supported tools in Armor on different distributions, please refer  https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Supported.4All.md
 
 For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Basic_Info.4All.md
