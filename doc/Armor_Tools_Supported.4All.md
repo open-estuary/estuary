@@ -48,9 +48,9 @@
  
     version - 11.0.1
 
-10. tcpdump - dump traffic on a network.
+ 10. tcpdump - dump traffic on a network.
 
-    version - 4.6.2
+     version - 4.6.2
     
 11. ethtool - query or control network driver and hardware settings, particularly for wired Ethernet devices. 
 
