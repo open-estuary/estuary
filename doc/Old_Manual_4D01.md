@@ -6,7 +6,7 @@
    * [GRUB](#3.3)
    * [EFI-STUB](#3.4)
    * [Kernel](#3.5)
-     *[Ethernet Driver](#3.5.1)
+    *[Ethernet Driver](#3.5.1)
      *[ VGIC](#3.5.2)  
      *[SMMU with SATA](#3.5.3)
      *[Reboot](#3.5.4)
