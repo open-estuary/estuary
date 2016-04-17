@@ -110,14 +110,14 @@ Known Issues:
 
 1. As Hisilicon hardware counters are not CPU core specific, the counter
 
-values maynot be accurate. To get more accurate count. please append the
+   values maynot be accurate. To get more accurate count. please append the
 
- option "-C 0 -A" in perf stat command.
+   option "-C 0 -A" in perf stat command.
  
-`$# perf stat -C 0 -A -e r24f303 -e r24f300 ls -l`
+  `$# perf stat -C 0 -A -e r24f303 -e r24f300 ls -l`
 
 2. As the counter registers in Hisiilicon are config and accessed via
 
- Djtag interface, it can affect the event counter readings as the access
+  Djtag interface, it can affect the event counter readings as the access
 
- is not atomic.
+  is not atomic.
