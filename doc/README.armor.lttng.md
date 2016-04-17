@@ -17,7 +17,7 @@ downloaded from https://lttng.org/download/#build-from-source
 
 - LTTNG user space packages are available to install in Ubuntu distribution.
 
-```apt-get install -y lttng-tools
+  ```apt-get install -y lttng-tools
 apt-get install -y liblttng-ust-dev```
 
 - The armor-postinstall.sh script does the lttng user space packages installations on first bootup.
