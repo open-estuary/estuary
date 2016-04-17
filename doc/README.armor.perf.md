@@ -1,6 +1,7 @@
 **Readme for Ubuntu ARM64**
 
 Install the latest perf binary*
+
 `$# sudo apt-get  install linux-tools-3.19.0-23`
 
 *- The latest version availabe can be installed.
@@ -10,6 +11,7 @@ Now use the perf tool installed in `/usr/lib/linux-tools-3.19.0-23/perf`
 `$# /usr/lib/linux-tools-3.19.0-23/perf stat -e L1-dcache-stores ls -l`
 
 The LLC, MN and DDR are added as RAW events.
+
 The RAW event encoding format is as below
 
 `<die ID(4 bit)><Module ID(4 bit)><Bank(4 bit)><event code(12 bit)>`
@@ -29,6 +31,7 @@ DDRC1	= 0xd
 ```
 
 The DieID for the CPU Die are as below
+
 ```
 SOC0_TOTEMA = 0x1 /* TOTEM A in Socket 0 */
 SOC0_TOTEMC = 0x2
@@ -39,7 +42,9 @@ SOC1_TOTEMB = 0x6
 ```
 
 The 22 LLC events are added as RAW events starting from 0x300 to 0x315
+
 The 9 MN event codes and also the DDRC read, write and latecy counters 
+
 event codes are listed below
 
 ```
@@ -104,10 +109,15 @@ $# /usr/lib/linux-tools-3.19.0-23/perf stat -e r24f304,r24f305 -p <pid>
 Known Issues:
 
 1. As Hisilicon hardware counters are not CPU core specific, the counter
+
 values maynot be accurate. To get more accurate count. please append the
+
  option "-C 0 -A" in perf stat command.
+ 
 `$# perf stat -C 0 -A -e r24f303 -e r24f300 ls -l`
 
 2. As the counter registers in Hisiilicon are config and accessed via
+
  Djtag interface, it can affect the event counter readings as the access
+
  is not atomic.
