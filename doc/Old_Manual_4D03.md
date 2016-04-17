@@ -259,7 +259,7 @@ Note: In case of booting by PXE mode:
  * [Deploy system via PXE](#2.3)
 
 <h2 id="1">Introduction</h2>
-<h2 id="2">Introduction</h2>
-<h3 id="2.1">Introduction</h3>
-<h3 id="2.2">Introduction</h3>
-<h3 id="2.3">Introduction</h3>
+<h2 id="2">Quick Deploy System</h2>
+<h3 id="2.1">Deploy system via USB Disk</h3>
+<h3 id="2.2">Deploy system via DVD</h3>
+<h3 id="2.3">Deploy system via PXE</h3>
