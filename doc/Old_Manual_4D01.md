@@ -25,7 +25,7 @@
    * [Kernel Hacking](#4.4)
  * [Boot via NAND](#5)
    * [Upgrade kernel and NAND rootfs](#5.1)
-   * [Boot into NAND rootfs(#5.2)
+   * [Boot into NAND rootfs](#5.2)
  * [Boot via NFS](#6)
    * [Boot into Ubuntu on SATA](#6.2)
  * [Boot via PXE](#7)
@@ -727,7 +727,9 @@ Steps to build and run guest:
 
   Launch QEMU on D01:
 
-   ` qemu-system-arm -enable-kvm -kernel zImage -dtb rtsm_ve-cortex_a15x4.dtb -initrd initrd.cpio.gz -append "console=ttyAMA0 earlyprintk rdinit=/linuxrc" -nographic -machine vexpress-a15,kernel_irqchip=on -m 128 -smp 4 -cpu cortex-a15 -rtc base=localtime`
+   ``` 
+   qemu-system-arm -enable-kvm -kernel zImage -dtb rtsm_ve-cortex_a15x4.dtb -initrd initrd.cpio.gz -append "console=ttyAMA0 earlyprintk rdinit=/linuxrc" -nographic -machine vexpress-a15,kernel_irqchip=on -m 128 -smp 4 -cpu cortex-a15 -rtc base=localtime
+   ```
 <h2 id="9">Xen on D01</h2>
 
 <FixMe>
