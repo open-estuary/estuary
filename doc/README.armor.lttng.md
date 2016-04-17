@@ -26,10 +26,11 @@ apt-get install -y liblttng-ust-dev```
 <h2 id="3">Fedora</h2>
 
 - LTTNG user space packages are available to install in Fedora distribution.
-```
+ ```
 dnf install -y lttng-tools.aarch64
 dnf install -y lttng-ust.aarch64
-dnf install -y babeltrace.aarch64```
+dnf install -y babeltrace.aarch64
+ ```
 
 - The armor-postinstall.sh script does the lttng user space package installations on first bootup.
 
