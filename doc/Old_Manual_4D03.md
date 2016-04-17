@@ -27,18 +27,18 @@ After you run `./estuary/build.sh -d <Platform Name> -p <Distribution Name>`, th
 By default, it is named as <Distribution Name>_<ARM arch>.tar.gz, and the default username and password for them are "root,root".
 
 You can do following commands to uncompress the tarball into any special block device's partition, e.g.: SATA, SAS or USB disk.
- ```shell  
+  ```shell  
     mkdir tempdir
     sudo mount /dev/<block device name> tempdir
     sudo tar -xzf <Distribution Name>_<Arm arch>.tar.gz -C tempdir 
-```
+ ```
 You can also simply uncompress the tarball into a special directory as follows, and use the directory as the NFS's rootfs.
   ```shell
     mkdir nfsdir
     sudo tar -xzf <Distribution Name>_<Arm arch>.tar.gz -C nfsdir 
-```
+ ```
 If you want to produce a rootfs image file for QEMU, you can try as belows
-```shell
+  ```shell
     mkdir tempdir
     sudo tar -xzf <Distribution Name>_<Arm arch>.tar.gz -C tempdir 
 
@@ -54,7 +54,7 @@ If you want to produce a rootfs image file for QEMU, you can try as belows
   ```
 Then you will get the rootfs image file as rootfs.img
 
-You can download above distributions by following commands manually.
+**You can download above distributions by following commands manually**.
 
    Ubuntu:     wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Ubuntu_ARM64.tar.gz
    
@@ -68,7 +68,7 @@ You can download above distributions by following commands manually.
    
    OpenEmbedded:  TBD
 
-And all original distributions can be gotten by following commands:
+**And all original distributions can be gotten by following commands**:
 
   Ubuntu:     wget -c https://cloud-images.ubuntu.com/vivid/current/vivid-server-cloudimg-arm64.tar.gz
   
