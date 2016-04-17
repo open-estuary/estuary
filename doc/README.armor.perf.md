@@ -1,4 +1,4 @@
-Readme for Ubuntu ARM64
+**Readme for Ubuntu ARM64**
 
 Install the latest perf binary*
 `$# sudo apt-get  install linux-tools-3.19.0-23`
@@ -85,17 +85,21 @@ DDRC1_FLUX_WRITE_BW		= 0x324
 DDRC1_FLUX_READ_LAT		= 0x325
 DDRC1_FLUX_WRITE_LAT		= 0x326
 ```
-
+```shell
 # To count LLC_WRITE_NOALLOCATE and LLC_READ_ALLOCATE for TotemC
 
-`$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r24f303 -e r24f300 ls -l`
+$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r24f303 -e r24f300 ls -l
+```
 
+```shell
 # To count MN_EO_BARR_REQ and LLC_READ_ALLOCATE for TotemA
 
-`$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r1bf316 -e r14f300 ls -l`
-
+$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r1bf316 -e r14f300 ls -l
+```
+```
 # To count LLC_READ_HIT and LLC_WRITE_HIT for a process with pid
-`$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r24f304,r24f305 -p <pid>`
+$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r24f304,r24f305 -p <pid>
+```
 
 Known Issues:
 
