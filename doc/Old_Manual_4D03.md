@@ -87,6 +87,7 @@ More detail about how to deploy target system into target board, please refer to
 -------
 * [Grub manual](#1)
 * [Grub config file](#2)
+* [files structure bootable partition](#3)
 
 <h2 id="1">Introduction</h2>
 
@@ -244,7 +245,7 @@ Note: In case of booting by PXE mode:
 
    2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
 
-   3. The grub binary name (grubxxx.efi) must be consistent with the "filename" in /etc/dhcp/dhcpd.conf, for more detail, please refer to Setup_PXE_Env_on_Host.md(https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.md).
+   3. The grub binary name (grubxxx.efi) must be consistent with the "filename" in /etc/dhcp/dhcpd.conf, for more detail, please refer to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.md).
 
    4. If you use D02 board, you should not input DTB in the grub.cfg but you must flash the DTB file into spiflash to avoid a known Mac address duplicate issue.
 
