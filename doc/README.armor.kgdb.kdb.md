@@ -36,7 +36,7 @@ menuentry "ubuntu64-nfs" --id ubuntu64-nfs {
     `echo g > /proc/sysrq-trigger`  
     This will enter kdb terminal and then coninue with kernel debugging using kdb commands. 
     
-<h2 id="1">Debugging using KGDB</h2>
+  <h2 id="1">Debugging using KGDB</h2>
 
 6. On D02 kdb terminal type 'kgdb' command. Then please attach debugger from host machine to remotely debug using gdb.
 
