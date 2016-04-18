@@ -411,13 +411,13 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    	
 <h3 id="3.6">Boot via ACPI</h3>
 
- D02 also supports booting via ACPI, you can bring up this systerm which is similar with this DT mode, you must fix some point as follow:
+D02 also supports booting via ACPI, you can bring up this systerm which is similar with this DT mode, you must fix some point as follow:
 
  1. delete DTB file and don't burn DTB file<br>
  
  2. Set the parameters of booting via ACPI
 
- you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while you delete DTB line
+you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while you delete DTB line
   for "grub.cfg" file.
 
 NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
