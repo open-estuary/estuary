@@ -19,6 +19,7 @@ All following sections will take the D03 board as example, other boards have the
 <h2 id="2">Preparation</h2>
 
 <h3 id="2.1">Prerequisite</h3>
+
 Local network: To connect hardware boards and host machine, so that they can communicate each other.
 
 Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
@@ -31,9 +32,11 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
-<h3 id="2.4">Upgrade DTB file</h3>
+<h3 id="2.4">Upgrade DTB file(Necessary step) </h3>
 
-Because this dtb file is important to this D03 boards, firstly you must flash this DTB file into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the follow commands in EBL:
+Because this dtb file is important to this D03 boards, firstly you must flash this DTB file
+into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the
+follow commands in EBL:
 
 We will often do some commands in UEFI EBL shell for these methods, about how to enter it,please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
@@ -72,29 +75,32 @@ There are several methods to bring up system, you can select following anyone fi
 
 <h3 id="3.1">Boot via ESL</h3>
 
-In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.
-After reboot or power off, all downloaded data will be lost. This boot mode is just used for debugging.
+In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into
+RAM at first and then start the system by ESL.
+After reboot or power off, all downloaded data will be lost.
+This boot mode is just used for debugging.
 
-Boot D03 to UEFI menu. Select "Boot Manager"->"Eebedded Boot Loader(EBL)" and type the follow commands in EBL:
+Boot D03 to UEFI menu. Select "Boot Manager"->"Eebedded Boot Loader(EBL)" and type the
+follow commands in EBL:
 
 1. Download Image binary file from FTP server to target board's RAM
-     ```
-   # Download Image binary file from FTP server to target board's RAM
-   provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
+   ```
+    # Download Image binary file from FTP server to target board's RAM
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
    ```
     e.g.: 
-    `provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x80000`
+    `provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 0x80000`
  
 2. Download dtb file from FTP server to target board's RAM
-    ```
+   ```
    # Download dtb file from FTP server to target board's RAM
-   provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
+    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
      ```
-    e.g.: 
-    `provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x06000000`
+   e.g.: 
+    `provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x06000000`
  
-3. Download rootfs file from FTP server to target board's RAM
-     ```
+3. Download rootfs file from FTP server
+    ```
     # Download rootfs file from FTP server to target board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
      ```
@@ -145,17 +151,19 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
    Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2<br>
    Part hardware disk with `"sudo fdisk /dev/sda"` as follow:<br>
        add a gpt to this disk : 
+       
            `fdisk /dev/sda` <br>
            `g`-------add a gpt partition
        
        add some EFI partition : 
+       
             `n`-------add a partition<br>
             `1`-------the number of partition<br>
             `+200M`---------size of partition<br>
             `t`-------change the type of partition<br>
              EFI system
       
-       add some anther partition  ...
+       add some anther partition  `...`
        save the change           : `w`<br>
        formate EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
        formate ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
@@ -182,9 +190,9 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
   （SAS/USB/SATA）Related files are placed as follow: 
    ```
-         sda1: -------EFI
+       sda1: -------EFI
               |       |
-              |       BOOT------BOOTAA64.EFI(rename "grubaa64.efi" as BOOTAA64.EFI)   //grub binary file
+              |       GRUB2------grubaa64.efi  //grub binary file
               |
               |-------------grub.cfg           //grub config file
               |
