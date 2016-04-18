@@ -31,13 +31,13 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 <h3 id="2.3">Upgrade UEFI and trust firmware</h3>
 
-You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.txt.4D02).
+You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
 
 <h3 id="2.4">Upgrade DTB file(Necessary step)</h3>
 
 Because this dtb file is important to this D02 boards, firstly you must flash this DTB file into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the follow commands in EBL:
 
-We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to [UEFI_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.txt.4D02).
+We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
 
 1. IP address config (Optional, you can ignore this step if DHCP works well)
 
@@ -150,7 +150,7 @@ Boot D02 to UEFI SHELL, and type the follow commands in EBL:
 
 4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
  
-To get all binaries mentioned above, please refer to [Readme.txt](https://github.com/open-estuary/estuary/blob/master/doc/Readme.txt.4D02).
+To get all binaries mentioned above, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md).
 
 <h3 id="3.3">Boot via PXE</h3>
 
@@ -158,7 +158,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 
 1. Setup PXE environment on host
 
-   Enable both DHCP and TFTP services on one of your host machines according to Setup_PXE_Env_on_Host.txt.
+   Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
    
 2. Reboot and press anykey to enter UEFI Boot Menu
 
@@ -166,7 +166,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 
 4. After several seconds, D02 will boot by PXE automatically.
 
-To config the grub.cfg to support PXE boot, please refer to [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).
+To config the grub.cfg to support PXE boot, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
 <h3 id="3.4">Boot via NFS</h3>
 
@@ -174,9 +174,9 @@ In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs
 
 D02 supports booting via NFS, you can try it as following steps:
 
-1. Enable DHCP, TFTP and NFS service according to Setup_PXE_Env_on_Host.txt.
+1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
-2. Get and config grub file to support NFS boot according to Grub_Manual.txt.
+2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
 3. Reboot D02 and press anykey to enter UEFI Boot Menu
 
@@ -263,15 +263,15 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
         sda2: Ubuntu distribution
         sda3: OpenSUSE distribution
    ```
-    To get kernel image and dtb file, please refer to [Readme.txt](https://github.com/open-estuary/estuary/blob/master/doc/Readme.txt.4D02).<br>
-    To get and config grub and grub.cfg, please refer to [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).<br>
-    To get different distributions, please refer to [Distributions_Guider.txt](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.txt.4All).<br> 
+    To get kernel image and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md).<br>
+    To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).<br>
+    To get different distributions, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br> 
     
 3. Boot the board via SAS/USB/SATA
 
  **Boot via SAS/USB**
          
-   * modify grub config file(please refer to Grub_Manual.txt.4All)
+   * modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
    
      ` e.g.: the context of grub.cfg file is modified as follow:`
        ```
@@ -297,7 +297,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    * Reboot and press any key into enter UEFI menu.
         
    * Select "Boot Manager"-> "Boot Maintenance Manager"-> "Boot From File" boot option to select corresponding disk.<br>
-          Press arrow key up or down to select grub boot option to decide which distribution should boot.
+     Press arrow key up or down to select grub boot option to decide which distribution should boot.
           
  **Boot via SATA**
 
@@ -379,7 +379,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
     
    * ./estuary/build.sh -f estuary/estuarycfg.json
    
-   * Burn Image, dtb file and UEFI into NorFlash. About how to burn, please refer to "Boot via NORFLASH" and UEFI_Manual.txt.4D02.
+   * Burn Image, dtb file and UEFI into NorFlash. About how to burn, please refer to "Boot via NORFLASH" and  [UEFI_Manual.4D02.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D02.md).
    
    * Reboot and press any key to enter UEFI menu.
    
@@ -395,4 +395,4 @@ D02 also supports booting via ACPI, you can bring up this systerm which is simil
  you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while you delete DTB line
     for "grub.cfg" file.
 
-NOTE: you can get more information about setting grub.cfg from [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).
+NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
