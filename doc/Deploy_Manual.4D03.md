@@ -29,13 +29,13 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 <h3 id="2.3">Upgrade UEFI and trust firmware</h3>
 
-You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.txt.4D03).
+You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
 <h3 id="2.4">Upgrade DTB file</h3>
 
 Because this dtb file is important to this D03 boards, firstly you must flash this DTB file into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the follow commands in EBL:
 
-We will often do some commands in UEFI EBL shell for these methods, about how to enter it,please refer to [UEFI_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.txt.4D03).
+We will often do some commands in UEFI EBL shell for these methods, about how to enter it,please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
 1. IP address config (Optional, you can ignore this step if DHCP works well)
 the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
@@ -112,7 +112,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 
 1. Setup PXE environment on host
 
-   Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.txt.4All)..
+   Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
    
 2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
@@ -120,7 +120,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 
 4. After several seconds, D03 will boot by PXE automatically.
 
-To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).
+To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
 <h3 id="3.3">Boot via NFS</h3>
 
@@ -128,9 +128,9 @@ In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs
  
 D03 supports booting via NFS, you can try it as following steps:
 
-1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.txt.4All).
+1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
-2. Get and config grub file to support NFS boot according to [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).
+2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
 3. Reboot D03 and press anykey except "enter" to enter UEFI Boot Menu
 
@@ -192,13 +192,13 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
         sda2: Ubuntu distribution
         sda3: Fedora distribution
    ```     
-    To get kernel image and dtb file, please refer to [Readme.txt](https://github.com/open-estuary/estuary/blob/master/doc/Readme.txt.4D03).<br>
-    To get and config grub and grub.cfg, please refer to [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).<br>
-    To get different distributions, please refer to [Distributions_Guider.txt](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.txt.4All).<br> 
+    To get kernel image and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D03.md).<br>
+    To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).<br>
+    To get different distributions, please refer to [Distributions_Guider](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br> 
     
 3. Boot the board via SAS/USB/SATA
 
-   a. Modify grub config file(please refer to Grub_Manual.txt.4All)<br>
+   a. Modify grub config file(please refer to [Grub_Manual.txt.4All](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))<br>
        e.g.: <br>
        the context of grub.cfg file is modified as follow:
        ``` 
