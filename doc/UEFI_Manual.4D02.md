@@ -46,18 +46,17 @@ FTP protocol is used for downloading between hardware boards and local network. 
     
     b. Burn BIOS file
        After setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)    
-       ```shell
+      ```shell
         # Download file from FTP server to board's RAM
         provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
         # Write the data into NORFLASH
         spiwfmem <source address> <target address> <data length>
-        ```
-       e.g.: 
-       
-       ```shell
+      ```
+      e.g.: 
+     ```shell
         provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 100000
         spiwfmem 100000 0000000 300000
-       ```
+      ```
    c. Burn CPLD file
     
       Notes: This is a very dangerous operation, please don't do it when not necessary.
