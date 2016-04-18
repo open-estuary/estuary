@@ -383,10 +383,10 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        * Find the word "&sas0", "&sas1" and delete as follow:
        
         ~~&sas0 {~~  
-        ~~status = "okay";~~
-        ~~};~~
-       ~~&sas1 {~~
-        ~~status = "okay";~~
+        ~~status = "okay";~~,<br>
+        ~~};~~<br>
+       ~~&sas1 {~~<br>
+        ~~status = "okay";~~<br>
         ~~};~~    
 
    c. Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
