@@ -236,28 +236,26 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    b. Use tool fdisk to process this disk
     
       format the disk firstly: 
-      ```shell
-        sudo mkfs.ext4 /dev/sda
-      ```
+      
+      `sudo mkfs.ext4 /dev/sda`
        
-       add a gpt to this disk : 
-       ```shell
-            fdisk /dev/sda
-       ```
-           `g`-------add a gpt partition
-       
+      add a gpt to this disk : 
+      
+      `fdisk /dev/sda`
+        
+       `g`-------add a gpt partition
        
        add some EFI partition : 
        
-        `n`-------add a partition
+       `n`-------add a partition
         
-        `1`-------the number of partition
+       `1`-------the number of partition
         
-        `+200M`---------size of partition
+       `+200M`---------size of partition
         
-        `t`-------change the type of partition
+       `t`-------change the type of partition
         
-          EFI system
+        EFI system
  
        add some anther partition  ...
        
@@ -317,10 +315,11 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 	    }
 
        ```
-        Note:
-	   1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
+      Note:
+      
+	1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    
-	   2. If you want to use another linux distribution, please refer above steps.
+	2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
         
@@ -385,11 +384,11 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
          ```
        * Find the word "&sas0", "&sas1" and delete as follow:
         ```
-	 ~~&sas0 {~~                             
-              ~~status = "okay";~~              
-	       ~~};~~                              
-         ~~&sas1 {~~                              
-              ~~status = "okay";~~               
+	 ~~&sas0 {~~  
+	      ~~status = "okay";~~
+	       ~~};~~
+	 ~~&sas1 {~~
+	 ~~status = "okay";~~
 	       ~~};~~    
         ```                       
 
@@ -420,7 +419,8 @@ D02 also supports booting via ACPI, you can bring up this systerm which is simil
 1. delete DTB file and don't burn DTB file
  
 2. Set the parameters of booting via ACPI
+
  you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while you delete DTB line
-    for "grub.cfg" file.
+  for "grub.cfg" file.
 
 NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
