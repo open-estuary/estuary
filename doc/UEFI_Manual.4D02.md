@@ -76,7 +76,7 @@ d. Power off and reboot board again
 
 <h2 id="3">Recover the UEFI when it broke</h2>
 
-Actually the board can restore two UEFI in case of the default one breaks, then you can restore it as following way:
+   Actually the board can restore two UEFI in case of the default one breaks, then you can restore it as following way:
 
    1. Power off the board and disconnect power supply.<br>
    2. Push the dial switch 's3' to 'off' with a '3' on the board, please check the Hardware Boards to find where it is: http://open-estuary.com/d02-2/.<br>
