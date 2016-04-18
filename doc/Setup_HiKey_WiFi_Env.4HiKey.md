@@ -26,7 +26,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf
    ```
    
-    eg: `wpa_passphrase admin admin > /etc/wpa_supplicant.conf`
+   eg: `wpa_passphrase admin admin > /etc/wpa_supplicant.conf`
    
   ```shell
    $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
