@@ -13,29 +13,29 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
    boot into mini-rootfs systerm successfully. You can config this WiFi according to this follow
    instruction:
    
-    ```shell
+   ```shell
     $ echo 0 > /sys/kernel/debug/ieee80211/phy0/wlcore/sleep_auth
     $ ifconfig wlan0 up
-    ```
-    ```shell
+   ```
+   ```shell
     ## Use the following command to know if WiFi is ok ##
     $ iw wlan0 scan | grep SSID
-    ```
-    ```shell
+   ```
+   ```shell
     ## to create a wpa_supplicant.conf ##
     $ wpa_passphrase <ssid> <passphrase> > /etc/wpa_supplicant.conf
    ```
    
     eg: `wpa_passphrase admin admin > /etc/wpa_supplicant.conf`
    
-   ```shell
+  ```shell
    $ wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf -Dnl80211
-   ```
-   ```shell
+  ```
+  ```shell
    ## wait a while for wpa_supplicant to link ##
    $ iw wlan0 link
-   ```
-   ```shell
+  ```
+  ```shell
    ## config ip and route ##
    $ ifconfig wlan0 <IP address>
    $ route add default gw <IP address>
