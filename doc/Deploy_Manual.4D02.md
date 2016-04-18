@@ -299,7 +299,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
      e.g.: the context of grub.cfg file is modified as follow:
     
-      ```shell
+     ```shell
 	   # Sample GRUB configuration file
 	   #
 	   # Boot automatically after 5 secs.
@@ -312,7 +312,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 		set root=(hd0,gpt1)
 		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
 	    }
-      ```
+     ```
     Note:
       
       1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
