@@ -52,8 +52,8 @@ FTP protocol is used for downloading between hardware boards and local network. 
         # Write the data into NORFLASH
         spiwfmem <source address> <target address> <data length>
         ```
-        
        e.g.: 
+       
        ```shell
         provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 100000
         spiwfmem 100000 0000000 300000
