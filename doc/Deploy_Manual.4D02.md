@@ -315,9 +315,9 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
      ```
     Note:
       
-     1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
+    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    
-     2. If you want to use another linux distribution, please refer above steps.
+    2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
         
