@@ -40,9 +40,9 @@ FTP protocol is used for downloading between hardware boards and local network. 
        the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
        `ifconfig -s eth0 static <IP address> <mask> <gateway>`
     
-        e.g.: 
+       e.g.: 
         
-        `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
+       `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
     b. Burn BIOS file
        After setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)    
@@ -52,6 +52,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
         # Write the data into NORFLASH
         spiwfmem <source address> <target address> <data length>
         ```
+        
        e.g.: 
        ```shell
         provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 100000
