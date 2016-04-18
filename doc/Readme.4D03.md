@@ -96,7 +96,7 @@ build commands(supposedly, you are in <project root> currently:
 ```
 More detail about distributions, please refer to [Distributions_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).
 
-More detail about toolchains, please refer to [Toolchains_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.md.4All).
+More detail about toolchains, please refer to [Toolchains_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md).
 
 More detail about how to deploy target system into D03 board, please refer to [Deployment_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D03.md).
 
@@ -104,4 +104,4 @@ More detail about how to debug, analyse, diagnose system, please refer to [Armor
 
 More detail about how to benchmark system, please refer to [Caliper_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.4All.md).
 
-More detail about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.txt.4All).
+More detail about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab](http://open-estuary.org/accessing-boards-in-open-lab/).
