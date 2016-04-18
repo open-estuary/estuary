@@ -32,6 +32,7 @@ The HiKey board is ready to use “out of the box” with a preinstalled version
  3. Link 1-2 (J601) pin causes HiKey to auto-power up when power is applied.
  
  4. Connect the HiKey power supply to the HiKey board (Uart3 P301).
+ 
 NOTE: please refer to the Hardware User Guide for more information on board link options. you can visit: http://open-estuary.com/hikey/ 
 
 <h3 id="2.2">PC Environment</h3>
