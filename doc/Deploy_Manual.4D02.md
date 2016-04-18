@@ -313,11 +313,11 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
 	    }
     ```
-     Note:
+    Note:
       
-      1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
+     1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    
-      2. If you want to use another linux distribution, please refer above steps.
+     2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
         
