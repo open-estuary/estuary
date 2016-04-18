@@ -203,7 +203,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
 1. Boot by PXE or NORFLASH(please refer to "#Boot via PXE" or "#Boot via NORFLASH") to part and format hardware disk before booting D02 board
 
-   Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2<br>
+   Format hardware disk, e.g.: `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`
+   
    Part hardware disk with `"sudo fdisk /dev/sda" as follow:`<br>
 
         +---------+-----------+--------------+------------------+------------------+
@@ -234,29 +235,33 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
    b. Use tool fdisk to process this disk
     
-       format the disk firstly: 
-       ```shell
-            sudo mkfs.ext4 /dev/sda
-       ```
+      format the disk firstly: 
+      ```shell
+        sudo mkfs.ext4 /dev/sda
+      ```
        
        add a gpt to this disk : 
-       
        ```shell
             fdisk /dev/sda
-            g-------add a gpt partition
        ```
+           `g`-------add a gpt partition
+       
        
        add some EFI partition : 
-        ```shell
-          n-------add a partition
-          1-------the number of partition
-          +200M---------size of partition
-          t-------change the type of partition
+       
+        `n`-------add a partition
+        
+        `1`-------the number of partition
+        
+        `+200M`---------size of partition
+        
+        `t`-------change the type of partition
+        
           EFI system
-        ```
+ 
        add some anther partition  ...
        
-       save the change           : w
+       save the change           : `w`
        
        formate EFI partition  : `sudo mkfs.vfat /dev/sda1`
        
@@ -295,8 +300,9 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    a. modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
    
      e.g.: the context of grub.cfg file is modified as follow:
+     
        ```shell
-       #
+            #
 	    # Sample GRUB configuration file
 	    #
 	    # Boot automatically after 5 secs.
@@ -312,13 +318,14 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
        ```
         Note:
-	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
+	   1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    
-	    2. If you want to use another linux distribution, please refer above steps.
+	   2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
         
    c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+   
       For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
    
    d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
@@ -331,21 +338,22 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
     a. Build kernel
     
-        * Enable driver configuration of corresponding SATA model in kernel
+       * Enable driver configuration of corresponding SATA model in kernel
         
-          Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.
+         Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.
           
-           e.g.:modify arch/arm64/configs/defconfig as follow:
+         e.g.:modify arch/arm64/configs/defconfig as follow:
+           
          ```
-                 ......
-		 CONFIG_SATA_MV=m             ----------> CONFIG_SATA_MV=y
-	```	
+              ...... 
+           CONFIG_SATA_MV=m             ----------> CONFIG_SATA_MV=y
+        ```	
 	
-        * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file as follow:
+       * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file as follow:
          
          ```
        　 bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
-       ```
+         ```
        After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "#Boot via NORFLASH".
        
        NOTE: according to above bootargs, it will boot ubuntu distribution in sda2, if you want to boot other different distribution, you should change "root=/dev/sdaX" item.
@@ -377,12 +385,12 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
          ```
        * Find the word "&sas0", "&sas1" and delete as follow:
         ```
-	     ~~&sas0 {~~                             
+	 ~~&sas0 {~~                             
               ~~status = "okay";~~              
-	     ~~};~~                              
-           ~~&sas1 {~~                              
+	       ~~};~~                              
+         ~~&sas1 {~~                              
               ~~status = "okay";~~               
-	      ~~};~~    
+	       ~~};~~    
         ```                       
 
    c. Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
