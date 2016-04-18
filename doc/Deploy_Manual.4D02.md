@@ -234,33 +234,35 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
    b. Use tool fdisk to process this disk
     
-        format the disk firstly: 
-         ```shell
+       format the disk firstly: 
+       ```shell
             sudo mkfs.ext4 /dev/sda
-         ```
-         add a gpt to this disk : 
-           ```shell
+       ```
+       add a gpt to this disk : 
+       ```shell
             fdisk /dev/sda
             g-------add a gpt partition
-            
-           ```
-         add some EFI partition : 
-           ```shell
-            n-------add a partition
-            1-------the number of partition
-            +200M---------size of partition
-            t-------change the type of partition
-            EFI system
-           ```
-         add some anther partition  ...<br>
-         save the change           : w<br>
-         formate EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
-         Then this disk can be identified by D02 board.<br>
+       ```
+       add some EFI partition : 
+        ```shell
+          n-------add a partition
+          1-------the number of partition
+          +200M---------size of partition
+          t-------change the type of partition
+          EFI system
+        ```
+       add some anther partition  ...
+       
+       save the change           : w
+       
+       formate EFI partition  : `sudo mkfs.vfat /dev/sda1`
+       
+       Then this disk can be identified by D02 board.
          
 2. Download files and store them into hardware disk as below:
 
    (SAS/USB）Related files are placed as follow:
-   ```
+    ```
         sda1: -------EFI
               |       |
               |      GRUB2------grubaa64.efi  //grub binary file
@@ -270,15 +272,15 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
               |-------------Image_D02          //kernel binary Image
         sda2: Ubuntu distribution
         sda3: Fedora distribution
-   ```     
+    ```     
    
    （SATA）Related files are placed as follow:
-   ```
+    ```
  
         sda1: -------NULL
         sda2: Ubuntu distribution
         sda3: OpenSUSE distribution
-   ```
+    ```
     To get kernel image and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md).<br>
     To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).<br>
     To get different distributions, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br> 
