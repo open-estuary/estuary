@@ -298,8 +298,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    a. modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
    
      e.g.: the context of grub.cfg file is modified as follow:
-     
-       ```shell
+  
+     ```shell
            #
 	   # Sample GRUB configuration file
 	   #
@@ -385,8 +385,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        
 	 ~~&sas0 {~~  
 	      ~~status = "okay";~~
-	      ~~};~~
-	 ~~&sas1 {~~
+	 ~~};~~
+         ~~&sas1 {~~
 	    ~~status = "okay";~~
 	      ~~};~~    
 
