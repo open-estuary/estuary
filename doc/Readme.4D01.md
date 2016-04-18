@@ -58,7 +58,7 @@ grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Dis
     
 grub.cfg is used by grubaa64.efi to config boot options.
     
-More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.md.4All).
+More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
     
 **target**:`<project root>/build/D01/grub/`
 
