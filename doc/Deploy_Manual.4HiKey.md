@@ -41,20 +41,20 @@ NOTE: please refer to the Hardware User Guide for more information on board link
  2. Config a serial com on PC such as kermit, mincom and so on.
  
  3. Install fastboot tool, you do it as follows:
-    ```
+    ```shell
       $ sudo apt-get update
       $ sudo apt-get install android-tools-fastboot
     ```
 	 
  4. Install Python, you can do it as follows:
-    ```
+    ```shell
       $ sudo apt-get update
       $ sudo apt-get install python2.7 python2.7-dev
       $ alias python=python2.7
 	 ```
 	 
 <h3 id="2.3">Image File</h3>
- ```
+ ```shell
  $ mkdir hikey-image
  $ cd hikey-image
  $ cp {pwd}/open-estuary/build/HiKey/binary/* ./  -rf
@@ -88,13 +88,13 @@ If you can understand above information, you will start to flash this image acco
       On serial console, you should see some debug message (NULL packet) run HiKey recovery tool to flash l-loader.bin 
 
       Note: if the serial port recorded in hisi-idt.py isn't available, adjust the command line below by manually setting the serial port with "-d /dev/ttyUSBx" where x is usually the last serial port reported by "dmesg" command
-      ```
+      ```shell
       $ cd hikey-image
       $ sudo python hisi-idt.py -d /dev/ttyUSBx --img1=l-loader.bin
       ```
      Do not reboot yet
      Run fastboot commands to flash the images (order must be respected)
-      ```
+      ```shell
       $ sudo fastboot flash ptable ptable-linux.img
       $ sudo fastboot flash fastboot UEFI_HiKey.fd
       $ sudo fastboot flash nvme nvme.img
@@ -107,7 +107,7 @@ If you can understand above information, you will start to flash this image acco
 
 The boot partition is a 64MB FAT partition and contains kernel/dtb, grub files and so on. You should make the boot-fat.uefi.img image and flash this image according to follow this instruction:
 
-```
+```shell
   $ cd hikey-image
   $ mkdir boot-fat
   $ dd if=/dev/zero of=boot-fat.uefi.img bs=512 count=131072
@@ -142,7 +142,7 @@ You should partion SD card (8G) and tar this Ubuntu_ARM64.tar.gz into your SD ca
  1. Insert SD card into your linux PC by card reader
  
  2. Grep SD card node and fdisk or partion SD card in your linux PC
-  ``` 
+  ``` shell
     $ sudo parted /dev/sdx
     (parted) mklabel gpt
     (parted) mkpart primary ext4 1MB 7086MB
@@ -152,7 +152,7 @@ You should partion SD card (8G) and tar this Ubuntu_ARM64.tar.gz into your SD ca
  3. Remove and insert SD card in your PC
  
  4. Tar Ubuntu_ARM64.tar.gz into your SD card
-    ```
+    ```shell
       $ cd hikey-image	
       $ tar -xvzf Ubuntu_ARM64.tar.gz -C /media/{admin}/ubuntu
     ```
@@ -180,7 +180,7 @@ You can place this ubuntu systerm into eMMC on HiKey according to this following
   4. Refer to [Setup_HiKey_Wifi_Env.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.4HiKey.md) document to config WIFI link<br>
   5. Download this ubuntu systerm into eMMC on HiKey board<br>
     
-     ```
+     ```shell
       $ mount /dev/mmcblk0p9 /tmp
       $ cd /tmp
       $ false; while [ $? -ne 0 ]; do wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist_<version>/
@@ -195,7 +195,7 @@ You can place this ubuntu systerm into eMMC on HiKey according to this following
   8. Select "Hikey Ubuntu eMMC" from grub options<br>
   9. Success to boot ubunt systerm<br>
 	 
-NOTE: WIFI config about ubuntu systerm please refer to [Setup_HiKey_Wifi_Env.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.txt.4HiKey) document
+NOTE: WIFI config about ubuntu systerm please refer to [Setup_HiKey_Wifi_Env.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.4HiKey.md) document
 
 <h2 id="4">Appendix 1: Partition Information</h2>
 
