@@ -299,7 +299,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
     e.g.: the context of grub.cfg file is modified as follow:
     
-      ```shell
+    ```shell
 	   # Sample GRUB configuration file
 	   #
 	   # Boot automatically after 5 secs.
@@ -312,7 +312,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 		set root=(hd0,gpt1)
 		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
 	    }
-       ```
+    ```
      Note:
       
       1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
@@ -381,21 +381,22 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
          bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
        * Find the word "&sas0", "&sas1" and delete as follow:
-	~~&sas0 {~~  
-	      ~~status = "okay";~~
-	      ~~};~~
-        ~~&sas1 {~~
-	    ~~status = "okay";~~
-	      ~~};~~    
+       
+        ~~&sas0 {~~  
+        ~~status = "okay";~~
+         ~~};~~
+       ~~&sas1 {~~
+        ~~status = "okay";~~
+        ~~};~~    
 
    c. Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
    
      Change the status' value of node "ahci0: sata@b1002800" to "disabled" as follow:
      
       ```shell
-             ahci0: sata@b1002800 {
-                          ......
-                        status = "disabled";      ---------> status = "okay";
+           ahci0: sata@b1002800 {
+                    ......
+           status = "disabled";      ---------> status = "okay";
                 };
        ```
    d. Build the kernel 
