@@ -127,44 +127,44 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
     
  a. Check whether the wireless device is up.
 
-    `$ ip link show wlan0`
+   `$ ip link show wlan0`
    
-    `3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
+   `3: wlan0: (BROADCAST,MULTICAST) mtu 1500 qdisc noop state DOWN mode DEFAULT qlen 1000
       link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff`
 	    
-    Look for the word "UP" inside the brackets in the first line of the output.
+   Look for the word "UP" inside the brackets in the first line of the output.
 
  b. enable the wireless device
 
    In the above example, wlan0 is not UP. Execute the following command to bring it up:
 
-     $ sudo ip link set wlan0 up`
+    $ sudo ip link set wlan0 up`
 
-    `[sudo] password for peter`:
+   `[sudo] password for peter`:
      
-   Note: you need root privilege for the above operation.
+  Note: you need root privilege for the above operation.
 
-   If you run the show link command again, you can tell that wlan0 is now UP.
+  If you run the show link command again, you can tell that wlan0 is now UP.
 
-    `$ ip link show wlan0`
+  `$ ip link show wlan0`
 	 
-      wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT<br>
-      qlen 1000<br>
-      link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
+    wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT<br>
+    qlen 1000<br>
+    link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
       
  c.  Check the connection status.
 
-     `$ iw wlan0 link`
+    `$ iw wlan0 link`
 	 
-     you can found the connect is ok now.
+    you can found the connect is ok now.
 
-      `$ ip addr show wlan0`
+    `$ ip addr show wlan0`
 	  
-	wlan0:  mtu 1500 qdisc mq state UP qlen 1000<br>
-	link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff<br>
-	inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0<br>
-	inet6 fe80::76e5:43ff:fea1:ce65/64 scope link<br>
-	valid_lft forever preferred_lft forever<br>
+     wlan0:  mtu 1500 qdisc mq state UP qlen 1000<br>
+     link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff<br>
+     inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0<br>
+     inet6 fe80::76e5:43ff:fea1:ce65/64 scope link<br>
+     valid_lft forever preferred_lft forever<br>
 	  
   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
    
