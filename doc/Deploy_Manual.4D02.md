@@ -238,11 +238,14 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        ```shell
             sudo mkfs.ext4 /dev/sda
        ```
+       
        add a gpt to this disk : 
+       
        ```shell
             fdisk /dev/sda
             g-------add a gpt partition
        ```
+       
        add some EFI partition : 
         ```shell
           n-------add a partition
@@ -309,7 +312,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
        ```
         Note:
-	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. <br>
+	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
+	    
 	    2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
@@ -324,10 +328,14 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    In this boot mode, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board,another is to connect SATA disk into SATA interface on D02 board directly. 
  
    **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
+   
     a. Build kernel
+    
         * Enable driver configuration of corresponding SATA model in kernel
-           Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.<br>
-           `e.g.:modify arch/arm64/configs/defconfig as follow:`
+        
+          Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.
+          
+           e.g.:modify arch/arm64/configs/defconfig as follow:
          ```
                  ......
 		 CONFIG_SATA_MV=m             ----------> CONFIG_SATA_MV=y
@@ -350,10 +358,11 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
    a. select sata mode for UEFI 
    
-     After burn BIOS file(you can refer to "UEFI_Manual.4D02.md"), UEFI boot as sas mode by default.<br>
+     After burn BIOS file(you can refer to "UEFI_Manual.4D02.md"), UEFI boot as sas mode by default.
+     
      You can switch between sata and sas by adding a commandline at EBL.
-
-       e.g.:
+     
+     e.g.:
        ```
            sataenable 0      //set into sas
            sataenable 1      //set into sata
@@ -362,21 +371,24 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    b. Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file 
   
        * Find the word "bootargs" and modify the value as follow:　
+       
 	 ```shell
          bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
        * Find the word "&sas0", "&sas1" and delete as follow:
+        ```
 	     ~~&sas0 {~~                             
               ~~status = "okay";~~              
 	     ~~};~~                              
            ~~&sas1 {~~                              
               ~~status = "okay";~~               
 	      ~~};~~    
-                               
+        ```                       
 
    c. Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
    
      Change the status' value of node "ahci0: sata@b1002800" to "disabled" as follow:
+     
      ```shell
              ahci0: sata@b1002800 {
                           ......
