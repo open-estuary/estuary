@@ -17,7 +17,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 
 * Install DHCP server package
 
-`sudo apt-get install -y isc-dhcp-server syslinux`
+  `sudo apt-get install -y isc-dhcp-server syslinux`
 
 * Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
 
