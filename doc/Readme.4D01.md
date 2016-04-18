@@ -156,4 +156,4 @@ More detail about how to debug, analyse, diagnose system, please refer to [Armor
 
 More detail about how to benchmark system, please refer to [Caliper_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.4All.md)
 
-More detail about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab.md](http://open-estuary.org/accessing-boards-in-open-lab/)
+More detail about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab](http://open-estuary.org/accessing-boards-in-open-lab/)
