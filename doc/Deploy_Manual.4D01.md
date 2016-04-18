@@ -32,12 +32,12 @@ Serial cable: To connect hardware board’s serial port to host machine, so that
 Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d01-2/.
 
 <h3 id="2.3">Upgrade UEFI and trust firmware</h3>
-You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.txt.4D01).
+You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D01.md).
 
 <h3 id="2.4">Show & change kernel cmdline in UEFI</h3>
 
 1. Boot D01 to enter UEFI "EBL".
-   We will often do some commands UEFI "EBL" after here, about how to enter it, please refer to [UEFI_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.txt.4D01).
+   We will often do some commands UEFI "EBL" after here, about how to enter it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D01.md).
 
 2. Use getlinuxatag to see current kernel parameter
 
@@ -99,11 +99,11 @@ There are several methods to bring up system, you can select following anyone fi
 
   5. Reboot the board.
     Note: the name of ".kernel" and ".filesystem" can not be changed!
-    To get all binaries mentioned above, please refer to [readme.txt](https://github.com/open-estuary/estuary/blob/master/doc/Readme.txt.4D01).
+    To get all binaries mentioned above, please refer to [readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D01.md).
 
 <h3 id="3.2">Boot via PXE</h3>
  1. Setup PXE environment on host
-    Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.txt.4All).
+    Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
  2. Reboot and enter UEFI "Boot Menu".
    
@@ -117,13 +117,13 @@ There are several methods to bring up system, you can select following anyone fi
     `2`    //Boot from PXE<br>
        
  3. After several seconds, D01 will boot by PXE automatically.
-    To config the grub.cfg to support PXE boot, please refer to [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).
+    To config the grub.cfg to support PXE boot, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
 <h3 id="3.3">Boot via NORFLASH with NFS as rootfs</h3>
 
    D01 supports booting via NFS, you can try it as following steps:
     
-   1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.txt.4All).
+   1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
   
    2. Change command line as follow according in "Show & change kernel cmdline in UEFI"
       Change kernel cmdline to:
@@ -171,7 +171,7 @@ In my case, my hardware disk only has one partition: sda1(Ubuntu rootfs).
        sda1: Empty
        sda2: Ubuntu distribution
        ```
-       To get different distributions, please refer to [Distributions_Guider.txt](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.txt.4All). 
+       To get different distributions, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md). 
    
    4. Reboot and enter UEFI "EBL" Shell.
     
@@ -195,8 +195,8 @@ In my case, my hardware disk only has one partition: sda1(Ubuntu rootfs).
               |-------------hip04-d01.dtb      //device tree binary for D01
         sda2: Ubuntu distribution
     ```
-    To get kernel zImage_D01 and dtb file, please refer to [Readme.txt](https://github.com/open-estuary/estuary/blob/master/doc/Readme.txt.4D01).<br>
-    To get different distributions, please refer to [Distributions_Guider.txt](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.txt.4All).<br>
+    To get kernel zImage_D01 and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D01.md).<br>
+    To get different distributions, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br>
 
   4. Launch EFI-stub Kernel in the UEFI shell
  
@@ -225,9 +225,9 @@ Then the board will boot from kernel with EFI-stub.
               |-------------hip04-d01.dtb      //device tree binary for D01
         sda2: Ubuntu distribution
  ```
-   To get kernel zImage_D01 and dtb file, please refer to [Readme.txt](https://github.com/open-estuary/estuary/blob/master/doc/Readme.txt.4D01).<br>
-   To get and config grub and grub.cfg, please refer to [Grub_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All).<br>
-   To get different distributions, please refer to [Distributions_Guider.txt](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.txt.4All).<br>
+   To get kernel zImage_D01 and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D01.md).<br>
+   To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).<br>
+   To get different distributions, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br>
 
  3. Reboot board and enter UEFI Shell, then input these commands in turn:
     
