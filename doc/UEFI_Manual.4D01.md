@@ -3,7 +3,7 @@
 * [Recover the UEFI when it broke](#3)
 * [BootWrapper Hacking](#4)
    * [Compile BootWrapper](#4.1)
-   * [Upgrade Bootwrapper](#4.1)
+   * [Upgrade Bootwrapper](#4.2)
 
 
 <h2 id="1">Introduction</h2>
@@ -88,7 +88,7 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
 
  Download BootWrapper source code and build according [Readme.md](https://github.com/tianjiaoling/estuary/blob/mark/doc/Readme.4D01.md) to produce .text and .monitor
 
-<h3 id="4.1">Upgrade Bootwrapper</h3>
+<h3 id="4.2">Upgrade Bootwrapper</h3>
 1. Boot D01 to enter UEFI "EBL" as above description.
 
 2. IP address config:
