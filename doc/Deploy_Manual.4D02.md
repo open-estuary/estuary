@@ -13,6 +13,7 @@
    * [Boot via ACPI](#3.6)
    
 <h2 id="1">Introduction</h2>
+
 This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
 
 All following sections will take the D02 board as example, other boards have the similar steps to do, for more detail difference between them, please refer to Hardware Boards sections in http://open-estuary.com/hardware-boards/.
@@ -35,14 +36,17 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
 
 <h3 id="2.4">Upgrade DTB file(Necessary step)</h3>
 
-Because this dtb file is important to this D02 boards, firstly you must flash this DTB file into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the follow commands in EBL:
-
-We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
+ Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
+ into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the
+ follow commands in EBL:
+  
+ We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
 
 1. IP address config (Optional, you can ignore this step if DHCP works well)
 
    the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
-
+   
+   after setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)
  ```
 # Config board's IP address
 ifconfig -s eth0 static <IP address> <mask> <gateway>
@@ -70,7 +74,9 @@ provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <dow
 
    You must reboot your D02 board after above two steps, this new DTB file will be used on booting board.
 
-   Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.Also it is to be noted that the DTB file should not be input in the Grub config file. So if you wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
+   Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.
+   Also it is to be noted that the DTB file should not be input in the Grub config file. So if you
+    wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
 
 <h2 id="3">Bring up System</h2>
 
@@ -78,9 +84,11 @@ There are several methods to bring up system, you can select following anyone fi
 
 <h3 id="3.1">Boot via ESL</h3>
 
-In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.After reboot or power off, all downloaded data will be lost. This boot mode is just used for debugging.
+ In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.<br>
+ After reboot or power off, all downloaded data will be lost.<br>
+ This boot mode is just used for debugging.
 
-Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+ Boot D02 to UEFI menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
 
 1. Download Image binary file from FTP server to target board's RAM
 
@@ -113,7 +121,8 @@ Boot D02 to UEFI SHELL, and type the follow commands in EBL:
 
 <h3 id="3.2">Boot via NORFLASH</h3>
 
-In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
+ In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
+ Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
 
 Boot D02 to UEFI SHELL, and type the follow commands in EBL:
 
@@ -146,7 +155,7 @@ Boot D02 to UEFI SHELL, and type the follow commands in EBL:
  norwfmem 100000 2000000 4000000
 
   
-3. Reboot D02 and press anykey to enter UEFI Boot Menu
+3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
 
 4. Select "Boot Manager"->"FLASH Start OS" boot option and press "Enter"
  
@@ -154,13 +163,14 @@ To get all binaries mentioned above, please refer to [Readme.md](https://github.
 
 <h3 id="3.3">Boot via PXE</h3>
 
-In this boot mode, the UEFI will get grub from PXE server.The grub will get the configuration file from TFTP service configured by PXE server.
+In this boot mode, the UEFI will get grub from PXE server.
+The grub will get the configuration file from TFTP service configured by PXE server.
 
 1. Setup PXE environment on host
 
    Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
    
-2. Reboot and press anykey to enter UEFI Boot Menu
+2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
 3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
 
@@ -172,26 +182,29 @@ To config the grub.cfg to support PXE boot, please refer to [Grub_Manual.md](htt
 
 In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server.You can use `"showmount -e <server ip address>"` to list the exported NFS directories on the NFS server.
 
+You can use "showmount -e <server ip address>" to list the exported NFS directories on the NFS server.
+
 D02 supports booting via NFS, you can try it as following steps:
 
 1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
 2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
-3. Reboot D02 and press anykey to enter UEFI Boot Menu
+3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
 
 4. Select boot option "Boot Manager"->"EFI Network" boot option to enter.
 
 <h3 id="3.5">Boot via DISK(SAS/USB/SATA)</h3>
 
-D02 board supports booting via SAS and USB disk by default, if you want to boot via SATA, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board, another is to connect SATA disk into SATA interface on D02 board directly. Usually the first is more stable than the second, so we suggest you to use the first method.
+D02 board supports booting via SAS and USB disk by default, if you want to boot via SATA, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board, another is to connect SATA disk into SATA interface on D02 board directly. <br>
+Usually the first is more stable than the second, so we suggest you to use the first method.
 
 For SAS and USB, the UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So grubaa64.efi, grub.cfg, Image and different estuary release distributions are stored on disk. But for SATA boot mode, the kernel image will be loaded from NORFLASH into RAM on target board. The root parameter passed to the kernel will be specified in hip05-d02.dts and it will point to the root partition on SATA disk.
 
-1. Boot by PXE or NORFLASH(please refer to "Boot via PXE" or "Boot via NORFLASH") to part and format hardware disk before booting D02 board
+1. Boot by PXE or NORFLASH(please refer to "#Boot via PXE" or "#Boot via NORFLASH") to part and format hardware disk before booting D02 board
 
    Format hardware disk, e.g.: sudo mkfs.vfat /dev/sda1; sudo mkfs.ext4 /dev/sda2<br>
-      Part hardware disk with `"sudo fdisk /dev/sda" as follow:`<br>
+   Part hardware disk with `"sudo fdisk /dev/sda" as follow:`<br>
 
         +---------+-----------+--------------+------------------+------------------+
         | Name    |   Size    |    Type      |   USB/SAS        |   SATA           |
@@ -212,24 +225,27 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
    *Preprocess when the disk can’t be identified*
    
-    In case of the SATA disk is not be identified by D02, you can try the following step to process the disk. (for some specfic disk eg seagate disk made by samsung, it can be useful)
-    * Find a PC or another board which can identify this disk
+    In case of the SATA disk is not be identified by D02, you can try the following step to process the disk.
+    (it can be useful for some specfic disk such as seagate disk made by samsung.
+    
+   *  Find a PC or another board which can identify SATA disk.
     
        You should find a PC or another board which can identify this disk, and the system of PC or board should be linux system. For us,we can use D01 board.
-    * Use tool fdisk to process this disk
+
+   * Use tool fdisk to process this disk
     
         format the disk firstly: 
-          ```
+         ```shell
             sudo mkfs.ext4 /dev/sda
          ```
          add a gpt to this disk : 
-           ```
+           ```shell
             fdisk /dev/sda
             g-------add a gpt partition
             
            ```
          add some EFI partition : 
-           ```
+           ```shell
             n-------add a partition
             1-------the number of partition
             +200M---------size of partition
@@ -273,8 +289,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
          
    * modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
    
-     ` e.g.: the context of grub.cfg file is modified as follow:`
-       ```
+     e.g.: the context of grub.cfg file is modified as follow:
+       ```shell
        #
 	    # Sample GRUB configuration file
 	    #
@@ -294,17 +310,19 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. <br>
 	    2. If you want to use another linux distribution, please refer above steps.
           
-   * Reboot and press any key into enter UEFI menu.
+   * Reboot and press any key except "enter" into enter UEFI menu.
         
-   * Select "Boot Manager"-> "Boot Maintenance Manager"-> "Boot From File" boot option to select corresponding disk.<br>
-     Press arrow key up or down to select grub boot option to decide which distribution should boot.
+   * For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+     For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+   
+   * Press arrow key up or down to select grub boot option to decide which distribution should boot.
           
  **Boot via SATA**
 
-    In this boot mode, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card (model:PEC-2024) which connect to D02 board, another is to connect SATA disk into SATA interface on D02 board directly. 
-  
-  **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
-   * Build kernel
+   In this boot mode, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board,another is to connect SATA disk into SATA interface on D02 board directly. 
+ 
+   **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
+    * Build kernel
         * Enable driver configuration of corresponding SATA model in kernel
            Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.<br>
            `e.g.:modify arch/arm64/configs/defconfig as follow:`
@@ -326,60 +344,50 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
    * Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
    
-  **The second one: to connect SATA disk into SATA interface on D02 board directly**
+   **The second one: to connect SATA disk into SATA interface on D02 board directly**
 
-   * modify UEFI code
+   * select sata mode for UEFI 
    
-      ```
-        $ cd ~/open-estuary/uefi
-        $ git submodule init
-        $ git submodule update
-        $ cd OpenPlatformPkg
-        $ git rebase -i 03ba7ae
-	
-     ```	   
-        modify commit
-      ```
-        pick 5cce83a D02/SAS: add sas driver for d02             ------> drop 5cce83a D02/SAS: add sas driver for d02
-        pick 858d56d D02/SAS: use sge chain to support big data  ------> drop 858d56d D02/SAS: use sge chain to support big data
-        : wq(write and quit)
-        
-      ```
-      
-   * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file as follow:
-     
-      ~~&sas0 {~~                             
+     After burn BIOS file(you can refer to "UEFI_Manual.4D02.md"), UEFI boot as sas mode by default.<br>
+     You can switch between sata and sas by adding a commandline at EBL.
+
+       e.g.:
+       ```
+           sataenable 0      //set into sas
+           sataenable 1      //set into sata
+           sataenable 2      //check the current setting: sas or sata   
+       ```
+   * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file 
+  
+       * Find the word "bootargs" and modify the value as follow:　
+	 ```shell
+         bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+         ```
+       * Find the word "&sas0", "&sas1" and delete as follow:
+	     ~~&sas0 {~~                             
               ~~status = "okay";~~              
 	     ~~};~~                              
-       ~~&sas1 {~~                              
+           ~~&sas1 {~~                              
               ~~status = "okay";~~               
-	      ~~};~~                              
+	      ~~};~~    
+                               
 
-   * Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file as follow:
+   * Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
    
-     Change the status' value of node "ahci0: sata@b1002800" to "disabled".
- 
+     Change the status' value of node "ahci0: sata@b1002800" to "disabled" as follow:
+     ```shell
+             ahci0: sata@b1002800 {
+                          ......
+                        status = "disabled";      ---------> status = "okay";
+                };
        ```
-        ahci0: sata@b1002800 {
-                        ......
-                        status = "disabled";  ---------> status = "okay";
-                             };
-       ```
-       
-   * Modify estuary/build.sh file 
-   
-     Find the sentence` "# roll back to special version for D02/D03"` and comment out the following code as follow:
-      ```
-             git reset --hard                  ---------->    # git reset --hard
-             git clean -fdx                    ---------->    # git clean -fdx
-             git checkout open-estuary/master  ---------->    # git checkout open-estuary/master
-             git submodule init                ---------->    # git submodule init
-             git submodule update              ---------->    # git submodule update
-    ```
+   * Build the kernel 
+  
+     eg: ` ./estuary/build.sh -f estuary/estuarycfg.json`
     
-   * ./estuary/build.sh -f estuary/estuarycfg.json
+   * Burn Image, dtb file NorFlash. About how to burn, please refer to "Boot via NORFLASH".
    
-   * Burn Image, dtb file and UEFI into NorFlash. About how to burn, please refer to "Boot via NORFLASH" and  [UEFI_Manual.4D02.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D02.md).
+   * Reboot and press any key except "enter" to enter UEFI menu.
    
    * Reboot and press any key to enter UEFI menu.
    
