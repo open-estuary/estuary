@@ -19,11 +19,11 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
 FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
 
-1. Prepare files about UEFI on local computer
+ 1. Prepare files about UEFI on local computer
 
     All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
-2. Boot board into UEFI SHELL
+ 2. Boot board into UEFI SHELL
 
   Follow below steps to UEFI SHELL:
     
@@ -34,13 +34,14 @@ FTP protocol is used for downloading between hardware boards and local network. 
     
     Then the board will enter the UEFI SHELL mode.
 
-3. Update UEFI files
+ 3. Update UEFI files
 
     a. IP address config
        the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
        `ifconfig -s eth0 static <IP address> <mask> <gateway>`
     
         e.g.: 
+        
         `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
     b. Burn BIOS file
