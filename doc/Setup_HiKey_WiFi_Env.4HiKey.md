@@ -138,7 +138,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
    In the above example, wlan0 is not UP. Execute the following command to bring it up:
 
-    $ sudo ip link set wlan0 up`
+   `$ sudo ip link set wlan0 up`
 
    `[sudo] password for peter`:
      
