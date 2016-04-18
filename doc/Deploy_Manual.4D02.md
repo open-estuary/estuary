@@ -298,9 +298,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    a. modify grub config file(please refer to [Grub_Manual.4All.md] (https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
    
     e.g.: the context of grub.cfg file is modified as follow:
-  
+    
       ```shell
-             #
 	   # Sample GRUB configuration file
 	   #
 	   # Boot automatically after 5 secs.
@@ -313,12 +312,12 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 		set root=(hd0,gpt1)
 		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
 	    }
-        ```
+       ```
      Note:
       
-       1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
+      1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
 	    
-       2. If you want to use another linux distribution, please refer above steps.
+      2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
         
@@ -342,14 +341,14 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
           
          e.g.:modify arch/arm64/configs/defconfig as follow:
            
-         ```
+        ```
               ...... 
            CONFIG_SATA_MV=m             ----------> CONFIG_SATA_MV=y
         ```	
 	
        * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file as follow:
          
-         ```
+        ```
        　 bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
        After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "#Boot via NORFLASH".
@@ -382,7 +381,6 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
          bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
        * Find the word "&sas0", "&sas1" and delete as follow:
-       
 	~~&sas0 {~~  
 	      ~~status = "okay";~~
 	      ~~};~~
@@ -394,7 +392,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
      Change the status' value of node "ahci0: sata@b1002800" to "disabled" as follow:
      
-     ```shell
+      ```shell
              ahci0: sata@b1002800 {
                           ......
                         status = "disabled";      ---------> status = "okay";
@@ -402,7 +400,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        ```
    d. Build the kernel 
   
-     eg: ` ./estuary/build.sh -f estuary/estuarycfg.json`
+      eg: ` ./estuary/build.sh -f estuary/estuarycfg.json`
     
    e. Burn Image, dtb file NorFlash. About how to burn, please refer to "Boot via NORFLASH".
    
