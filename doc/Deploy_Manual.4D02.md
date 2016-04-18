@@ -255,9 +255,9 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
         
        `t`-------change the type of partition
         
-        EFI system
+       EFI system
  
-       add some anther partition  ...
+       add some anther partition ` ...`
        
        save the change           : `w`
        
@@ -300,20 +300,19 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
      e.g.: the context of grub.cfg file is modified as follow:
      
        ```shell
-            #
-	    # Sample GRUB configuration file
-	    #
-	    # Boot automatically after 5 secs.
+           #
+	   # Sample GRUB configuration file
+	   #
+	   # Boot automatically after 5 secs.
 	    set timeout=5
-	    # By default, boot the Estuary with Ubuntu filesystem
+	   # By default, boot the Estuary with Ubuntu filesystem
 	    set default=ubuntu
-	    # For booting GNU/Linux
+	   # For booting GNU/Linux
 
 	    menuentry "ubuntu" --id ubuntu {
 		set root=(hd0,gpt1)
 		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
 	    }
-
        ```
     Note:
       
@@ -386,11 +385,10 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        
 	 ~~&sas0 {~~  
 	      ~~status = "okay";~~
-	       ~~};~~
+	      ~~};~~
 	 ~~&sas1 {~~
-	 ~~status = "okay";~~
-	       ~~};~~    
-                      
+	    ~~status = "okay";~~
+	      ~~};~~    
 
    c. Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
    
