@@ -61,7 +61,7 @@ NOTE: please refer to the Hardware User Guide for more information on board link
  $ cp {pwd}/open-estuary/build/HiKey/binary/* ./  -rf
  $ sudo cp {pwd}/open-estuary/build/HiKey/distro/* ./  -rf
 ```
-NOTE: you can get more information about Image explaination from this Readme.txt document.
+NOTE: you can get more information about Image explaination from this [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4HiKey.md) document.
 
 <h2 id="3">Upgrade Systerm</h2>
 
