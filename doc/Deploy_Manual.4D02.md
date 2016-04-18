@@ -300,23 +300,28 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
      e.g.: the context of grub.cfg file is modified as follow:
     
      ```shell
-	   # Sample GRUB configuration file
-	   #
-	   # Boot automatically after 5 secs.
-	    set timeout=5
-	   # By default, boot the Estuary with Ubuntu filesystem
-	    set default=ubuntu
-	   # For booting GNU/Linux
+	       #
+	       # Sample GRUB configuration file
+	       #
+	       # Boot automatically after 5 secs.
+	       set timeout=5
+	       # By default, boot the Estuary with Ubuntu filesystem
+	       set default=ubuntu
+	       # For booting GNU/Linux
 
-	    menuentry "ubuntu" --id ubuntu {
-		set root=(hd0,gpt1)
-		linux /Image rdinit=/init root=PARTUUID=XXX rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-	    }
+         menuentry "ubuntu" --id ubuntu {
+         search --no-floppy --fs-uuid --set=root <UUID>
+         linux /Image_D02 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+         }
      ```
     Note:
       
-    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. 
-	    
+    1. <UUID> means the UUID of that partition which your EFI System is located in.
+    
+       <PARTUUID> means the PARTUUID of that partition which your linux distribution is located in. 
+       
+       To see the values of UUID and PARTUUID, please use the command:`$blkid`.
+  
     2. If you want to use another linux distribution, please refer above steps.
           
    b. Reboot and press any key except "enter" into enter UEFI menu.
