@@ -60,5 +60,5 @@ Then you will get the rootfs image file as rootfs.img
   
   OpenEmbedded: wget -c http://releases.linaro.org/14.06/openembedded/aarch64/vexpress64-openembedded_minimal-armv8-gcc-4.8_20140623-668.img.gz
 
-More detail about how to deploy target system into target board, please refer to Deployment_Manual.txt.
+More detail about how to deploy target system into target board, please refer to Deployment_Manual.md.
 
