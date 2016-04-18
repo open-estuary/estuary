@@ -125,7 +125,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
    After the system is ready, you can check whether the wifi is ready:
     
-   a. Check whether the wireless device is up.
+ a. Check whether the wireless device is up.
 
      `$ ip link show wlan0`
    
@@ -134,7 +134,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	    
     Look for the word "UP" inside the brackets in the first line of the output.
 
-   b. enable the wireless device
+ b. enable the wireless device
 
    In the above example, wlan0 is not UP. Execute the following command to bring it up:
 
@@ -152,7 +152,7 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 	qlen 1000<br>
 	link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
       
-   c. Check the connection status.
+ c. Check the connection status.
 
 	`$ iw wlan0 link`
 	 
