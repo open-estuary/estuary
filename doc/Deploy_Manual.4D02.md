@@ -385,7 +385,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
    * Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
    	
-<h3 id="3.5">Boot via ACPI</h3>
+<h3 id="3.6">Boot via ACPI</h3>
 
 D02 also supports booting via ACPI, you can bring up this systerm which is similar with this DT mode, you must fix some point as follow:
 
