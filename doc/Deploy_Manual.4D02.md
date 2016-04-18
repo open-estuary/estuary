@@ -327,7 +327,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
    d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
           
- **Boot via SATA**
+  **Boot via SATA**
 
    In this boot mode, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board,another is to connect SATA disk into SATA interface on D02 board directly. 
  
