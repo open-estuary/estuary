@@ -242,7 +242,7 @@ Then the board will boot from kernel with EFI-stub.
    
  4. Then the board will boot according configurations in grub.cfg
   
-<h3 id="3.6">KVM on D01</h3>
+<h3 id="3.7">KVM on D01</h3>
 Host Kernel on D01 is already support KVM. steps to build kernel could refer to Kernal hacking.
 
 Steps to build and run guest:
