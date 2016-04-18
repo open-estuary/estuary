@@ -155,11 +155,11 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
 	 `$ ip addr show wlan0`
 	  
-	   wlan0:  mtu 1500 qdisc mq state UP qlen 1000
-	   link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
-	   inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0
-	   inet6 fe80::76e5:43ff:fea1:ce65/64 scope link
-	   valid_lft forever preferred_lft forever
+	   wlan0:  mtu 1500 qdisc mq state UP qlen 1000<br>
+	   link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff<br>
+	   inet 192.168.1.113/24 brd 192.168.1.255 scope global wlan0<br>
+	   inet6 fe80::76e5:43ff:fea1:ce65/64 scope link<br>
+	   valid_lft forever preferred_lft forever<br>
 	  
   NOTE: In order to test this WiFi function, you can use "ping www.baidu.com" website to verify it.
    
