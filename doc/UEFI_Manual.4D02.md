@@ -38,40 +38,40 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
     a. IP address config
        the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
-    `ifconfig -s eth0 static <IP address> <mask> <gateway>`
+       `ifconfig -s eth0 static <IP address> <mask> <gateway>`
     
-    e.g.: `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
+        e.g.: `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
     b. Burn BIOS file
        After setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)    
-      ```shell
-    # Download file from FTP server to board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
-    # Write the data into NORFLASH
-    spiwfmem <source address> <target address> <data length>
-    ```
-    e.g.: 
-    ```shell
-    provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 100000
-    spiwfmem 100000 0000000 300000
-    ```
+       ```shell
+        # Download file from FTP server to board's RAM
+        provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
+        # Write the data into NORFLASH
+        spiwfmem <source address> <target address> <data length>
+        ```
+       e.g.: 
+       ```shell
+        provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 100000
+        spiwfmem 100000 0000000 300000
+       ```
    c. Burn CPLD file
     
-     Notes: This is a very dangerous operation, please don't do it when not necessary.
+      Notes: This is a very dangerous operation, please don't do it when not necessary.
      	
-     If you really want to do it, please make sure the power can **NOT** be shut off suddenly during updating CPLD.
+      If you really want to do it, please make sure the power can **NOT** be shut off suddenly during updating CPLD.
      	
-    ```shell
-     # Download file from FTP server to board's RAM
-      provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
-     # Write the data into NORFLASH
-     updatecpld <target address>
-    ```
-     e.g.: 
-     ```
+      ```shell
+       # Download file from FTP server to board's RAM
+       provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
+       # Write the data into NORFLASH
+       updatecpld <target address>
+      ```
+       e.g.: 
+       ```
       provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 100000
       updatecpld 100000
-    ```
+      ```
 d. Power off and reboot board again
 
 <h2 id="3">Recover the UEFI when it broke</h2>
