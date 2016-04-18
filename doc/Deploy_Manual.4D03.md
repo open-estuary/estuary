@@ -150,20 +150,25 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
    Format hardware disk, e.g.: `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`<br>
    Part hardware disk with `"sudo fdisk /dev/sda"` as follow:<br>
-       add a gpt to this disk : 
+    add a gpt to this disk : 
        
-        `fdisk /dev/sda` <br>
-        `g`-------add a gpt partition
+      `fdisk /dev/sda` 
+        
+      `g`-------add a gpt partition
        
-       add some EFI partition : 
+     add some EFI partition : 
        
-        `n`-------add a partition<br>
-        `1`-------the number of partition<br>
-        `+200M`---------size of partition<br>
-        `t`-------change the type of partition<br>
-         EFI system
+      `n`-------add a partition
+       
+      `1`-------the number of partition
+       
+      `+200M`---------size of partition
+       
+      `t`-------change the type of partition
+       
+       EFI system
       
-       add some anther partition  `...`
+       add some anther partition  `...`<br>
        save the change           : `w`<br>
        formate EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
        formate ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
