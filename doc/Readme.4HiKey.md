@@ -128,4 +128,4 @@ More detail information about toolchains, please refer to [Toolchains_Guider.md]
 
 More detail information about how to benchmark system, please refer to [Caliper_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.4All.md).
 
-More detail information about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab](https://github.com/open-estuary/estuary/blob/master/doc/Caliper_Manual.txt.4All).
+More detail information about how to access remote boards in OpenLab, please refer to [Boards_in_OpenLab](http://open-estuary.org/accessing-boards-in-open-lab/).
