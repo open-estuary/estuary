@@ -120,7 +120,7 @@ The boot partition is a 64MB FAT partition and contains kernel/dtb, grub files a
   $ sudo umount boot-fat
   $ rm -rf boot-fat
 ```
-NOTE: More detail information about how to write this grub.cfg, please refer to [GRUB_Manual.txt](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.txt.4All) document.
+NOTE: More detail information about how to write this grub.cfg, please refer to [GRUB_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md) document.
 
  If you finish making boot-fat.uefi.img image, you start to flash this image according to this instruction:
    1. Turn off HiKey board<br>
@@ -166,7 +166,7 @@ You should partion SD card (8G) and tar this Ubuntu_ARM64.tar.gz into your SD ca
  
  9. Success to boot ubunt systerm
  
-NOTE: WIFI config about mini-rootfs systerm please refer to [Setup_HiKey_Wifi_Env.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.txt.4HiKey) document
+NOTE: WIFI config about mini-rootfs systerm please refer to [Setup_HiKey_Wifi_Env.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.4HiKey.md) document
 
 <h4 id="3.3.2">eMMC on HiKey placing this ubuntu systerm</h4> 
 
@@ -177,7 +177,7 @@ You can place this ubuntu systerm into eMMC on HiKey according to this following
   1. Turn on HiKey board<br>
   2. Select "grub on eMMC" from uefi options<br>
   3. Select "Hikey minilinux eMMC" from grub options (boot min rootfs)<br>
-  4. Refer to [Setup_HiKey_Wifi_Env.txt](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.txt.4HiKey) document to config WIFI link<br>
+  4. Refer to [Setup_HiKey_Wifi_Env.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_HiKey_WiFi_Env.4HiKey.md) document to config WIFI link<br>
   5. Download this ubuntu systerm into eMMC on HiKey board<br>
     
      ```
