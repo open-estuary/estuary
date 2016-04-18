@@ -384,7 +384,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        
         ~~&sas0 {~~  
         ~~status = "okay";~~
-         ~~};~~
+        ~~};~~
        ~~&sas1 {~~
         ~~status = "okay";~~
         ~~};~~    
