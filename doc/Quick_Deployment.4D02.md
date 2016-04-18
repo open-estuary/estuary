@@ -1,4 +1,4 @@
- ------
+
 * [Introduction](#1)
 * [Quick Deploy System](#2)
    * [Deploy system via USB Disk](#2.1)
