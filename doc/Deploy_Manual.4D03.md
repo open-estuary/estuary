@@ -211,7 +211,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
     
 3. Boot the board via SAS/USB/SATA
 
-   a. Modify grub config file(please refer to [Grub_Manual.txt.4All](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))<br>
+   a. Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))<br>
        e.g.: <br>
        the context of grub.cfg file is modified as follow:
        ``` 
