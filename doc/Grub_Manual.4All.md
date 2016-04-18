@@ -140,10 +140,10 @@ Normally they are placed into bootable partition as following structure.
 ```
 -------EFI
 |       |
-|       BOOT------BOOTAA64.EFI(rename grubaa64.efi as BOOTAA64.EFI ) # grub binary file only for ARM64 architecture
+|       GRUB2------grubaa64.efi   # grub binary file only for ARM64 architecture
 |           |
 |           |
-|           ------BOOTARM32.EFI(rename grubarm32.efi as BOOTARM.EFI ) # grub binary file only for ARM32 architecture
+|            ------grubarm32.efi  # grub binary file only for ARM32 architecture
 |
 |-------------grub.cfg          # grub config file
 |
