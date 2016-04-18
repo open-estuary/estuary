@@ -59,9 +59,9 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
      `$ iw dev`
      
-     phy#0
-     Interface wlan0
-     ifindex 3
+     phy#0<br>
+     Interface wlan0<br>
+     ifindex 3<br>
      type managed
 	   
    The above output shows that the system has 1 physical WiFi card, designated as phy#0.
@@ -148,8 +148,8 @@ When HiKey board can boot into mini-rootfs systerm or Ubuntu systerm in Estuary 
 
 	`$ ip link show wlan0`
 	 
-        wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT
-	qlen 1000
+        wlan0: (NO-CARRIER,BROADCAST,MULTICAST,UP) mtu 1500 qdisc mq state DOWN mode DEFAULT<br>
+	qlen 1000<br>
 	link/ether 74:e5:43:a1:ce:65 brd ff:ff:ff:ff:ff:ff
       
    c. Check the connection status.
