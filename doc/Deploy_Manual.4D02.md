@@ -164,6 +164,7 @@ To get all binaries mentioned above, please refer to [Readme.md](https://github.
 <h3 id="3.3">Boot via PXE</h3>
 
 In this boot mode, the UEFI will get grub from PXE server.
+
 The grub will get the configuration file from TFTP service configured by PXE server.
 
 1. Setup PXE environment on host
@@ -196,8 +197,7 @@ D02 supports booting via NFS, you can try it as following steps:
 
 <h3 id="3.5">Boot via DISK(SAS/USB/SATA)</h3>
 
-D02 board supports booting via SAS and USB disk by default, if you want to boot via SATA, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board, another is to connect SATA disk into SATA interface on D02 board directly. <br>
-Usually the first is more stable than the second, so we suggest you to use the first method.
+D02 board supports booting via SAS and USB disk by default, if you want to boot via SATA, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board, another is to connect SATA disk into SATA interface on D02 board directly. Usually the first is more stable than the second, so we suggest you to use the first method.
 
 For SAS and USB, the UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So grubaa64.efi, grub.cfg, Image and different estuary release distributions are stored on disk. But for SATA boot mode, the kernel image will be loaded from NORFLASH into RAM on target board. The root parameter passed to the kernel will be specified in hip05-d02.dts and it will point to the root partition on SATA disk.
 
@@ -228,11 +228,11 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
     In case of the SATA disk is not be identified by D02, you can try the following step to process the disk.
     (it can be useful for some specfic disk such as seagate disk made by samsung.
     
-   *  Find a PC or another board which can identify SATA disk.
+   a. Find a PC or another board which can identify SATA disk.
     
        You should find a PC or another board which can identify this disk, and the system of PC or board should be linux system. For us,we can use D01 board.
 
-   * Use tool fdisk to process this disk
+   b. Use tool fdisk to process this disk
     
         format the disk firstly: 
          ```shell
@@ -287,7 +287,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
  **Boot via SAS/USB**
          
-   * modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
+   a. modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
    
      e.g.: the context of grub.cfg file is modified as follow:
        ```shell
@@ -310,19 +310,19 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 	    1. XXX means the PARTUUID($blkid) of that partition which your linux distribution is located in. <br>
 	    2. If you want to use another linux distribution, please refer above steps.
           
-   * Reboot and press any key except "enter" into enter UEFI menu.
+   b. Reboot and press any key except "enter" into enter UEFI menu.
         
-   * For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
-     For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+   c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+      For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
    
-   * Press arrow key up or down to select grub boot option to decide which distribution should boot.
+   d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
           
  **Boot via SATA**
 
    In this boot mode, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board,another is to connect SATA disk into SATA interface on D02 board directly. 
  
    **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
-    * Build kernel
+    a. Build kernel
         * Enable driver configuration of corresponding SATA model in kernel
            Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.<br>
            `e.g.:modify arch/arm64/configs/defconfig as follow:`
@@ -340,13 +340,13 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        
        NOTE: according to above bootargs, it will boot ubuntu distribution in sda2, if you want to boot other different distribution, you should change "root=/dev/sdaX" item.
    
-   * Reboot and press any key into enter UEFI menu.
+   b. Reboot and press any key into enter UEFI menu.
    
-   * Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
+   c. Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
    
    **The second one: to connect SATA disk into SATA interface on D02 board directly**
 
-   * select sata mode for UEFI 
+   a. select sata mode for UEFI 
    
      After burn BIOS file(you can refer to "UEFI_Manual.4D02.md"), UEFI boot as sas mode by default.<br>
      You can switch between sata and sas by adding a commandline at EBL.
@@ -357,7 +357,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
            sataenable 1      //set into sata
            sataenable 2      //check the current setting: sas or sata   
        ```
-   * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file 
+   b. Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file 
   
        * Find the word "bootargs" and modify the value as follow:　
 	 ```shell
@@ -372,7 +372,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 	      ~~};~~    
                                
 
-   * Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
+   c. Modify arch/arm64/boot/dts/hisilicon/hip05.dtsi file
    
      Change the status' value of node "ahci0: sata@b1002800" to "disabled" as follow:
      ```shell
@@ -381,17 +381,15 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
                         status = "disabled";      ---------> status = "okay";
                 };
        ```
-   * Build the kernel 
+   d. Build the kernel 
   
      eg: ` ./estuary/build.sh -f estuary/estuarycfg.json`
     
-   * Burn Image, dtb file NorFlash. About how to burn, please refer to "Boot via NORFLASH".
+   e. Burn Image, dtb file NorFlash. About how to burn, please refer to "Boot via NORFLASH".
    
-   * Reboot and press any key except "enter" to enter UEFI menu.
+   f. Reboot and press any key except "enter" to enter UEFI menu.
    
-   * Reboot and press any key to enter UEFI menu.
-   
-   * Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
+   g. Select "Boot Manager"->"FLASH Start OS" and then press Enter Key.
    	
 <h3 id="3.6">Boot via ACPI</h3>
 
