@@ -1,7 +1,7 @@
 * [D01 Board Hardware Features](#1)
 * [D01 Software Solution and Status](#2)
 * [Major Components](#3)
-  * [UEFI:](#3.1)
+  * [UEFI](#3.1)
   * [BootWrapper](#3.2)
   * [GRUB](#3.3)
   * [EFI-STUB](#3.4)
