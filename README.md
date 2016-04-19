@@ -35,7 +35,7 @@ NOTE:
 
 6.Change list compared with previous version
 
-  Please refer to "changelist.txt" in this project.
+  Please refer to [changelist.txt](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
 
 7. TODO
 ================
