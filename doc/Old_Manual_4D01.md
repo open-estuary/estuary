@@ -284,18 +284,25 @@ For simplicity, to build UEFI for D01 board, follow these steps:
 In case of failure in UEFI, you can always switch to a factory default (known-good, non-erasable) UEFI by shorting Pin 2 and Pin 3 of J39.
 (Refer to Mark 18 of d01-portrait.png)
 
-```
-Power off the board, disconnect power supply
-    Short Pin 2 and Pin 3 of J39 (Leave Pin 1 unconnected)
-    On your client (minicom or similar tools),
-    change UART baudrate to 9600 or 115200
-    Apply power to the board, turn it on
-    Following above steps to upgrade UEFI
-    Power off the board, disconnect power supply
-    Short Pin 1 and Pin 2 of J39 (Leave Pin 3 unconnected)
-    On your client, change UART baudrate to 115200. (That’s usually the case.
-    Unless you know that you are using a 9600 baudrate UEFI.)
-```
+ Power off the board, disconnect power supply
+
+ Short Pin 2 and Pin 3 of J39 (Leave Pin 1 unconnected)
+ 
+ On your client (minicom or similar tools),
+ 
+ change UART baudrate to 9600 or 115200
+ 
+ Apply power to the board, turn it on
+ 
+ Following above steps to upgrade UEFI
+ 
+ Power off the board, disconnect power supply
+ 
+ Short Pin 1 and Pin 2 of J39 (Leave Pin 3 unconnected)
+ 
+ On your client, change UART baudrate to 115200. (That’s usually the case.
+ 
+ Unless you know that you are using a 9600 baudrate UEFI.)
 
 <h3 id="4.2">BootWrapper Hacking</h3>
    
