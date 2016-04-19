@@ -66,7 +66,7 @@ provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <dow
  spiwfmem <source address> <target address> <data length>
  ```
  
- e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 100000 <br>
+ e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x100000 <br>
  spiwfmem 100000 300000 100000
 
 
