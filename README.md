@@ -8,11 +8,12 @@
 * [TODO](#8)
 
  <h2 id="1">Introduction</h2>
-=================
+
  These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
 
-  Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
-  More detail information about Estuary, please refer to http://open-estuary.org/estuary.
+ Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
+ 
+ More detail information about Estuary, please refer to http://open-estuary.org/estuary.
 
 <h2 id="2"> Obtain and build</h2>
 ================
