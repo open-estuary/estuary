@@ -266,11 +266,11 @@ For simplicity, to build UEFI for D01 board, follow these steps:
   
   uefi-build.sh -b RELEASE d01
   
-   When finished, you can find the build result here:
+  When finished, you can find the build result here:
    
    `ls -la Build/D01/DEBUG_GCC46/FV/D01.fd`
     
-    Note: for a release version:
+ Note: for a release version:
     
    `ls -la Build/D01/RELEASE_GCC46/FV/D01.fd`
    
