@@ -336,7 +336,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
    In this boot mode, there are two different methods for you, one is to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board,another is to connect SATA disk into SATA interface on D02 board directly. 
  
-   **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
+    **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
    
     a. Build kernel(please refer to [Readme.4D02.md] (https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md))
     
@@ -416,9 +416,9 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
  D02 also supports booting via ACPI, you can bring up this systerm which is similar with this DT mode, you must fix some point as follow:
 
- 1. delete DTB file and don't burn DTB file
+1. delete DTB file and don't burn DTB file
 
- 2. Set the parameters of booting via ACPI
+2. Set the parameters of booting via ACPI
 
 you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while you delete DTB line
   for "grub.cfg" file.
