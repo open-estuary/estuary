@@ -1,25 +1,31 @@
-******  Estuary release 2.1 ******
+* [Introduction](#1)
+* [Obtain and build](#2)
+* [Deployment](#3)
+* [Prebuilt binaries](#4)
+* [Contact us](#5)
+* [Change list compared with previous version](#6)
+* [CPPYRIGHT](#7)
+* [TODO](#8)
 
-These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
 
-
-1. Introduction 
+ <h2 id="1">Introduction</h2>
 =================
+ These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
 
   Estuary is a totally open source version of the whole software solution which target is the ICT market. It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
   More detail information about Estuary, please refer to http://open-estuary.org/estuary.
 
-2. Obtain and build
+<h2 id="2"> Obtain and build</h2>
 ================
   To obtain and build system, please refer to http://open-estuary.org/estuary-user-manual/.
 
-3. Deployment
+<h2 id="3"> Deployment</h2>
 ================
   More detail information about deployment, please refer to documents in "<project root>/build/<platform>/doc" directory after building.
   
   Detail description about what is in `<project root>/build/<platform>/doc`please refer to https://github.com/open-estuary/estuary/tree/master/doc
 
-4. Prebuilt binaries
+<h2 id="4"> Prebuilt binaries</h2>
 ================
 To use prebuilt binaries directly, please refer to http://download.open-estuary.org/.
 
@@ -29,19 +35,15 @@ NOTE:
   
  `pre-releases` directory is nonformal version like Estuary 2.2 rc<number> which all binary files located in. 
 
-5. Contact us
+ <h2 id="5"> Contact us</h2>
 ================
 About the technical support, you can contact us by http://open-estuary.org/contact-us.
 
-6. Change list compared with previous version
+<h2 id="6"> Change list compared with previous version</h2>
 ================
 Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
 
-7. TODO
-================
-  Further more platforms will be supported in the esturay.
-  More detail information about estuary, please refer to
-  http://open-estuary.org
+<h2 id="7"> COPYRIGHT</h2>
 
 ==================
 There is a homepage at http://download.open-estuary.org/ for using prebuilt binaries directly.
@@ -125,4 +127,12 @@ Copyright: (c) 2016, Hisilicon Limited
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+
+
+<h2 id="8"> TODO</h2>
+================
+  Further more platforms will be supported in the esturay.
+  More detail information about estuary, please refer to
+  http://open-estuary.org
 
