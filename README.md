@@ -7,7 +7,6 @@
 * [CPPYRIGHT](#7)
 * [TODO](#8)
 
-
  <h2 id="1">Introduction</h2>
 =================
  These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
@@ -48,39 +47,39 @@ Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/mas
 ==================
 There is a homepage at http://download.open-estuary.org/ for using prebuilt binaries directly.
 
-**prebuilt binaries for D01**
+ **prebuilt binaries for D01**
 
-UEFI_D01.fd      //UEFI_D01.fd is the UEFI bios for D01 platform.
+  UEFI_D01.fd      //UEFI_D01.fd is the UEFI bios for D01 platform.
 
-.text and .monitor  // boot wrapper files to take responsible of switching into HYP mode.
+ .text and .monitor  // boot wrapper files to take responsible of switching into HYP mode.
 
- grubarm32.efi      //grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+  grubarm32.efi      //grubarm32.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
  
- grub.cfg          // grub.cfg is used by grubaa64.efi to config boot options.
+  grub.cfg          // grub.cfg is used by grubaa64.efi to config boot options.
  
- zImage           // zImageis the compressed kernel executable program.
+  zImage           // zImageis the compressed kernel executable program.
  
- hip04-d01.dtb    // hip04-d01.dtb is the device tree binary.
+  hip04-d01.dtb    // hip04-d01.dtb is the device tree binary.
  
  .kernel           //.kernel is the file combining zImage and hip04-d01.dtb.
  
-.filesystem      //.filesystem is a special rootfs for D01 booting from NORFLASH.
+ .filesystem      //.filesystem is a special rootfs for D01 booting from NORFLASH.
 
-**prebuilt binaries for D02**
+ **prebuilt binaries for D02**
 
-UEFI_D02.fd       //UEFI_D02.fd is the UEFI bios for D02 platform.
+ UEFI_D02.fd       //UEFI_D02.fd is the UEFI bios for D02 platform.
 
-CH02TEVBC_V03.bin //CH02TEVBC_V03.bin is the CPLD binary for D02 board.
+ CH02TEVBC_V03.bin //CH02TEVBC_V03.bin is the CPLD binary for D02 board.
 
-grubaa64.efi  //grubaa64.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
+ grubaa64.efi  //grubaa64.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
 
-grub.cfg      //grub.cfg is used by grubaa64.efi to config boot options.
+ grub.cfg      //grub.cfg is used by grubaa64.efi to config boot options.
 
-Image_D02     //Image is the kernel executable program for D02.
+ Image_D02     //Image is the kernel executable program for D02.
 
-hip05-d02.dtb //hip05-d02.dtbis the device tree binary.
-
-**prebuilt binaries for D03**
+ hip05-d02.dtb //hip05-d02.dtbis the device tree binary.
+ 
+ **prebuilt binaries for D03**
 
 UEFI_D03.fd    //UEFI_D03.fd is the UEFI bios for D03 platform.
 
@@ -94,7 +93,7 @@ Image_D03  //Image_D03 is the kernel executable program.
 
 hip06-d03.dtb //hip06-d03.dtb is the device tree binary.
 
-**prebuilt binaries for HiKey**
+ **prebuilt binaries for HiKey**
 
 l-loader.bin //l-loader.binused to switch from aarch32 to aarch64 and boot.
 
@@ -110,9 +109,9 @@ grubaa64.efi  //grubaa64.efi is used to load kernel image and dtb files from SAT
 
 grub.cfg      //grub.cfg is used by grubaa64.efi to config boot options.
 
-Copyright: (c) 2016, Hisilicon Limited
+**Copyright**: (c) 2016, Hisilicon Limited
      
- License: GPLv2+
+**License**: GPLv2+
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
