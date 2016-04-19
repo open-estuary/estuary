@@ -5,6 +5,7 @@
 * [Contact us](#5)
 * [Change list compared with previous version](#6)
 * [CPPYRIGHT](#7)
+* [TODO](#8)
 
 <h2 id="1">Introduction</h2>
 
@@ -46,7 +47,7 @@ Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/mas
 
 There is a homepage at http://download.open-estuary.org/ for using prebuilt binaries directly.
 
- **prebuilt binaries for D01**
+ **prebuilt binaries for D01:**
 
   UEFI_D01.fd      //UEFI_D01.fd is the UEFI bios for D01 platform.
 
@@ -64,7 +65,7 @@ There is a homepage at http://download.open-estuary.org/ for using prebuilt bina
  
  .filesystem      //.filesystem is a special rootfs for D01 booting from NORFLASH.
 
- **prebuilt binaries for D02**
+ **prebuilt binaries for D02:**
 
  UEFI_D02.fd       //UEFI_D02.fd is the UEFI bios for D02 platform.
 
@@ -78,7 +79,7 @@ There is a homepage at http://download.open-estuary.org/ for using prebuilt bina
 
  hip05-d02.dtb //hip05-d02.dtbis the device tree binary.
  
- **prebuilt binaries for D03**
+ **prebuilt binaries for D03:**
 
 UEFI_D03.fd    //UEFI_D03.fd is the UEFI bios for D03 platform.
 
@@ -92,7 +93,7 @@ Image_D03  //Image_D03 is the kernel executable program.
 
 hip06-d03.dtb //hip06-d03.dtb is the device tree binary.
 
- **prebuilt binaries for HiKey**
+ **prebuilt binaries for HiKey:**
 
 l-loader.bin //l-loader.binused to switch from aarch32 to aarch64 and boot.
 
@@ -126,8 +127,8 @@ grub.cfg      //grub.cfg is used by grubaa64.efi to config boot options.
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
-<h2 id="8"> TODO</h2>
-================
+<h2 id="8">TODO</h2>
+
   Further more platforms will be supported in the esturay.
   More detail information about estuary, please refer to
   http://open-estuary.org
