@@ -20,7 +20,7 @@ These are the release notes for the Estuary new version. Please read them carefu
   Detail description about what is in `<project root>/build/<platform>/doc`please refer to https://github.com/open-estuary/estuary/tree/master/doc
 
 4. Prebuilt binaries
-================
+  ================
   To use prebuilt binaries directly, please refer to http://download.open-estuary.org/.
 
   NOTE:
@@ -30,7 +30,7 @@ These are the release notes for the Estuary new version. Please read them carefu
  `pre-releases` directory is nonformal version like Estuary  2.2 rc<number> which all binary files located in. 
 
 5. Contact us
- ================
+  ================
   About the technical support, you can contact us by http://open-estuary.org/contact-us.
 
 6. Change list compared with previous version
