@@ -122,7 +122,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
    
 2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
-3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
+3. Select boot option "Boot Manager"->"EFI Network 2" boot option and press "Enter".
 
 4. After several seconds, D03 will boot by PXE automatically.
 
