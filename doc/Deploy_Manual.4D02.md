@@ -338,7 +338,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
  
    **The first one: to plug SATA disk into PCIE-to-SATA convert card(model:PEC-2024) which connect to D02 board**
    
-    a. Build kernel
+    a. Build kernel(please refer to [Readme.4D02.md] (https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md))
     
        * Enable driver configuration of corresponding SATA model in kernel
         
@@ -404,9 +404,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
            status = "disabled";      ---------> status = "okay";
                 };
        ```
-   d. Build the kernel 
-  
-      eg: ` ./estuary/build.sh -f estuary/estuarycfg.json`
+   d. Build the kernel (please refer to [Readme.4D02.md] (https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md))
     
    e. Burn Image, dtb file NorFlash. About how to burn, please refer to "Boot via NORFLASH".
    
