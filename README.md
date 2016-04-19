@@ -5,9 +5,8 @@
 * [Contact us](#5)
 * [Change list compared with previous version](#6)
 * [CPPYRIGHT](#7)
-* [TODO](#8)
 
- <h2 id="1">Introduction</h2>
+<h2 id="1">Introduction</h2>
 
  These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
 
