@@ -275,9 +275,37 @@ For simplicity, to build UEFI for D01 board, follow these steps:
    `ls -la Build/D01/RELEASE_GCC46/FV/D01.fd`
    
 <h4 id="4.1.2">Boot D01 to UEFI shell(EBL)</h4>
-  
-  
+ 
+  Make sure Jumper J39 is in position 1 and 2.(This means to use custom UEFI.<br>
+  If position 2 and 3 are connected, it will boot with the default UEFI,<br>
+  which could never be flashed.)<br>
+  Serial console (Connector UART0): 115200/8/N/1<br>
+  Ethernet (FE, J44)<br>
+  The board is shipped with a power adapter. Apply it to the board,<br>
+  and turn it on.You should be able to see output in serial console now.<br>
+  Keep pressing ‘s’ in minicom or other serial terminal to start UEFI Boot Menu. Select [b] EBL. Type in ‘help’ to see all commands supported in EBL.
+ 
 <h4 id="4.1.3">Upgrade UEFI</h4>
+Download D01.fd the UEFI binary file or compile it by yourself copy the D01.fd to the FTP server
+Enter EBL as described above.
+Type in these commands:
+
+IP address config:
+ `> ifconfig -s eth0 [IP.address] [mask] [gateway]`
+ 
+  eg. `ifconfig -s eth0 192.168.10.155 255.255.255.0 192.168.10.1`
+  
+download from FTP server (Note, filename must be EFI-BOOT.fd)
+
+ `> provision [server.IP] -u [user.name] -p [passwd] -f EFI-BOOT.fd`
+ 
+  eg. provision 192.168.10.6 -u dj -p dj -f EFI-BOOT.fd
+  
+  flash to NOR:
+    
+  `> updateL1 EFI-BOOT.fd`
+
+  reboot the D01 board
    
 <h4 id="4.1.4">Restore the UEFI when the UEFI did not work</h4>
 
