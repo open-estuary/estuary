@@ -256,7 +256,7 @@ For simplicity, to build UEFI for D01 board, follow these steps:
 ```
 
  download D01 UEFI source code from above section
-    Enter your uefi source code folder, and run uefi-build.sh to build.
+ Enter your uefi source code folder, and run uefi-build.sh to build.
     
   ```shell
     cd your/path/to/uefi/source;
@@ -319,7 +319,7 @@ Boot D01 to UEFI shell. And in EBL, type in these commands:
    
    eg. provision 192.168.10.6 -u dj -p dj -f .monitor
    
-    Reboot D01
+  Reboot D01
     
     
 <h3 id="4.3">Grub Hacking</h3>   
@@ -451,10 +451,13 @@ and add your DNS server into it. Eg.
     mkdir /mnt/sda1 /mnt/sda3
     mount -t ext4 /dev/sda1 /mnt/sda1
  ```
-    Extract release from Step 1 to `/mnt/sda1`
-    Unmount `/dev/sda1`
-    Reboot, and enter UEFI EBL shell.
-    Change kernel cmdline. Refer to above for details how-to.
+  Extract release from Step 1 to `/mnt/sda1`
+  
+  Unmount `/dev/sda1`
+  
+  Reboot, and enter UEFI EBL shell.
+  
+  Change kernel cmdline. Refer to above for details how-to.
 ```
     console=ttyS0,115200 root=/dev/sda1 rootfstype=ext4 rw earlyprintk ip=192.168.0.150:192.168.0.108:192.168.0.1:255.255.255.0::eth0:on:192.168.0.1:8.8.8.8
 ```
@@ -490,25 +493,27 @@ PXE boot is built upon DHCP and TFTP. So, to verify PXE, the first thing you nee
 
     sudo mkdir /var/lib/tftpboot
     sudo chmod -R 777 /var/lib/tftpboot/
+   ```
+   restart TFTP server
 
-    restart TFTP server
-
-    service tftpd-hpa status
-    service tftpd-hpa restart
-    service tftpd-hpa force-reload
-  ```
+   service tftpd-hpa status
+   
+   service tftpd-hpa restart
+   
+   service tftpd-hpa force-reload
+ 
   
 <h3 id="7.2">Set up DHCP server on Ubuntu</h3> 
 
 Refer to https://help.ubuntu.com/community/isc-dhcp-server For a simplified direction, try these steps:
 
-    install DHCP server package
+   install DHCP server package
 
-    sudo apt-get install isc-dhcp-server
+   sudo apt-get install isc-dhcp-server
 
-    Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
-    Make sure filename is “grub2.efi”. Here is an example:
-
+   Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
+   Make sure filename is “grub2.efi”. Here is an example:
+   ```shell
     $ cat /etc/dhcp/dhcpd.conf
     # Sample /etc/dhcpd.conf
     # (add your comments here)
@@ -525,15 +530,15 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server For a simplified dire
             filename "grub2.efi";
     }
     #
-
-    Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd
-    should listen to. By default it listens to eth0.
-    Assign a static ip to the interface that you will use for dhcp.
-    use these commands to start or check dhcp service
-
-    sudo service isc-dhcp-server status
-    sudo service isc-dhcp-server start
-
+    ```
+   Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd
+   should listen to. By default it listens to eth0.
+   Assign a static ip to the interface that you will use for dhcp.
+   use these commands to start or check dhcp service
+   ```shell
+   sudo service isc-dhcp-server status
+   sudo service isc-dhcp-server start
+   ```
 Enter PXE in the UEFI shell
 
 In the description below, we suppose you have config:
@@ -570,8 +575,8 @@ then in 3 seconds, grub2 will download and boot linux.
 A full log is attached here: sample.pxe.boot.log.minicom.cap.txt
 Boot via EFI-stub
 
-    Compile kernel with EFI stub(#compilestubkernel)
-    Install EFI-stub kernel on SATA disk(#installefi)
+   Compile kernel with EFI stub(#compilestubkernel)
+   Install EFI-stub kernel on SATA disk(#installefi)
 
 partition the disk to MBR. use fdisk and mkfs
 command to create a FAT partition. If using D01
