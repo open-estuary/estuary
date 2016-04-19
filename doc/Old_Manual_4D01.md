@@ -216,7 +216,7 @@ http://releases.linaro.org/14.09/components/toolchain/binaries/gcc-linaro-arm-li
 
 FTP protocol is used in D01 UEFI for file downloading. So, before this step, please make sure you have a working FTP server running in your local network. And D01 can use FTP to get files from network.
 
-<h4 id="4..1.1">Compile UEFI</h4>
+<h4 id="4.1.1">Compile UEFI</h4>
 
 A general guideline is here: https://wiki.linaro.org/LEG/Engineering/Kernel/UEFI/build
 
@@ -357,16 +357,17 @@ if booting via NAND, could use following method to upgrade kernel and NAND rootf
 
 Boot D01 to UEFI shell. And in EBL, type in these commands:
 
-    IP address config: > ifconfig -s eth0 [IP.address] [mask] [gateway] eg. ifconfig -s eth0 192.168.10.155 255.255.255.0 192.168.10.1
-    download kernel binary from FTP server (Note, filenames must not be changed):
+   IP address config: > ifconfig -s eth0 [IP.address] [mask] [gateway] eg. ifconfig -s eth0 192.168.10.155 255.255.255.0 192.168.10.1
+   
+   download kernel binary from FTP server (Note, filenames must not be changed):
 
    ```shell
     > provision [server.IP] -u [user.name] -p [passwd] -f .filesystem
     > provision [server.IP] -u [user.name] -p [passwd] -f .kernel
   ```
-      eg. provision 192.168.10.6 -u dj -p dj -f .filesystem
+   eg. provision 192.168.10.6 -u dj -p dj -f .filesystem
       
-      eg. provision 192.168.10.6 -u dj -p dj -f .kernel
+   eg. provision 192.168.10.6 -u dj -p dj -f .kernel
 
   Reboot D01
     
@@ -378,14 +379,14 @@ Show & change kernel command line in UEFI
   ```
     > getlinuxatag
  ```
-    Use changelinuxatag to change kernel cmdline to this:
+  Use changelinuxatag to change kernel cmdline to this:
 ```
     > changelinuxatag
       ...
       console=ttyS0,115200 initrd=0x10d00000,0x1800000 rdinit=/linuxrc earlyprintk
       ...
 ```
-    Use setlinuxatag to save to FLASH > setlinuxatag
+  Use setlinuxatag to save to FLASH > setlinuxatag
     
     Reboot D01
 
