@@ -721,22 +721,22 @@ Steps to build and run guest:
    `git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`
 
   Checkout to v3.12 branch
-  ```
+   ```
     git checkout -b linux-3.12 v3.12
 
     Cross compile the kernel
 
     make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- vexpress_defconfig
     make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j2
-```
-    Grab Pawel’s DTS tree: git://linux-arm.org/arm-dts.git
-```
+   ```
+   Grab Pawel’s DTS tree: git://linux-arm.org/arm-dts.git
+   ```
     git clone git://linux-arm.org/arm-dts.git
     git chechout -b v3_12 v3.12
-```
+   ```
     From your kernel tree, run:
 
-    `./script/dtc/dtc -O dtb -o rtsm_ve-cortex_a15x4.dtb  wherever_your_arm-dts_tree_is/fast_models/rtsm_ve-cortex_a15x4.dts`
+  `./script/dtc/dtc -O dtb -o rtsm_ve-cortex_a15x4.dtb  wherever_your_arm-dts_tree_is/fast_models/rtsm_ve-cortex_a15x4.dts`
 
   Launch QEMU on D01:
 
