@@ -86,7 +86,7 @@ build commands(supposedly, you are in <project root> currently:
     make mrproper
     make defconfig
     make -j14 Image
-    make hip05-d02.dtb
+    make hisilicon/hip05-d02.dtb
 
     cp arch/arm64/boot/Image ../build/D02/binary/Image_D02
     cp arch/arm64/boot/dts/hisilicon/hip05-d02.dtb ../build/D02/binary
