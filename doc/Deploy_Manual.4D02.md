@@ -356,7 +356,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
         ```
        　 bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
-       After build the linux kernel from source, burn Image and dtb file into Nor Flash. About how to burn Image and dtb file into Nor Flash, please refer to "#Boot via NORFLASH".
+       After build the linux kernel from source, burn Image into Nor Flash and dtb file into SPI Flash. About how to burn Image and dtb file , please refer to "Boot via NORFLASH" and "Upgrade DTB file".
        
        NOTE: according to above bootargs, it will boot ubuntu distribution in sda2, if you want to boot other different distribution, you should change "root=/dev/sdaX" item.
    
