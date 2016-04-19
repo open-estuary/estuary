@@ -635,7 +635,7 @@ Disk identifier: 0x90465146
               1 Dir(s)
     FS0:\> zImage_lt-d01 dtb=hip04-d01.dtb console=ttyS0,115200 root=/dev/sda2 rw earlyprintk
   ```
-    EFI stub: Booting Linux Kernel...
+  EFI stub: Booting Linux Kernel...
 
   Note: Attached here a reference booting log. minicom_sata.cap Note: only FAT partition is recognizable so far.
 
@@ -675,7 +675,7 @@ Disk identifier: 0x90465146
         linux (hd0,msdos1)/zImage console=ttyS0,115200 earlyprintk rootfstype=nfsroot root=/dev/nfs rw nfsroot=192.168.201.25:/home/joyx/develop/d01/workspace/ubuntu-image/binary  ip=192.168.201.39:192.168.201.1::255.255.255.128::eth0:on:192.168.201.1:8.8.8.8 
     }
 ```
-    Install GRUB on SATA disk
+ Install GRUB on SATA disk
 
 Installing GRUB on SATA disk is similiar with installing EFI-stub kernel on SATA. Copy following files into the FAT partition of the SATA disk and the directory tree is like this:
 ```
