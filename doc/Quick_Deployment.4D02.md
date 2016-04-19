@@ -7,6 +7,11 @@
 
 <h2 id="1">Introduction</h2>
 
+Above all, prepare hardware boards with SCSI disk and download Estuary source code from GitHub.
+To learn more about how to do them, please visit this web site: http://open-estuary.com/estuary-user-manual/, and then refer to ‘Get & Build Estuary yourself’.
+
+Note: In my case, the working directory is `~/workdir`.
+
 <h2 id="2">Quick Deploy System</h2>
 <h3 id="2.1">Deploy system via USB Disk</h3>
 
