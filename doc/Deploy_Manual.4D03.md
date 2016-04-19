@@ -59,7 +59,7 @@ the newest edk2 base code does not support the ifconfig command in "ebl", if we 
    ```
    e.g.:
    ```
-   provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 100000
+   provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x100000
    sfcerase 0x7C0000 0x10000
    sfcwrite 0x100000 0x7C0000 0x10000
    ```
