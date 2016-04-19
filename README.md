@@ -21,9 +21,9 @@ These are the release notes for the Estuary new version. Please read them carefu
 
 4. Prebuilt binaries
 ================
- To use prebuilt binaries directly, please refer to http://download.open-estuary.org/.
+  To use prebuilt binaries directly, please refer to http://download.open-estuary.org/.
 
- NOTE:
+  NOTE:
   
  `releases` directory is formal version which all binary files located in.
   
@@ -31,11 +31,11 @@ These are the release notes for the Estuary new version. Please read them carefu
 
 5. Contact us
  ================
-   About the technical support, you can contact us by http://open-estuary.org/contact-us.
+  About the technical support, you can contact us by http://open-estuary.org/contact-us.
 
 6. Change list compared with previous version
 
-   Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
+  Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
 
 7. TODO
 ================
