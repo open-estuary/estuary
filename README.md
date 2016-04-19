@@ -33,7 +33,7 @@ NOTE:
 ================
   About the technical support, you can contact us by http://open-estuary.org/contact-us.
 
-6.Change list compared with previous version
+6. Change list compared with previous version
 
   Please refer to [changelist.txt](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
 
