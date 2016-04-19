@@ -31,11 +31,11 @@ NOTE:
 
 5. Contact us
 ================
-  About the technical support, you can contact us by http://open-estuary.org/contact-us.
+About the technical support, you can contact us by http://open-estuary.org/contact-us.
 
 6. Change list compared with previous version
 
-   Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
+  Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
 
 7. TODO
 ================
