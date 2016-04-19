@@ -16,6 +16,8 @@ These are the release notes for the Estuary new version. Please read them carefu
 3. Deployment
 ================
   More detail information about deployment, please refer to documents in "<project root>/build/<platform>/doc" directory after building.
+  
+  More detail about what is in `<project root>/build/<platform>/doc`please refer to https://github.com/open-estuary/estuary/tree/master/doc
 
 4. Prebuilt binaries
   To use prebuilt binaries directly, please refer to http://open-estuary.org/estuary-download.
