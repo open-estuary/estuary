@@ -4,7 +4,7 @@
 * [Prebuilt binaries](#4)
 * [Contact us](#5)
 * [Change list compared with previous version](#6)
-* [CPPYRIGHT](#7)
+* [COPYRIGHT](#7)
 * [TODO](#8)
 
 <h2 id="1">Introduction</h2>
