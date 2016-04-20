@@ -173,7 +173,7 @@ The grub will get the configuration file from TFTP service configured by PXE ser
    
 2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
-3. Select boot option "Boot Manager"->"EFI Network 2" boot option and press "Enter".
+3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
 
 4. After several seconds, D02 will boot by PXE automatically.
 
