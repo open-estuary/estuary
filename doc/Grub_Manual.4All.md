@@ -2,6 +2,7 @@
 * [Grub manual](#1)
 * [Grub config file](#2)
 * [files structure bootable partition](#3)
+* [FAQ](#4)
 
 <h2 id="1">Introduction</h2>
 
@@ -164,4 +165,17 @@ Note: In case of booting by PXE mode:
    4. If you use D02 board, you should not input DTB in the grub.cfg but you must flash the DTB file into spiflash to avoid a known Mac address duplicate issue.
 
   You can get more information from the Deploy_Manual.txt guide.
-  
+
+<h2 id="4">FAQ</h2>  
+
+If you want to modify grub.cfg command line temporarily. please enter "E" key and you will face the "backspace" issue.
+
+You can fix backspace issue by changing terminal emulator's configuration.
+
+**For gnome-terminal**: Open "Edit" menu, select "Profile preferences".
+
+In "Compatibility" page, select "Control-H" in "Backspace key generates"
+listbox.
+
+**For Xterm**: press Ctrl key and left botton of mouse, and toggle on
+"Backarrow key (BS/DEL)" in mainMenu.
