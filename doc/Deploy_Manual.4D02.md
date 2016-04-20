@@ -136,8 +136,8 @@ Boot D02 to UEFI SHELL, and type the follow commands in EBL:
  # Write data into NORFLASH
  norwfmem <source address> <target address> <data length>
  ```
- e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 100000<br>
- norwfmem 100000 100000 1f00000
+ e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x100000<br>
+ norwfmem 0x100000 0x100000 0x1f00000
 
 
 2. Download rootfs file from FTP
@@ -151,8 +151,8 @@ Boot D02 to UEFI SHELL, and type the follow commands in EBL:
  # Write data into NORFLASH
  norwfmem <source address> <target address> <data length>
    ```
- e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 100000<br>
- norwfmem 100000 2000000 4000000
+ e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x100000<br>
+ norwfmem 0x100000 0x2000000 0x4000000
 
   
 3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
