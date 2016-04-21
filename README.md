@@ -33,7 +33,7 @@ NOTE:
   
  `releases` directory is formal version which all binary files located in.
   
- `pre-releases` directory is nonformal version like Estuary 2.2 rc<number> which all binary files located in. 
+ `pre-releases` directory is nonformal version like Estuary 2.2 rc`<number>` which all binary files located in. 
 
  <h2 id="5"> Contact us</h2>
 
