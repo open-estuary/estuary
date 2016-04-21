@@ -23,5 +23,5 @@
 # Remained issues:
 1. ACPI is not available for D03 yet.
 2. KVM is not available based on kernel v4.4 yet.
-3. PCIE-SATA card can't work well.
+3. PCIE-SATA card can't work well on D03.
 4. SATA is very unstable on D02 board.
