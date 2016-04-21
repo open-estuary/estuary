@@ -820,6 +820,9 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
 	if [ -f $PREBUILD_DIR/mini-rootfs-arm64.cpio.gz ]; then
 	    cp $PREBUILD_DIR/mini-rootfs-arm64.cpio.gz $binary_dir/ 2>/dev/null
 	fi
+	if [ -f $PREBUILD_DIR/deploy-utils.tar.bz2 ]; then
+	    cp $PREBUILD_DIR/deploy-utils.tar.bz2 $binary_dir/ 2>/dev/null
+	fi
     fi
 
     if [[ x"D02" = x"$PLATFORM" || x"D03" = x"$PLATFORM" ]] && [ -f $PREBUILD_DIR/CH02TEVBC_V03.bin ]; then

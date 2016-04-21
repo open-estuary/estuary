@@ -121,6 +121,7 @@ cp $BINARY_DIR/grub*.efi ./
 cp $BINARY_DIR/hip*.dtb ./
 cp $BINARY_DIR/Image* ./
 cp $BINARY_DIR/mini-rootfs-arm64.cpio.gz ./
+cp $BINARY_DIR/deploy-utils.tar.bz2 ./
 
 cp $CONF_DIR/estuarycfg.json ./
 cp $CONF_DIR/setup.sh ./
@@ -166,10 +167,12 @@ fi
 
 cp ../estuarycfg.json ./usr/bin/
 mv ../setup.sh ./usr/bin/
+tar jxvf ../deploy-utils.tar.bz2 -C ./
+rm -f ../deploy-utils.tar.bz2
 sudo chmod 755 ./usr/bin/setup.sh
 
 sudo chown -R root:root *
-find | cpio -o -H newc | gzip -c > ../initrd.gz
+find | sudo cpio -o -H newc | gzip -c > ../initrd.gz
 
 popd
 sudo rm -rf rootfs
