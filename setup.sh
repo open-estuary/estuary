@@ -169,7 +169,7 @@ echo "Install grub and kernel to $BOOT_DEV ......"
 pushd /scratch
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
-mkdir -p /boot/EFI/GURB2/
+mkdir -p /boot/EFI/GRUB2/
 # cp grub*.efi /boot/EFI/GRUB2/grubaa64.efi
 grub-install --efi-directory=/boot --target=arm64-efi $BOOT_DEV
 cp Image* /boot/
