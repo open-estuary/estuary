@@ -345,8 +345,11 @@ install_development_tools()
 	else
 		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage"
 	fi
-
-	sudo apt-get install -y --force-yes $development_tools
+	dpkg-query -l $development_tools >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		sudo apt-get update
+		sudo apt-get install -y --force-yes $development_tools
+	fi
 }
 
 update_acpica_tools()
@@ -358,36 +361,45 @@ update_acpica_tools()
 	(cd acpica/generate/unix && make -j${corenum} && sudo make install)
 }
 
-automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
-if [ x"$?" = x"1" ]; then
-	sudo apt-get remove -y --purge automake*
-    rm -rf ".initialized"
-fi
-
-check_init ".initialized" $lastupdate
-if [ x"0" = x"$?" ]; then
-	sudo apt-get update
-	
-	# Install development tools
-	install_development_tools
-	if [ x"$?" != x"0" ]; then
-		echo -e "\033[31mError! Failed to install development tools!\033[0m"
-		exit 1
+###################################################################################
+########################### Initialize host #######################################
+###################################################################################
+initialize_host()
+{
+	automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null
+	if [ x"$?" = x"1" ]; then
+		sudo apt-get remove -y --purge automake*
+	    rm -rf ".initialized"
 	fi
 
-	# Check if iasl needs to update
-	iasl_version=`iasl -v 2>/dev/null | grep -Po "(?<=version )(\d+)(?=.*)" 2>/dev/null`
-	if [[ x"$iasl_version" < x"20150214" ]]; then
-		update_acpica_tools
+	check_init ".initialized" $lastupdate
+	if [ x"0" = x"$?" ]; then
+		# Install development tools
+		install_development_tools
 		if [ x"$?" != x"0" ]; then
-			echo -e "\033[31mError! Failed to update iasl!\033[0m"
-			exit 1
+			echo -e "\033[31mError! Failed to install development tools!\033[0m"
+			return 1
 		fi
+
+		# Check if iasl needs to update
+		iasl_version=`iasl -v 2>/dev/null | grep -Po "(?<=version )(\d+)(?=.*)" 2>/dev/null`
+		if [[ x"$iasl_version" < x"20150214" ]]; then
+			update_acpica_tools
+			if [ x"$?" != x"0" ]; then
+				echo -e "\033[31mError! Failed to update iasl!\033[0m"
+				return 1
+			fi
+		fi
+
+		touch ".initialized"
 	fi
+	
+	return 0
+}
 
-	touch ".initialized"
-fi
-
+###################################################################################
+###################### Global environment variables ###############################
+###################################################################################
 export LC_ALL=C
 export LANG=C
 
@@ -395,7 +407,6 @@ TOOLS_DIR="`dirname $0`"
 cd $TOOLS_DIR/../
 PRJROOT=${PWD}
 build_dir=build
-
 
 ###################################################################################
 ############################# Set download source server ##########################
@@ -598,6 +609,8 @@ binary_dir=$build_dir/binary
 if [ x"" != x"$PLATFORM" ] && [ ! -d "$binary_dir" ] ; then
 	mkdir -p "$binary_dir" 2> /dev/null
 fi
+
+initialize_host || exit 1
 
 ###################################################################################
 ###################### Download & uncompress toochain #############################
@@ -861,7 +874,7 @@ copy_doc()
 	do
 	    if [ x"$LINE" != x"" ]; then
             filename=${LINE##*/}
-            filename=${filename%.txt.*}".txt"
+            filename=${filename%.*.md}".md"
             cp $LINE $doc_dir/$filename
 	    fi
 	done  < $TEMPFILE
@@ -872,8 +885,8 @@ if [ x"" != x"$PLATFORM" ]; then
     if [ ! -d "$doc_dir" ] ; then
         mkdir -p "$doc_dir" 2>/dev/null
     fi
-    copy_doc ".4All"
-    copy_doc ".4$PLATFORM"
+    copy_doc ".4All.md"
+    copy_doc ".4$PLATFORM.md"
 fi
 
 ###################################################################################
