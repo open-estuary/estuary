@@ -54,8 +54,8 @@ FTP protocol is used for downloading between hardware boards and local network. 
       ```
       e.g.: 
      ```shell
-        provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 100000
-        spiwfmem 100000 0000000 300000
+        provision 192.168.1.107 -u sch -p aaa -f UEFI_D02.fd -a 0x100000
+        spiwfmem 0x100000 0x0000000 0x300000
       ```
    c. Burn CPLD file
     
@@ -71,8 +71,8 @@ FTP protocol is used for downloading between hardware boards and local network. 
       ```
        e.g.: 
        ```
-      provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 100000
-      updatecpld 100000
+      provision 192.168.1.107 -u sch -p aaa -f CH02TEVBC_V03.bin -a 0x100000
+      updatecpld 0x100000
       ```
   d. Power off and reboot board again
 
