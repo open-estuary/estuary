@@ -168,7 +168,8 @@ Note: In case of booting by PXE mode:
 
 <h2 id="4">FAQ</h2>  
 
-If you want to modify grub.cfg command line temporarily. please enter "E" key and you will face the "backspace" key not woking properly problem.
+If you want to modify grub.cfg command line temporarily. Type "E" key into grub modification menu.
+You will face problem that the "backspace" key not woking properly.
 
 You can fix backspace issue by changing terminal emulator's configuration.
 
