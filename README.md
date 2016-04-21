@@ -35,7 +35,7 @@ NOTE:
   
  `pre-releases` directory is nonformal version like Estuary 2.2 rc`<number>` which all binary files located in. 
  
- <h3 id="4.1"> COPYRIGHT</h3>
+<h3 id="4.1"> COPYRIGHT</h3>
 
  COPYRIGHT for prebuilt binaries of D01, D02, D03, HiKey.
 
