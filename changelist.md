@@ -19,6 +19,7 @@
 14. Support D01 better, to enable boot from NorFlash, PXE, SATA.
 15. Enable both 32bits and 64bits minirrotfs for different arch.
 16. Improved and refined all documents and changed the format to markdown.
+
 # Remained issues:
 1. ACPI is not available for D03 yet.
 2. KVM is not available based on kernel v4.4 yet.
