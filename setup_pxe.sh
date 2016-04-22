@@ -376,6 +376,16 @@ else
 	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=${inet_addr}:$NFS_ROOT ip=dhcp"
 fi
 
+pushd $BINARY_DIR
+Image="`ls Image*`"
+Dtb="`ls hip*.dtb`"
+Grub="`ls grub*.efi`"
+popd
+
+cp $BINARY_DIR/$Image $TFTP_ROOT/
+cp $BINARY_DIR/$Dtb $TFTP_ROOT/
+cp $BINARY_DIR/$Grub $TFTP_ROOT/
+
 idx=0
 mac_addr=`jq -r ".boards[$idx].mac" $CFGFILE`
 sudo rm -f $tftproot/grub.cfg*
@@ -385,118 +395,16 @@ do
 cat > $tftproot/grub.cfg-$grub_suffix << EOM
 set timeout=5
 set default=minilinux
-menuentry "minilinux" --id minilinux {
+menuentry "Install estuary" --id minilinux {
         set root=(tftp,${inet_addr})
-        linux /Image_$PLATFORM $cmd_line
-	initrd /initrd.gz
+        linux /$Image $cmd_line
+        initrd /initrd.gz
+        # devicetree /$Dtb
 }
 EOM
 	let idx=$idx+1
 	mac_addr=`jq -r ".boards[$idx].mac" $CFGFILE`
 done
-
-platform=`jq -r ".system.platform" $CFGFILE`
-kernelimage="Image_""$platform"
-kernelimagesrc=`ls -1 $cwd/../build/$platform/binary/$kernelimage`
-if [ -f $tftproot/$kernelimage ]; then
-	echo
-	echo "$tftproot/$kernelimage already exists. The existing installed file can be renamed and saved under the new name."
-	echo "(r) rename (o) overwrite (s) skip copy "
-	read -p "[r] " exists
-	case "$exists" in
-	s) echo "Skipping copy of $kernelimage, existing version will be used"
-		;;
-	o) sudo cp $kernelimagesrc $tftproot
-		check_status
-		echo
-		echo "Successfully overwritten $kernelimage in tftp root directory $tftproot"
-		;;
-	*) dte="`date +%m%d%Y`_`date +%H`.`date +%M`"
-	echo "New name for existing kernelimage: "
-		read -p "[ $kernelimage.$dte ]" newname
-		if [ ! -n "$newname" ]; then
-			newname="$kernelimage.$dte"
-		fi
-		sudo mv "$tftproot/$kernelimage" "$tftproot/$newname"
-		check_status
-		sudo cp $kernelimagesrc $tftproot
-		check_status
-		echo
-		echo "Successfully copied $kernelimage to tftp root directory $tftproot as $newname"
-		;;
-	esac
-else
-	sudo cp $kernelimagesrc $tftproot
-	check_status
-	echo
-	echo "Successfully copied $kernelimage to tftp root directory $tftproot"
-fi
-
-platform=`jq -r ".system.platform" $CFGFILE`
-dtbfiles=`cd $cwd/../build/$platform/binary/;ls -1 *.dtb`
-prebuiltimagesdir=`cd $cwd/../build/$platform/binary/ ; echo $PWD`
-
-for dtbfile in $dtbfiles
-do
-	if [ -f $tftproot/$dtbfile ]; then
-		echo
-		echo "$tftproot/$dtbfile already exists. The existing installed file can be renamed and saved under the new name."
-		echo "(o) overwrite (s) skip copy "
-		read -p "[o] " exists
-		case "$exists" in
-		s) echo "Skipping copy of $dtbfile, existing version will be used"
-			;;
-		*) sudo cp "$prebuiltimagesdir/$dtbfile" $tftproot
-			check_status
-			echo
-			echo "Successfully overwritten $$dtbfile in tftp root directory $tftproot"
-			;;
-		esac
-	else
-		sudo cp "$prebuiltimagesdir/$dtbfile" $tftproot
-		check_status
-		echo
-		echo "Successfully copied $dtbfile to tftp root directory $tftproot"
-	fi
-done
-
-grub_efi=grubaa64.efi
-grub_efisrc=`ls -1 $cwd/../build/$platform/binary/$grub_efi`
-if [ -f $tftproot/$grub_efi ]; then
-	echo
-	echo "$tftproot/$grub_efi already exists. The existing installed file can be renamed and saved under the new name."
-	echo "(r) rename (o) overwrite (s) skip copy "
-	read -p "[r] " exists
-	case "$exists" in
-	s) echo "Skipping copy of $grub_efi, existing version will be used"
-		;;
-	o) sudo cp $grub_efisrc $tftproot
-		check_status
-		echo
-		echo "Successfully overwritten $grub_efi in tftp root directory $tftproot"
-		;;
-	*) dte="`date +%m%d%Y`_`date +%H`.`date +%M`"
-		echo "New name for existing kernelimage: "
-		read -p "[ $grub_efi.$dte ]" newname
-		if [ ! -n "$newname" ]; then
-			newname="$grub_efi.$dte"
-		fi
-		sudo mv "$tftproot/$grub_efi" "$tftproot/$newname"
-		check_status
-		sudo cp $grub_efisrc $tftproot
-		check_status
-		echo
-		echo "Successfully copied $grub_efi to tftp root directory $tftproot as $newname"
-		;;
-	esac
-else
-	sudo cp $grub_efisrc $tftproot
-	check_status
-	echo
-	echo "Successfully copied $grub_efi to tftp root directory $tftproot"
-fi
-
-echo
 
 ###################################################################################
 # 08. Stat all services
