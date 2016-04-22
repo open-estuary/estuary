@@ -69,7 +69,6 @@ provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <dow
  e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x100000 <br>
  spiwfmem 0x100000 0x300000 0x100000
 
-
 3. Reboot your D02 board
 
    You must reboot your D02 board after above two steps, this new DTB file will be used on booting board.
