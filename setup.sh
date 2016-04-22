@@ -3,11 +3,14 @@
 ###################################################################################
 # Global variable
 ###################################################################################
+INSTALL_TYPE=""
+
 PART_BASE_INDEX=2
 BOOT_PARTITION_SIZE=200
 DISK_LABEL=""
+NFS_ROOT=""
 
-INSTALL_DISK=
+INSTALL_DISK="/dev/sdx"
 TARGET_DISK=
 BOOT_DEV=
 
@@ -25,24 +28,32 @@ mkdir /scratch 2>/dev/null
 ###################################################################################
 # Find install disk and mount it to /scratch
 ###################################################################################
-disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
-for ((index=0; index<45; index++))
-do
-	if [ x"$disk_info" != x"" ]; then
-		break
-	fi
-	sleep 1
+if [ x"$INSTALL_TYPE" = x"NFS" ]; then
+	nfs_root=`cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"`
+	NFS_ROOT=`expr "X$nfs_root" : 'X[^=]*=\(.*\)'`
+	echo "mount $NFS_ROOT ......"
+	mount -o nolock -t nfs $NFS_ROOT /scratch
+	echo "mount $NFS_ROOT done ......"
+else
 	disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
-done
+	for ((index=0; index<45; index++))
+	do
+		if [ x"$disk_info" != x"" ]; then
+			break
+		fi
+		sleep 1
+		disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
+	done
 
-if [ x"$disk_info" = x"" ]; then
-	echo "Cann't find install disk!"
-	exit 1
+	if [ x"$disk_info" = x"" ]; then
+		echo "Cann't find install disk!"
+		exit 1
+	fi
+
+	INSTALL_DISK=`expr "${disk_info}" : '/dev/\([^:]*\):[^:]*'`
+
+	mount /dev/${INSTALL_DISK} /scratch
 fi
-
-INSTALL_DISK=`expr "${disk_info}" : '/dev/\([^:]*\):[^:]*'`
-
-mount /dev/${INSTALL_DISK} /scratch
 
 ###################################################################################
 # Get all disk info (exclude the install disk)
@@ -158,12 +169,13 @@ echo "Install grub and kernel to $BOOT_DEV ......"
 pushd /scratch
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
-mkdir -p /boot/EFI/GURB2/
-cp grub*.efi /boot/EFI/GRUB2/grubaa64.efi
+# mkdir -p /boot/EFI/GRUB2/
+# cp grub*.efi /boot/EFI/GRUB2/grubaa64.efi
+grub-install --efi-directory=/boot --target=arm64-efi $BOOT_DEV
 cp Image* /boot/
 cp hip*.dtb /boot/
 
-cat > /boot/grub.cfg << EOF
+cat > /boot/grub/grub.cfg << EOF
 # NOTE: Please remove the unused boot items according to your real condition.
 # Sample GRUB configuration file
 #
@@ -266,13 +278,13 @@ do
 	distro_name=${INSTALL_DISTRO[$index]}
 	
 
-cat >> /boot/grub.cfg << EOF
+cat >> /boot/grub/grub.cfg << EOF
 # Booting from SATA with $distro_name rootfs
-menuentry "${PLATFORM} $distro_name SATA" --id ${platform}_${distro_name}_sata {
+menuentry "${PLATFORM} $distro_name" --id ${platform}_${distro_name} {
     set root=(hd0,gpt1)
     search --no-floppy --fs-uuid --set=root $boot_dev_uuid
     linux $linux_arg
-    devicetree $device_tree_arg
+    # devicetree $device_tree_arg
 }
 
 EOF
@@ -280,8 +292,8 @@ EOF
 done
 
 # Set the first distribution to default
-default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}""_sata"
-sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub.cfg
+default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}"
+sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub/grub.cfg
 
 echo "Update grub configuration file done!"
 
