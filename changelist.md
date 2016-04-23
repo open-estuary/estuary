@@ -14,11 +14,10 @@
 9. Firstly integrated ODP and MySQL into Estuary.
 10. Added collaboration feature in website.
 11. Enabled Docker & Armor tools for all distributions.
-12. Improved all documents into markdown format.
+12. Improved all documents, and change them into markdown format.
 13. Fixed most issues found in rc0 & rc1, include but not limited to: UEFI, network, grub, usb compatibility, build and etc.
 14. Support D01 better, to enable boot from NorFlash, PXE, SATA.
 15. Enable both 32bits and 64bits minirrotfs for different arch.
-16. Improved and refined all documents and changed the format to markdown.
 
 # Remained issues:
 1. ACPI is not available for D03 yet.
