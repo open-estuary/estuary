@@ -411,9 +411,9 @@ build_dir=build
 ###################################################################################
 ############################# Set download source server ##########################
 ###################################################################################
-PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.2/rc1
+PATH_DISTRO=http://open-estuary.org/EstuaryDownloads/cleandistro/pre_release/linux/v2.2/rc2
 TOOLCHAIN_SOURCE=http://open-estuary.org/EstuaryDownloads/toolchain
-BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/prebuild/v2.2/rc1
+BINARY_SOURCE=http://open-estuary.org/EstuaryDownloads/prebuild/v2.2/release
 
 ###################################################################################
 ############################# Get setup parameter #################################
@@ -1669,7 +1669,7 @@ if [ x"" != x"$PLATFORM" ]; then
     	echo -e "\033[31mFailed! Documents    can not be found!\033[0m"
     else
         if [ $build_error = 0 ]; then
-    	    echo -e "\033[32mPlease follow the instructions in $doc_dir/Readme.txt to use the binaries for your purpose.\033[0m"
+    	    echo -e "\033[32mPlease follow the instructions in $doc_dir/Readme.md to use the binaries for your purpose.\033[0m"
         fi
     fi
 
