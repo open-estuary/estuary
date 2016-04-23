@@ -55,7 +55,8 @@ the newest edk2 base code does not support the ifconfig command in "ebl", if we 
    # Download file from FTP server to target board's RAM
    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
    # Write data into FLASH
-   spiwfmem <source address> <target address> <data length>
+   sfcerase <source address> <target address> <data length>
+   sfcwrite <source address> <target address> <data length>
    ```
    e.g.:
    ```

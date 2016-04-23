@@ -2,10 +2,10 @@
 * [Obtain and build](#2)
 * [Deployment](#3)
 * [Prebuilt binaries](#4)
+  * [COPYRIGHT](#4.1)
 * [Contact us](#5)
 * [Change list compared with previous version](#6)
-* [CPPYRIGHT](#7)
-* [TODO](#8)
+* [TODO](#7)
 
 <h2 id="1">Introduction</h2>
 
@@ -31,21 +31,15 @@ To use prebuilt binaries directly, please refer to http://download.open-estuary.
 
 NOTE:
   
- `releases` directory is formal version which all binary files located in.
+ `releases` directory is formal version which all binary files and distributions version located in.
   
- `pre-releases` directory is nonformal version like Estuary 2.2 rc<number> which all binary files located in. 
+ `pre-releases` directory is nonformal version like Estuary 2.2 rc`<number>` which all binary files and distributions version
+ 
+ located in. 
+ 
+<h3 id="4.1"> COPYRIGHT</h3>
 
- <h2 id="5"> Contact us</h2>
-
-About the technical support, you can contact us by http://open-estuary.org/contact-us.
-
-<h2 id="6"> Change list compared with previous version</h2>
-
-Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
-
-<h2 id="7"> COPYRIGHT</h2>
-
-There is a homepage at http://download.open-estuary.org/ for using prebuilt binaries directly.
+ COPYRIGHT for prebuilt binaries of D01, D02, D03, HiKey.
 
  **prebuilt binaries for D01:**
 
@@ -127,7 +121,16 @@ grub.cfg      //grub.cfg is used by grubaa64.efi to config boot options.
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
-<h2 id="8">TODO</h2>
+
+ <h2 id="5"> Contact us</h2>
+
+About the technical support, you can contact us by http://open-estuary.org/contact-us.
+
+<h2 id="6"> Change list compared with previous version</h2>
+
+Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
+
+<h2 id="7">TODO</h2>
 
   Further more platforms will be supported in the esturay.
   More detail information about estuary, please refer to
