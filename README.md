@@ -31,9 +31,9 @@ To use prebuilt binaries directly, please refer to http://download.open-estuary.
 
 NOTE:
   
- `releases` directory is formal version which all binary files located in.
+ `releases` directory is formal version which all binary files and distributions version located in.
   
- `pre-releases` directory is nonformal version like Estuary 2.2 rc`<number>` which all binary files located in. 
+ `pre-releases` directory is nonformal version like Estuary 2.2 rc`<number>` which all binary files and distributions version located in. 
  
 <h3 id="4.1"> COPYRIGHT</h3>
 
