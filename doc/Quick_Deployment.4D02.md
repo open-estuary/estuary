@@ -33,6 +33,8 @@ Note: In my case, the working directory is `~/workdir`.
 
 5. According to the prompt to deploy the system.
 
+6. Start the boards from "grub" menu of UEFI.
+
 <h3 id="2.2">Deploy system via DVD</h3>
 
 1. Prepare ISO image and install disk.
@@ -54,32 +56,20 @@ Note: In my case, the working directory is `~/workdir`.
 
 5. According to the prompt to deploy the system.
 
+6. Start the boards from "grub" menu of UEFI
+
 <h3 id="2.3">Deploy system via PXE</h3>
 
-1. Prepare hardware and software environment 
-    * Firstly, connect Ubuntu PC and hardware boards with SCSI Disk to the network router, this router should be connected to the internet. Secondly, connect the serial port of target boards to Ubuntu PC, install and configure minicom, do following commands:
-    `$sudo minicom`
+1. Connect Ubuntu PC and hardware boards into the same local area network. (Make sure the PC can connect to the internet and no other PXE servers exist.)
 
-    * Add the mac address of hardware boards to the estuarycfg.json file.
-    Switch on hardware boards and press anykey to enter UEFI Boot Menu. Get the MAC address of boards according to 'PXE on MAC Address:', refer to "boards" format of estuarycfg.json and add one element to "boards":
-    `{"mac":"01-xx-xx-xx-xx-xx-xx"}`
+2. Modify the configuration file of estuary/estuarycfg.json based on you hardware boards. Change the values of mac to physical addresses of the connected network cards on the board.
 
-    xx-xx-xx-xx-xx-xx means the MAC address of hardware board.
+3. Backup files under the tftp root directory if necessary. Use "./estuary/setup_pxe.sh" to setup the PXE server on Ubuntu PC.
 
-2. Automatically setup PXE deployment environment
-    Do as following steps:
-    You must disabled the DHCP server of the router.
-    ```shell
-    $cd ~/workdir/estuary
-    $sudo ./setup_pxe.sh
-    ```
-    Afterwards, make selection according to prompt information.
-    
-    After all these, PXE deployment environment may be setuped successfully.
+4. After that, install minicom and connect the the serial ports of hardware boards to the Ubuntu PC. Connect the hardware boards by minicom using serial ports.
 
-3. Power on the target boards 
-    In UEFI shell, select PXE bootup selection. Afterwards, make selection according to prompt information. After this, the Linux system selected is deployed into the SCSI Disk of the target boards.
+5. Reboot the hardware boards and start the boards from the correct EFI Network.
 
-4. Reboot the target boards
-    Now, you should enable the DHCP server of the router.
-    Power on again, then select SCSI Disk startup selection in UEFI shell, and Linux system will boot up from SCSI disk.
+6. Install the system according to prompt. After install finished, the boards will restart automatically.
+
+7. Start the boards from "grub" menu of UEFI.
