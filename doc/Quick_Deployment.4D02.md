@@ -33,7 +33,7 @@ Note: In my case, the working directory is `~/workdir`.
 
 5. According to the prompt to deploy the system.
 
-6. Start the boards from "grub" menu of UEFI.
+6. Start the boards from "grub" menu of UEFI by default.
 
 <h3 id="2.2">Deploy system via DVD</h3>
 
@@ -56,7 +56,7 @@ Note: In my case, the working directory is `~/workdir`.
 
 5. According to the prompt to deploy the system.
 
-6. Start the boards from "grub" menu of UEFI
+6. Start the boards from "grub" menu of UEFI by default.
 
 <h3 id="2.3">Deploy system via PXE</h3>
 
@@ -72,4 +72,4 @@ Note: In my case, the working directory is `~/workdir`.
 
 6. Install the system according to prompt. After install finished, the boards will restart automatically.
 
-7. Start the boards from "grub" menu of UEFI.
+7. Start the boards from "grub" menu of UEFI by default.
