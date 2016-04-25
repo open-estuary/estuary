@@ -34,6 +34,7 @@ Note: In my case, the working directory is `~/workdir`.
 5. According to the prompt to deploy the system.
 
 6. Start the boards from "grub" menu of UEFI by default.
+
 <h3 id="2.2">Deploy system via DVD</h3>
 
 1. Prepare ISO image and install disk. 
