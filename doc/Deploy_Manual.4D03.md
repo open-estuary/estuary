@@ -111,9 +111,9 @@ follow commands in EBL:
   
     `provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000`
  
-4. Start operator system
+4. Start operating system
   
-  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operator system.
+  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operating system.
 
 <h3 id="3.2">Boot via PXE</h3>
 
