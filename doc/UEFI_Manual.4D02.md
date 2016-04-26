@@ -30,7 +30,8 @@ FTP protocol is used for downloading between hardware boards and local network. 
     a. Connect the board's UART port to a host machine with a serial cable.<br>
     b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
     c. Config serial port setting:115200/8/N/1 on host machine.<br>
-    d. Reboot the board and press any key except "enter" to enter Boot Option Menu.
+    d. Reboot the board and press any key except "enter" key to enter into UEFI menu.<br>
+    e .Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
     
     Then the board will enter the UEFI SHELL mode.
 
