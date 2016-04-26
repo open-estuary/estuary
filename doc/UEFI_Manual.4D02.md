@@ -46,7 +46,7 @@ Embedded Boot Loader(EBL)
 
  2. Boot board into UEFI SHELL
 
-   Follow below steps to enter into UEFI SHELL:
+   Follow below steps to enter UEFI SHELL:
     
     a. Connect the board's UART port to a host machine with a serial cable.<br>
     b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
