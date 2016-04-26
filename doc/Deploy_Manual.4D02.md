@@ -37,7 +37,7 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
 <h3 id="2.4">Upgrade DTB file(Necessary step)</h3>
 
  Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
- into spiflash before any methods of bringing up systerm. 
+ into SPI flash before any methods of bringing up systerm. 
   
  We will often do some commands in "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode, about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md) "Upgarde UEFI" chapter.
 
@@ -54,7 +54,7 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
  
 2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode
 
-   Enter "exit" to the UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
+   Enter "exit" from "EFI Internal Shell" mode to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
 
  ```
 # Download file from FTP server to target board's RAM
