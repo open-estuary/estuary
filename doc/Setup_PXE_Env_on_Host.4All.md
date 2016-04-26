@@ -13,12 +13,16 @@
  * [Run the PyPXE server](#2.5)
  * [Boot the D02 board and enjoy](#2.6)
  
+ 
+Method 1 workable when DHCP and TFTP server havnot setup yet.
+
+Method 2 works well if you already have a DHCP server on your local network.
+ 
 <h2 id="1">Mehtod 1</h2>
 
 This is a guide to setup a PXE environment on host machine.
 
 <h3 id="1.1">Mehtod 1 introduction</h3>
-
 
 PXE boot depends on DHCP, TFTP and NFS services. So before verifing PXE, you need to setup a working DHCP, TFTP, NFS server on one of your host machine in local network. In this case, my host OS is Ubuntu 12.04.
 
