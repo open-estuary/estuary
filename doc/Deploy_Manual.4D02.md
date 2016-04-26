@@ -37,21 +37,20 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
 <h3 id="2.4">Upgrade DTB file(Necessary step)</h3>
 
  Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
- into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the
- follow commands in EBL:
+ into spiflash before any methods of bringing up systerm. 
   
- We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
+ We will often do some commands in "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode, about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
 
 1. IP address config (Optional, you can ignore this step if DHCP works well)
 
    the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
    
-   after setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)
- ```
-# Config board's IP address
-ifconfig -s eth0 static <IP address> <mask> <gateway>
-```
-e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
+   after setting the IP address done, switch back to "EBL" again.(enter "exit" to the main menu)
+   ```
+   # Config board's IP address
+   ifconfig -s eth0 static <IP address> <mask> <gateway>
+   ```
+   e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
  
  
 2. Download dtb file from FTP
