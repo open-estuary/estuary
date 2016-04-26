@@ -38,6 +38,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
 
     a. IP address config
        the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
+       
        `ifconfig -s eth0 static <IP address> <mask> <gateway>`
     
        e.g.: 
