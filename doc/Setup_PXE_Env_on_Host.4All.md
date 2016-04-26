@@ -209,9 +209,7 @@ Then copy grubaa64.efi to <netboot>.
 
 <h3 id="2.5">Boot the D02 board and enjoy</h3>
 
-If you want to use a distribution root FS over NFS instead of using
-
-mini-rootfs-arm64.cpio.gz initrd, follow these steps.
+If you want to use a distribution root FS over NFS instead of using mini-rootfs-arm64.cpio.gz initrd, follow these steps.
 
 * Extract the root FS tarball
  ```
