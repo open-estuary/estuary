@@ -20,7 +20,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
 
 After you used "board_connect" command, the system will echo "Press Any key in 10 seconds to stop automatical booting...".
-Press any key except "enter" key and you will see UEFI main menu.
+Press any key except "enter" key and enter into UEFI main menu.
 
 UEFI main menu option is showed as follow:
 ```
@@ -30,7 +30,7 @@ select Language            <standard English>
 >Device Manager
 >Boot Maintenance Manager
 ```
-when you choose "Boot Manager" you will enter into Boot option menu:
+Choose "Boot Manager" and enter into Boot option menu:
 ```
 EFI Misc Device 
 EFI Misc Device 1
