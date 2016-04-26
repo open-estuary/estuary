@@ -1,17 +1,27 @@
 
-* [Introduction](#1)
-* [Setup DHCP server on Ubuntu](#2)
-* [Setup TFTP server on Ubuntu](#3)
-* [Put files in the TFTP root path](#4)
-* [Setup NFS server on Ubuntu](#5)
+* [Mehtod 1](#1)
+ * [Mehtod 1 introduction](#1.1)
+ * [Setup DHCP server on Ubuntu](#1.2)
+ * [Setup TFTP server on Ubuntu](#1.3)
+ * [Put files in the TFTP root path](#1.4)
+ * [Setup NFS server on Ubuntu](#1.5)
+* [Mehtod 2](#2.1)
+ * [Put the D02 binaries into some <netboot> directory](#2.1)
+ * [Get and build a patched Grub](#2.2)
+ * [Get PyPXE](#2.3)
+ * [Run the PyPXE server](#2.4)
+ * [Boot the D02 board and enjoy](#2.5)
+ 
+<h2 id="1">Mehtod 1</h2>
 
 This is a guide to setup a PXE environment on host machine.
 
-<h2 id="1">Introduction</h2>
+<h3 id="1.1">Mehtod 1 introduction</h3>
+
 
 PXE boot depends on DHCP, TFTP and NFS services. So before verifing PXE, you need to setup a working DHCP, TFTP, NFS server on one of your host machine in local network. In this case, my host OS is Ubuntu 12.04.
 
-<h2 id="2">Setup DHCP server on Ubuntu</h2>
+<h3 id="1.2">Setup DHCP server on Ubuntu</h3>
 
 Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified direction, try these steps:
 
@@ -59,7 +69,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
     Proto Recv-Q Send-Q Local Address           Foreign Address         State      
     udp        0      0 *:bootpc                *:*                                
 
-<h2 id="3">Setup TFTP server on Ubuntu</h2>
+<h3 id="1.3">Setup TFTP server on Ubuntu</h3>
 
 * Install TFTP server and TFTP client(optional, tftp-hpa is the client package)
 
@@ -99,7 +109,7 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
     udp        0      0 *:tftp                  *:*                          
    ```
    
-<h2 id="4">Put files in the TFTP root path</h2>
+<h3 id="1.4">Put files in the TFTP root path</h3>
 
 Put the corresponding files into TFTP root directory, they are:
 
@@ -117,7 +127,7 @@ To get and config grub and grub config files, please refer to [Grub_Manual.md](h
 
 To get kernel and dtb file, please refer to Readme.md.
 
-<h2 id="5">Setup NFS server on Ubuntu</h2>
+<h3 id="1.5">Setup NFS server on Ubuntu</h3>
 
 * Install NFS server package
         
@@ -139,12 +149,7 @@ To get kernel and dtb file, please refer to Readme.md.
     
     sudo service nfs-kernel-server restart
 
-
-* [Put the D02 binaries into some <netboot> directory](#1.1)
-* [Get and build a patched Grub](#1.2)
-* [Get PyPXE](#1.3)
-* [Run the PyPXE server](#1.4)
-* [Boot the D02 board and enjoy](#1.5)
+<h2 id="2">Mehtod 2</h2>
 
 This is a guide to setup a PXE environment on host machine with PyPXE (https://github.com/psychomario/PyPXE.git).
 
@@ -153,7 +158,7 @@ It is an alternative to the setup described in Setup_PXE_Env_on_Host.txt.
 It works well if you already have a DHCP server on your local network. Only one Python tool is needed (PyPXE) so you don't need to install and configure the DHCP and TFTP servers on the host (but, you may still want to
 install the NFS server to mount root over NFS).
 
-<h3 id="1.1">Put the D02 binaries into some <netboot> directory</h3>
+<h3 id="2.1">Put the D02 binaries into some <netboot> directory</h3>
 
 For instance <netboot> = `~/work/d02/netboot`
 
@@ -167,7 +172,7 @@ You need:
   <netboot>/mini-rootfs-arm64.cpio.gz # Or a distribution (Debian_ARM64.tar.gz...)
                                       # See NFS below
   ```
-<h3 id="1.2">Get and build a patched Grub</h3>
+<h3 id="2.2">Get and build a patched Grub</h3>
 
 You cannot use the pre-built grubaa64.efi because a patch [1] is needed,
 
@@ -190,10 +195,10 @@ development list [2] so it may be upstream soon.
 ```
 Then copy grubaa64.efi to <netboot>.
 
-<h3 id="1.3">Get PyPXE</h3>
+<h3 id="2.3">Get PyPXE</h3>
 `git clone -b development https://github.com/psychomario/PyPXE.git`
 
-<h3 id="1.4">Run the PyPXE server</h3>
+<h3 id="2.4">Run the PyPXE server</h3>
 ```
  export MYIP=$(hostname -I)
  export NETBOOT=~/work/d02/netboot # put your own directory here
@@ -202,11 +207,31 @@ Then copy grubaa64.efi to <netboot>.
  --netboot-dir $NETBOOT --netboot-file grubaa64.efi
 ```
 
-<h3 id="1.4">Boot the D02 board and enjoy</h3>
+<h3 id="2.5">Boot the D02 board and enjoy</h3>
 
 If you want to use a distribution root FS over NFS instead of using
+
 mini-rootfs-arm64.cpio.gz initrd, follow these steps.
 
-<h3 id="1.5">Extract the root FS tarball</h3>
+* Extract the root FS tarball
+ ```
+   cd <netboot>
+   mkdir Debian_ARM64
+   (cd Debian_ARM64 ; sudo tar xf ../Debian_ARM64.tar.gz)
+ ```
+* Install the NFS server
+  
+  `sudo apt-get install nfs-kernel-server nfs-common portmap`
+
+* Configure the NFS server
+
+  `/path/to/netboot/Debian_ARM64 *(rw,sync,no_root_squash)`
+  
+* Restart the NFS server
+  `sudo service nfs-kernel-server restart`
+
+* Make sure grub.cfg contains an entry with the following line
+
+ `linux /Image_arm64 rdinit=/init root=/dev/nfs rw nfsroot=192.168.1.10:/path/to/your/netboot/Debian_ARM64 console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp`
 
 
