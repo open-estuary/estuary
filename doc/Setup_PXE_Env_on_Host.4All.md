@@ -224,9 +224,12 @@ If you want to use a distribution root FS over NFS instead of using mini-rootfs-
 
 * Configure the NFS server
 
+  add the following to /etc/exports:
+
   `/path/to/netboot/Debian_ARM64 *(rw,sync,no_root_squash)`
   
 * Restart the NFS server
+
   `sudo service nfs-kernel-server restart`
 
 * Make sure grub.cfg contains an entry with the following line
