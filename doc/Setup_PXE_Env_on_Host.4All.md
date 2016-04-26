@@ -193,7 +193,7 @@ may be upstream soon.
    make
   ./grub-mkimage -o grubaa64.efi --format=arm64-efi --prefix=/ --directory=grub-core boot chain configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
 ```
-Then copy grubaa64.efi to <netboot>.
+Then copy grubaa64.efi to `<netboot>`.
 
 <h3 id="2.4">Get PyPXE</h3>
 `git clone -b development https://github.com/psychomario/PyPXE.git`
