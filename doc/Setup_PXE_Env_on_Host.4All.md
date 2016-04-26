@@ -165,7 +165,7 @@ install the NFS server to mount root over NFS).
 
 For instance <netboot> = `~/work/d02/netboot`
 
-Get the binaries from open-estuary.org or build them. See Readme.txt.
+Get the binaries from open-estuary.org or build them. See Readme.md.
 You need:
   ```shell
   <netboot>/grubaa64.efi # You MUST rebuild it, see below
