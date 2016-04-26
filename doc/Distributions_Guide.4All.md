@@ -34,15 +34,15 @@ Then you will get the rootfs image file as rootfs.img
 
 **You can download above distributions by following commands manually**.
 
-   Ubuntu:     wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Ubuntu_ARM64.tar.gz
+   Ubuntu:     `wget -c http://download.open-estuary.org/AllDownloads/DownloadsEstuary/[release|pre-releases]/<version>/linux/Ubuntu/Common/Ubuntu_ARM64.tar.gz`
    
-   OpenSUSE:   wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/OpenSuse_ARM64.tar.gz
+   OpenSUSE:   `wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/OpenSuse_ARM64.tar.gz`
    
-   Fedora:     wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Fedora_ARM64.tar.gz
+   Fedora:     `wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Fedora_ARM64.tar.gz`
    
    Redhat:     TBD
    
-   Debian:     wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Debian_ARM64.tar.gz
+   Debian:     `wget -c http://7xjz0v.com1.z0.glb.clouddn.com/dist/Debian_ARM64.tar.gz`
    
    OpenEmbedded:  TBD
 
