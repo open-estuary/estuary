@@ -70,7 +70,7 @@ into spiflash before any methods of bringing up systerm.
 
    You must reboot your D03 board after above two steps, this new DTB file will be used on booting board.
 
-   Note: It is necessary to flash the DTB file to SPI flash to solve a known MAC address duplicate Issue.Also it is to be noted that the DTB file should not be input in the Grub config file. So if you wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
+   Note: It is necessary to flash the DTB file to SPI flash to solve a known MAC address duplicate Issue.Also it is to be noted that the DTB file should not be input in the Grub config file. So if you wish to use a modified DTB file, then you should always have it flashed to SPI flash before bootup.
 
 <h2 id="3">Bring up System</h2>
 
