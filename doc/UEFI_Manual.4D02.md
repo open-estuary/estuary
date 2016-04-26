@@ -51,7 +51,7 @@ Embedded Boot Loader(EBL)
     a. Connect the board's UART port to a host machine with a serial cable.<br>
     b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
     c. Config serial port setting:115200/8/N/1 on host machine.<br>
-    d. Reboot the board and press any key except "enter" key to enter into UEFI main menu.<br>
+    d. Reboot the board and press any key except "enter" key to enter UEFI main menu.<br>
     e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
     
     Then the board will enter into the UEFI SHELL mode.
