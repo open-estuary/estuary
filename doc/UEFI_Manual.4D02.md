@@ -38,7 +38,8 @@ FTP protocol is used for downloading between hardware boards and local network. 
  3. Update UEFI files
 
     a. IP address config
-       the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to switch to "shell" (EFI Internal Shell)
+       we have to switch to "EFI Internal Shell"<br>
+       the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address,the comand is:
        
        `ifconfig -s eth0 static <IP address> <mask> <gateway>`
     
@@ -47,8 +48,9 @@ FTP protocol is used for downloading between hardware boards and local network. 
        `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
     b. Burn BIOS file
-       After setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)    
-      ```shell
+    
+       Enter "exit" to the select menu to switch back to "EBL" after setting the IP address done.    
+       ```shell
         # Download file from FTP server to board's RAM
         provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
         # Write the data into NORFLASH
