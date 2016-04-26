@@ -27,7 +27,7 @@ select Language            <standard English>
 >Device Manager
 >Boot Maintenance Manager
 ```
-when you choose "Boot Manager" you will enter into Boot option menu:
+Choose "Boot Manager" and enter into Boot option menu:
 ```
 EFI Misc Device 
 EFI Misc Device 1
