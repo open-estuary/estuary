@@ -170,9 +170,9 @@ The grub will get the configuration file from TFTP service configured by PXE ser
 
    Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
    
-2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
+2. Reboot and press anykey except "enter" to enter UEFI main Menu
 
-3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
+3. Select "Boot Manager"->"EFI Network" and press "Enter".
 
 4. After several seconds, D02 will boot by PXE automatically.
 
@@ -190,9 +190,9 @@ D02 supports booting via NFS, you can try it as following steps:
 
 2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
-3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
+3. Reboot D02 and press anykey except "enter" to enter UEFI main Menu
 
-4. Select boot option "Boot Manager"->"EFI Network" boot option to enter.
+4. Select  "Boot Manager"->"EFI Network" to and press enter key.
 
 <h3 id="3.5">Boot via DISK(SAS/USB/SATA)</h3>
 
