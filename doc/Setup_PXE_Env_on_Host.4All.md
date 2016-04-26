@@ -5,12 +5,13 @@
  * [Setup TFTP server on Ubuntu](#1.3)
  * [Put files in the TFTP root path](#1.4)
  * [Setup NFS server on Ubuntu](#1.5)
-* [Mehtod 2](#2.1)
- * [Put the D02 binaries into some <netboot> directory](#2.1)
- * [Get and build a patched Grub](#2.2)
- * [Get PyPXE](#2.3)
- * [Run the PyPXE server](#2.4)
- * [Boot the D02 board and enjoy](#2.5)
+* [Mehtod 2](#2)
+ * [Mehtod 1 introduction](#2.1)
+ * [Put the D02 binaries into some <netboot> directory](#2.2)
+ * [Get and build a patched Grub](#2.3)
+ * [Get PyPXE](#2.4)
+ * [Run the PyPXE server](#2.5)
+ * [Boot the D02 board and enjoy](#2.6)
  
 <h2 id="1">Mehtod 1</h2>
 
@@ -153,7 +154,9 @@ To get kernel and dtb file, please refer to Readme.md.
 
 This is a guide to setup a PXE environment on host machine with PyPXE (https://github.com/psychomario/PyPXE.git).
 
-It is an alternative to the setup described in Setup_PXE_Env_on_Host.txt.
+<h3 id="2">Mehtod 2 introduction</h3>
+
+It is an alternative to the setup described above.
 
 It works well if you already have a DHCP server on your local network. Only one Python tool is needed (PyPXE) so you don't need to install and configure the DHCP and TFTP servers on the host (but, you may still want to
 install the NFS server to mount root over NFS).
