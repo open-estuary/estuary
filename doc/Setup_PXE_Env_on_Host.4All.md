@@ -14,9 +14,9 @@
  * [Boot the D02 board and enjoy](#2.6)
  
  
-Method 1 workable when DHCP and TFTP server havnot setup yet.
+**Method 1 is suitable when DHCP and TFTP server have not setup yet.**
 
-Method 2 works well if you already have a DHCP server on your local network.
+**Method 2 works well if you already have a DHCP server on your local network.**
  
 <h2 id="1">Mehtod 1</h2>
 
