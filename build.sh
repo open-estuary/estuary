@@ -1297,6 +1297,7 @@ build_kernel()
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
+        make O=../$kernel_dir $CFG_FILE
         if [ x"QEMU" = x"$PLATFORM" ]; then
     		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
     		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
@@ -1312,7 +1313,6 @@ build_kernel()
 			sed -i 's/\(CONFIG_BLK_DEV_SR=\)\(.*\)/\1y/' ../$kernel_dir/.config
 			sed -i 's/\(CONFIG_CHR_DEV_SG=\)\(.*\)/\1y/' ../$kernel_dir/.config
         fi
-		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
 		dtb_dir=${DTB_BIN#*arch/}
