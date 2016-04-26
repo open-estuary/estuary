@@ -72,6 +72,7 @@ All validated distributions can be obtained in [HTTP Download](http://download.o
   `wget -c http://people.debian.org/~wookey/bootstrap/rootfs/debian-unstable-arm64.tar.gz`
   
   OpenEmbedded:
+  
   `wget -c http://releases.linaro.org/14.06/openembedded/aarch64/vexpress64-openembedded_minimal-armv8-gcc-4.8_20140623-668.img.gz`
 
 More detail about how to deploy target system into target board, please refer to Deployment_Manual.md.
