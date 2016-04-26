@@ -61,7 +61,8 @@ Embedded Boot Loader(EBL)
 
     a. IP address config at "EFI Internal Shell" mode
     
-       Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->EFI Internal Shell
+       Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->EFI Internal Shell.
+       
        the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address,the comand is:
        
        `ifconfig -s eth0 static <IP address> <mask> <gateway>`
