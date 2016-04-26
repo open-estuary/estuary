@@ -167,7 +167,7 @@ For instance <netboot> = `~/work/d02/netboot`
 
 Get the binaries from open-estuary.org or build them. See Readme.txt.
 You need:
-  ```
+  ```shell
   <netboot>/grubaa64.efi # You MUST rebuild it, see below
   <netboot>/grub.cfg     # Make sure you set your IP address:
                          # edit root = (tftp,x.x.x.x)
@@ -188,7 +188,7 @@ development list [2] so it may be upstream soon.
 [1] https://github.com/jforissier/grub/commit/e0f3bc4554ee79111f6ef6f6910c662d02b981dd
 
 [2] http://lists.gnu.org/archive/html/grub-devel/2016-04/msg00051.html
- ```
+ ```shell
   git clone -b efinet-dhcp-proxy-offer-fix https://github.com/jforissier/grub
   cd grub
   ./autogen.sh
@@ -202,7 +202,7 @@ Then copy grubaa64.efi to <netboot>.
 `git clone -b development https://github.com/psychomario/PyPXE.git`
 
 <h3 id="2.4">Run the PyPXE server</h3>
-```
+```shell
  export MYIP=$(hostname -I)
  export NETBOOT=~/work/d02/netboot # put your own directory here
  cd pypxe
@@ -215,7 +215,7 @@ Then copy grubaa64.efi to <netboot>.
 If you want to use a distribution root FS over NFS instead of using mini-rootfs-arm64.cpio.gz initrd, follow these steps.
 
 * Extract the root FS tarball
- ```
+ ```shell
    cd <netboot>
    mkdir Debian_ARM64
    (cd Debian_ARM64 ; sudo tar xf ../Debian_ARM64.tar.gz)
