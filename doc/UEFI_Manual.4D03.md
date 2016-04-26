@@ -49,7 +49,7 @@ Embedded Boot Loader(EBL)
       a. Connect the board's UART port to a host machine with a serial cable.<br>
       b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
       c. Config serial port setting:115200/8/N/1 on host machine.<br>
-      d. Reboot the board and press any key except enter key to enter into UEFI main menu.<br>
+      d. Reboot the board and press any key except enter key to enter UEFI main menu.<br>
       e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
       
    Then the board will enter into the UEFI SHELL mode.
@@ -66,7 +66,7 @@ Embedded Boot Loader(EBL)
     
     b. Burn BIOS file at "Embedded Boot Loader(EBL)" mode
     
-       Enter "exit" to the UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.   
+       Enter "exit" to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.   
      ```shell
     # Download file from FTP server to board's RAM
     provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
