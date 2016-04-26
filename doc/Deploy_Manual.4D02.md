@@ -87,7 +87,7 @@ There are several methods to bring up system, you can select following anyone fi
  After reboot or power off, all downloaded data will be lost.<br>
  This boot mode is just used for debugging.
 
- Boot D02 to UEFI menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
+ Boot D02 to UEFI main menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
 
 1. Download Image binary file from FTP server to target board's RAM
 
@@ -123,7 +123,7 @@ There are several methods to bring up system, you can select following anyone fi
  In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
  Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
 
-Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+ Boot D02 to UEFI main menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
 
 1. Download Image binary file from FTP
  ```
