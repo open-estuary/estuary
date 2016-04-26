@@ -37,7 +37,7 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
 Because this dtb file is important to this D03 boards, firstly you must flash this DTB file
 into spiflash before any methods of bringing up systerm. 
 
-We will often do some commands in "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode, about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md)  "Upgarde UEFI" chapter..
+ "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode often used to upgrade DTB file , about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md)  "Upgarde UEFI" chapter..
 
 1. IP address config at "EFI Internal Shell" mode (Optional, you can ignore this step if DHCP works well)
 
@@ -52,7 +52,7 @@ We will often do some commands in "EFI internal shell" mode and "Embedded Boot L
 
 2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode
 
-   Enter "exit" to the UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
+   Enter "exit" from to "Embedded Boot Loader(EBL)" to the UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
    ```
    # Download file from FTP server to target board's RAM
    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
