@@ -39,7 +39,7 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
  Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
  into spiflash before any methods of bringing up systerm. 
   
- We will often do some commands in "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode, about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
+ We will often do some commands in "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode, about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md) "Upgarde UEFI" chapter.
 
 1. IP address config at "EFI Internal Shell" mode(Optional, you can ignore this step if DHCP works well)
 
