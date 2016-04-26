@@ -211,7 +211,7 @@ Then copy grubaa64.efi to `<netboot>`.
 
 If you want to use a distribution root FS over NFS instead of using mini-rootfs-arm64.cpio.gz initrd, follow these steps.
 
-* Extract the root FS tarball
+* Extract the root FS tarball, example: Debian
  ```shell
    cd <netboot>
    mkdir Debian_ARM64
