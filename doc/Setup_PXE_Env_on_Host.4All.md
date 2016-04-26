@@ -7,7 +7,7 @@
  * [Setup NFS server on Ubuntu](#1.5)
 * [Mehtod 2](#2)
  * [Mehtod 1 introduction](#2.1)
- * [Put the D02 binaries into some <netboot> directory](#2.2)
+ * [Put the D02 binaries into some `<netboot>` directory](#2.2)
  * [Get and build a patched Grub](#2.3)
  * [Get PyPXE](#2.4)
  * [Run the PyPXE server](#2.5)
@@ -161,7 +161,7 @@ It is an alternative to the setup described above.
 It works well if you already have a DHCP server on your local network. Only one Python tool is needed (PyPXE) so you don't need to install and configure the DHCP and TFTP servers on the host (but, you may still want to
 install the NFS server to mount root over NFS).
 
-<h3 id="2.2">Put the D02 binaries into some <netboot> directory</h3>
+<h3 id="2.2">Put the D02 binaries into some `<netboot>` directory</h3>
 
 For instance <netboot> = `~/work/d02/netboot`
 
