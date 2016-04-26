@@ -171,7 +171,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
        
        EFI system
       
-       add some anther partition  `...`<br>
+       add some another partition  `...`<br>
        save the change           : `w`<br>
        formate EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
        formate ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
@@ -238,7 +238,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
            To see the values of UUID and PARTUUID, please use the command:$blkid.<br>
 	* If you want to use another linux distribution, please refer above steps.
             
-  b. Reboot and press anykey except "enter" to enter UEFI menu.
+  b. Reboot and press anykey except "enter" to enter UEFI main menu.
 
   c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.<br>For SAS/SATA: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
   
