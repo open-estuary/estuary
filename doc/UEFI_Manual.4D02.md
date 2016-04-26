@@ -70,7 +70,7 @@ Embedded Boot Loader(EBL)
     
     b. Burn BIOS file at "Embedded Boot Loader(EBL)" mode
     
-       Enter "exit" from "EFI Internet Shell" mode to UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.    
+       Enter "exit" from "EFI Internet Shell" mode to UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.    
        ```shell
         # Download file from FTP server to board's RAM
         provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
