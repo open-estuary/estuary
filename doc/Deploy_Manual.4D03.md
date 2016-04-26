@@ -38,7 +38,7 @@ Because this dtb file is important to this D03 boards, firstly you must flash th
 into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the
 follow commands in EBL:
 
-We will often do some commands in UEFI EBL shell for these methods, about how to enter it,please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
+We will often do some commands in "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode, about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
 1. IP address config (Optional, you can ignore this step if DHCP works well)
 the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
