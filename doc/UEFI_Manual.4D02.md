@@ -41,28 +41,27 @@ ESL Start OS
 Embedded Boot Loader(EBL)
 ```
 
-There are two command execution environments, one is "EFI internal shell", another one is "Embedded Boot Loader(EBL)". These two environments conld be entered by press any key except "enter" key. when system show "Press Any key in 10 seconds to stop automatical booting...", then choose "Boot Manager" to enter Boot option Menu.
-
  1. Prepare files about UEFI on local computer
 
     All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
  2. Boot board into UEFI SHELL
 
-  Follow below steps to UEFI SHELL:
+   Follow below steps to enter into UEFI SHELL:
     
     a. Connect the board's UART port to a host machine with a serial cable.<br>
     b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
     c. Config serial port setting:115200/8/N/1 on host machine.<br>
-    d. Reboot the board and press any key except "enter" key to enter into UEFI menu.<br>
-    e .Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
+    d. Reboot the board and press any key except "enter" key to enter into UEFI main menu.<br>
+    e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
     
-    Then the board will enter the UEFI SHELL mode.
+    Then the board will enter into the UEFI SHELL mode.
 
  3. Update UEFI files
 
-    a. IP address config
-       we have to switch to "EFI Internal Shell"<br>
+    a. IP address config at "EFI Internal Shell" mode
+    
+       Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->EFI Internal Shell
        the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address,the comand is:
        
        `ifconfig -s eth0 static <IP address> <mask> <gateway>`
@@ -71,9 +70,9 @@ There are two command execution environments, one is "EFI internal shell", anoth
         
        `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
-    b. Burn BIOS file
+    b. Burn BIOS file at "Embedded Boot Loader(EBL)" mode
     
-       Enter "exit" to the select menu to switch back to "EBL" after setting the IP address done.    
+       Enter "exit" to the UEFI main menu and type "Boot Manager"-> after setting the IP address done.    
        ```shell
         # Download file from FTP server to board's RAM
         provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
