@@ -177,13 +177,10 @@ You need:
   ```
 <h3 id="2.3">Get and build a patched Grub</h3>
 
-You cannot use the pre-built grubaa64.efi because a patch [1] is needed,
+You cannot use the pre-built grubaa64.efi because a patch [1] is needed, ("efinet: get bootstrap info from proxy offer packet") 
+which is currently not upstream nor on open-estuary.org. The patch has been posted on the Grub development list [2] so it may 
 
-("efinet: get bootstrap info from proxy offer packet") which is currently not
-
-upstream nor on open-estuary.org.  The patch has been posted on the Grub
-
-development list [2] so it may be upstream soon.
+be upstream soon.
 
 [1] https://github.com/jforissier/grub/commit/e0f3bc4554ee79111f6ef6f6910c662d02b981dd
 
