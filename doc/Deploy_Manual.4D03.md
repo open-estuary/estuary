@@ -52,7 +52,7 @@ into spiflash before any methods of bringing up systerm.
 
 2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode
 
-   Enter "exit" from to "Embedded Boot Loader(EBL)" to the UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
+   Enter "exit" from "EFI internal shell" to the UEFI main menu and type "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
    ```
    # Download file from FTP server to target board's RAM
    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
