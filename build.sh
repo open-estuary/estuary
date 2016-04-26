@@ -838,7 +838,7 @@ if [ x"QEMU" != x"$PLATFORM" ] && [ -d $binary_dir ]; then
 	fi
     fi
 
-    if [[ x"D02" = x"$PLATFORM" || x"D03" = x"$PLATFORM" ]] && [ -f $PREBUILD_DIR/CH02TEVBC_V03.bin ]; then
+    if [ x"D02" = x"$PLATFORM" ] && [ -f $PREBUILD_DIR/CH02TEVBC_V03.bin ]; then
         cp $PREBUILD_DIR/CH02TEVBC_V03.bin $binary_dir/ 2>/dev/null
     fi
     
@@ -1126,7 +1126,7 @@ build_grub()
 # Apply patch for boot from inidcated MAC address
         git reset --hard
 		git checkout grub/master
-		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
+#		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
 		git am ../patches/001-Search-for-specific-config-file-for-netboot.patch
 #		git pull
 #        git checkout grub-2.02-beta2
