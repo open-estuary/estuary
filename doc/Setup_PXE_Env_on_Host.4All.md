@@ -154,14 +154,14 @@ To get kernel and dtb file, please refer to Readme.md.
 
 This is a guide to setup a PXE environment on host machine with PyPXE (https://github.com/psychomario/PyPXE.git).
 
-<h3 id="2">Mehtod 2 introduction</h3>
+<h3 id="2.1">Mehtod 2 introduction</h3>
 
 It is an alternative to the setup described above.
 
 It works well if you already have a DHCP server on your local network. Only one Python tool is needed (PyPXE) so you don't need to install and configure the DHCP and TFTP servers on the host (but, you may still want to
 install the NFS server to mount root over NFS).
 
-<h3 id="2.1">Put the D02 binaries into some <netboot> directory</h3>
+<h3 id="2.2">Put the D02 binaries into some <netboot> directory</h3>
 
 For instance <netboot> = `~/work/d02/netboot`
 
@@ -175,7 +175,7 @@ You need:
   <netboot>/mini-rootfs-arm64.cpio.gz # Or a distribution (Debian_ARM64.tar.gz...)
                                       # See NFS below
   ```
-<h3 id="2.2">Get and build a patched Grub</h3>
+<h3 id="2.3">Get and build a patched Grub</h3>
 
 You cannot use the pre-built grubaa64.efi because a patch [1] is needed,
 
@@ -198,10 +198,10 @@ development list [2] so it may be upstream soon.
 ```
 Then copy grubaa64.efi to <netboot>.
 
-<h3 id="2.3">Get PyPXE</h3>
+<h3 id="2.4">Get PyPXE</h3>
 `git clone -b development https://github.com/psychomario/PyPXE.git`
 
-<h3 id="2.4">Run the PyPXE server</h3>
+<h3 id="2.5">Run the PyPXE server</h3>
 ```shell
  export MYIP=$(hostname -I)
  export NETBOOT=~/work/d02/netboot # put your own directory here
@@ -210,7 +210,7 @@ Then copy grubaa64.efi to <netboot>.
  --netboot-dir $NETBOOT --netboot-file grubaa64.efi
 ```
 
-<h3 id="2.5">Boot the D02 board and enjoy</h3>
+<h3 id="2.6">Boot the D02 board and enjoy</h3>
 
 If you want to use a distribution root FS over NFS instead of using mini-rootfs-arm64.cpio.gz initrd, follow these steps.
 
