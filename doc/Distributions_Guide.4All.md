@@ -34,7 +34,7 @@ Then you will get the rootfs image file as rootfs.img
 
 **You can download above distributions by following commands manually**.
 
-All validated distributions can be obtained in [HTTP Download](http://download.open-estuary.org/)/[release|pre-releases]/<version>/linux/<distro name>/.
+All validated distributions can be obtained in [HTTP Download](http://download.open-estuary.org/)/[release|pre-releases]/`<version>`/linux/`<distro name>`/.
    
    CentOS:     
    `wget -c http://download.open-estuary.org/AllDownloads/DownloadsEstuary/[release|pre-releases]/<version>/linux/CentOS/Common/CentOS_ARM64.tar.gz`
