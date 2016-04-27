@@ -48,6 +48,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   Embedded Boot Loader(EBL)
   ```
  EFI Internal Shell mode is a standard command shell in UEFI.
+ 
  Embedded Boot Loader(EBL) mode is an embedded command shell based on boot loader specially for developers.
 
 * Update UEFI files
