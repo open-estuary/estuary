@@ -177,7 +177,7 @@ set timeout=3
 set default=${platform}_minilinux
 
 # Booting from PXE with mini rootfs
-menuentry "${PLATFORM} minilinux" --id ${platform}_minilinux {
+menuentry "Install estuary" --id ${platform}_minilinux {
     linux /$Image $cmd_line
     initrd /$Initrd
     devicetree /$Dtb
@@ -197,7 +197,7 @@ sudo dd if=/dev/zero of=boot.img bs=1M count=4 2>/dev/null
 sudo mkfs.vfat boot.img
 sudo mount boot.img /mnt/
 sudo cp -r EFI /mnt/
-sync
+# sync
 sudo umount /mnt/
 
 ###################################################################################

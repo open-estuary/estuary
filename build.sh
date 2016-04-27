@@ -44,6 +44,7 @@ DEPRECATED_PARAMETER=0
 DEFAULT_ISO_FILE="Estuary.iso"
 INSTALL_ISO_IMG=
 INSTALL_UDISK_DEV=
+INSTALL_PXE=
 
 ###################################################################################
 ############################# Print help information       ########################
@@ -155,6 +156,13 @@ check_setup_param()
 	if [ x"$INSTALL_UDISK_DEV" != x"" ]; then
 		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
 			echo -e "\033[31mError! Unsupported platform $PLATFORM for usb install disk!\033[0m"
+			return 1
+		fi
+	fi
+
+	if [ x"$INSTALL_PXE" != x"" ]; then
+		if [ x"D02" != x"$PLATFORM" ] && [ x"D03" != x"$PLATFORM" ]; then
+			echo -e "\033[31mError! Unsupported platform $PLATFORM for PXE install!\033[0m"
 			return 1
 		fi
 	fi
@@ -435,7 +443,7 @@ get_setup_parameter()
 				if [ x"null" != x"$iso_image" ]; then
 					INSTALL_ISO_IMG=$iso_image
 				fi
-			else
+			elif [ x"usb" = x"$install_type" ]; then
 				INSTALL_UDISK_DEV=`jq -r ".setup[$idx].device" $cfg_file`
 				if [ x"$INSTALL_UDISK_DEV" = x"/dev/sdx" ]; then
 					INSTALL_UDISK_DEV=`get_1st_usb_storage`
@@ -452,6 +460,8 @@ get_setup_parameter()
 						echo -e "\033[31mError! Device $INSTALL_UDISK_DEV is not an usb disk!\033[0m" ; return 1
 					fi
 				fi
+			elif [ x"pxe" = x"$install_type" ]; then
+				INSTALL_PXE="yes"
 			fi
 		fi
 		let idx=$idx+1
@@ -1108,7 +1118,7 @@ build_grub()
         git reset --hard
 		git checkout grub/master
 		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
-		git am ../patches/0002-D01-fix-dtb-load-address.patch
+		git apply ../patches/0002-D01-fix-dtb-load-address.patch
 
     	make distclean
     	./autogen.sh
@@ -1127,7 +1137,7 @@ build_grub()
         git reset --hard
 		git checkout grub/master
 #		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
-		git am ../patches/001-Search-for-specific-config-file-for-netboot.patch
+		git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
 #		git pull
 #        git checkout grub-2.02-beta2
 
@@ -1564,6 +1574,20 @@ if [ x"$INSTALL_UDISK_DEV" != x"" ]; then
 fi
 
 ###################################################################################
+############################## Setup PXE environment #############################
+###################################################################################
+pxe_result=0
+if [ x"$INSTALL_PXE" = x"yes" ]; then
+	./estuary/setup_pxe.sh
+	if [ x"$?" = x"0" ]; then
+		echo -e "\033[32mSetup PXE environment successfully!\033[0m"
+	else
+		echo -e "\033[31mSetup PXE environment failed!\033[0m"
+		pxe_result=1
+	fi
+fi
+
+###################################################################################
 ########################## Check and report build resutl   ########################
 ###################################################################################
 echo ""
@@ -1688,6 +1712,14 @@ if [ x"" != x"$PLATFORM" ]; then
     	    echo -e "\033[31mFailed! Create usb install disk return error!\033[0m"
 		fi
     fi
+	
+	if [ x"$INSTALL_PXE" = x"yes" ]; then
+		if [ $pxe_result = 0 ]; then
+			echo -e "\033[32mSetup PXE environment successfully.\033[0m"
+		else
+			echo -e "\033[31mFailed! Setup PXE environment error!\033[0m"
+		fi
+	fi
 fi
 
 # Binaries download report

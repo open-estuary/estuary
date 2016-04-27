@@ -284,13 +284,8 @@ check_status
 NFS_ROOT=`mktemp -d $dst/rootfs.XXXXXX`
 
 ###################################################################################
-# 07. Build and Copy binary files
+# 07. Copy binary files
 ###################################################################################
-./estuary/build.sh -f ./estuary/estuarycfg.json
-if [ ! $? ]; then
-	echo -e "\033[31mError! Build estuary project failed!\033[0m" ; exit 1
-fi
-
 platform=`jq -r ".system.platform" $CFGFILE`
 binary_dir=$PRJROOT/build/$platform/binary
 
@@ -423,4 +418,7 @@ sudo service openbsd-inetd start
 sudo service tftpd-hpa start
 check_status
 echo "--------------------------------------------------------------------------------"
+
+exit 0
+
 
