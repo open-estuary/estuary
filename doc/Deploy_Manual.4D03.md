@@ -191,8 +191,8 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
       
        add some another partition  `...`<br>
        save the change           : `w`<br>
-       formate EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
-       formate ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
+       format EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
+       format ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
        
        ```
           +---------+-----------+--------------+------------------+
