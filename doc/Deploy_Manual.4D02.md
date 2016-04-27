@@ -26,6 +26,24 @@ Local network: To connect hardware boards and host machine, so that they can com
 
 Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
 
+Two methods are provided to **connect the board's UART port to a host machine**:
+
+**Method 1** : booting board in openlab environment
+
+After used `board_connect` command, the target machine connected to the host machine. Use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
+
+**Method 2** : booting board into UEFI SHELL on your host machine
+
+Follow below steps to enter UEFI SHELL:
+ 
+   a. Connect the board's UART port to a host machine with a serial cable.<br>
+   b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
+   c. Config serial port setting:115200/8/N/1 on host machine.<br>
+   d. Reboot the board and press any key except "enter" key to enter UEFI main menu.<br>
+   e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
+   
+ Then the board will enter into the UEFI SHELL mode.
+
 <h3 id="2.2">Check the hardware board</h3>
 
 Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.com/d02-2/.
@@ -37,24 +55,24 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
 <h3 id="2.4">Upgrade DTB file(Necessary step)</h3>
 
  Because this dtb file is important to this D02 boards, firstly you must flash this DTB file
- into spiflash before any methods of bringing up systerm. Boot D02 to UEFI SHELL, and type the
- follow commands in EBL:
+ into SPI flash before any methods of bringing up systerm. 
   
- We will often do some commands in UEFI EBL shell for these methods, about how to enter it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md).
+ "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode often used to upgrade DTB file , about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md) "Upgarde UEFI" chapter.
 
-1. IP address config (Optional, you can ignore this step if DHCP works well)
+1. IP address config at "EFI Internal Shell" mode(Optional, you can ignore this step if DHCP works well)
 
-   the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
+   Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->"EFI Internal Shell".
    
-   after setting the IP address done, switch back to "EBL" again.(enter "exit" to the select menu)
- ```
-# Config board's IP address
-ifconfig -s eth0 static <IP address> <mask> <gateway>
-```
-e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
+   ```
+   # Config board's IP address
+   ifconfig -s eth0 static <IP address> <mask> <gateway>
+   ```
+   e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
  
  
-2. Download dtb file from FTP
+2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode
+
+   Enter "exit" from "EFI Internal Shell" mode to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
 
  ```
 # Download file from FTP server to target board's RAM
@@ -73,9 +91,9 @@ provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <dow
 
    You must reboot your D02 board after above two steps, this new DTB file will be used on booting board.
 
-   Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.
+   Note: It is necessary to flash the DTB file to SPI flash to solve a known MAC address duplicate Issue.
    Also it is to be noted that the DTB file should not be input in the Grub config file. So if you
-    wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
+    wish to use a modified DTB file, then you should always have it flashed to SPI flash before bootup.
 
 <h2 id="3">Bring up System</h2>
 
@@ -87,7 +105,7 @@ There are several methods to bring up system, you can select following anyone fi
  After reboot or power off, all downloaded data will be lost.<br>
  This boot mode is just used for debugging.
 
- Boot D02 to UEFI menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
+ Boot D02 to UEFI main menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
 
 1. Download Image binary file from FTP server to target board's RAM
 
@@ -114,16 +132,16 @@ There are several methods to bring up system, you can select following anyone fi
    e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000
 
  
-4. Start operator system
+4. Start operating system
   
-  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operator system.
+  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operating system.
 
 <h3 id="3.2">Boot via NORFLASH</h3>
 
  In this boot mode, kernel image, dtb file and rootfs file will be writen into NORFLASH. 
  Before the kernel start, the kernel image, dtb fille and rootfs file will be loaded into RAM from NORFLASH.
 
-Boot D02 to UEFI SHELL, and type the follow commands in EBL:
+ Boot D02 to UEFI main menu. Select "Boot Manager"->"Eembedded Boot Loader(EBL)" and type the follow commands in EBL:
 
 1. Download Image binary file from FTP
  ```
@@ -170,9 +188,9 @@ The grub will get the configuration file from TFTP service configured by PXE ser
 
    Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
    
-2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
+2. Reboot and press anykey except "enter" to enter UEFI main Menu
 
-3. Select boot option "Boot Manager"->"EFI Network" boot option and press "Enter".
+3. Select "Boot Manager"->"EFI Network" and press "Enter".
 
 4. After several seconds, D02 will boot by PXE automatically.
 
@@ -190,9 +208,9 @@ D02 supports booting via NFS, you can try it as following steps:
 
 2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
-3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
+3. Reboot D02 and press anykey except "enter" to enter UEFI main Menu
 
-4. Select boot option "Boot Manager"->"EFI Network" boot option to enter.
+4. Select  "Boot Manager"->"EFI Network" to and press enter key.
 
 <h3 id="3.5">Boot via DISK(SAS/USB/SATA)</h3>
 
@@ -260,7 +278,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        
        save the change           : `w`
        
-       formate EFI partition  : `sudo mkfs.vfat /dev/sda1`
+       format EFI partition  : `sudo mkfs.vfat /dev/sda1`
        
        Then this disk can be identified by D02 board.
          
