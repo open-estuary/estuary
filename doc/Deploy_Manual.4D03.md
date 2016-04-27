@@ -24,7 +24,7 @@ Local network: To connect hardware boards and host machine, so that they can com
 
 Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
 
-Two methods are provided to **connect the board's UART port**:
+Two methods are provided to **connect the board's UART port to a host machine**:
 
 **Method 1**: booting board in openlab environment
 
