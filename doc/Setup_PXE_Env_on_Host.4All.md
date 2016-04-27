@@ -1,5 +1,5 @@
 
-* [introduction](#1)
+* [Introduction](#1)
 * [Setup DHCP server on Ubuntu](#2)
 * [Setup TFTP server on Ubuntu](#3)
 * [Put files in the TFTP root path](#4)
@@ -7,7 +7,7 @@
 
 This is a guide to setup a PXE environment on host machine.
 
-<h3 id="1">Method 1 introduction</h3>
+<h3 id="1">Introduction</h3>
 
 PXE boot depends on DHCP, TFTP and NFS services. So before verifing PXE, you need to setup a working DHCP, TFTP, NFS server on one of your host machine in local network. In this case, my host OS is Ubuntu 12.04.
 
