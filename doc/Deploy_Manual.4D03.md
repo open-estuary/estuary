@@ -24,6 +24,24 @@ Local network: To connect hardware boards and host machine, so that they can com
 
 Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
 
+Two methods are provided to **connect the board's UART port to a host machine**:
+
+**Method 1**: booting board in openlab environment
+
+After used `board_connect` command, the target machine connected to the host machine. Use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
+
+**Method 2**: booting board into UEFI SHELL on your host machine
+
+Follow below steps to enter UEFI SHELL:
+ 
+   a. Connect the board's UART port to a host machine with a serial cable.<br>
+   b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
+   c. Config serial port setting:115200/8/N/1 on host machine.<br>
+   d. Reboot the board and press any key except "enter" key to enter UEFI main menu.<br>
+   e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
+   
+ Then the board will enter into the UEFI SHELL mode.
+
 <h3 id="2.2">Check the hardware board</h3>
 
 Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.org/d03/.
@@ -35,13 +53,13 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
 <h3 id="2.4">Upgrade DTB file(Necessary step) </h3>
 
 Because this dtb file is important to this D03 boards, firstly you must flash this DTB file
-into spiflash before any methods of bringing up systerm. Boot D03 to UEFI SHELL, and type the
-follow commands in EBL:
+into spiflash before any methods of bringing up systerm. 
 
-We will often do some commands in UEFI EBL shell for these methods, about how to enter it,please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
+ "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode often used to upgrade DTB file , about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md)  "Upgarde UEFI" chapter..
 
-1. IP address config (Optional, you can ignore this step if DHCP works well)
-the newest edk2 base code does not support the ifconfig command in "ebl", if we must set the IP address, we have to change to "shell" (EFI Internal Shell)
+1. IP address config at "EFI Internal Shell" mode (Optional, you can ignore this step if DHCP works well)
+
+   Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->"EFI Internal Shell".
   ```
  # Config board's IP address
  ifconfig -s eth0 static <IP address> <mask> <gateway> 
@@ -50,7 +68,9 @@ the newest edk2 base code does not support the ifconfig command in "ebl", if we 
   
   `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
 
-2. Download dtb file from FTP
+2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode
+
+   Enter "exit" from "EFI internal shell" to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
    ```
    # Download file from FTP server to target board's RAM
    provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
@@ -68,7 +88,7 @@ the newest edk2 base code does not support the ifconfig command in "ebl", if we 
 
    You must reboot your D03 board after above two steps, this new DTB file will be used on booting board.
 
-   Note: It is necessary to flash the DTB file to spiflash to solve a known MAC address duplicate Issue.Also it is to be noted that the DTB file should not be input in the Grub config file. So if you wish to use a modified DTB file, then you should always have it flashed to spiflash before bootup.
+   Note: It is necessary to flash the DTB file to SPI flash to solve a known MAC address duplicate Issue.Also it is to be noted that the DTB file should not be input in the Grub config file. So if you wish to use a modified DTB file, then you should always have it flashed to SPI flash before bootup.
 
 <h2 id="3">Bring up System</h2>
 
@@ -109,9 +129,9 @@ follow commands in EBL:
   
     `provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000`
  
-4. Start operator system
+4. Start operating system
   
-  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operator system.
+  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operating system.
 
 <h3 id="3.2">Boot via PXE</h3>
 
@@ -169,7 +189,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
        
        EFI system
       
-       add some anther partition  `...`<br>
+       add some another partition  `...`<br>
        save the change           : `w`<br>
        formate EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
        formate ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
@@ -236,7 +256,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
            To see the values of UUID and PARTUUID, please use the command:$blkid.<br>
 	* If you want to use another linux distribution, please refer above steps.
             
-  b. Reboot and press anykey except "enter" to enter UEFI menu.
+  b. Reboot and press anykey except "enter" to enter UEFI main menu.
 
   c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.<br>For SAS/SATA: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
   
