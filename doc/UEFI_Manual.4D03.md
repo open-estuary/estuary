@@ -17,46 +17,41 @@ Where to get them, please refer to [Readme.md](https://github.com/open-estuary/e
 
 Note: This is not necessary unless you want to upgrade UEFI really.
 
-FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
+* Prepare files about UEFI on local computer
 
-After used `board_connect` command, the target machine connected to the host machine. Use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
+  FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
+  
+  All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
-UEFI main menu option is showed as follow:
-```
-continue 
-select Language            <standard English>
->Boot Manager
->Device Manager
->Boot Maintenance Manager
-```
-Choose "Boot Manager" and enter into Boot option menu:
-```
-EFI Misc Device 
-EFI Misc Device 1
-EFI Network
-EFI Internal Shell
-Flash Start OS
-ESL Start OS
-Embedded Boot Loader(EBL)
-```
+* Connect the board's UART port
 
-1. Prepare files about UEFI on local computer
+  Please refer to [Deploy_Manual.4D02.md](https://github.com/estuary/blob/mark/doc/Deploy_Manual.4D02.md#2.4) Prerequisite chapter.
 
-    All files mentioned above should be ready firstly, then put them in the root directory of FTP.
+* UEFI menu introduction
 
-2. Boot board into UEFI SHELL
+  UEFI main menu option is showed as follow:
+  ```
+  continue 
+  select Language            <standard English>
+  >Boot Manager
+  >Device Manager
+  >Boot Maintenance Manager
+  ```
+  Choose "Boot Manager" and enter into Boot option menu:
+  ```
+  EFI Misc Device 
+  EFI Misc Device 1
+  EFI Network
+  EFI Internal Shell
+  Flash Start OS
+  ESL Start OS
+  Embedded Boot Loader(EBL)
+  ```
+  EFI Internal Shell mode is a standard command shell in UEFI.
+ 
+  Embedded Boot Loader(EBL) mode is an embedded command shell based on boot loader specially for developers.
 
-    Follow below steps to UEFI SHELL:
-    
-      a. Connect the board's UART port to a host machine with a serial cable.<br>
-      b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
-      c. Config serial port setting:115200/8/N/1 on host machine.<br>
-      d. Reboot the board and press any key except enter key to enter UEFI main menu.<br>
-      e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
-      
-   Then the board will enter into the UEFI SHELL mode.
-
-3. Update UEFI files
+* Update UEFI files
 
     a. IP address config at "EFI Internal Shell" mode
     
