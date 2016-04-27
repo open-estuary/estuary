@@ -19,11 +19,11 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
 * Prepare files about UEFI on local computer
 
-FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
+  FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
 
-All files mentioned above should be ready firstly, then put them in the root directory of FTP.
+  All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
-* Connect UART(please refer to [Deploy_Manual.4D02.md](https://github.com/estuary/blob/mark/doc/Deploy_Manual.4D02.md#2.4)Prerequisite chapter)
+* Connect UART(please refer to [Deploy_Manual.4D02.md](https://github.com/estuary/blob/mark/doc/Deploy_Manual.4D02.md#2.4) Prerequisite chapter)
 
 * UEFI menu introduction
 
