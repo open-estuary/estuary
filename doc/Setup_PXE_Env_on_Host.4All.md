@@ -152,11 +152,12 @@ To get kernel and dtb file, please refer to Readme.md.
 
 <h2 id="2">Mehtod 2</h2>
 
-This is a guide to setup a PXE environment on host machine with PyPXE (https://github.com/psychomario/PyPXE.git).
+It is an alternative to the setup described above.
+
 
 <h3 id="2.1">Mehtod 2 introduction</h3>
 
-It is an alternative to the setup described above.
+This is a guide to setup a PXE environment on host machine with PyPXE (https://github.com/psychomario/PyPXE.git) as a proxy DHCP server.
 
 It works well if you already have a DHCP server on your local network. Only one Python tool is needed (PyPXE) so you don't need to install and configure the DHCP and TFTP servers on the host (but, you may still want to
 install the NFS server to mount root over NFS).
