@@ -47,6 +47,8 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   ESL Start OS
   Embedded Boot Loader(EBL)
   ```
+ EFI Internal Shell mode is a standard command shell in UEFI.
+ Embedded Boot Loader(EBL) mode is an embedded command shell based on boot loader specially for developers.
 
 * Update UEFI files
 
@@ -103,7 +105,7 @@ Actually the board can restore two UEFI in case of the default one breaks, then 
 
 3. Power on and enter UEFI SHELL again as above description.
 
-4. Push the dial swift 's3' to 'on' with a 's' on the board.
+4. Push the dial swift 's3' to 'on' with a '3' on the board.
 
 5. Burn UEFI file for BIOS as above step3 "Update UEFI files".
 
