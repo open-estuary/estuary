@@ -26,7 +26,8 @@
 
 "setup":[
 {"type":"iso","install":"yes","name":"Estuary.iso"},
-{"type":"usb","install":"no","device":"/dev/sdx"}
+{"type":"usb","install":"no","device":"/dev/sdx"},
+{"type":"pxe","install":"no"}
 ]
 
 }

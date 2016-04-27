@@ -205,7 +205,7 @@ set timeout=3
 set default=${platform}_minilinux
 
 # Booting from PXE with mini rootfs
-menuentry "${PLATFORM} minilinux" --id ${platform}_minilinux {
+menuentry "Install estuary" --id ${platform}_minilinux {
     linux /$Image $cmd_line
     initrd /$Initrd
     devicetree /$Dtb
@@ -222,7 +222,7 @@ cp grubaa64.efi EFI/GRUB2/grubaa64.efi
 sudo mount ${DISK}1 /mnt/
 sudo cp -r EFI /mnt/
 sudo cp Image* hip*.dtb initrd*.gz grub.cfg /mnt/
-sync
+# sync
 sudo umount /mnt/
 
 ###################################################################################
@@ -231,7 +231,7 @@ sudo umount /mnt/
 sudo chown -R root:root *
 popd
 
-sync
+# sync
 sudo umount ${DISK}2
 ###################################################################################
 # Delete workspace
