@@ -35,9 +35,8 @@ Then you will get the rootfs image file as rootfs.img
 **You can download above distributions by following commands manually**.
 
 All validated distributions can be obtained in [HTTP Download](http://download.open-estuary.org/)/[release|pre-releases]/`<version>`/linux/`<distro name>`/.
-   
-  Ubuntu:   
-   
+  
+  e.g.:
   You can get Ubuntu distribution of estuary v2.2-rc1 pre-releases version as follow:
    
   `wget -c http://download.open-estuary.org/AllDownloads/DownloadsEstuary/pre-releases/2.2/rc1/linux/Ubuntu/Common/Ubuntu_ARM64.tar.gz`
