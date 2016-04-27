@@ -23,7 +23,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
   All files mentioned above should be ready firstly, then put them in the root directory of FTP.
 
-* Connect the board's UART port
+* Connect the board's UART port to a host machine
 
   Please refer to [Deploy_Manual.4D02.md](https://github.com/estuary/blob/mark/doc/Deploy_Manual.4D02.md#2.4) "Prerequisite" chapter.
 
