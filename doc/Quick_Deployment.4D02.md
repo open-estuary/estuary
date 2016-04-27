@@ -69,7 +69,7 @@ Note: In my case, the working directory is `~/workdir`.
 
    eg: `./estuary/build.sh -f estuary/estuarycfg.json`
 
-4. After that, install minicom and connect the the serial ports of hardware boards to the Ubuntu PC. Connect the hardware boards by minicom using serial ports.
+4. After that, install minicom and connect the serial ports of hardware boards to the Ubuntu PC. Connect the hardware boards by minicom using serial ports.
 
 5. Reboot the hardware boards and start the boards from the correct EFI Network.
 
