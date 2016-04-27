@@ -23,6 +23,7 @@ Note: In my case, the working directory is `~/workdir`.
     (Notice: if the specified usb device does not exist, the first usb device will be selected by default.)
 
     * Use build.sh to create the usb install disk.
+    
        `eg: ./estuary/build.sh -f estuary/estuarycfg.json`
 
 2. Connect the usb install disk to the board.
