@@ -34,8 +34,6 @@ Two methods are provided to **connect the board's UART port to a host machine**:
 
 **Method 2** : booting board into UEFI SHELL on your host machine
 
-Follow below steps to enter UEFI SHELL:
- 
    a. Connect the board's UART port to a host machine with a serial cable.<br>
    b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
    c. Config serial port setting:115200/8/N/1 on host machine.<br>
