@@ -85,9 +85,9 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 Actually the board can restore two UEFI in case of the default one breaks, then you can restore it as following way:
 
   1. Power off the board and disconnect power supply.<br>
-  2. Push the dial switch 's3' to 'off' with a '1' on the board, please check the Hardware Boards to find where it is: http://open-estuary.com/d03-2/.<br>
+  2. Push the dial switch 's3' to 'off' with a '3' on the board, please check the Hardware Boards to find where it is: http://open-estuary.com/d03-2/.<br>
   3. Power on and enter UEFI SHELL again as above description.<br>
-  4. Push the dial swift 's3' to 'on' with a '0' on the board.<br>
+  4. Push the dial swift 's3' to 'on' with a '3' on the board.<br>
   5. Burn UEFI file for BIOS as above step3 "Update UEFI files".<br>
   6. Reset the system again.
 
