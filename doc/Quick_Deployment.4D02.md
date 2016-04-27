@@ -20,7 +20,7 @@ Note: In my case, the working directory is `~/workdir`.
     
     * Change the value of "install" to "yes" in object "setup" for usb and the value "device" to your USB install disk.
     
-    (Notice: if the specified usb device does not exist, the first usb device will be selected by default.)
+       (Notice: if the specified usb device does not exist, the first usb device will be selected by default.)
 
     * Use build.sh to create the usb install disk.
     
@@ -66,6 +66,7 @@ Note: In my case, the working directory is `~/workdir`.
 2. Modify the configuration file of estuary/estuarycfg.json based on you hardware boards. Change the values of mac to physical addresses of the connected network cards on the board. Change the value of "install" to "yes" in object "setup" for PXE.
 
 3. Backup files under the tftp root directory if necessary. Use build.sh to build project and setup the PXE server on Ubuntu PC.
+
    eg: `./estuary/build.sh -f estuary/estuarycfg.json`
 
 4. After that, install minicom and connect the the serial ports of hardware boards to the Ubuntu PC. Connect the hardware boards by minicom using serial ports.
