@@ -24,6 +24,24 @@ Local network: To connect hardware boards and host machine, so that they can com
 
 Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
 
+Two methods are provided to **connect the board's UART port**:
+
+Method 1 is booting board in openlab environment:
+
+After used `board_connect` command, the target machine connected to the host machine. Use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
+
+Method 2 is booting board into UEFI SHELL on your host machine
+
+Follow below steps to enter UEFI SHELL:
+ 
+   a. Connect the board's UART port to a host machine with a serial cable.<br>
+   b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
+   c. Config serial port setting:115200/8/N/1 on host machine.<br>
+   d. Reboot the board and press any key except "enter" key to enter UEFI main menu.<br>
+   e. Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
+   
+ Then the board will enter into the UEFI SHELL mode.
+
 <h3 id="2.2">Check the hardware board</h3>
 
 Hardware board should be ready and checked carefully to make sure it is available, more detail information about different hardware board, please refer to http://open-estuary.org/d03/.
