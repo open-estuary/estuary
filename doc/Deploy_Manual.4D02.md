@@ -278,7 +278,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        
        save the change           : `w`
        
-       formate EFI partition  : `sudo mkfs.vfat /dev/sda1`
+       format EFI partition  : `sudo mkfs.vfat /dev/sda1`
        
        Then this disk can be identified by D02 board.
          
