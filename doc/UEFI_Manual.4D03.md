@@ -25,7 +25,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
 * Connect the board's UART port to a host machine
 
-  Please refer to [Deploy_Manual.4D03.md](https://github.com/estuary/blob/mark/doc/Deploy_Manual.4D03.md) "Prerequisite" chapter.
+  Please refer to [Deploy_Manual.4D03.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D03.md) "Prerequisite" chapter.
 
 * UEFI menu introduction
 
