@@ -27,14 +27,13 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
   Please refer to [Deploy_Manual.4D03.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D03.md) "Prerequisite" chapter.
   
-  If you choose Method 1, use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
-  
-  If you choose Method 2, take the following steps:
-  
-   * Reboot the board and press any key except "enter" key to enter UEFI main menu.<br>
-   * Select "Boot Manager" into Boot Option Menu and choose "EFI Internet Shell".
-  
-  Then the board will enter into the UEFI SHELL mode.
+ If you choose Method 1, use another console window, input `board_reboot` command to reset the board.
+ 
+ If you choose Method 2, press the reset key on the board to reset the board.
+
+ when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key to
+ 
+ enter UEFI main menu.
 
 * UEFI menu introduction
 
