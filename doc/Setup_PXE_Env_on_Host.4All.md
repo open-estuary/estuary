@@ -1,12 +1,12 @@
 
-* [Mehtod 1](#1)
- * [Mehtod 1 introduction](#1.1)
+* [Method 1](#1)
+ * [Method 1 introduction](#1.1)
  * [Setup DHCP server on Ubuntu](#1.2)
  * [Setup TFTP server on Ubuntu](#1.3)
  * [Put files in the TFTP root path](#1.4)
  * [Setup NFS server on Ubuntu](#1.5)
-* [Mehtod 2](#2)
- * [Mehtod 1 introduction](#2.1)
+* [Method 2](#2)
+ * [Method 1 introduction](#2.1)
  * [Put the D02 binaries into some `<netboot>` directory](#2.2)
  * [Get and build a patched Grub](#2.3)
  * [Get PyPXE](#2.4)
@@ -14,11 +14,11 @@
  * [Boot the D02 board and enjoy](#2.6)
  
  
-<h2 id="1">Mehtod 1</h2>
+<h2 id="1">Method 1</h2>
 
 This is a guide to setup a PXE environment on host machine.
 
-<h3 id="1.1">Mehtod 1 introduction</h3>
+<h3 id="1.1">Method 1 introduction</h3>
 
 PXE boot depends on DHCP, TFTP and NFS services. So before verifing PXE, you need to setup a working DHCP, TFTP, NFS server on one of your host machine in local network. In this case, my host OS is Ubuntu 12.04.
 
@@ -150,12 +150,12 @@ To get kernel and dtb file, please refer to Readme.md.
     
     sudo service nfs-kernel-server restart
 
-<h2 id="2">Mehtod 2</h2>
+<h2 id="2">Method 2</h2>
 
 It is an alternative to the setup described above.
 
 
-<h3 id="2.1">Mehtod 2 introduction</h3>
+<h3 id="2.1">Method 2 introduction</h3>
 
 This is a guide to setup a PXE environment on host machine with [PyPXE] (https://github.com/psychomario/PyPXE.git) as a proxy DHCP server.
 
