@@ -50,6 +50,8 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   EFI Internal Shell mode is a standard command shell in UEFI.
  
   Embedded Boot Loader(EBL) mode is an embedded command shell based on boot loader specially for developers.
+  
+  You can switch between two modes by typing "exit" from one mode to UEFI main menu and then choose the another mode.
 
 * Update UEFI files
 
