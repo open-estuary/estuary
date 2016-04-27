@@ -74,7 +74,7 @@ There are several methods to bring up system, you can select following anyone fi
   
   2. Download .kernel binary file from FTP
      ```
-     # Download fiel from FTP server to target board's Flash
+     # Download file from FTP server to target board's Flash
      provision <server IP> -u <ftp user name> -p <ftp password> -f <.kernel image file>
      # Write data into NORFLASH
      norwfmem <source address> <target address> <data length>
