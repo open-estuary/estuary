@@ -30,7 +30,7 @@ Two methods are provided to connect UART:
 
 Method 1 is booting board in openlab environment:
 
-used `board_connect` command, the target machine connected to the host machine. Use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
+After used `board_connect` command, the target machine connected to the host machine. Use another console window, input `board_reboot` command, the system will be reset, when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key and enter UEFI main menu.
 
 Method 2 is booting board into UEFI SHELL on your host machine
 
