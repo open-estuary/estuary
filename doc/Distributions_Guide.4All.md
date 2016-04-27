@@ -38,7 +38,7 @@ All validated distributions can be obtained in [HTTP Download](http://download.o
    
   Ubuntu:   
    
-  you can get Ubuntu distributions of esturay 2.2-rc1 pre-releases version as follow:
+  You can get Ubuntu distribution of estuary v2.2-rc1 pre-releases version as follow:
    
   `wget -c http://download.open-estuary.org/AllDownloads/DownloadsEstuary/pre-releases/2.2/rc1/linux/Ubuntu/Common/Ubuntu_ARM64.tar.gz`
   
