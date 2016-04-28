@@ -64,7 +64,9 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
    # Config board's IP address
    ifconfig -s eth0 static <IP address> <mask> <gateway>
    ```
-   e.g.: ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1
+   e.g.:
+
+   `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
  
  
 2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode
@@ -74,16 +76,15 @@ You can upgrade UEFI and trust firmare yourself based on FTP service, but this i
  ```
 # Download file from FTP server to target board's RAM
 provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
-```
-
- ```
 # Write data into FLASH
  spiwfmem <source address> <target address> <data length>
  ```
  
- e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x100000 <br>
+ e.g.:
+ ```
+ provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x100000 <br>
  spiwfmem 0x100000 0x300000 0x100000
-
+ ```
 3. Reboot your D02 board
 
    You must reboot your D02 board after above two steps, this new DTB file will be used on booting board.
@@ -110,7 +111,9 @@ There are several methods to bring up system, you can select following anyone fi
 # Download Image binary file from FTP server to target board's RAM
  provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
  ```
- e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x80000
+ e.g.: 
+ 
+ `provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x80000`
  
  
 2. Download dtb file from FTP server to target board's RAM
@@ -118,7 +121,9 @@ There are several methods to bring up system, you can select following anyone fi
  # Download dtb file from FTP server to target board's RAM
   provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
  ```
-  e.g.: provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x06000000
+  e.g.: 
+  
+  `provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x06000000`
  
  
 3. Download rootfs file from FTP server to target board's RAM
@@ -126,7 +131,9 @@ There are several methods to bring up system, you can select following anyone fi
   # Download rootfs file from FTP server to target board's RAM
    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
   ```
-   e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000
+   e.g.:
+   
+   `provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000`
 
  
 4. Start operating system
@@ -144,30 +151,28 @@ There are several methods to bring up system, you can select following anyone fi
  ```
  # Download file from FTP server to target board's RAM
  provision <server IP> -u <ftp user name> -p <ftp password> -f <kernel image file> -a <download target address>
- ```
- 
- ```
  # Write data into NORFLASH
  norwfmem <source address> <target address> <data length>
  ```
- e.g.: provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x100000<br>
+ e.g.: 
+ ```
+ provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x100000<br>
  norwfmem 0x100000 0x100000 0x1f00000
-
+ ```
 
 2. Download rootfs file from FTP
 
  ```
   # Download file from FTP server to target board's RAM
   provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs image> -a <download target address>
-  ```
-
- ```
  # Write data into NORFLASH
  norwfmem <source address> <target address> <data length>
    ```
- e.g.: provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x100000<br>
+ e.g.: 
+ ```
+ provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x100000<br>
  norwfmem 0x100000 0x2000000 0x4000000
-
+ ```
   
 3. Reboot D02 and press anykey except "enter" to enter UEFI Boot Menu
 
@@ -217,7 +222,9 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
 1. Boot by PXE or NORFLASH(please refer to "#Boot via PXE" or "#Boot via NORFLASH") to part and format hardware disk before booting D02 board
 
-   Format hardware disk, e.g.: `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`
+   Format hardware disk, e.g.: 
+   
+   `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`
    
    Part hardware disk with `"sudo fdisk /dev/sda" as follow:`<br>
 
@@ -314,7 +321,6 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
      e.g.: the context of grub.cfg file is modified as follow:
     
      ```shell
-	       #
 	       # Sample GRUB configuration file
 	       #
 	       # Boot automatically after 5 secs.
@@ -330,9 +336,9 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
      ```
     Note:
       
-    1. <UUID> means the UUID of that partition which your EFI System is located in.
+    1. `<UUID>` means the UUID of that partition which your EFI System is located in.
     
-       <PARTUUID> means the PARTUUID of that partition which your linux distribution is located in. 
+       `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. 
        
        To see the values of UUID and PARTUUID, please use the command:`$blkid`.
   
@@ -358,7 +364,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
         
          Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.
           
-         e.g.:modify arch/arm64/configs/defconfig as follow:
+         e.g.: modify arch/arm64/configs/defconfig as follow:
            
         ```
               ...... 
@@ -382,7 +388,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
    a. select sata mode for UEFI 
    
-     After burn BIOS file(you can refer to "UEFI_Manual.4D02.md"), UEFI boot as sas mode by default.
+     After burn BIOS file(you can refer to [UEFI_Manual.4D02.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D02.md)), UEFI boot as sas mode by default.
      
      You can switch between sata and sas by adding a commandline at EBL.
      

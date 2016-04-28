@@ -107,6 +107,7 @@ follow commands in EBL:
     provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
    ```
     e.g.: 
+    
     `provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 0x80000`
  
 2. Download dtb file from FTP server to target board's RAM
@@ -115,6 +116,7 @@ follow commands in EBL:
     provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
      ```
    e.g.: 
+   
     `provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x06000000`
  
 3. Download rootfs file from FTP server
@@ -166,7 +168,10 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
 1. Boot by PXE (please refer to "Boot via PXE") to part and format hardware disk before booting D03 board
 
-   Format hardware disk, e.g.: `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`<br>
+   Format hardware disk, e.g.: 
+   
+   `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`
+   
    Part hardware disk with `"sudo fdisk /dev/sda"` as follow:<br>
     add a gpt to this disk : 
        
@@ -233,7 +238,6 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
        e.g.: <br>
        the context of grub.cfg file is modified as follow:
        ``` 
-        #
 	        # Sample GRUB configuration file
 	        #
 	        # Boot automatically after 5 secs.
@@ -250,7 +254,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
        Note:<br>
 	* `<UUID> `means the UUID of that partition which your EFI System is located in.<br>
           `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. <br>
-           To see the values of UUID and PARTUUID, please use the command:$blkid.<br>
+           To see the values of UUID and PARTUUID, please use the command: `$blkid`.<br>
 	* If you want to use another linux distribution, please refer above steps.
             
   b. Reboot and press anykey except "enter" to enter UEFI main menu.
