@@ -69,7 +69,9 @@ Note: This is not necessary unless you want to upgrade UEFI really.
     
     `ifconfig -s eth0 static <IP address> <mask> <gateway>`
     
-    e.g.: `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
+    e.g.:
+    
+    `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
     
     b. Burn BIOS file at "Embedded Boot Loader(EBL)" mode
     
