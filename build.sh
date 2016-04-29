@@ -487,6 +487,12 @@ parse_cfg()
         exit 1
     fi
 
+    dpkg-query -l jq >/dev/null 2>&1
+    if [ x"$?" != x"0" ]; then
+        sudo apt-get update
+        sudo apt-get install -y --force-yes jq
+    fi
+
     PLATFORM=`jq -r ".system.platform" $CFGFILE`
 
     if [ x"0" != x"$?" ]; then
