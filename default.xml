@@ -18,7 +18,7 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project name="kernel" revision="est2.2-k4.4" />
+  <project name="kernel" />
 
   <!-- uefi -->
   <project name="uefi" />
