@@ -76,7 +76,7 @@ netcard_count=`ifconfig -a | grep -A 1 eth | grep "inet addr" | grep -v 127.0.0.
 if [ $netcard_count -gt 1 ]; then
 	echo "netcard_count=$netcard_count"
 	echo -e "\nPlease choise the network card needed: \n"
-	ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
+	ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
 	echo " "
 
 	NETCARDNUMBER=
@@ -95,7 +95,7 @@ if [ $netcard_count -gt 1 ]; then
 			continue
 		fi
 
-		NETCARDNAME=`ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
+		NETCARDNAME=`ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
 		if [ -n "$NETCARDNAME" ]; then
 			HWaddr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $5}'`
 			inet_addr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $7}' | awk 'BEGIN{FS=":"} {print $2}'`
@@ -108,7 +108,7 @@ if [ $netcard_count -gt 1 ]; then
 		else
 			echo -e "Invalid selection!"
 			echo -e "\nPlease choise the network card needed: \n"
-			ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
+			ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
 			echo " "
 		fi
 	done
@@ -118,7 +118,7 @@ elif [ $netcard_count -eq 1 ]; then
 	echo ""
 	echo "netcard_count=$netcard_count"
 	NETCARDNUMBER=1
-	NETCARDNAME=`ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
+	NETCARDNAME=`ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
 	if [ -n "$NETCARDNAME" ]; then
 		HWaddr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $5}'`
 		inet_addr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $7}' | awk 'BEGIN{FS=":"} {print $2}'`
