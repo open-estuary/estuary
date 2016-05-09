@@ -65,7 +65,7 @@ build commands(supposedly, you are in `<project root>` currently:
 
 ```
 
-Note: `<user>` means hostname of computer, <grubbuild> is folder new created.
+Note: `<user>` means hostname of computer, `<grubbuild>` is folder new created.
 ### Image ###
 ### hip05-d02.dtb ###
 

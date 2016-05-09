@@ -67,7 +67,7 @@ build commands(supposedly, you are in `<project root>` currently:
     popd
 ```
 
-Note: `<user>` means host name of your computer, <grubbuild> is folder new created.
+Note: `<user>` means host name of your computer, `<grubbuild>` is folder new created.
 ### Image 
 ### hip06-d03.dtb 
 
