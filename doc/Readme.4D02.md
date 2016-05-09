@@ -11,7 +11,7 @@ After you do `./estuary/build.sh -p D02 -d Ubuntu`, all targets files will be pr
 
 **source**: `<project root>/uefi`
 
-build commands(supposedly, you are in <project root> currently):
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export ARCH=
     export CROSS_COMPILE=aarch64-linux-gnu-
@@ -43,7 +43,7 @@ Then you will find *.fd in <project root>/uefi/Build.
 
 **source**: `<project root>/grub`
 
-build commands(supposedly, you are in `<project root>` currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export CROSS_COMPILE=aarch64-linux-gnu-
     pushd grub
@@ -78,7 +78,7 @@ hip05-d02.dtb in `<project root>/build/D02/kernel/arch/arm64/boot/dts/hisilicon/
 
 **source**: `<project root>/kernel`
 
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export ARCH=arm64
     export CROSS_COMPILE=aarch64-linux-gnu-

@@ -11,7 +11,7 @@ After you do `./estuary/build.sh -p D03 -d Ubuntu`, all targets files will be pr
 
 **source**: `<project root>/uefi`
 
-build commands(supposedly, you are in <project root> currently):
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export ARCH=
     export CROSS_COMPILE=aarch64-linux-gnu-
@@ -46,7 +46,7 @@ More detail about them, please refer to [Grub_Manual.md](https://github.com/open
 
 **source**: `<project root>/grub`
 
-build commands(supposedly, you are in `<project root>` currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export CROSS_COMPILE=aarch64-linux-gnu-
     pushd grub
@@ -79,7 +79,7 @@ Image in `<project root>/build/D03/kernel/arch/arm64/boot/Image`
 hip06-d03.dtb in `<project root>/build/D03/kernel/arch/arm64/boot/dts/hisilicon/hip06-d03.dtb`
 
 **source**: `<project root>/kernel`
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export ARCH=arm64
     export CROSS_COMPILE=aarch64-linux-gnu-
