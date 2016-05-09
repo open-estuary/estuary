@@ -11,7 +11,7 @@ After you do `./estuary/build.sh -p D02 -d Ubuntu`, all targets files will be pr
 
 **source**: `<project root>/uefi`
 
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export ARCH=
     export CROSS_COMPILE=aarch64-linux-gnu-
@@ -29,7 +29,7 @@ build commands(supposedly, you are in <project root> currently:
     cp Build/Pv660D02/RELEASE_GCC49/FV/PV660D02.fd ../build/D02/binary/UEFI_D02.fd
     popd
 ```
-Then you will find *.fd in <project root>/uefi/Build and the other trust firmware binaries in `<project root>/HwProductsPkg`.
+Then you will find *.fd in <project root>/uefi/Build.
 
 ### grubaa64.efi 
 ### grub.cfg 
@@ -43,28 +43,29 @@ Then you will find *.fd in <project root>/uefi/Build and the other trust firmwar
 
 **source**: `<project root>/grub`
 
-build commands(supposedly, you are in `<project root>` currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export CROSS_COMPILE=aarch64-linux-gnu-
     pushd grub
     # Apply patch for boot from indicated MAC address
     git reset --hard
     git checkout grub/master
-    git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
-    git am ../patches/001-Search-for-specific-config-file-for-netboot.patch
+    git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
 
     make distclean
     ./autogen.sh
-    ./configure --prefix="/home/user/grubbuild" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
+    ./configure --prefix="/home/<user>/<grubbuild>" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
     make -j14
     make  install
     popd
 
-    pushd /home/user/grubbuild
+    pushd /home/<user>/<grubbuild>
     ./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
     popd
 
 ```
+
+Note: `<user>` means hostname of computer, `<grubbuild>` is folder new created.
 ### Image ###
 ### hip05-d02.dtb ###
 
@@ -77,7 +78,7 @@ hip05-d02.dtb in `<project root>/build/D02/kernel/arch/arm64/boot/dts/hisilicon/
 
 **source**: `<project root>/kernel`
 
-build commands(supposedly, you are in <project root> currently:
+build commands(supposedly, you are in `<project root>` currently):
 ```shell
     export ARCH=arm64
     export CROSS_COMPILE=aarch64-linux-gnu-

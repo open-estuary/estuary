@@ -45,18 +45,24 @@ FTP protocol is used for downloading between hardware boards and local network. 
   Then the board will enter the UEFI SHELL mode.
 
 3. Update UEFI files
-
-   a. Boot to enter UEFI "EBL" as above description
      
-   b. IP address config:
-        ```shell
+   a. IP address config at "EFI Internal Shell" mode
+
+     Press any key except "enter" key to enter UEFI main menu. Select "Boot Manager"->"EFI Internal Shell".
+
+     ```shell
         # Config IP address
         ifconfig -s eth0 <IP address> <mask> <gateway>
-        ```
-        eg. 
-        `ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1`
+     ```
+
+      eg. 
+
+     `ifconfig -s eth0 192.168.1.155 255.255.255.0 192.168.1.1`
     
-   c. Burn BIOS file
+   b. Burn BIOS file at "Embedded Boot Loader(EBL)" mode
+     
+      Enter "exit" from "EFI Internal Shell" mode to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done. 
+
        ```shell
        # Download file from FTP server to board's RAM
        provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary>
@@ -64,6 +70,7 @@ FTP protocol is used for downloading between hardware boards and local network. 
        spiwfmem <source address> <target address> <data length>
        ```
        e.g.: 
+
        ```shell
        provision 192.168.1.107 -u sch -p aaa -f UEFI_D01.fd
        updateL1 UEFI_D01.fd

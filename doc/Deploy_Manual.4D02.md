@@ -82,7 +82,7 @@ provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <dow
  
  e.g.:
  ```
- provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x100000 <br>
+ provision 192.168.1.107 -u sch -p aaa -f hip05-d02.dtb -a 0x100000 
  spiwfmem 0x100000 0x300000 0x100000
  ```
 3. Reboot your D02 board
@@ -156,7 +156,7 @@ There are several methods to bring up system, you can select following anyone fi
  ```
  e.g.: 
  ```
- provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x100000<br>
+ provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x100000
  norwfmem 0x100000 0x100000 0x1f00000
  ```
 
