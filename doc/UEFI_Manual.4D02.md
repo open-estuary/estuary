@@ -63,7 +63,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
 * Update UEFI files
 
-    a. IP address config at "EFI Internal Shell" mode
+    a. IP address config at "EFI Internal Shell" mode((Optional, you can ignore this step if DHCP works well))
     
        Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->EFI Internal Shell.
        
