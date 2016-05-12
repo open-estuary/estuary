@@ -103,6 +103,9 @@ if [ $netcard_count -gt 1 ]; then
 			inet_mask=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $9}' | awk 'BEGIN{FS=":"} {print $2}'`
 			sub_net=`route | grep "$NETCARDNAME" | grep -v default | awk '{print $1}'`
 			router=`route | grep "$NETCARDNAME" | grep default | awk '{print $2}'`
+			if [ x"$router" = x"" ]; then
+				router="0.0.0.0"
+			fi
 			echo "HWaddr=$HWaddr, inet_addr=$inet_addr, broad_cast=$broad_cast, inet_mask=$inet_mask, sub_net=$sub_net, router=$router"
 			break
 		else
@@ -126,6 +129,9 @@ elif [ $netcard_count -eq 1 ]; then
 		inet_mask=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $9}' | awk 'BEGIN{FS=":"} {print $2}'`
 		sub_net=`route | grep "$NETCARDNAME" | grep -v default | awk '{print $1}'`
 		router=`route | grep "$NETCARDNAME" | grep default | awk '{print $2}'`
+		if [ x"$router" = x"" ]; then
+			router="0.0.0.0"
+		fi
 		echo "HWaddr=$HWaddr, inet_addr=$inet_addr, broad_cast=$broad_cast, inet_mask=$inet_mask, sub_net=$sub_net, router=$router"
 	else
 		echo -e "$NETCARDNAME not exist !!!" ; exit 1
