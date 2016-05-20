@@ -47,8 +47,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   ```
   Choose "Boot Manager" and enter into Boot option menu:
   ```
-  EFI Misc Device 
-  EFI Hard Device 
+  EFI Misc Device  
   EFI Network
   EFI Network 1
   EFI Network 2
@@ -57,6 +56,8 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   ESL Start OS
   Embedded Boot Loader(EBL)
   ```
+  There are four network ports on D03 boards: EFI Network, EFI Network 1, EFI Network 2, EFI Network 3. To enable any one of them by connecting to a network cable. 
+
   EFI Internal Shell mode is a standard command shell in UEFI.
  
   Embedded Boot Loader(EBL) mode is an embedded command shell based on boot loader specially for developers.
