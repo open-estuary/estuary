@@ -170,7 +170,7 @@ There are several methods to bring up system, you can select following anyone fi
    ```
  e.g.: 
  ```
- provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x100000<br>
+ provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x100000
  norwfmem 0x100000 0x2000000 0x4000000
  ```
   

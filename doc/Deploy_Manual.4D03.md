@@ -143,7 +143,9 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
 3. Select boot option "Boot Manager"->"EFI Network 2" boot option and press "Enter".
-
+  
+   Note: There are four network ports on D03 boards: EFI Network, EFI Network 1, EFI Network 2, EFI Network 3. To enable any one of them by connecting to a network cable.
+  
 4. After several seconds, D03 will boot by PXE automatically.
 
 To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
@@ -259,6 +261,11 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
             
   b. Reboot and press anykey except "enter" to enter UEFI main menu.
 
-  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.<br>For SAS/SATA: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+
+    For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+
+    For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
+
   
   d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
