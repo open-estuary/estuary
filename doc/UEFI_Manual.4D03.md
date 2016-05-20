@@ -48,10 +48,12 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   Choose "Boot Manager" and enter into Boot option menu:
   ```
   EFI Misc Device 
-  EFI Misc Device 1
+  EFI Hard Device 
   EFI Network
+  EFI Network 1
+  EFI Network 2
+  EFI Network 3
   EFI Internal Shell
-  Flash Start OS
   ESL Start OS
   Embedded Boot Loader(EBL)
   ```

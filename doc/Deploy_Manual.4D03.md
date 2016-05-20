@@ -259,6 +259,11 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
             
   b. Reboot and press anykey except "enter" to enter UEFI main menu.
 
-  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.<br>For SAS/SATA: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+
+    For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+
+    For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
+
   
   d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
