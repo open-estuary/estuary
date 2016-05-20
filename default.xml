@@ -18,7 +18,7 @@
            sync-j="4" />
   
   <!-- kernel -->
-  <project name="kernel" />
+  <project name="kbase" path="kernel" revision="release/d0x-4.4" />
 
   <!-- uefi -->
   <project name="uefi" />
