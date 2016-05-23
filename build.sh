@@ -1313,10 +1313,10 @@ build_kernel()
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
         cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
     else
-        ./scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig arch/arm64/configs/distro.config
-        mv -f .config .merged.config
+        ./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig arch/arm64/configs/distro.config
+        mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
 
-        make O=../$kernel_dir KCONFIG_ALLCONFIG=.merged.config alldefconfig
+        make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
         if [ x"QEMU" = x"$PLATFORM" ]; then
     		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
     		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
