@@ -21,7 +21,7 @@
   <project name="kbase" path="kernel" revision="release/d0x-4.4" />
 
   <!-- uefi -->
-  <project name="uefi" />
+  <project name="uefi" revision="estuary-rp" />
 
   <!-- patches -->
   <project name="patches" />
