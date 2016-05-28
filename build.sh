@@ -20,7 +20,7 @@ corenum=36
 distros=(Ubuntu OpenSuse Fedora Debian CentOS)
 distros_arm32=(Ubuntu)
 distros_arm64=(Ubuntu OpenSuse Fedora Debian CentOS)
-platforms=(QEMU D01 D02 D03 HiKey)
+platforms=(QEMU D02 D03 HiKey)
 installs=(Caliper toolchain)
 
 #PATH_DISTRO=http://7xjz0v.com1.z0.glb.clouddn.com/dist
@@ -67,7 +67,6 @@ usage()
 	echo " -p,--platform: the target platform, the -d must be specified if platform is QEMU"
 	echo " -c,--clear: to clear the specified build target so that it'll be rebuilt for next building, the -p must be specified before it if the platform is specified"
 	echo " -d,--distro: the distribuation, the -p must be specified if -d is specified"
-	echo "		*for D01, only support Ubuntu"
 	echo "		*for D02,D03,HiKey, support Ubuntu, OpenSuse, Fedora, Debian, CentOS"
     echo " -i,--install: to install target into local host machine"
 	echo "		*for Caliper, to install Caliper as the benchmark tools"
@@ -349,9 +348,9 @@ check_sum()
 install_development_tools()
 {
 	if [ x"$LOCALARCH" = x"x86_64" ]; then
-		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage"
+		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage libssl-dev"
 	else
-		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage"
+		development_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage libssl-dev"
 	fi
 	dpkg-query -l $development_tools >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
@@ -964,7 +963,7 @@ build_uefi()
 		# roll back to special version for D02/D03
 		git reset --hard
 		git clean -fdx
-		git checkout open-estuary/master
+		git checkout open-estuary/estuary-rp
 		git submodule init
 		git submodule update
 
@@ -1123,12 +1122,12 @@ build_grub()
 # Rollbak the grub master
         git reset --hard
 		git checkout grub/master
-		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
+		# git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
 		git apply ../patches/0002-D01-fix-dtb-load-address.patch
 
     	make distclean
     	./autogen.sh
-    	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir"
+    	./configure --target=arm-linux-gnueabihf --with-platform=efi --prefix="$absolute_dir" --disable-werror
     	make -j${corenum}
     	make install
     	popd
@@ -1143,7 +1142,7 @@ build_grub()
         git reset --hard
 		git checkout grub/master
 #		git checkout 8e3d2c80ed1b9c2d150910cf3611d7ecb7d3dc6f
-		git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
+#		git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
 #		git pull
 #        git checkout grub-2.02-beta2
 
