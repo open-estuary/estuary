@@ -1288,59 +1288,45 @@ pushd $KERNEL_DIR/
 
 build_kernel()
 {
-    echo "Building kernel ..."
+	echo "Building kernel ..."
 
+	# Need to apply patch when building ARM32(D01 board), so need to clean source tree each time
 	git clean -fdx
 	git reset --hard
+
 	sudo rm -rf ../$kernel_dir/*
 	make O=../$kernel_dir mrproper
 
-    # kernel building
-    if [ x"ARM32" = x"$TARGETARCH" ]; then
-#		sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_MMIO=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_VIRTUALIZATION=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_HOST=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' ../$kernel_dir/.config
-#		sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' ../$kernel_dir/.config
+	# kernel building
+	if [ x"ARM32" = x"$TARGETARCH" ]; then
 		git apply ../patches/d01-kernel-ethernet/*.patch
 		make O=../$kernel_dir $CFG_FILE
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-        cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
-    else
-        ./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
-        mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
+		cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
+	else
+		if [ x"QEMU" = x"$PLATFORM" ]; then
+			./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig \
+				arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig arch/arm64/configs/qemu_defconfig
+			mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
+			make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
+		else
+			./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig \
+				arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
+			mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
+			make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
+		fi
 
-        make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
-        if [ x"QEMU" = x"$PLATFORM" ]; then
-    		sed -i -e '/# CONFIG_ATA_OVER_ETH is not set/ a\CONFIG_VIRTIO_BLK=y' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_SCSI_BFA_FC is not set/ a\# CONFIG_SCSI_VIRTIO is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VETH is not set/ a\# CONFIG_VIRTIO_NET is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_SERIAL_FSL_LPUART is not set/ a\# CONFIG_VIRTIO_CONSOLE is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRT_DRIVERS is not set/ a\CONFIG_VIRTIO=y' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRTIO_PCI is not set/ a\# CONFIG_VIRTIO_BALLOON is not set' ../$kernel_dir/.config
-    		sed -i -e '/# CONFIG_VIRTIO_MMIO is not set/ a\# CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES is not set' ../$kernel_dir/.config
-    		sed -i 's/# CONFIG_VIRTIO_MMIO is not set/CONFIG_VIRTIO_MMIO=y/g' ../$kernel_dir/.config
-        else
-			sed -i 's/\(CONFIG_CDROM_PKTCDVD=\)\(.*\)/\1y/' ../$kernel_dir/.config
-			sed -i 's/\(CONFIG_ISO9660_FS=\)\(.*\)/\1y/' ../$kernel_dir/.config
-			sed -i 's/\(CONFIG_BLK_DEV_SR=\)\(.*\)/\1y/' ../$kernel_dir/.config
-			sed -i 's/\(CONFIG_CHR_DEV_SG=\)\(.*\)/\1y/' ../$kernel_dir/.config
-        fi
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
 		dtb_dir=${DTB_BIN#*arch/}
 		dtb_dir=${DTB_BIN%/*}
 		dtb_dir=../${kernel_dir}/arch/${dtb_dir}
 
-	    mkdir -p $dtb_dir 2>/dev/null
+		mkdir -p $dtb_dir 2>/dev/null
 
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-    fi
+	fi
 }
 
 if [ x"$BUILDFLAG" = x"TRUE" ] || [ x"$kernel_update_flag" != x"0" ]; then
