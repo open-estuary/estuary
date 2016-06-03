@@ -9,7 +9,7 @@
    * [Boot via PXE](#3.2)
    * [Boot via NFS](#3.3)
    * [Boot via DISK(SAS/USB/SATA)](#3.4)
-
+   * [Boot via ACPI](#3.5)
 <h2 id="1">Introduction</h2>
 
 This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
@@ -142,8 +142,16 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
    
 2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
-3. Select boot option "Boot Manager"->"EFI Network 2" boot option and press "Enter".
+3. Select boot option "Boot Manager"->"EFI Network <No>" boot option and press "Enter".
+  
+   Note:
 
+    The No is depended by which D03 GE be connected. D03 board largest support 4 onboard network ports.
+
+    To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE
+     
+    ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
+  
 4. After several seconds, D03 will boot by PXE automatically.
 
 To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
@@ -160,8 +168,10 @@ D03 supports booting via NFS, you can try it as following steps:
 
 3. Reboot D03 and press anykey except "enter" to enter UEFI Boot Menu
 
-4. Select boot option "Boot Manager"->"EFI Network" boot option to enter.
-
+4. Select boot option "Boot Manager"->"EFI Network <No>" boot option to enter.
+  
+  Note: The No is depended by which D03 GE be connected.
+   
 <h3 id="3.4">Boot via DISK(SAS/USB/SATA)</h3>
 
 D03 board supports booting via SAS, USB and SATA by default. The UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So grubaa64.efi, grub.cfg, Image and different estuary release distributions are stored on disk.
@@ -248,7 +258,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
            menuentry "ubuntu" --id ubuntu {
            search --no-floppy --fs-uuid --set=root <UUID>
-           linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+           linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
             }
        ```
        Note:<br>
@@ -259,6 +269,33 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
             
   b. Reboot and press anykey except "enter" to enter UEFI main menu.
 
-  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.<br>For SAS/SATA: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+
+    For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+
+    For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
+
   
   d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+
+
+<h3 id="3.5">Boot via ACPI</h3>
+
+D03 also supports booting via ACPI, you can bring up this systerm which is similar with DTB mode, you must fix some point as follow:
+
+1. delete DTB file and don't burn DTB file
+
+2. Set the parameters of booting via ACPI
+
+you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while must you delete DTB line for "grub.cfg" file.
+
+e.g.:
+```shell
+# Booting from NFS with Ubuntu rootfs
+menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D03 rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+}
+```
+
+NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).

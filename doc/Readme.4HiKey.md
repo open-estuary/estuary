@@ -97,24 +97,54 @@ build commands(supposedly, you are in `<project root>` currently:
 
 **target**: 
 Image in `<project root>/build/HiKey/kernel/arch/arm64/boot/Image`
+
 hi6220-hikey.dtb in `<project root>/build/D02/kernel/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb`
 
 **source**: `<project root>/kernel`
 
+**Note**: Before compiling kernel, gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux(https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md) and
+
+libssl-dev should be installed first.
+
 build commands(supposedly, you are in `<project root>` currently:
 ```shell
-    export ARCH=arm64
-    export CROSS_COMPILE=aarch64-linux-gnu-
+build_dir=build
+KERNEL_DIR=kernel
+mkdir -p $build_dir/HiKey/$KERNEL_DIR 2>/dev/null
+kernel_dir=$build_dir/HiKey/$KERNEL_DIR
+KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
+CFG_FILE=defconfig
+DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb
+export ARCH=arm64
+export CROSS_COMPILE=aarch64-linux-gnu-
 
-    pushd kernel
-    make mrproper
-    make defconfig
-    make -j14 Image
-    make hi6220-hikey.dtb
+pushd $KERNEL_DIR/
 
-    cp arch/arm64/boot/Image ../build/HiKey/binary/Image_HiKey
-    cp arch/arm64/boot/dts/hisilicon/hi6220-hikey.dtb ../build/Hikey/binary
-    popd
+git clean -fdx
+git reset --hard
+sudo rm -rf ../$kernel_dir/*
+make O=../$kernel_dir mrproper
+
+./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
+
+mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
+
+make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
+
+sed -i 's/\(CONFIG_CDROM_PKTCDVD=\)\(.*\)/\1y/' ../$kernel_dir/.config
+sed -i 's/\(CONFIG_ISO9660_FS=\)\(.*\)/\1y/' ../$kernel_dir/.config
+sed -i 's/\(CONFIG_BLK_DEV_SR=\)\(.*\)/\1y/' ../$kernel_dir/.config
+sed -i 's/\(CONFIG_CHR_DEV_SG=\)\(.*\)/\1y/' ../$kernel_dir/.config
+
+make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+dtb_dir=${DTB_BIN#*arch/}
+dtb_dir=${DTB_BIN%/*}
+dtb_dir=../${kernel_dir}/arch/${dtb_dir}
+
+mkdir -p $dtb_dir 2>/dev/null
+
+make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
+
 ```
 If you get more information about uefi, please visit https://github.com/96boards/documentation/wiki/HiKeyUEFI
 
