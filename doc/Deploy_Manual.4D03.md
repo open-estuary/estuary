@@ -10,6 +10,7 @@
    * [Boot via NFS](#3.3)
    * [Boot via DISK(SAS/USB/SATA)](#3.4)
    * [Boot via ACPI](#3.5)
+
 <h2 id="1">Introduction</h2>
 
 This documentation describes how to get, build, deploy and bring up target system based Estuary Project, it will help you to make your Estuary Environment setup from ZERO.
@@ -142,11 +143,11 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
    
 2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
 
-3. Select boot option "Boot Manager"->"EFI Network <No>" boot option and press "Enter".
+3. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option and press "Enter".
   
    Note:
 
-    The No is depended by which D03 GE be connected. D03 board largest support 4 onboard network ports.
+    The value of `<No>` is depended on which D03 GE port is connected. D03 board support 4 on-board network ports at maximun.
 
     To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE
      
@@ -168,9 +169,9 @@ D03 supports booting via NFS, you can try it as following steps:
 
 3. Reboot D03 and press anykey except "enter" to enter UEFI Boot Menu
 
-4. Select boot option "Boot Manager"->"EFI Network <No>" boot option to enter.
+4. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option to enter.
   
-  Note: The No is depended by which D03 GE be connected.
+  Note: The value of `<No>` is depended on which D03 GE port is connected.
    
 <h3 id="3.4">Boot via DISK(SAS/USB/SATA)</h3>
 
@@ -194,8 +195,10 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
       `n`-------add a partition
        
       `1`-------the number of partition
+     
+      type "Enter" key ------ First sector
        
-      `+200M`---------size of partition
+      `+200M`---------Last sector, size of partition
        
       `t`-------change the type of partition
        
@@ -281,13 +284,13 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
 <h3 id="3.5">Boot via ACPI</h3>
 
-D03 also supports booting via ACPI, you can bring up this systerm which is similar with DTB mode, you must fix some point as follow:
+D03 also supports booting via ACPI, you can bring up this systerm which is similar with DTS mode, you must fix some point as follow:
 
-1. delete DTB file and don't burn DTB file
+1. Delete DTB file and don't burn DTB file
 
 2. Set the parameters of booting via ACPI
 
-you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file; while must you delete DTB line for "grub.cfg" file.
+you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file.
 
 e.g.:
 ```shell

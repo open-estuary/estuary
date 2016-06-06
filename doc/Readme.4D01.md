@@ -115,34 +115,45 @@ build commands(supposedly, you are in `project root` currently:
         
 **source**: `<project root>/kernel`
 
+**Note**: Before compiling kernel,  gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux(https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md) and
+
+libssl-dev should be installed first.
+
 build commands(supposedly, you are in `project root` currently:
  ```shell
-    export ARCH=arm
-    export CROSS_COMPILE=arm-linux-gnueabihf-
+build_dir=build
+KERNEL_DIR=kernel
+mkdir -p $build_dir/D01/$KERNEL_DIR 2>/dev/null
+kernel_dir=$build_dir/D01/$KERNEL_DIR
 
-    pushd kernel
-    make mrproper
-    make hisi_defconfig
-    
-    sed -i 's/CONFIG_HAVE_KVM_IRQCHIP=y/# CONFIG_VIRTUALIZATION is not set/g' .config
-    sed -i 's/CONFIG_KVM_MMIO=y//g' .config
-    sed -i 's/CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT=y//g' .config
-    sed -i 's/CONFIG_VIRTUALIZATION=y//g' .config
-    sed -i 's/CONFIG_KVM=y//g' .config
-    sed -i 's/CONFIG_KVM_ARM_HOST=y//g' .config
-    sed -i 's/CONFIG_KVM_ARM_MAX_VCPUS=4//g' .config
-    sed -i 's/CONFIG_KVM_ARM_VGIC=y//g' .config
-    sed -i 's/CONFIG_KVM_ARM_TIMER=y//g' .config
-    
-    make zImage
-    make hip04-d01.dtb
+KERNEL_BIN=$kernel_dir/arch/arm/boot/zImage
+DTB_BIN=$kernel_dir/arch/arm/boot/dts/hip04-d01.dtb
+CFG_FILE=hisi_defconfig
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
 
-    cat arch/arm/boot/zImage arch/arm/boot/dts/hip04-d01.dtb > .kernel
+pushd $KERNEL_DIR/
 
-    cp arch/arm/boot/zImage ../build/D01/binary/zImage_D01
-    cp arch/arm/boot/dts/hip04-d01.dtb ../build/D01/binary/
-    cp .kernel ../build/D01/binary/
-    popd
+git clean -fdx
+git reset --hard
+sudo rm -rf ../$kernel_dir/*
+make O=../$kernel_dir mrproper
+
+git apply ../patches/d01-kernel-ethernet/*.patch
+make O=../$kernel_dir $CFG_FILE
+make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
+cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
+
+make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
+
+dtb_dir=${DTB_BIN#*arch/}
+dtb_dir=${DTB_BIN%/*}
+dtb_dir=../${kernel_dir}/arch/${dtb_dir}
+
+mkdir -p $dtb_dir 2>/dev/null
+
+make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
  ```
   
   
