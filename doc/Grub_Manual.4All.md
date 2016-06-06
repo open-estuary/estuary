@@ -39,75 +39,108 @@ You should change them acoording to your real local environment.
     set default=d03_ubuntu_hd
      
     # Booting from PXE with mini rootfs
-    menuentry "D03-test-minilinux" --id d03-minilinux {
-       set root=(tftp,192.168.1.107)
-       linux /Image_D03 rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
-       initrd /mini-rootfs-arm64.cpio.gz
-    }
+    menuentry "D03 minilinux PXE" --id d03_minilinux_pxe {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D03 rdinit=/init crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+    initrd /mini-rootfs-arm64.cpio.gz
+    } 
 
-   # Booting from NFS with Ubuntu rootfs
-   menuentry "D03-nfs" --id d03-NFS {
-       set root=(tftp,192.168.1.107)
-       linux /Image_D03 rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/user/ubuntu64 ip=dhcp
-    }
 
-   # Booting from disk with ubuntu rootfs
-   menuentry "D03 Ubuntu HD" --id d03_ubuntu_hd {
-        set root=(hd0,gpt1)
-        linux /Image_D03 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8  ip=dhcp
+    menuentry "D03 Ubuntu NFS" --id d03_ubuntu_nfs {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D03 rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+    }
+ 
+
+   # Booting from SATA with Ubuntu rootfs in /dev/sda2
+    menuentry "D03 Ubuntu SATA" --id d03_ubuntu_sata {
+    set root=(hd1,gpt1)
+    linux /Image_D03 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+    }
+   
+   menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D03 rdinit=/init crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
+    initrd /mini-rootfs-arm64.cpio.gz
    }
 
-    # Booting from eMMC with mini rootfs
-    menuentry "Hikey minilinux eMMC" --id HiKey_minilinux_eMMC {
-        set root=(hd0,gpt6)
-	linux /Image_Hikey rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime
-        initrd /mini-rootfs.cpio.gz
-        devicetree /hi6220-hikey.dtb
-    }
-    
-    # Booting from eMMC with Ubuntu
-    menuentry "Hikey Ubuntu eMMC" --id HiKey_Ubuntu_eMMC {
-        set root=(hd0,gpt6)
-	linux /Image_Hikey rdinit=/init console=tty0 console=ttyAMA3,115200 root=/dev/mmcblk0p7 rootwait rw loglevel=8 efi=noruntime
-        devicetree /hi6220-hikey.dtb
-    }
-    
-    # Booting from SD card with Ubuntu
-    menuentry "Hikey Ubuntu SD card" --id HiKey_Ubuntu_SD {
-        set root=(hd0,gpt6)
-	linux /Image_Hikey rdinit=/init console=tty0 console=ttyAMA3,115200 root=/dev/mmcblk1p1 rootwait rw loglevel=8 efi=noruntime
-        devicetree /hi6220-hikey.dtb
-    }
+   menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D03 rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+   }
 
-    menuentry 'HiKey Fastboot mode' {
-        set root=(hd0,gpt6)
-        chainloader (hd0,gpt6)/fastboot.efi
-    }    
+   menuentry "D03 Ubuntu SATA(ACPI)" --id d03_ubuntu_sata {
+    set root=(hd1,gpt1)
+    linux /Image_D03 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
+   }
 
-    # Booting from PXE with mini rootfs
-    menuentry "D02 minilinux PXE" --id d02_minilinux_pxe {
+
+   # Booting from eMMC with mini rootfs
+   menuentry "HiKey minilinux eMMC" --id HiKey_minilinux_eMMC {
+   linux /Image_HiKey rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime
+   initrd /mini-rootfs.cpio.gz
+   devicetree /hi6220-hikey.dtb
+   }
+
+   # Booting from eMMC with Ubuntu
+   menuentry "HiKey Ubuntu eMMC" --id HiKey_Ubuntu_eMMC {
+    linux /Image_HiKey rdinit=/init console=tty0 console=ttyAMA3,115200 root=/dev/mmcblk0p9 rootwait rw loglevel=8 efi=noruntime
+    devicetree /hi6220-hikey.dtb
+   }
+
+   # Booting from SD card with Ubuntu
+   menuentry "HiKey Ubuntu SD card" --id HiKey_Ubuntu_SD {
+    linux /Image_HiKey rdinit=/init console=tty0 console=ttyAMA3,115200 root=/dev/mmcblk1p1 rootwait rw loglevel=8 efi=noruntime
+    devicetree /hi6220-hikey.dtb
+   }
+
+  menuentry 'HiKey Fastboot mode' {
+    chainloader (hd0,gpt6)/fastboot.efi
+   }
+
+   # Booting from PXE with mini rootfs
+   menuentry "D02 minilinux PXE" --id d02_minilinux_pxe {
         set root=(tftp,192.168.1.107)
         linux /Image_D02 rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
         initrd /mini-rootfs.cpio.gz
-    }
+   }
     
-    # Booting from NFS with Ubuntu rootfs
-    menuentry "D02 Ubuntu NFS" --id d02_ubuntu_nfs {
+   # Booting from NFS with Ubuntu rootfs
+   menuentry "D02 Ubuntu NFS" --id d02_ubuntu_nfs {
         set root=(tftp,192.168.1.107)
         linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
-    }
+   }
     
-    # Booting from SATA with Ubuntu rootfs in /dev/sda2
-    menuentry "D02 Ubuntu SATA" --id d02_ubuntu_sata {
+   # Booting from SATA with Ubuntu rootfs in /dev/sda2
+   menuentry "D02 Ubuntu SATA" --id d02_ubuntu_sata {
         set root=(hd1,gpt1)
         linux /Image_D02 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-    }
+   }
 
-    # Booting from SATA with Fedora rootfs in /dev/sda3
-    menuentry "D02 Fedora SATA" --id d02_fedora_sata {
+   # Booting from SATA with Fedora rootfs in /dev/sda3
+   menuentry "D02 Fedora SATA" --id d02_fedora_sata {
         set root=(hd1,gpt1)
         linux /Image_D02 rdinit=/init root=/dev/sda3 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-    }
+   }
+    
+   # Booting from PXE with mini rootfs
+   menuentry "D02 minilinux PXE(ACPI)" --id d02_minilinux_pxe {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D02 rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
+    initrd /mini-rootfs.cpio.gz
+   }
+
+   # Booting from NFS with Ubuntu rootfs
+   menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs {
+    set root=(tftp,192.168.1.107)
+    linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+  }
+
+   # Booting from SATA with Ubuntu rootfs in /dev/sda2
+   menuentry "D02 Ubuntu SATA(ACPI)" --id d02_ubuntu_sata {
+    set root=(hd1,gpt1)
+    linux /Image_D02 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
+   }
 
     # Booting from Norflash with mini rootfs
     menuentry "D01 minilinux Norflash" --id d01_minilinux_nor {
