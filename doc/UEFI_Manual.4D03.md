@@ -48,15 +48,16 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   Choose "Boot Manager" and enter into Boot option menu:
   ```
   EFI Misc Device  
-  EFI Network
-  EFI Network 1
-  EFI Network 2
-  EFI Network 3
+  EFI Network    // corresponding to 10 GE(the third port from left to right on back panel of D03)
+  EFI Network 1  // corresponding to 10 GE(the fourth port from left to right on back panel of D03)
+  EFI Network 2  // corresponding to GE (the first port from left to right on back panel of D03)
+  EFI Network 3  // corresponding to GE (the second port from left to right on back panel of D03)
   EFI Internal Shell
   ESL Start OS
   Embedded Boot Loader(EBL)
   ```
-  There are four network ports on D03 boards: EFI Network, EFI Network 1, EFI Network 2, EFI Network 3. To enable any one of them by connecting to a network cable. 
+  D03 board largest support 4 onboard network ports. To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by the two 2GE ports, 
+  two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
 
   EFI Internal Shell mode is a standard command shell in UEFI.
  

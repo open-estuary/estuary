@@ -15,7 +15,7 @@ Of course, you can install the toolchains yourself with following commands (take
 ```shell
     pushd toolchain
     sudo mkdir -p /opt 2>/dev/null
-    sudo tar -xzf gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz -C /opt
+    sudo tar -xvf gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz -C /opt
     str='export PATH=$PATH:/opt/gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux/bin' 
     grep "$str" ~/.bashrc >/dev/null
     if [ x"$?" != x"0" ]; then echo "$str">> ~/.bashrc; fi
