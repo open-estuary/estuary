@@ -158,7 +158,7 @@ platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
 if [ x"D02" = x"$PLATFORM" ]; then
 	cmd_line="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
 else
-	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8"
+	cmd_line="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp"
 fi
 
 Image="`ls Image*`"
