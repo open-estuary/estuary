@@ -362,17 +362,6 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    
     a. Build kernel(please refer to [Readme.4D02.md] (https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D02.md))
     
-       * Enable driver configuration of corresponding SATA model in kernel
-        
-         Change the value of CONFIG_SATA_MV from "m" to "y" to enable PCIE-to-SATA driver.
-          
-         e.g.: modify arch/arm64/configs/defconfig as follow:
-           
-        ```
-              ...... 
-           CONFIG_SATA_MV=m             ----------> CONFIG_SATA_MV=y
-        ```	
-	
        * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file as follow:
          
         ```

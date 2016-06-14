@@ -96,8 +96,8 @@ export CROSS_COMPILE=aarch64-linux-gnu-
 
 pushd $KERNEL_DIR/
 
-git clean -fdx
-git reset --hard
+#git clean -fdx
+#git reset --hard
 sudo rm -rf ../$kernel_dir/*
 make O=../$kernel_dir mrproper
 
