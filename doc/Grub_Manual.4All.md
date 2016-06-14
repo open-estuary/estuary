@@ -1,12 +1,12 @@
 
-* [Grub manual](#1)
+* [Introduction](#1)
 * [Grub config file](#2)
 * [files structure bootable partition](#3)
 * [FAQ](#4)
 
 <h2 id="1">Introduction</h2>
 
-Grub is a kind of boot loader to load kernel\OS into RAM and run it.
+Grub is a kind of boot loader to load kernel into RAM and run it.
 
 After rebooting board every time, the UEFI will firstly try to download the grub binary and run it firstly.
 
