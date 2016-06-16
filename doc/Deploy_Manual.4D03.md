@@ -265,6 +265,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
             }
        ```
        Note:<br>
+        *  From the formal version of V2.2 and later versions value of console is `ttys0115200`, if you use V2.2 and previous versions value of console is `ttys1,115200`
 	* `<UUID> `means the UUID of that partition which your EFI System is located in.<br>
           `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. <br>
            To see the values of UUID and PARTUUID, please use the command: `$blkid`.<br>
