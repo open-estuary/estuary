@@ -249,7 +249,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
    a. Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))<br>
        e.g.: <br>
-       the context of grub.cfg file is modified as follow:
+       grub.cfg file for official versions after V2.2 is modified as follow:
        ``` 
 	        # Sample GRUB configuration file
 	        #
@@ -264,7 +264,25 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
            linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
             }
        ```
+
+       grub.cfg file for official V2.2 and previous versions is modified as follow:
+       ```
+                # Sample GRUB configuration file
+                #
+                # Boot automatically after 5 secs.
+                set timeout=5
+                # By default, boot the Estuary with Ubuntu filesystem
+                set default=ubuntu
+                # For booting GNU/Linux
+
+           menuentry "ubuntu" --id ubuntu {
+           search --no-floppy --fs-uuid --set=root <UUID>
+           linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+            }
+       ```
+
        Note:<br>
+        *  The value of console is `ttyS0` for official versions after V2.2. If you use official V2.2 and previous versions, the value of console is `ttyS1`
 	* `<UUID> `means the UUID of that partition which your EFI System is located in.<br>
           `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. <br>
            To see the values of UUID and PARTUUID, please use the command: `$blkid`.<br>
