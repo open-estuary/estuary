@@ -1305,17 +1305,10 @@ build_kernel()
 		make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
 		cat ../$KERNEL_BIN ../$DTB_BIN > ../$kernel_dir/.kernel
 	else
-		if [ x"QEMU" = x"$PLATFORM" ]; then
-			./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig \
-				arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig arch/arm64/configs/qemu_defconfig
-			mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
-			make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
-		else
-			./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig \
-				arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
-			mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
-			make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
-		fi
+		./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig \
+			arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
+		mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
+		make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
 
 		make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
 
