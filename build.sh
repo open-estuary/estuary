@@ -1001,7 +1001,7 @@ build_uefi()
 	    export UEFI_TOOLS_DIR=${PWD}/uefi-tools
 
 		git reset --hard
-		git checkout open-estuary/master
+		git checkout open-estuary/estuary-rp
 		git submodule init
 		git submodule update
 
