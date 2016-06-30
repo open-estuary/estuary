@@ -2,7 +2,8 @@
 
 LOCALARCH=`uname -m`
 TOPDIR=$(cd `dirname $0` ; pwd)
-export PATH=$TOPDIR:$PATH
+export PATH=$TOPDIR:$TOPDIR/../includes:$PATH
+. $TOPDIR/../Include.sh
 
 ###################################################################################
 # build arguments
