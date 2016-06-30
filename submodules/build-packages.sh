@@ -137,10 +137,12 @@ done
 ###################################################################################
 # Check args
 ###################################################################################
-if [ x"$PLATFORM" = x"" ] || [ x"$PKGS" = x"" ] \
-	|| [ x"$DISTRO" = x"" ] || [ x"$ROOTFS" = x"" ] \
-	|| [ x"$KERNEL" = x"" ]; then
-		echo "Error! platform: $PLATFORM, distro: $DISTRO, pkgs: $PKGS, kernel: $KERNEL"
+if [ x"$PKGS" = x"" ]; then
+	echo "Warning! No packages to build!" ; exit 0
+fi
+
+if [ x"$PLATFORM" = x"" ] || [ x"$DISTRO" = x"" ] || [ x"$ROOTFS" = x"" ] || [ x"$KERNEL" = x"" ]; then
+		echo "Error! platform: $PLATFORM, distro: $DISTRO, rootfs: $ROOTFS, kernel: $KERNEL"
         build_pcakages_usage ; exit 1
 fi
 

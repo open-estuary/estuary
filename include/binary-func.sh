@@ -1,27 +1,6 @@
 #!/bin/bash
 
 ###################################################################################
-# get_all_binary_files <checksum_source_file>
-###################################################################################
-get_all_binary_files()
-{
-	(
-	checksum_source_file=$1
-	cat $checksum_source_file 2>/dev/null | sed 's/.*\///' | awk '{print $2}'
-	)
-}
-
-###################################################################################
-# download_binary <binary> <remote_binary>
-###################################################################################
-{
-	(
-	binary=$1
-	remote_binary=$2
-	)
-}
-
-###################################################################################
 # download_binaries <target_dir> <checksum_dir> <binary_source>
 ###################################################################################
 download_binaries()
@@ -37,6 +16,9 @@ download_binaries()
 		remote_file=`cat $checksum_dir/$checksum_file | awk '{print $2}'`
 		if ! check_sum . $checksum_dir/$checksum_file; then
 			wget -c $binary_source/$remote_file || return 1
+			if ! check_sum . $checksum_dir/$checksum_file; then
+				return 1
+			fi
 		fi
 
 		origin_file=`echo $remote_file | sed 's/.*\///'`
@@ -53,6 +35,62 @@ download_binaries()
 }
 
 ###################################################################################
+# copy_common_binaries <src_dir> <target_dir>
+###################################################################################
+copy_common_binaries()
+{
+	(
+	src_dir=$1
+	target_dir=$2
+	if [ ! -f $target_dir/mini-rootfs.cpio.gz ]; then
+		cp $src_dir/mini-rootfs.cpio.gz $target_dir || return 1
+	fi
+	
+	if [ -f $target_dir/deploy-utils.tar.bz2 ]; then
+		cp $src_dir/deploy-utils.tar.bz2 $target_dir || return 1
+	fi
+
+	return 0
+	)
+}
+
+###################################################################################
+# copy_d02_binaries <src_dir> <target_dir>
+###################################################################################
+copy_d02_binaries()
+{
+	(
+	src_dir=$1
+	target_dir=$2
+	if [ ! -f $target_dir/CH02TEVBC_V03.bin ]; then
+		cp $src_dir/CH02TEVBC_V03.bin $target_dir || return 1
+	fi
+
+	return 0
+	)
+}
+
+###################################################################################
+# copy_hikey_binaries <src_dir> <target_dir>
+###################################################################################
+copy_d02_binaries()
+{
+	(
+	src_dir=$1
+	target_dir=$2
+	if [ ! -f $target_dir/hisi-idt.py ]; then
+		cp $src_dir/hisi-idt.py $target_dir || return 1
+	fi
+
+	if [ ! -f $target_dir/nvme.img ]; then
+		cp $src_dir/nvme.img $target_dir || return 1
+	fi
+
+	return 0
+	)
+}
+
+###################################################################################
 # copy_binaries <plat> <src_dir> <target_dir>
 ###################################################################################
 copy_binaries()
@@ -61,6 +99,11 @@ copy_binaries()
 	plat=$1
 	src_dir=$2
 	target_dir=$3
+	if [ x"$plat" = x"D02" ]; then
+		copy_d02_binaries $src_dir $target_dir/D02
+	elif [ x"$plat" = x"HiKey" ]; then
+		copy_hikey_binaries $src_dir $target_dir/HiKey
+	fi
 	)
 }
 

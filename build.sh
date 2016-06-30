@@ -165,7 +165,7 @@ echo "##########################################################################
 echo "# Download distros (distros: $DISTROS)"
 echo "##############################################################################"
 mkdir -p distro
-download_distros distro $TOPDIR/checksum/linux $ESTUARY_INTERAL_FTP $DISTROS
+download_distros distro $TOPDIR/checksum/linux $ESTUARY_INTERAL_FTP/linux $DISTROS
 if [[ $? != 0 ]]; then
 	echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
 fi
