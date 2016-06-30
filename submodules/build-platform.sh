@@ -100,18 +100,23 @@ fi
 ###################################################################################
 platforms=`echo $PLATFORMS | tr ',' ' '`
 for plat in ${platforms[*]}; do
-	echo "##############################################################################"
-	echo "# Build UEFI (platform: $plat, output: $OUTPUT)"
-	echo "##############################################################################"
+	echo "---------------------------------------------------------------"
+	echo "- Build UEFI (platform: $plat, output: $OUTPUT)"
+	echo "---------------------------------------------------------------"
 	build-uefi.sh --platform=$plat --output=$OUTPUT || exit 1
-	echo "##############################################################################"
-	echo "# Build GRUB (output: $OUTPUT)"
-	echo "##############################################################################"
+	echo "- Build UEFI done!\n"
+
+	echo "---------------------------------------------------------------"
+	echo "- Build GRUB (output: $OUTPUT)"
+	echo "---------------------------------------------------------------"
 	build-grub.sh --output=$OUTPUT || exit 1
-	echo "##############################################################################"
-	echo "# Build Kernel (platform: $plat, cross: $CROSS_COMPILE, output: $OUTPUT)"
-	echo "##############################################################################"
+	echo "- Build GRUB done!\n"
+
+	echo "---------------------------------------------------------------"
+	echo "- Build Kernel (platform: $plat, cross: $CROSS_COMPILE, output: $OUTPUT)"
+	echo "---------------------------------------------------------------"
 	build-kernel.sh --platform=$plat --cross=$CROSS_COMPILE --output=$OUTPUT || exit 1
+	echo "- Build Kernel done!\n"
 done
 
 ###################################################################################
@@ -119,10 +124,11 @@ done
 ###################################################################################
 distros=`echo $DISTROS | tr ',' ' '`
 for distro in ${distros[*]}; do
-	echo "##############################################################################"
-	echo "# Build modules (kerneldir: $OUTPUT/kernel, rootfs: $OUTPUT/distro/$distro, cross: $CROSS_COMPILE)"
-	echo "##############################################################################"
+	echo "---------------------------------------------------------------"
+	echo "- Build modules (kerneldir: $OUTPUT/kernel, rootfs: $OUTPUT/distro/$distro, cross: $CROSS_COMPILE)"
+	echo "---------------------------------------------------------------"
 	build-modules.sh --kerneldir=$OUTPUT/kernel --rootfs=$OUTPUT/distro/$distro --cross=$CROSS_COMPILE || exit 1
+	echo "- Build modules done!\n"
 done
 
 ###################################################################################
@@ -131,22 +137,24 @@ done
 distros=`echo $DISTROS | tr ',' ' '`
 if [ x"$PACKAGES" != x"" ]; then
 	for distro in ${distros[*]}; do
-		echo "##############################################################################"
-		echo "# Build packages (pkgs: $PACKAGES, kerneldir: $OUTPUT/kernel, distro: $distro, rootfs: $OUTPUT/distro/$distro)"
-		echo "##############################################################################"
+		echo "---------------------------------------------------------------"
+		echo "- Build packages (pkgs: $PACKAGES, kerneldir: $OUTPUT/kernel, distro: $distro, rootfs: $OUTPUT/distro/$distro)"
+		echo "---------------------------------------------------------------"
 		build-packages.sh --packages=$PACKAGES --platform=none --kernel=$OUTPUT/kernel --distro=$distro --rootfs=$OUTPUT/distro/$distro
+		echo "- Build packages done!\n"
 	done
 fi
 
 ###################################################################################
 # Create <DISTRO>_ARM64.tar.gz
 ###################################################################################
-echo "##############################################################################"
-echo "# Create distros (distros: $DISTROS, distro dir: $OUTPUT/distro)"
-echo "##############################################################################"
+echo "---------------------------------------------------------------"
+echo "- Create distros (distros: $DISTROS, distro dir: $OUTPUT/distro)"
+echo "---------------------------------------------------------------"
 if ! create_distros $DISTROS $OUTPUT/distro; then
 	echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
 fi
+echo "- Create distros done!\n"
 
 ###################################################################################
 # End
