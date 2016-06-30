@@ -104,19 +104,22 @@ for plat in ${platforms[*]}; do
 	echo "- Build UEFI (platform: $plat, output: $OUTPUT)"
 	echo "---------------------------------------------------------------"
 	build-uefi.sh --platform=$plat --output=$OUTPUT || exit 1
-	echo "- Build UEFI done!\n"
+	echo "- Build UEFI done!"
+	echo ""
 
 	echo "---------------------------------------------------------------"
 	echo "- Build GRUB (output: $OUTPUT)"
 	echo "---------------------------------------------------------------"
 	build-grub.sh --output=$OUTPUT || exit 1
-	echo "- Build GRUB done!\n"
+	echo "- Build GRUB done!"
+	echo ""
 
 	echo "---------------------------------------------------------------"
 	echo "- Build Kernel (platform: $plat, cross: $CROSS_COMPILE, output: $OUTPUT)"
 	echo "---------------------------------------------------------------"
 	build-kernel.sh --platform=$plat --cross=$CROSS_COMPILE --output=$OUTPUT || exit 1
-	echo "- Build Kernel done!\n"
+	echo "- Build Kernel done!"
+	echo ""
 done
 
 ###################################################################################
@@ -128,7 +131,8 @@ for distro in ${distros[*]}; do
 	echo "- Build modules (kerneldir: $OUTPUT/kernel, rootfs: $OUTPUT/distro/$distro, cross: $CROSS_COMPILE)"
 	echo "---------------------------------------------------------------"
 	build-modules.sh --kerneldir=$OUTPUT/kernel --rootfs=$OUTPUT/distro/$distro --cross=$CROSS_COMPILE || exit 1
-	echo "- Build modules done!\n"
+	echo "- Build modules done!"
+	echo ""
 done
 
 ###################################################################################
@@ -141,7 +145,8 @@ if [ x"$PACKAGES" != x"" ]; then
 		echo "- Build packages (pkgs: $PACKAGES, kerneldir: $OUTPUT/kernel, distro: $distro, rootfs: $OUTPUT/distro/$distro)"
 		echo "---------------------------------------------------------------"
 		build-packages.sh --packages=$PACKAGES --platform=none --kernel=$OUTPUT/kernel --distro=$distro --rootfs=$OUTPUT/distro/$distro
-		echo "- Build packages done!\n"
+		echo "- Build packages done!"
+		echo ""
 	done
 fi
 
@@ -154,7 +159,8 @@ echo "---------------------------------------------------------------"
 if ! create_distros $DISTROS $OUTPUT/distro; then
 	echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
 fi
-echo "- Create distros done!\n"
+echo "- Create distros done!"
+echo ""
 
 ###################################################################################
 # End
