@@ -144,6 +144,10 @@ if [ x"$PLATFORM" = x"" ] || [ x"$PKGS" = x"" ] \
         build_pcakages_usage ; exit 1
 fi
 
+if [ ! -d $ROOTFS ] || [ ! -d $KERNEL ]; then
+	echo "Error! Please check --rootfs, --kernel specified directorys are exist!" >&2 ; exit 1
+fi
+
 ###################################################################################
 # Build packages
 ###################################################################################
