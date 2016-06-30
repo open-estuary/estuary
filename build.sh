@@ -152,10 +152,10 @@ if [ x"$LOCALARCH" = x"x86_64" ]; then
 			echo -e "\033[31mError! Uncompress toolchain failed!\033[0m" ; exit 1
 		fi
 	fi
-	export PATH=$TOOLCHAIN_DIR/bin:$PATH
 	TOOLCHAIN=$toolchain
-	TOOLCHAIN_DIR="toolchain/$toolchain_dir"
+	TOOLCHAIN_DIR=`cd toolchain/$toolchain_dir; pwd`
 	CROSS_COMPILE=`get_cross_compile $LOCALARCH $TOOLCHAIN_DIR`
+	export PATH=$TOOLCHAIN_DIR/bin:$PATH
 fi
 
 ###################################################################################
