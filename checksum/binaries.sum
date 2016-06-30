@@ -1,8 +1,0 @@
-fb9e2cba06ac589a3963eb6d1a3ae223  CH02TEVBC_V03.bin
-780f9f3f97d1a8651f1f679e584ca0b1  filesystem.bin
-14542a497601d729f88090a1c15ae7ac  grub.cfg
-813e47453b5d831c0212d0164b0b9a5b  hisi-idt.py
-c9de2b6b4695122c530cdd4cebebd52a  mini-rootfs-arm32.cpio.gz
-871a8766267c814368d80a99591a52a0  mini-rootfs-arm64.cpio.gz
-ad26182449b4b302be35c529e1467107  deploy-utils.tar.bz2
-d8d56cc22e6d06855b62ff4544dcc3d4  nvme.img
