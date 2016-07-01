@@ -1,5 +1,7 @@
 #!/bin/bash
-
+###################################################################################
+# mkisoimg.sh --platform=D02 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
+###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
 
 ###################################################################################
@@ -82,7 +84,7 @@ rm -f ${DISK_LABEL}.iso
 pushd $WORKSPACE
 
 ###################################################################################
-# Copy kernel, grub, mini-rootfs, setup.sh, estuarycfg.json ...
+# Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
 cp $BINARY_DIR/grub*.efi ./
 cp $BINARY_DIR/Image ./
@@ -94,11 +96,11 @@ cp $TOPDIR/setup.sh ./
 ###################################################################################
 # Copy distros
 ###################################################################################
-echo "Copy distributions to workspace configured by estuarycfg.json ......"
+echo "Copy distributions to $WORKSPACE......"
 
 distros=`echo $DISTROS | tr ',' ' '`
 for distro in ${distros[*]}; do
-	echo "Copy distribution ${distro}_ARM64.tar.gz to workspace ......"
+	echo "Copy distribution ${distro}_ARM64.tar.gz to $WORKSPACE......"
 	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./
 done
 
@@ -129,7 +131,6 @@ DISTROS=$DISTROS
 CAPACITY=$CAPACITY
 EOF
 
-cp ../estuarycfg.json ./usr/bin/
 mv ../setup.sh ./usr/bin/
 tar jxvf ../deploy-utils.tar.bz2 -C ./
 rm -f ../deploy-utils.tar.bz2
