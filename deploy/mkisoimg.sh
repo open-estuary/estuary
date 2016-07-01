@@ -13,7 +13,7 @@ BINARY_DIR=
 DISK_LABEL="Estuary"
 
 BOOT_PARTITION_SIZE=200
-WORKSPACE=`mktemp -d workspace.XXXX`
+WORKSPACE=
 
 ###################################################################################
 # Usage
@@ -33,10 +33,10 @@ Usage: mkisoimg.sh [OPTION]... [--OPTION=VALUE]...
 	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
   
 for example:
-	mkisoimg.sh --platform=D02 -distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace/binary
-	mkisoimg.sh --platform=D02 -distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace/binary --disklabel=Estuary
+	mkisoimg.sh --platform=D02 --distros=Ubuntu,OpenSuse \\
+	--capacity=50,50 --bindir=./workspace
+	mkisoimg.sh --platform=D02 --distros=Ubuntu,OpenSuse \\
+	--capacity=50,50 --bindir=./workspace --disklabel=Estuary
 
 EOF
 }
@@ -77,18 +77,17 @@ fi
 ###################################################################################
 # Create Workspace
 ###################################################################################
-sudo rm -rf $WORKSPACE 2>/dev/null
+WORKSPACE=`mktemp -d workspace.XXXX`
 rm -f ${DISK_LABEL}.iso
-mkdir $WORKSPACE
 pushd $WORKSPACE
 
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh, estuarycfg.json ...
 ###################################################################################
-cp $BINARY_DIR/arm64/grub*.efi ./
-cp $BINARY_DIR/arm64/Image ./
-cp $BINARY_DIR/arm64/mini-rootfs-arm64.cpio.gz ./
-cp $BINARY_DIR/arm64/deploy-utils.tar.bz2 ./
+cp $BINARY_DIR/grub*.efi ./
+cp $BINARY_DIR/Image ./
+cp $BINARY_DIR/mini-rootfs.cpio.gz ./
+cp $BINARY_DIR/deploy-utils.tar.bz2 ./
 
 cp $TOPDIR/setup.sh ./
 
@@ -100,7 +99,7 @@ echo "Copy distributions to workspace configured by estuarycfg.json ......"
 distros=`echo $DISTROS | tr ',' ' '`
 for distro in ${distros[*]}; do
 	echo "Copy distribution ${distro}_ARM64.tar.gz to workspace ......"
-	cp $BINARY_DIR/arm64/${distro}_ARM64.tar.gz ./
+	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./
 done
 
 echo "Copy distributions to workspace done!"
@@ -116,8 +115,8 @@ group=`groups | awk '{print $1}'`
 mkdir rootfs
 
 pushd rootfs
-zcat ../mini-rootfs-arm64.cpio.gz | sudo cpio -dimv
-
+zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv
+rm -f ../mini-rootfs.cpio.gz
 sudo chown -R ${user}:${group} *
 
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
@@ -194,7 +193,6 @@ sudo umount /mnt/
 ###################################################################################
 # Create bootable iso
 ###################################################################################
-rm -f mini-rootfs-arm64.cpio.gz
 genisoimage -e boot.img -no-emul-boot -J -R -c boot.catalog -hide boot.catalog -hide boot.img -V "$DISK_LABEL" -o /tmp/${DISK_LABEL}.iso .
 mv /tmp/${DISK_LABEL}.iso ../
 
