@@ -23,7 +23,8 @@
 {"name":"lamp","install":"no"},
 {"name":"docker","install":"no"},
 {"name":"mysql","install":"yes"},
-{"name":"odp","install":"yes"}
+{"name":"odp","install":"yes"},
+{"name":"docker_apps","install":"yes"}
 ],
 
 "setup":[
