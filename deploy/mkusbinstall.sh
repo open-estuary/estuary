@@ -1,5 +1,7 @@
 #!/bin/bash
-
+###################################################################################
+# mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
+###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
 
 ###################################################################################
@@ -35,9 +37,9 @@ Usage: mkusbinstall.sh [OPTION]... [--OPTION=VALUE]...
   
 for example:
 	mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace/binary
+	--capacity=50,50 --bindir=./workspace
 	mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace/binary --disklabel=Estuary
+	--capacity=50,50 --bindir=./workspace --disklabel=Estuary
 
 EOF
 }
@@ -80,10 +82,22 @@ fi
 ###################################################################################
 # Notice the user to continue this operation
 ###################################################################################
-echo "Please note this operation will format the device $TARGET!"
-read -p "Continue to create the usb install disk on $DISK?(y/n)" choice
+if mount | grep -Po "^($TARGET[^ ]* on / ).*" >/dev/null 2>&1; then
+	echo "Error!!! Target device $TARGET is mounted as root system! Please use another usb device!" ; exit 1
+fi
+
+device_info=`sudo fdisk -l 2>/dev/null | grep -Po "^(Disk $TARGET: ).*"`
+if [ x"$device_info" = x"" ]; then
+	echo "Error! Target device $TARGET is not exist!" ; exit 1
+fi
+
+echo "---------------------------------------------------------------"
+echo "- Please note this operation will format the device $TARGET!!!"
+echo "- $device_info"
+echo "---------------------------------------------------------------"
+read -p "Continue to create the usb install disk on $TARGET? (y/n)" choice
 if [ x"$choice" != x"y" ]; then
-	echo "exit ......"
+	echo "exit ......" ; exit 1
 fi
 
 ###################################################################################
@@ -120,7 +134,7 @@ sudo chmod a+w $WORKSPACE
 pushd $WORKSPACE
 
 ###################################################################################
-# Copy kernel, grub, mini-rootfs, setup.sh, estuarycfg.json ...
+# Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
 cp $BINARY_DIR/grub*.efi ./
 cp $BINARY_DIR/Image ./
@@ -132,11 +146,11 @@ cp $TOPDIR/setup.sh ./
 ###################################################################################
 # Copy distros
 ###################################################################################
-echo "Copy distributions to workspace configured by estuarycfg.json ......"
+echo "Copy distributions to $WORKSPACE......"
 
 distros=`echo $DISTROS | tr ',' ' '`
 for distro in ${distros[*]}; do
-	echo "Copy distribution ${distro}_ARM64.tar.gz to workspace ......"
+	echo "Copy distribution ${distro}_ARM64.tar.gz to $WORKSPACE......"
 	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./
 done
 
@@ -167,7 +181,6 @@ DISTROS=$DISTROS
 CAPACITY=$CAPACITY
 EOF
 
-cp ../estuarycfg.json ./usr/bin/
 mv ../setup.sh ./usr/bin/
 tar jxvf ../deploy-utils.tar.bz2 -C ./
 rm -f ../deploy-utils.tar.bz2
