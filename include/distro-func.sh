@@ -42,7 +42,7 @@ uncompress_distros()
 	src_dir=$2
 	target_dir=$3
 	for distro in ${distros[*]}; do
-		if [ ! -f $target_dir/.${distro}_ARM64.tar.gz.sum ] || \
+		if [ ! -f $target_dir/.${distro}_ARM64.tar.gz.sum ] || [ ! -d $target_dir/$distro ] || \
 			! (diff $src_dir/.${distro}_ARM64.tar.gz.sum $target_dir/.${distro}_ARM64.tar.gz.sum >/dev/null 2>&1); then
 			sudo rm -rf $target_dir/$distro
 			rm -f $target_dir/.${distro}_ARM64.tar.gz.sum 2>/dev/null

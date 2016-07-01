@@ -51,6 +51,31 @@ get_install_distros()
 }
 
 ###################################################################################
+# get_install_capacity <cfgfile>
+###################################################################################
+get_install_capacity()
+{
+	(
+	index=0
+	cfgfile=$1
+	capacities=()
+	install=`jq -r ".distros[$index].install" $cfgfile 2>/dev/null`
+	while [ x"$?" = x"0" ] && [ x"$install" != x"null" ] && [ x"$install" != x"" ]; do
+		if [ x"yes" = x"$install" ]; then
+			capacity=`jq -r ".distros[$index].capacity" $cfgfile`
+			idx=${#capacities[@]}
+			capacities[$idx]=$capacity
+		fi
+		
+		(( index=index+1 ))
+		install=`jq -r ".distros[$index].install" $cfgfile`
+	done
+
+	echo ${capacities[@]}
+	)
+}
+
+###################################################################################
 # get_install_packages <cfgfile>
 ###################################################################################
 get_install_packages()
@@ -93,9 +118,9 @@ get_boards_mac()
 }
 
 ###################################################################################
-# get_deployment <cfgfile>
+# get_deploy_info <cfgfile>
 ###################################################################################
-get_deployment()
+get_deploy_info()
 {
 	(
 	cfgfile=$1
@@ -104,8 +129,8 @@ get_deployment()
 	install=`jq -r ".setup[$index].install" $cfgfile 2>/dev/null`
 	while [ x"$?" = x"0" ] && [ x"$install" != x"null" ] && [ x"$install" != x"" ]; do
 		if [ x"yes" = x"$install" ]; then
-			deploy=`jq -r ".setup[$index]" $cfgfile 2>/dev/null`
-			echo $deploy | sed -e 's/[ |{|}|"]//g' | tr ':' '=' | sed -e 's/install=yes,*//g'
+			deploy_info=`jq -r ".setup[$index]" $cfgfile 2>/dev/null`
+			echo $deploy_info | sed -e 's/[ |{|}|"]//g' | tr ':' '=' | sed -e 's/install=yes,*//g'
 		fi
 		index=$[index + 1]
 		install=`jq -r ".setup[$index].install" $cfgfile 2>/dev/null`
@@ -114,4 +139,5 @@ get_deployment()
 	return 0
 	)
 }
+
 

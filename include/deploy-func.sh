@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ###################################################################################
-# get_all_usb_device
+# get_usb_device
 ###################################################################################
-get_all_usb_device()
+get_usb_device()
 {
 	sudo lshw | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | grep -Po "(/dev/sd.*)" | sort
 }
@@ -19,9 +19,24 @@ get_1st_usb_storage()
 		root_dev="/dev/sdx"
 	fi
 	
-	usb_devs=($(get_all_usb_device | grep -v $root_dev))
+	usb_devs=($(get_usb_device | grep -v $root_dev))
 	echo ${usb_devs[0]}
 	)
 }
 
+###################################################################################
+# get_deploy_type <deploy>
+###################################################################################
+get_deploy_type()
+{
+	echo "$1" | grep -Po "(?<=type=)([^,]*)"
+}
+
+###################################################################################
+# get_deploy_device <deploy>
+###################################################################################
+get_deploy_device()
+{
+	echo "$1" | grep -Po "(?<=device=)([^,]*)"
+}
 

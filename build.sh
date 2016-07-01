@@ -128,6 +128,9 @@ fi
 # Download/uncompress toolchains
 ###################################################################################
 if [ x"$LOCALARCH" = x"x86_64" ]; then
+	echo "##############################################################################"
+	echo "# Download/Uncompress toolchain"
+	echo "##############################################################################"
 	mkdir -p toolchain
 	download_toolchain toolchain $TOPDIR/checksum/toolchain/toolchain.sum $ESTUARY_INTERAL_FTP/toolchain
 	if [[ $? != 0 ]]; then
@@ -172,6 +175,7 @@ download_distros distro $TOPDIR/checksum/linux $ESTUARY_INTERAL_FTP/linux $DISTR
 if [[ $? != 0 ]]; then
 	echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
 fi
+echo ""
 
 echo "##############################################################################"
 echo "# Uncompress distros (distros: $DISTROS)"
@@ -179,6 +183,7 @@ echo "##########################################################################
 if ! uncompress_distros $DISTROS distro $BUILD_DIR/distro; then
 	echo -e "\033[31mError! Uncompress distro files failed!\033[0m" ; exit 1
 fi
+echo ""
 
 ###################################################################################
 # Download binaries
@@ -191,25 +196,47 @@ download_binaries prebuild $TOPDIR/checksum/prebuild $ESTUARY_INTERAL_FTP
 if [[ $? != 0 ]]; then
 	echo -e "\033[31mError! Download binaries failed!\033[0m" ; exit 1
 fi
+echo ""
+
+###################################################################################
+# Copy binaries/docs ...
+###################################################################################
+echo "##############################################################################"
+echo "# Copy binaries/docs"
+echo "##############################################################################"
+platfroms=`echo $PLATFORMS | tr ',' ' '`
+binary_src_dir="./prebuild"
+doc_src_dir="./estuary/doc"
+
+mkdir -p $BUILD_DIR/binary
+mkdir -p $BUILD_DIR/doc
+if ! copy_all_binaries $PLATFORMS $binary_src_dir $BUILD_DIR/binary; then
+	echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
+fi
+
+if ! copy_all_docs $PLATFORMS $doc_src_dir $BUILD_DIR/doc; then
+	echo -e "\033[31mError! Copy docs failed!\033[0m" ; exit 1
+fi
 
 ###################################################################################
 # Build project
 ###################################################################################
+echo "##############################################################################"
+echo "# Build platforms"
+echo "##############################################################################"
 platfroms=`echo $PLATFORMS | tr ',' ' '`
 for plat in ${platfroms[*]}; do
-	echo "##############################################################################"
-	echo "# Build platform (platform: $plat, distros: $DISTROS, pkgs: $PACKAGES, builddir: $BUILD_DIR)"
-	echo "##############################################################################"
+	echo "/*---------------------------------------------------------------"
+	echo "- build platform (platform: $plat, distros: $DISTROS, pkgs: $PACKAGES, builddir: $BUILD_DIR)"
+	echo "---------------------------------------------------------------*/"
 	build-platform.sh --cross=$CROSS_COMPILE --platform=$plat --distros=$DISTROS --packages=$PACKAGES --output=$BUILD_DIR
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
+	echo ""
 done
 echo "Build estuary done!"
-
-###################################################################################
-# Copy binaries ...
-###################################################################################
+echo ""
 
 ###################################################################################
 # Quick Deployment
@@ -217,5 +244,30 @@ echo "Build estuary done!"
 echo "##############################################################################"
 echo "# Quick deployment"
 echo "##############################################################################"
+BOARDS_MAC=`get_boards_mac $CFG_FILE`
+boards_mac=`echo $BOARDS_MAC | tr ' ' ','`
+CAPACITY=`get_install_capacity $CFG_FILE`
+capacity=`echo $CAPACITY | tr ' ' ','`
+ 
+deploy=($(get_deploy_info $CFG_FILE))
+for dep in ${deploy[*]}; do
+	deploy_type=`get_deploy_type $dep`
+	deploy_device=`get_deploy_device $dep`
+	echo "/*---------------------------------------------------------------"
+	echo "- deploy type: $deploy_type, target device: $deploy_device, boards mac: $boards_mac"
+	echo "- platform: $PLATFORMS, distros: $DISTROS, capacity: $capacity"
+	echo "- binary directory: $BUILD_DIR/binary/arm64"
+	echo "---------------------------------------------------------------*/"
+	quick-deploy.sh --target=$deploy_type:$deploy_device --boardmac=$boards_mac --platform=$PLATFORMS \
+		--distros=$DISTROS --capacity=$capacity --binary=$BUILD_DIR/binary/arm64
+	if [[ $? -ne 0 ]]; then
+		echo "Deploy of $deploy_type failed!" >&2 ; exit 1
+	fi
+	echo ""
+done
+
+echo ""
+echo "Create quick deploy done!"
+echo ""
 
 
