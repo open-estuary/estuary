@@ -12,7 +12,7 @@ After you executed `./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --bui
 ### AndroidFastbootApp.efi 
 ### UEFI_HiKey.fd
 
-**description**: l-loader.bin - used to switch from aarch32 to aarch64 and boot, fip.bin - firmware package, ptable-linux.img - partition tables for Linux images. 
+**description**: l-loader.bin - used to switch from aarch32 to aarch64 and boot, UEFI_HiKey.fd is the UEFI bios for HiKey, ptable-linux.img - partition tables for Linux images. 
 
 **target**:
  
