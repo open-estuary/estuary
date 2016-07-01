@@ -1,122 +1,55 @@
 This is the readme file for D03 platform
 
-After you do `./estuary/build.sh -p D03 -d Ubuntu`, all targets files will be produced into `<project root>/build/D03` directory, they are:
+After you executed `./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=./workspace` for D03, all targets files will be produced. they are:
 
 ### UEFI_D03.fd 
-### CH02TEVBC_V03.bin 
 
-**description**: UEFI_D03.fd is the UEFI bios for D03 platform, CH02TEVBC_V03.bin is the CPLD binary for D03 board, the others are binaries for trust firmware.
+**description**: UEFI_D03.fd is the UEFI bios for D03 platform.
 
-**target**: `<project root>/build/D03/binary/`
+**target**: `<project root>/workspace/binary/D03/UEFI_D03.fd`
 
 **source**: `<project root>/uefi`
 
 build commands(supposedly, you are in `<project root>` currently):
 ```shell
-    export ARCH=
-    export CROSS_COMPILE=aarch64-linux-gnu-
-    pushd uefi
-    # roll back to special version for D03
-    git reset --hard
-    git checkout open-estuary/master
-    # build uefi
-    export LC_CTYPE=C
-    git submodule init
-    git submodule update
-
-    uefi-tools/uefi-build.sh -c LinaroPkg/platforms.config d03
-
-    cp Build/D03/RELEASE_GCC49/FV/D03.fd ../build/D03/binary/UEFI_D03.fd
-    popd
+./estuary/submodules/build-uefi.sh --platform=D03 --output=workspace
 ```
-Then you will find *.fd in `<project root>/uefi/Build`.
 
 ### grubaa64.efi 
-### grub.cfg 
 
 **description**: 
 
 grubaa64.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
     
-grub.cfg is used by grubaa64.efi to config boot options.
-    
-More detail about them, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
-    
-**target**: `<project root>/build/D03/grub/`
+**target**: `<project root>/workspace/binary/arm64/grubaa64.efi`
 
 **source**: `<project root>/grub`
 
 build commands(supposedly, you are in `<project root>` currently):
-```shell
-    export CROSS_COMPILE=aarch64-linux-gnu-
-    pushd grub
-    # Apply patch for boot from indicated MAC address
-    git reset --hard
-    git checkout grub/master
-    git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
 
-    make distclean
-    ./autogen.sh
-    ./configure --prefix="/home/<user>/<grubbuild>" --with-platform=efi --build=x86_64-suse-linux-gnu --target=aarch64-linux-gnu --disable-werror --host=x86_64-suse-linux-gnu
-    make -j14
-    make  install
-    popd
+`./estuary/submodules/build-grub.sh --output=./workspace`, if your host is not arm architecture, please execute`build-grub.sh --output=./workspace --cross=aarch64-linux-gnu-`
 
-    pushd /home/<user>/<grubbuild>
-    ./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p / boot chain configfile configfile efinet ext2 fat gettext help hfsplus loadenv lsefi normal normal ntfs ntfscomp part_gpt part_msdos part_msdos read search search_fs_file search_fs_uuid search_label terminal terminfo tftp linux
-    popd
-```
+Note: more details about how to install gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux, please refer to https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md.
 
-Note: `<user>` means host name of your computer, `<grubbuild>` is folder new created.
 ### Image 
 ### hip06-d03.dtb 
 
 **descriptions**: Image is the kernel executable program, and hip06-d03.dtb is the device tree binary.
 
-**target**: 
-Image in `<project root>/build/D03/kernel/arch/arm64/boot/Image`
+**target**:
+ 
+Image in `<project root>/workspace/binary/arm64/Image`
 
-hip06-d03.dtb in `<project root>/build/D03/kernel/arch/arm64/boot/dts/hisilicon/hip06-d03.dtb`
+hip06-d03.dtb in `<project root>/workspace/binary/D03/hip06-d03.dtb`
 
 **source**: `<project root>/kernel`
 
-**Note**: Before compiling kernel, gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux(https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md) and
-
-libssl-dev should be installed first.
-
 build commands(supposedly, you are in `<project root>` currently):
-```shell
-build_dir=build
-KERNEL_DIR=kernel
-mkdir -p $build_dir/D03/$KERNEL_DIR 2>/dev/null
-kernel_dir=$build_dir/D03/$KERNEL_DIR
-KERNEL_BIN=$kernel_dir/arch/arm64/boot/Image
-CFG_FILE=defconfig
-DTB_BIN=$kernel_dir/arch/arm64/boot/dts/hisilicon/hip06-d03.dtb
-export ARCH=arm64
-export CROSS_COMPILE=aarch64-linux-gnu-
 
-pushd $KERNEL_DIR/
+`./estuary/submodules/build-kernel.sh --platform=D03 --output=workspace`, if your host is not arm architecture, please execute `./estuary/submodules/build-kernel.sh --platform=D03 --output=workspace --cross=aarch64-linux-gnu-`.
 
-git clean -fdx
-git reset --hard
-sudo rm -rf ../$kernel_dir/*
-make O=../$kernel_dir mrproper
+Note: more details about how to install gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux, please refer to https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md.
 
-./scripts/kconfig/merge_config.sh -O ../$kernel_dir -m arch/arm64/configs/defconfig \
-arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
-mv -f ../$kernel_dir/.config ../$kernel_dir/.merged.config
-make O=../$kernel_dir KCONFIG_ALLCONFIG=../$kernel_dir/.merged.config alldefconfig
-
-make O=../$kernel_dir -j${corenum} ${KERNEL_BIN##*/}
-dtb_dir=${DTB_BIN#*arch/}
-dtb_dir=${DTB_BIN%/*}
-dtb_dir=../${kernel_dir}/arch/${dtb_dir}
-
-mkdir -p $dtb_dir 2>/dev/null
-
-make O=../$kernel_dir ${DTB_BIN#*/boot/dts/}
-```
 More detail about distributions, please refer to [Distributions_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).
 
 More detail about toolchains, please refer to [Toolchains_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md).

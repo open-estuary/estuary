@@ -56,9 +56,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   ESL Start OS
   Embedded Boot Loader(EBL)
   ```
-  D03 board support 4 on-board network ports at maximun. To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by the two 2GE
-
-  ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
+  D03 board support 4 on-board network ports at maximun. To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by the two 2GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
  
   EFI Internal Shell mode is a standard command shell in UEFI.
  
