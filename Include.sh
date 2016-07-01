@@ -6,6 +6,8 @@
 . estuary-func.sh
 . initialize-func.sh
 . json-func.sh
+. doc-func.sh
+. deploy-func.sh
 . compile-func.sh
 . fileop-func.sh
 . checksum-func.sh
