@@ -122,21 +122,6 @@ if [ -z "$PLATFORMS" ] || [ -z $DISTROS ]; then
 fi
 
 ###################################################################################
-# Clean project
-###################################################################################
-if [ x"$CLEAN" = x"yes" ]; then
-	echo "##############################################################################"
-	echo "# Clean project (platform: $PLATFORMS, distros: $DISTROS, builddir: $BUILD_DIR"
-	echo "##############################################################################"
-	platfroms=`echo $PLATFORMS | tr ',' ' '`
-	for plat in ${platfroms[*]}; do
-		build-platform.sh clean --cross=$CROSS_COMPILE --platform=$plat --distros=$DISTROS --output=$BUILD_DIR
-	done
-	echo "Clean binary files done!"
-	exit 0
-fi
-
-###################################################################################
 # Download/uncompress toolchains
 ###################################################################################
 if [ x"$LOCALARCH" = x"x86_64" ]; then
@@ -156,6 +141,21 @@ if [ x"$LOCALARCH" = x"x86_64" ]; then
 	TOOLCHAIN_DIR=`cd toolchain/$toolchain_dir; pwd`
 	CROSS_COMPILE=`get_cross_compile $LOCALARCH $TOOLCHAIN_DIR`
 	export PATH=$TOOLCHAIN_DIR/bin:$PATH
+fi
+
+###################################################################################
+# Clean project
+###################################################################################
+if [ x"$CLEAN" = x"yes" ]; then
+	echo "##############################################################################"
+	echo "# Clean project (platform: $PLATFORMS, distros: $DISTROS, builddir: $BUILD_DIR"
+	echo "##############################################################################"
+	platfroms=`echo $PLATFORMS | tr ',' ' '`
+	for plat in ${platfroms[*]}; do
+		build-platform.sh clean --cross=$CROSS_COMPILE --platform=$plat --distros=$DISTROS --output=$BUILD_DIR
+	done
+	echo "Clean binary files done!"
+	exit 0
 fi
 
 ###################################################################################
