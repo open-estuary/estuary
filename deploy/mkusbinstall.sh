@@ -13,7 +13,7 @@ BINARY_DIR=
 DISK_LABEL="Estuary"
 
 BOOT_PARTITION_SIZE=200
-WORKSPACE=`mktemp -d workspace.XXXX`
+WORKSPACE=
 
 ###################################################################################
 # Usage
@@ -34,9 +34,9 @@ Usage: mkusbinstall.sh [OPTION]... [--OPTION=VALUE]...
 	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
   
 for example:
-	mkusbinstall.sh --target=/dev/sdb --platform=D02 -distros=Ubuntu,OpenSuse \\
+	mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse \\
 	--capacity=50,50 --bindir=./workspace/binary
-	mkusbinstall.sh --target=/dev/sdb --platform=D02 -distros=Ubuntu,OpenSuse \\
+	mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse \\
 	--capacity=50,50 --bindir=./workspace/binary --disklabel=Estuary
 
 EOF
@@ -67,6 +67,15 @@ do
 
 	shift
 done
+
+###################################################################################
+# Check parameter
+###################################################################################
+if [ x"$TARGET" = x"" ] || [ x"$PLATFORM" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] \
+	|| [ x"$BINARY_DIR" = x"" ]; then
+	echo "target: $TARGET, platform: $PLATFORM, distros: $DISTROS, capacity: $CAPACITY, bindir: $$BINARY_DIR"
+	echo "Error! Please all parameters are right!" ; Usage ; exit 1
+fi
 
 ###################################################################################
 # Notice the user to continue this operation
@@ -105,8 +114,7 @@ yes | sudo mkfs.ext4 -L $DISK_LABEL ${TARGET}2
 ###################################################################################
 # Create Workspace
 ###################################################################################
-sudo rm -rf $WORKSPACE 2>/dev/null
-mkdir $WORKSPACE
+WORKSPACE=`mktemp -d workspace.XXXX`
 sudo mount ${TARGET}2 $WORKSPACE
 sudo chmod a+w $WORKSPACE
 pushd $WORKSPACE
@@ -114,10 +122,10 @@ pushd $WORKSPACE
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh, estuarycfg.json ...
 ###################################################################################
-cp $BINARY_DIR/arm64/grub*.efi ./
-cp $BINARY_DIR/arm64/Image ./
-cp $BINARY_DIR/arm64/mini-rootfs-arm64.cpio.gz ./
-cp $BINARY_DIR/arm64/deploy-utils.tar.bz2 ./
+cp $BINARY_DIR/grub*.efi ./
+cp $BINARY_DIR/Image ./
+cp $BINARY_DIR/mini-rootfs.cpio.gz ./
+cp $BINARY_DIR/deploy-utils.tar.bz2 ./
 
 cp $TOPDIR/setup.sh ./
 
@@ -129,7 +137,7 @@ echo "Copy distributions to workspace configured by estuarycfg.json ......"
 distros=`echo $DISTROS | tr ',' ' '`
 for distro in ${distros[*]}; do
 	echo "Copy distribution ${distro}_ARM64.tar.gz to workspace ......"
-	cp $BINARY_DIR/arm64/${distro}_ARM64.tar.gz ./
+	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./
 done
 
 echo "Copy distributions to workspace done!"
@@ -145,8 +153,8 @@ group=`groups | awk '{print $1}'`
 mkdir rootfs
 
 pushd rootfs
-zcat ../mini-rootfs-arm64.cpio.gz | sudo cpio -dimv
-
+zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv
+rm -f ../mini-rootfs.cpio.gz
 sudo chown -R ${user}:${group} *
 
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
