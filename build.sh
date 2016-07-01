@@ -13,6 +13,9 @@ TOPDIR=$(cd `dirname $0` ; pwd)
 ESTUARY_INTERAL_FTP=`grep -Po "(?<=download_address: )(.*)" $TOPDIR/estuary.txt`
 export PATH=$TOPDIR:$TOPDIR/include:$TOPDIR/submodules:$TOPDIR/deploy:$PATH
 
+export LC_ALL=C
+export LANG=C
+
 ###################################################################################
 # Includes
 ###################################################################################
