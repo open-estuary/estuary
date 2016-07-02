@@ -86,23 +86,16 @@ fi
 ###################################################################################
 deploy_type=`echo "$TARGET" | awk -F ':' '{print $1}'`
 deploy_device=`echo "$TARGET" | awk -F ':' '{print $2}'`
-platforms=`echo $PLATFORMS | tr ',' ' '`
 
 if [ x"$deploy_type" = x"usb" ]; then
-	for plat in ${platforms[*]}; do
-		mkusbinstall.sh --target=$deploy_device --platform=$plat -distros=$DISTROS --capacity=$CAPACITY --bindir=$BIN_DIR || exit 1
-	done
+	mkusbinstall.sh --target=$deploy_device --platforms=$PLATFORMS -distros=$DISTROS --capacity=$CAPACITY --bindir=$BIN_DIR || exit 1
 elif [ x"$deploy_type" = x"iso" ]; then
-	for plat in ${platforms[*]}; do
-		if [ ! -f $BIN_DIR/Estuary_${plat}.iso ]; then
-			mkisoimg.sh --platform=$plat --distros=$DISTROS --capacity=$CAPACITY --disklabel="Estuary" --bindir=$BIN_DIR || exit 1
-			mv Estuary_${plat}.iso $BIN_DIR/ || exit 1
-		fi
-	done
+	if [ ! -f $BIN_DIR/Estuary.iso ]; then
+		mkisoimg.sh --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --disklabel="Estuary" --bindir=$BIN_DIR || exit 1
+		mv Estuary.iso $BIN_DIR/ || exit 1
+	fi
 elif [ x"$deploy_type" = x"pxe" ]; then
-	for plat in ${platforms[*]}; do
-		mkpxe.sh --platform=$plat --distros=$DISTROS --capacity=$CAPACITY --boardmac=$BOARDS_MAC --bindir=$BIN_DIR || exit 1
-	done
+	mkpxe.sh --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --boardmac=$BOARDS_MAC --bindir=$BIN_DIR || exit 1
 else
 	echo "Unknow deploy type!" >&2 ; exit 1
 fi
@@ -111,7 +104,7 @@ fi
 # Report result
 ###################################################################################
 echo "/*---------------------------------------------------------------"
-echo "- quick deploy, deploy type: $deploy_type, platform: $PLATFORMS, distros: $DISTROS"
+echo "- quick deploy, deploy type: $deploy_type, platforms: $PLATFORMS, distros: $DISTROS"
 echo "- target device: $deploy_device, boards mac: $BOARDS_MAC"
 echo "- done!"
 echo "---------------------------------------------------------------*/"

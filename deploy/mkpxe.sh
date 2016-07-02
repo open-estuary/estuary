@@ -1,7 +1,7 @@
 #!/bin/bash
 ###################################################################################
-# mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --capacity=50,50 --bindir=./workspace
-# mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --capacity=50,50 --bindir=./workspace --net=eth0
+# mkpxe.sh --platforms=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --capacity=50,50 --bindir=./workspace
+# mkpxe.sh --platforms=D02,D03 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --capacity=50,50 --bindir=./workspace --net=eth0
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
 export PATH=$TOPDIR:$PATH
@@ -11,7 +11,7 @@ export PATH=$TOPDIR:$PATH
 # Global variable
 ###################################################################################
 BOARDSMAC=
-PLATFORM=
+PLATFORMS=
 DISTROS=
 CAPACITY=
 BINARY_DIR=
@@ -38,7 +38,7 @@ cat << EOF
 Usage: mkpxe.sh [OPTION]... [--OPTION=VALUE]...
 	-h, --help              display this help and exit
 	--boardmac=xxx,xxx      target boards mac
-	--platform=xxx          which platform to deploy (D02, D03)
+	--platforms=xxx,xxx     which platforms to deploy (D02, D03)
 	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
 	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
 	--bindir=xxx            binary directory
@@ -48,9 +48,9 @@ Usage: mkpxe.sh [OPTION]... [--OPTION=VALUE]...
 
   
 for example:
-	mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+	mkpxe.sh --platforms=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
 	--capacity=50,50 --bindir=./workspace
-	mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+	mkpxe.sh --platforms=D02,D03 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
 	--capacity=50,50 --bindir=./workspace --net=eth0
 
 EOF
@@ -71,7 +71,7 @@ do
 	case $ac_option in
 		-h | --help) Usage ; exit ;;
 		--boardmac) BOARDSMAC=$ac_optarg ;;
-		--platform) PLATFORM=$ac_optarg ;;
+		--platforms) PLATFORMS=$ac_optarg ;;
 		--distros) DISTROS=$ac_optarg ;;
 		--capacity) CAPACITY=$ac_optarg ;;
 		--bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
@@ -87,8 +87,8 @@ done
 ###################################################################################
 # Check parameters
 ###################################################################################
-if  [ x"$PLATFORM" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ] || [ x"$BOARDSMAC" = x"" ]; then
-	echo "board mac: $BOARDSMAC, platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
+if  [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ] || [ x"$BOARDSMAC" = x"" ]; then
+	echo "board mac: $BOARDSMAC, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
 	echo "Error! Please all parameters are right!" >&2
 	Usage ; exit 1
 fi
@@ -142,15 +142,15 @@ cp $BINARY_DIR/Image $TFTP_ROOT/ || exit 1
 # Copy distros
 ###################################################################################
 NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
-echo "Copy distributions to $NFS_ROOT......"
+echo "Copy distros to $WORKSPACE......"
 
 distros=($(echo $DISTROS | tr ',' ' '))
 for distro in ${distros[*]}; do
-	echo "Copy distribution ${distro}_ARM64.tar.gz to $NFS_ROOT......"
+	echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
 	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
 done
 
-echo "Copy distributions to $NFS_ROOT done!"
+echo "Copy distros to $WORKSPACE done!"
 echo ""
 
 ###################################################################################
@@ -181,7 +181,7 @@ if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
 fi
 
 cat > ./usr/bin/Estuary.txt << EOF
-PLATFORM=$PLATFORM
+PLATFORMS=$PLATFORMS
 DISTROS=$DISTROS
 CAPACITY=$CAPACITY
 EOF
@@ -200,28 +200,32 @@ sudo rm -rf rootfs
 ###################################################################################
 # Create grub.cfg
 ###################################################################################
-distros=`echo $DISTROS | tr ',' ' '`
-platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
-
 Image="`ls Image*`"
 Initrd="`ls initrd*.gz`"
-eval cmd_line=\$${PLATFORM}_CMDLINE
+platforms=(`echo $PLATFORMS | tr ',' ' '`)
+default_plat=`echo ${platforms[0]} | tr "[:upper:]" "[:lower:]"`
 
 cat > grub.cfg << EOF
 # NOTE: Please remove the unused boot items according to your real condition.
 # Sample GRUB configuration file
 #
 
-# Boot automatically after 0 secs.
-set timeout=3
+# Boot automatically after 5 secs.
+set timeout=5
 
 # By default, boot the Linux
-set default=${platform}_minilinux
+set default=${default_plat}_minilinux
 
-# Booting from PXE with mini rootfs
-menuentry "Install estuary" --id ${platform}_minilinux {
-    linux /$Image $cmd_line root=/dev/nfs rw nfsroot=${SERVER_IP}:$NFS_ROOT ip=dhcp
-    initrd /$Initrd
+EOF
+
+for plat in ${platforms[*]}; do
+	eval cmd_line=\$${plat}_CMDLINE
+	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
+	cat >> grub.cfg << EOF
+# Booting initrd for $plat
+menuentry "$Install $plat estuary" --id ${platform}_minilinux {
+	linux /$Image $cmd_line
+	initrd /$Initrd
 }
 
 EOF

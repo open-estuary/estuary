@@ -23,18 +23,34 @@ BOOT_DEV=
 ESTUARY_CFG="/usr/bin/estuary.txt"
 
 PLATFORM=
-INSTALL_DISTRO=()
-DISTRO_CAPACITY=()
+INSTALL_DISTROS=()
+DISTRO_CAPACITIES=()
 
 ###################################################################################
 # Install parameters
 ###################################################################################
-platform=`cat $ESTUARY_CFG | grep -Eo "PLATFORM=[^ ]*"`
-PLATFORM=`expr "X$platform" : 'X[^=]*=\(.*\)'`
-install_distro=`cat $ESTUARY_CFG | grep -Eo "DISTROS=[^ ]*"`
-INSTALL_DISTRO=($(expr "X$install_distro" : 'X[^=]*=\(.*\)' | tr ',' ' '))
-distro_capacity=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
-DISTRO_CAPACITY=($(expr "X$distro_capacity" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+platforms=`cat $ESTUARY_CFG | grep -Eo "PLATFORMS=[^ ]*"`
+PLATFORMS=(`expr "X$platform" : 'X[^=]*=\(.*\)' | tr ',' ' '`
+PLATFORM=${PLATFORMS[0]}
+
+if [ ${#[PLATFORMS[@]} -gt 1 ]; then
+	echo "Notice! Multiple platforms found."
+	while true; do
+		echo ""
+		echo "---------------------------------------------------------------"
+		echo "- platfrom: ${PLATFORMS[*]}"
+		echo "---------------------------------------------------------------"
+		read -p "Please input the platfrom name to install " plat
+		if `echo ${PLATFORMS[*]} | grep -E "\b${plat}\b"`; then
+			PLATFORM=$plat ; break
+		fi
+	done
+fi
+
+install_distros=`cat $ESTUARY_CFG | grep -Eo "DISTROS=[^ ]*"`
+INSTALL_DISTROS=($(expr "X$install_distros" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+distro_capacities=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
+DISTRO_CAPACITIES=($(expr "X$distro_capacities" : 'X[^=]*=\(.*\)' | tr ',' ' '))
 
 if cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"; then
 	INSTALL_TYPE="NFS"
@@ -43,11 +59,11 @@ fi
 ###################################################################################
 # Install parameters check
 ###################################################################################
-if [[ ${#INSTALL_DISTRO[@]} == 0 ]]; then
+if [[ ${#INSTALL_DISTROS[@]} == 0 ]]; then
 	echo "Error!!! Distros are not specified" ; exit 1
 fi
 
-if [[ ${#DISTRO_CAPACITY[@]} == 0 ]]; then
+if [[ ${#DISTRO_CAPACITIES[@]} == 0 ]]; then
 	echo "Error! Capacities is not specified!" ; exit 1
 fi
 
@@ -55,7 +71,7 @@ fi
 # Display install info
 ###################################################################################
 echo "/*---------------------------------------------------------------"
-echo "- platform: $PLATFORM, distros: ${INSTALL_DISTRO[@]}, capacity: ${DISTRO_CAPACITY[@]}, type: $INSTALL_TYPE"
+echo "- platform: $PLATFORM, distros: ${INSTALL_DISTROS[@]}, capacities: ${DISTRO_CAPACITIES[@]}, type: $INSTALL_TYPE"
 echo "---------------------------------------------------------------*/"
 echo "" ; sleep 1
 
@@ -241,15 +257,15 @@ end_address=
 
 pushd /scratch >/dev/null
 index=0
-distro_number=${#INSTALL_DISTRO[@]}
+distro_number=${#INSTALL_DISTROS[@]}
 
 for ((index=0; index<distro_number; index++))
 do
 	# Get necessary info for current distro.
 	part_index=$((PART_BASE_INDEX + index))
-	distro_name=${INSTALL_DISTRO[$index]}
+	distro_name=${INSTALL_DISTROS[$index]}
 	rootfs_package="${distro_name}""_ARM64.tar.gz"
-	distro_capacity=${DISTRO_CAPACITY[$index]%G*}
+	distro_capacity=${DISTRO_CAPACITIES[$index]%G*}
 	
 	start_address=$allocate_address
 	end_address=$((start_address + distro_capacity * 1000))
@@ -306,7 +322,7 @@ Image="`ls Image*`"
 popd >/dev/null
 
 echo "Updating grub.cfg."
-distro_number=${#INSTALL_DISTRO[@]}
+distro_number=${#INSTALL_DISTROS[@]}
 for ((index=0; index<distro_number; index++)); do
 	part_index=$((PART_BASE_INDEX + index))
 	root_dev="${TARGET_DISK}${part_index}"
@@ -314,7 +330,7 @@ for ((index=0; index<distro_number; index++)); do
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
 	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
-	distro_name=${INSTALL_DISTRO[$index]}
+	distro_name=${INSTALL_DISTROS[$index]}
 	
 cat >> /boot/grub/grub.cfg << EOF
 # Booting from SATA with $distro_name rootfs
@@ -329,7 +345,7 @@ EOF
 done
 
 # Set the first distro to default
-default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}"
+default_menuentry_id="${platform}_""${INSTALL_DISTROS[0]}"
 sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub/grub.cfg
 
 echo "Update grub.cfg done!"
