@@ -3,6 +3,7 @@
 # mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
+. $TOPDIR/usb-func.sh
 
 ###################################################################################
 # Global variable
@@ -76,16 +77,20 @@ done
 ###################################################################################
 # Check parameters
 ###################################################################################
-if  [ x"$PLATFORM" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ] || [ x"$TARGET" = x"" ]; then
+if  [ x"$PLATFORM" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
 	echo "target: $TARGET, platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
 	echo "Error! Please all parameters are right!" >&2
 	Usage ; exit 1
 fi
 
+if ! check_usb_device $TARGET || ! get_default_usb TARGET; then
+	echo "Error! Can't find available usb device!" >&2 ; exit 1
+fi
+
 distros=($(echo "$DISTROS" | tr ',' ' '))
 capacity=($(echo "$CAPACITY" | tr ',' ' '))
 if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
-	echo "Error! Number of capacity is not eq the distros!"
+	echo "Error! Number of capacity is not eq the distros!" >&2
 	Usage ; exit 1
 fi
 
@@ -93,12 +98,12 @@ fi
 # Notice the user to continue this operation
 ###################################################################################
 if mount | grep -Po "^($TARGET[^ ]* on / ).*" >/dev/null 2>&1; then
-	echo "Error!!! Target device $TARGET is mounted as root system! Please use another usb device!" ; exit 1
+	echo "Error!!! Target device $TARGET is mounted as root system! Please use another usb device!" >&2 ; exit 1
 fi
 
 device_info=`sudo fdisk -l 2>/dev/null | grep -Po "^(Disk $TARGET: ).*"`
 if [ x"$device_info" = x"" ]; then
-	echo "Error! Target device $TARGET is not exist!" ; exit 1
+	echo "Error! Target device $TARGET is not exist!" >&2 ; exit 1
 fi
 
 echo "---------------------------------------------------------------"
@@ -107,7 +112,7 @@ echo "- $device_info"
 echo "---------------------------------------------------------------"
 read -p "Continue to create the usb install disk on $TARGET? (y/n)" choice
 if [ x"$choice" != x"y" ]; then
-	echo "exit ......" ; exit 1
+	echo "Exit ......" ; exit 1
 fi
 
 ###################################################################################
@@ -128,12 +133,12 @@ echo -e "n\n\n\n\n\nw\n" | sudo fdisk $TARGET
 yes | sudo mkfs.ext4 -L $DISK_LABEL ${TARGET}2
 
 ###################################################################################
-# Create Workspace
+# Create Workspace and Switch to Workspace!!!
 ###################################################################################
 WORKSPACE=`mktemp -d workspace.XXXX`
 sudo mount ${TARGET}2 $WORKSPACE
 sudo chmod a+w $WORKSPACE
-pushd $WORKSPACE
+pushd $WORKSPACE >/dev/null
 
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh ...
@@ -142,7 +147,6 @@ cp $BINARY_DIR/grub*.efi ./ || exit 1
 cp $BINARY_DIR/Image ./ || exit 1
 cp $BINARY_DIR/mini-rootfs.cpio.gz ./ || exit 1
 cp $BINARY_DIR/deploy-utils.tar.bz2 ./ || exit 1
-
 cp $TOPDIR/setup.sh ./ || exit 1
 
 ###################################################################################
@@ -156,7 +160,7 @@ for distro in ${distros[*]}; do
 	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
 done
 
-echo "Copy distributions to workspace done!"
+echo "Copy distributions to $WORKSPACE done!"
 echo ""
 
 ###################################################################################
@@ -168,7 +172,7 @@ user=`whoami`
 group=`groups | awk '{print $1}'`
 mkdir rootfs
 
-pushd rootfs
+pushd rootfs >/dev/null
 zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv || exit 1
 rm -f ../mini-rootfs.cpio.gz
 sudo chown -R ${user}:${group} *
@@ -191,7 +195,7 @@ sudo chmod 755 ./usr/bin/setup.sh
 sudo chown -R root:root *
 find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
 
-popd
+popd >/dev/null
 sudo rm -rf rootfs
 
 ###################################################################################
@@ -236,10 +240,10 @@ sudo cp Image* initrd*.gz grub.cfg /mnt/ || exit 1
 sudo umount /mnt/
 
 ###################################################################################
-# Pop Workspace
+# Pop Workspace!!!
 ###################################################################################
 sudo chown -R root:root *
-popd
+popd >/dev/null
 
 # sync
 sudo umount ${TARGET}2
@@ -247,7 +251,7 @@ sudo umount ${TARGET}2
 # Delete workspace
 ###################################################################################
 sudo rm -rf $WORKSPACE 2>/dev/null
-echo "Write to USB disk successful!"
+echo "Create USB disk deployment environment successful!"
 echo ""
 
 exit 0

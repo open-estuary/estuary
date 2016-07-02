@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo 0 > /proc/sys/kernel/printk
+D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp"
+
 ###################################################################################
 # Global variable
 ###################################################################################
@@ -17,9 +21,43 @@ TARGET_DISK=
 BOOT_DEV=
 
 ESTUARY_CFG="/usr/bin/estuary.txt"
-PLATFORM=`grep -Po "(?<=PLATFORM=)(.*)" $ESTUARY_CFG`
-INSTALL_DISTRO=($(grep -Po "(?<=DISTROS=)(.*)" $ESTUARY_CFG | tr ',' ' '))
-DISTRO_CAPACITY=($(grep -Po "(?<=CAPACITY=)(.*)" $ESTUARY_CFG | tr ',' ' '))
+
+PLATFORM=
+INSTALL_DISTRO=()
+DISTRO_CAPACITY=()
+
+###################################################################################
+# Install parameters
+###################################################################################
+platform=`cat $ESTUARY_CFG | grep -Eo "PLATFORM=[^ ]*"`
+PLATFORM=`expr "X$platform" : 'X[^=]*=\(.*\)'`
+install_distro=`cat $ESTUARY_CFG | grep -Eo "DISTROS=[^ ]*"`
+INSTALL_DISTRO=($(expr "X$install_distro" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+distro_capacity=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
+DISTRO_CAPACITY=($(expr "X$distro_capacity" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+
+if cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"; then
+	INSTALL_TYPE="NFS"
+fi
+
+###################################################################################
+# Install parameters check
+###################################################################################
+if [[ ${#INSTALL_DISTRO[@]} == 0 ]]; then
+	echo "Error!!! Distros are not specified" ; exit 1
+fi
+
+if [[ ${#DISTRO_CAPACITY[@]} == 0 ]]; then
+	echo "Error! Capacities is not specified!" ; exit 1
+fi
+
+###################################################################################
+# Display install info
+###################################################################################
+echo "/*---------------------------------------------------------------"
+echo "- platform: $PLATFORM, distros: ${INSTALL_DISTRO[@]}, capacity: ${DISTRO_CAPACITY[@]}, type: $INSTALL_TYPE"
+echo "---------------------------------------------------------------*/"
+echo "" ; sleep 1
 
 ###################################################################################
 # Create mountpointer
@@ -34,45 +72,58 @@ mkdir /scratch 2>/dev/null
 if [ x"$INSTALL_TYPE" = x"NFS" ]; then
 	nfs_root=`cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"`
 	NFS_ROOT=`expr "X$nfs_root" : 'X[^=]*=\(.*\)'`
-	echo "mount $NFS_ROOT ......"
-	mount -o nolock -t nfs $NFS_ROOT /scratch
-	echo "mount $NFS_ROOT done ......"
+	echo "/*---------------------------------------------------------------"
+	echo "- Mounting $NFS_ROOT as install source. Please wait for a moment!"
+	echo "---------------------------------------------------------------*/"
+	if ! mount -o nolock -t nfs $NFS_ROOT /scratch; then
+		echo "Error!!! Mount $NFS_ROOT to /scratch failed!" >&2 ; exit 1
+	fi
+	echo "Mount $NFS_ROOT to /scratch done......"
+	echo ""
 else
+	echo "/*---------------------------------------------------------------"
+	echo "- Finding install USB/ISO disk labelled $DISK_LABEL. Please wait for a moment!"
+	echo "---------------------------------------------------------------*/"
+	echo ""
 	disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
-	for ((index=0; index<45; index++))
-	do
+	for ((index=0; index<45; index++)); do
 		if [ x"$disk_info" != x"" ]; then
+			echo "Found install disk labelled $DISK_LABEL."
 			break
 		fi
-		sleep 1
+		printf "\r%Wait for install source disk $DISK_LABEL to be ready...... [ %2d ]" $index 
+		sleep 3
 		disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
 	done
 
 	if [ x"$disk_info" = x"" ]; then
-		echo "Cann't find install disk!"
-		exit 1
+		echo "Error!!! Cann't find install disk labelled $DISK_LABEL!" >&2 ; exit 1
 	fi
 
 	INSTALL_DISK=`expr "${disk_info}" : '/dev/\([^:]*\):[^:]*'`
-
-	mount /dev/${INSTALL_DISK} /scratch
+	echo "Mounting install disk /dev/${INSTALL_DISK} to /scratch."
+	if ! mount /dev/${INSTALL_DISK} /scratch; then
+		echo "Error!!! Mount install disk /dev/${INSTALL_DISK} to /scratch failed!" >&2
+	fi
+	echo "Mount install disk /dev/${INSTALL_DISK} to /scratch done."
 fi
 
 ###################################################################################
 # Get all disk info (exclude the install disk)
 ###################################################################################
-clear
-
 disk_list=()
 disk_model_info=()
 disk_size_info=()
 disk_sector_info=()
 
+echo "/*---------------------------------------------------------------"
+echo "- Find target distk to install. Please wait for a moment!"
+echo "---------------------------------------------------------------*/"
 install_disk_dev=`echo "${INSTALL_DISK}" | sed 's/[0-9]*$//g'`
 read -a disk_list <<< $(lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}')
 
 if [[ ${#disk_list[@]} = 0 ]]; then
-	echo "Error! Can't find disk to install distributions!" ; exit 1
+	echo "Error!!! Can't find disk to install distros!" >&2 ; exit 1
 fi
 
 for disk in ${disk_list[@]}
@@ -103,6 +154,7 @@ fi
 
 if [ x"$index" = x"" ] || [[ $index != [0-9]* ]] \
 	|| [[ $index -ge $disk_number ]]; then
+	echo "Warning! We'll use the first disk to install!"
 	index=0
 fi
 
@@ -120,32 +172,25 @@ if [ x"$c" = x"y" ]; then
 fi
 
 ###################################################################################
-# Install info check
+# Format target disk
 ###################################################################################
-if [[ ${#INSTALL_DISTRO[@]} == 0 ]]; then
-	echo "Error! Distros are not specified" ; exit 1
-fi
-
-if [[ ${#DISTRO_CAPACITY[@]} == 0 ]]; then
-	echo "Error! Capacities is not specified!" ; exit 1
-fi
-
-echo "" ; sleep 1s
-
-###################################################################################
-# Delete all partitions on target disk
-###################################################################################
-echo "Delete all partitions on $TARGET_DISK ......"
+echo "/*---------------------------------------------------------------"
+echo "- Format target disk $TARGET_DISK. Please wait for a moment!"
+echo "---------------------------------------------------------------*/"
 (yes | mkfs.ext4 $TARGET_DISK) >/dev/null 2>&1
-echo "Delete all partitions on $TARGET_DISK done!"
+echo "Format target disk $TARGET_DISK done."
+echo ""
 
 ###################################################################################
 # make gpt label and create EFI System partition
 ###################################################################################
-echo "Create EFI System partition on $TARGET_DISK ......"
+echo "/*---------------------------------------------------------------"
+echo "- Create and install kernel into EFI partition on ${TARGET_DISK}1. Please wait for a moment!"
+echo "---------------------------------------------------------------*/"
 (parted -s $TARGET_DISK mklabel gpt) >/dev/null 2>&1
 
 # EFI System
+echo "Creating and formatting ${TARGET_DISK}1."
 efi_start_address=1
 efi_end_address=$(( start_address + BOOT_PARTITION_SIZE))
 
@@ -153,17 +198,15 @@ BOOT_DEV=${TARGET_DISK}1
 (parted -s $TARGET_DISK "mkpart UEFI $efi_start_address $efi_end_address") >/dev/null 2>&1
 (parted -s $TARGET_DISK set 1 boot on) >/dev/null 2>&1
 (yes | mkfs.vfat $BOOT_DEV) >/dev/null 2>&1
-echo "Create EFI System partition on $TARGET_DISK done!"
+echo "Create and format ${TARGET_DISK}1 done."
 
 ###################################################################################
 # Install grub and kernel to EFI System partition
 ###################################################################################
-echo "Install grub and kernel to $BOOT_DEV ......"
-pushd /scratch
+echo "Installing grub and kernel to ${TARGET_DISK}1."
+pushd /scratch >/dev/null
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
-# mkdir -p /boot/EFI/GRUB2/
-# cp grub*.efi /boot/EFI/GRUB2/grubaa64.efi
 grub-install --efi-directory=/boot --target=arm64-efi $BOOT_DEV
 cp Image* /boot/
 
@@ -180,26 +223,29 @@ set default=default_menuentry
 
 EOF
 
-popd
+popd >/dev/null
 sync
 umount /boot/
-echo "Install grub and kernel to $BOOT_DEV done!"
+echo "Install grub and kernel to ${TARGET_DISK}1 done!"
+echo ""
 
 ###################################################################################
-# Install all distributions to target disk
+# Install all distros to target disk
 ###################################################################################
-echo "Install distributions to $TARGET_DISK ......"
+echo "/*---------------------------------------------------------------"
+echo "- Install distros into ${TARGET_DISK}. Please wait for a moment!"
+echo "---------------------------------------------------------------*/"
 allocate_address=$((efi_end_address + 1))
 start_address=
 end_address=
 
-pushd /scratch
+pushd /scratch >/dev/null
 index=0
 distro_number=${#INSTALL_DISTRO[@]}
 
 for ((index=0; index<distro_number; index++))
 do
-	# Get necessary info for current distribution.
+	# Get necessary info for current distro.
 	part_index=$((PART_BASE_INDEX + index))
 	distro_name=${INSTALL_DISTRO[$index]}
 	rootfs_package="${distro_name}""_ARM64.tar.gz"
@@ -209,18 +255,22 @@ do
 	end_address=$((start_address + distro_capacity * 1000))
 	allocate_address=$((end_address + 1))
 	
-	# Create and fromat partition for current distribution.
-	echo "Create ${TARGET_DISK}${part_index} for $distro_name ......"
+	# Create and fromat partition for current distro.
+	echo "Creating and formatting ${TARGET_DISK}${part_index} for $distro_name."
 	(parted -s $TARGET_DISK "mkpart ROOT ext4 $start_address $end_address") >/dev/null 2>&1
 	(echo -e "t\n$part_index\n13\nw\n" | fdisk $TARGET_DISK) >/dev/null 2>&1
 	(yes | mkfs.ext4 ${TARGET_DISK}${part_index}) >/dev/null 2>&1
-	echo "Create done!"
+	echo "Create and format ${TARGET_DISK}${part_index} for $distro_name."
 	
+	echo "Installing $rootfs_package into ${TARGET_DISK}${part_index}."
 	# Mount root dev to mnt and uncompress rootfs to root dev
-	mount ${TARGET_DISK}${part_index} /mnt/ 2>/dev/null
-	echo "Uncompress $rootfs_package to ${TARGET_DISK}${part_index} ......"
-	tar xvf $rootfs_package -C /mnt/ 2>/dev/null
-	echo "Uncompress $rootfs_package to ${TARGET_DISK}${part_index} done!"
+	if ! mount ${TARGET_DISK}${part_index} /mnt/ 2>/dev/null; then
+		echo "Error!!! Unable mount ${TARGET_DISK}${part_index} to /mnt!" >&2 ; exit 1
+	fi
+	if ! tar xvf $rootfs_package -C /mnt/ 2>/dev/null; then
+		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; exit 1
+	fi
+	echo "Install $rootfs_package into ${TARGET_DISK}${part_index} done."
 
 	sync
 	umount /mnt/
@@ -229,23 +279,19 @@ do
 	sleep 1s
 done
 
-popd
-echo ""
-sleep 1s
+popd >/dev/null
+echo "Install distros done!"
+echo "" ; sleep 1s
 
 ###################################################################################
 # Update grub configuration file
 ###################################################################################
-echo "Update grub configuration file ......"
-PLATFORM=`jq -r ".system.platform" $INSTALL_CFG`
+echo "/*---------------------------------------------------------------"
+echo "- Update grub configuration file. Please wait for a moment!"
+echo "---------------------------------------------------------------*/"
+
 platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
-
-if [ x"D02" = x"$PLATFORM" ]; then
-	cmd_line="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
-else
-	cmd_line="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp"
-fi
-
+eval cmd_line=\$${PLATFORM}_CMDLINE
 if [ x"$ACPI" = x"YES" ]; then
 	cmd_line="${cmd_line} ${ACPI_ARG}"
 fi
@@ -255,43 +301,39 @@ boot_dev_uuid=`expr "${boot_dev_info}" : '[^=]*=\(.*\)'`
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
 
-pushd /boot/
+pushd /boot/ >/dev/null
 Image="`ls Image*`"
-Dtb="`ls hip*.dtb`"
-popd
+popd >/dev/null
 
+echo "Updating grub.cfg."
 distro_number=${#INSTALL_DISTRO[@]}
-for ((index=0; index<distro_number; index++))
-do
+for ((index=0; index<distro_number; index++)); do
 	part_index=$((PART_BASE_INDEX + index))
 	root_dev="${TARGET_DISK}${part_index}"
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
 	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
-	device_tree_arg="/$Dtb"
-
 	distro_name=${INSTALL_DISTRO[$index]}
 	
-
 cat >> /boot/grub/grub.cfg << EOF
 # Booting from SATA with $distro_name rootfs
 menuentry "${PLATFORM} $distro_name" --id ${platform}_${distro_name} {
     set root=(hd0,gpt1)
     search --no-floppy --fs-uuid --set=root $boot_dev_uuid
     linux $linux_arg
-    # devicetree $device_tree_arg
 }
 
 EOF
 
 done
 
-# Set the first distribution to default
+# Set the first distro to default
 default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}"
 sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub/grub.cfg
 
-echo "Update grub configuration file done!"
+echo "Update grub.cfg done!"
+echo ""
 
 sync
 umount $BOOT_DEV
@@ -299,9 +341,24 @@ umount $BOOT_DEV
 ###################################################################################
 # Umount install disk
 ###################################################################################
+echo "/*---------------------------------------------------------------"
+echo "- Umount install disk. Please wait for a moment!"
+echo "---------------------------------------------------------------*/"
 cd ~
 umount /scratch
-echo "The system will restart in 3 seconds ......"
-sleep 3
-reboot
+echo ""
 
+###################################################################################
+# Restart the system
+###################################################################################
+echo "/*---------------------------------------------------------------"
+echo "- All install finished!"
+echo "---------------------------------------------------------------*/"
+for ((i=1; i<16; i++)); do
+	printf "\r"
+	if read -t 1 -p "The system will restart in $i second(s)! Press any key to stop." c; then
+		echo "" ; exit 0
+	fi
+done
+
+reboot
