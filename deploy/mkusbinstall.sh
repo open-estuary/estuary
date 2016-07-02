@@ -1,6 +1,7 @@
 #!/bin/bash
 ###################################################################################
-# mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
+# mkusbinstall.sh --target=/dev/sdb --platforms=D02 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
+# mkusbinstall.sh --target=/dev/sdb --platforms=D02,D03 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
 . $TOPDIR/usb-func.sh
@@ -9,7 +10,7 @@ TOPDIR=$(cd `dirname $0` ; pwd)
 # Global variable
 ###################################################################################
 TARGET=
-PLATFORM=
+PLATFORMS=
 DISTROS=
 CAPACITY=
 BINARY_DIR=
@@ -33,16 +34,16 @@ cat << EOF
 Usage: mkusbinstall.sh [OPTION]... [--OPTION=VALUE]...
 	-h, --help              display this help and exit
 	--target=xxx            deploy usb device
-	--platform=xxx          which platform to deploy (D02, D03)
+	--platforms=xxx,xxx     which platforms to deploy (D02, D03)
 	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
 	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
 	--bindir=xxx            binary directory
 	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
   
 for example:
-	mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse \\
+	mkusbinstall.sh --target=/dev/sdb --platforms=D02 --distros=Ubuntu,OpenSuse \\
 	--capacity=50,50 --bindir=./workspace
-	mkusbinstall.sh --target=/dev/sdb --platform=D02 --distros=Ubuntu,OpenSuse \\
+	mkusbinstall.sh --target=/dev/sdb --platforms=D02,D03 --distros=Ubuntu,OpenSuse \\
 	--capacity=50,50 --bindir=./workspace --disklabel=Estuary
 
 EOF
@@ -63,7 +64,7 @@ do
 	case $ac_option in
 		-h | --help) Usage ; exit ;;
 		--target) TARGET=$ac_optarg ;;
-		--platform) PLATFORM=$ac_optarg ;;
+		--platforms) PLATFORMS=$ac_optarg ;;
 		--distros) DISTROS=$ac_optarg ;;
 		--capacity) CAPACITY=$ac_optarg ;;
 		--bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
@@ -77,8 +78,8 @@ done
 ###################################################################################
 # Check parameters
 ###################################################################################
-if  [ x"$PLATFORM" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
-	echo "target: $TARGET, platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
+if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
+	echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
 	echo "Error! Please all parameters are right!" >&2
 	Usage ; exit 1
 fi
@@ -152,15 +153,15 @@ cp $TOPDIR/setup.sh ./ || exit 1
 ###################################################################################
 # Copy distros
 ###################################################################################
-echo "Copy distributions to $WORKSPACE......"
+echo "Copy distros to $WORKSPACE......"
 
 distros=($(echo $DISTROS | tr ',' ' '))
 for distro in ${distros[*]}; do
-	echo "Copy distribution ${distro}_ARM64.tar.gz to $WORKSPACE......"
+	echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
 	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
 done
 
-echo "Copy distributions to $WORKSPACE done!"
+echo "Copy distros to $WORKSPACE done!"
 echo ""
 
 ###################################################################################
@@ -182,7 +183,7 @@ if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
 fi
 
 cat > ./usr/bin/Estuary.txt << EOF
-PLATFORM=$PLATFORM
+PLATFORMS=$PLATFORMS
 DISTROS=$DISTROS
 CAPACITY=$CAPACITY
 EOF
@@ -201,31 +202,37 @@ sudo rm -rf rootfs
 ###################################################################################
 # Create grub.cfg
 ###################################################################################
-distros=`echo $DISTROS | tr ',' ' '`
-platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
-
 Image="`ls Image*`"
 Initrd="`ls initrd*.gz`"
-eval cmd_line=\$${PLATFORM}_CMDLINE
+platforms=(`echo $PLATFORMS | tr ',' ' '`)
+default_plat=`echo ${platforms[0]} | tr "[:upper:]" "[:lower:]"`
 
 cat > grub.cfg << EOF
 # NOTE: Please remove the unused boot items according to your real condition.
 # Sample GRUB configuration file
 #
 
-# Boot automatically after 0 secs.
-set timeout=3
+# Boot automatically after 5 secs.
+set timeout=5
 
 # By default, boot the Linux
-set default=${platform}_minilinux
+set default=${default_plat}_minilinux
 
-# Booting from PXE with mini rootfs
-menuentry "Install estuary" --id ${platform}_minilinux {
-    linux /$Image $cmd_line
-    initrd /$Initrd
+EOF
+
+for plat in ${platforms[*]}; do
+	eval cmd_line=\$${plat}_CMDLINE
+	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
+	cat >> grub.cfg << EOF
+# Booting initrd for $plat
+menuentry "$Install $plat estuary" --id ${platform}_minilinux {
+	linux /$Image $cmd_line
+	initrd /$Initrd
 }
 
 EOF
+
+done
 
 ###################################################################################
 # Create EFI System
