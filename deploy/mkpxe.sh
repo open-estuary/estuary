@@ -1,430 +1,249 @@
 #!/bin/bash
-#description: setup PXE environment for deploying estuary.
-#author: wangyanliang
-#date: October 19, 2015
+###################################################################################
+# mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --capacity=50,50 --bindir=./workspace
+# mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --capacity=50,50 --bindir=./workspace --net=eth0
+###################################################################################
+TOPDIR=$(cd `dirname $0` ; pwd)
+export PATH=$TOPDIR:$PATH
+. $TOPDIR/pxe-func.sh
 
-cwd=`dirname $0`
-cd $cwd/../
-
-PRJROOT=`pwd`
+###################################################################################
+# Global variable
+###################################################################################
+BOARDSMAC=
 PLATFORM=
-CFGFILE=$PRJROOT/estuary/estuarycfg.json
+DISTROS=
+CAPACITY=
 BINARY_DIR=
-NFS_ROOT=
+
+WORKSPACE=
+
 TFTP_ROOT=
+NFS_ROOT=
+NETCARD_NAME=
+SERVER_IP=
 
-. $PRJROOT/estuary/common.sh
-
-###################################################################################
-# 01. Verify distribution
-###################################################################################
-echo
-echo "--------------------------------------------------------------------------------"
-echo "Verifying Linux host distribution"
-
-get_host_type host
-
-if [ "$host" != "lucid" -a "$host" != "precise" -a "$host" != "trusty" ]; then
-	echo "Unsupported host machine, only Ubuntu 12.04 LTS and Ubuntu 14.04 LTS are supported"
-	exit 1
-fi
-echo "Ubuntu 12.04 LTS and Ubuntu 14.04 LTS is being used, continuing.."
-echo "--------------------------------------------------------------------------------"
-echo
+D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000"
+D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8"
 
 ###################################################################################
-# 02. Install host packages
+# Usage
 ###################################################################################
-entry_header() {
+Usage()
+{
 cat << EOF
--------------------------------------------------------------------------------
-setup package script
-This script will make sure you have the proper host support packages installed
-This script requires administrator priviliges (sudo access) if packages are to be installed.
--------------------------------------------------------------------------------
+###################################################################
+# mkusbinstall.sh usage
+###################################################################
+Usage: mkpxe.sh [OPTION]... [--OPTION=VALUE]...
+	-h, --help              display this help and exit
+	--boardmac=xxx,xxx      target boards mac
+	--platform=xxx          which platform to deploy (D02, D03)
+	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
+	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
+	--bindir=xxx            binary directory
+	--tftproot=xxx          tftp root directory (if not specified, you can select it in runing)
+	--nfsroot=xxx           nfs root directory (if not specified, you can select it in runing)
+	--net=xxx               wich ethernet card that the boards will connect to (if not specified, you can select it in runing)
+
+  
+for example:
+	mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+	--capacity=50,50 --bindir=./workspace
+	mkpxe.sh --platform=D02 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+	--capacity=50,50 --bindir=./workspace --net=eth0
+
 EOF
 }
 
-exit_footer() {
-cat << EOF
---------------------------------------------------------------------------------
-Package verification and installation successfully completed
---------------------------------------------------------------------------------
-EOF
-}
-
-entry_header
-
-packages_to_install="jq isc-dhcp-server syslinux tftpd-hpa tftp-hpa lftp nfs-kernel-server rpcbind build-essential libncurses5-dev openbsd-inetd"
-dpkg-query -l $packages_to_install >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-	sudo apt-get update
-	sudo apt-get install -y $packages_to_install
-	if [ $? -ne 0 ]; then
-		echo -e "\033[31mInstall packages failed!\033[0m" ; exit 1
-	fi
-fi
-
-# Print the exit statement to the console
-exit_footer
-
 ###################################################################################
-# 03. Get host ethernet info
+# Get parameters
 ###################################################################################
-echo "Get host sever inet addr, broadcast, netmask, etc."
-netcard_count=`ifconfig -a | grep -A 1 eth | grep "inet addr" | grep -v 127.0.0.1 | grep -v "Bcast:0.0.0.0" | wc -l`
-if [ $netcard_count -gt 1 ]; then
-	echo "netcard_count=$netcard_count"
-	echo -e "\nPlease choise the network card needed: \n"
-	ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
-	echo " "
-
-	NETCARDNUMBER=
-	while true; 
-	do
-		read -p 'Enter Device Number or 'q' to exit: ' NETCARDNUMBER
-		echo " "
-		if [ "$NETCARDNUMBER" = 'q' ]; then
-			exit 1
-		fi
-
-		if [ "$NETCARDNUMBER" = "" ]; then
-			echo -e "\nPlease choise the network card needed: \n"
-			ifconfig -a | grep -A 1 eth | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
-			echo " "
-			continue
-		fi
-
-		NETCARDNAME=`ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
-		if [ -n "$NETCARDNAME" ]; then
-			HWaddr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $5}'`
-			inet_addr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $7}' | awk 'BEGIN{FS=":"} {print $2}'`
-			broad_cast=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $8}' | awk 'BEGIN{FS=":"} {print $2}'`
-			inet_mask=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $9}' | awk 'BEGIN{FS=":"} {print $2}'`
-			sub_net=`route | grep "$NETCARDNAME" | grep -v default | awk '{print $1}'`
-			router=`route | grep "$NETCARDNAME" | grep default | awk '{print $2}'`
-			if [ x"$router" = x"" ]; then
-				router="0.0.0.0"
-			fi
-			echo "HWaddr=$HWaddr, inet_addr=$inet_addr, broad_cast=$broad_cast, inet_mask=$inet_mask, sub_net=$sub_net, router=$router"
-			break
-		else
-			echo -e "Invalid selection!"
-			echo -e "\nPlease choise the network card needed: \n"
-			ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}'
-			echo " "
-		fi
-	done
-
-	echo "$NETCARDNAME was selected"
-elif [ $netcard_count -eq 1 ]; then
-	echo ""
-	echo "netcard_count=$netcard_count"
-	NETCARDNUMBER=1
-	NETCARDNAME=`ifconfig -a | grep -A 1 eth | grep -B 1 "inet addr" | grep -v "Bcast:0.0.0.0" | awk 'BEGIN{FS="\n";OFS=") ";RS="--\n"} {print NR,$0}' | grep "${NETCARDNUMBER})" | awk '{print $2}'`
-	if [ -n "$NETCARDNAME" ]; then
-		HWaddr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $5}'`
-		inet_addr=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $7}' | awk 'BEGIN{FS=":"} {print $2}'`
-		broad_cast=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $8}' | awk 'BEGIN{FS=":"} {print $2}'`
-		inet_mask=`ifconfig -a | grep -A 1 "$NETCARDNAME" | awk 'BEGIN{RS="--\n"} {print $9}' | awk 'BEGIN{FS=":"} {print $2}'`
-		sub_net=`route | grep "$NETCARDNAME" | grep -v default | awk '{print $1}'`
-		router=`route | grep "$NETCARDNAME" | grep default | awk '{print $2}'`
-		if [ x"$router" = x"" ]; then
-			router="0.0.0.0"
-		fi
-		echo "HWaddr=$HWaddr, inet_addr=$inet_addr, broad_cast=$broad_cast, inet_mask=$inet_mask, sub_net=$sub_net, router=$router"
-	else
-		echo -e "$NETCARDNAME not exist !!!" ; exit 1
-	fi
-else
-	echo "Please setup NetCard!" ; exit 1
-fi
-
-###################################################################################
-# 04. Set up DHCP server
-###################################################################################
-cat > /tmp/isc-dhcp-server << EOM
-INTERFACES="$NETCARDNAME"
-EOM
-
-sudo mv /tmp/isc-dhcp-server /etc/default/isc-dhcp-server
-
-net_param=${inet_addr%.*}
-cat > /tmp/dhcpd.conf << EOM
-authoritative;
-default-lease-time 600;
-max-lease-time 7200;
-ping-check true;
-ping-timeout 2;
-allow booting;
-allow bootp;
-subnet ${sub_net} netmask ${inet_mask} {
-    range ${net_param}.210 ${net_param}.250;
-    option subnet-mask ${inet_mask};
-    option domain-name-servers ${router};
-    option time-offset -18000;
-    option routers ${router};
-    option subnet-mask ${inet_mask};
-    option broadcast-address ${broad_cast};
-    default-lease-time 600;
-    max-lease-time 7200;
-    next-server ${inet_addr};
-    filename "grubaa64.efi";
-}
-EOM
-
-sudo mv /tmp/dhcpd.conf /etc/dhcp/dhcpd.conf
-
-###################################################################################
-# 05. Set tftp server
-###################################################################################
-tftproot=
-tftpcfg=/etc/default/tftpd-hpa
-tftprootdefault=/var/lib/tftpboot
-
-tftp() {
-	cat > /tmp/inetd.conf << EOM
-tftp    dgram   udp    wait    root    /usr/sbin/in.tftpd /usr/sbin/in.tftpd -s $tftproot
-EOM
-	sudo mv /tmp/inetd.conf /etc/inetd.conf
-}
-
-echo "--------------------------------------------------------------------------------"
-echo "Which directory do you want to be your tftp root directory?(if this directory does not exist it will be created for you)"
-read -p "[ $tftprootdefault ] " tftproot
-
-if [ ! -n "$tftproot" ]; then
-	tftproot=$tftprootdefault
-fi
-echo $tftproot > $cwd/../.tftproot
-echo "--------------------------------------------------------------------------------"
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "This step will set up the tftp server in the $tftproot directory."
-echo
-echo "Note! This command requires you to have administrator priviliges (sudo access) "
-echo "on your host."
-read -p "Press return to continue" REPLY
-
-sudo mkdir -p $tftproot 2>/dev/null
-check_status
-
-cat > /tmp/tftpd-hpa << EOM
-# /etc/default/tftpd-hpa
-
-TFTP_USERNAME="tftp"
-TFTP_DIRECTORY="$tftproot"
-TFTP_ADDRESS="0.0.0.0:69"
-TFTP_OPTIONS="-l -c -s"
-EOM
-
-sudo mv /tmp/tftpd-hpa /etc/default/tftpd-hpa
-
-if [ -f $tftpcfg ]; then
-	echo "$tftpcfg already exists.."
-	tmp=\"$tftproot\"
-	if [ "`cat $tftpcfg | grep TFTP_DIRECTORY | cut -d= -f2 | sed 's/^[ ]*//'`" \
-	  = "$tmp" ]; then
-		echo "$tftproot already exported for TFTP, skipping.."
-		tftp
-	else
-		echo "Copying old $tftpcfg to $tftpcfg.old"
-		sudo cp $tftpcfg $tftpcfg.old
-		check_status
-		tftp
-	fi
-else
-	tftp
-fi
-
-sudo chmod 777 -R $tftproot
-check_status
-sudo chown nobody $tftproot
-check_status
-
-TFTP_ROOT=$tftproot
-
-###################################################################################
-# 06. Set up NFS server
-###################################################################################
-dstdefault=/targetNFS
-echo "--------------------------------------------------------------------------------"
-echo "In which directory do you want to install the target filesystem?(if this directory does not exist it will be created)"
-read -p "[ $dstdefault ] " dst
-
-if [ ! -n "$dst" ]; then
-	dst=$dstdefault
-fi
-
-echo
-echo "--------------------------------------------------------------------------------"
-echo "This step will export your target filesystem for NFS access."
-echo
-echo "Note! This command requires you to have administrator priviliges (sudo access) "
-echo "on your host."
-read -p "Press return to continue" REPLY
-
-sudo mkdir -p $dst
-sudo chmod 777 $dst
-
-grep $dst /etc/exports > /dev/null
-if [ "$?" -eq "0" ]; then
-	echo "$dst already NFS exported, skipping.."
-else
-	sudo chmod 666 /etc/exports
-	check_status
-	sudo echo "$dst *(rw,nohide,insecure,no_subtree_check,async,no_root_squash)" >> /etc/exports
-	check_status
-	sudo chmod 644 /etc/exports
-	check_status
-fi
-
-echo
-sudo /etc/init.d/nfs-kernel-server stop
-check_status
-sleep 1
-sudo /etc/init.d/nfs-kernel-server start
-check_status
-
-NFS_ROOT=`mktemp -d $dst/rootfs.XXXXXX`
-
-###################################################################################
-# 07. Copy binary files
-###################################################################################
-platform=`jq -r ".system.platform" $CFGFILE`
-binary_dir=$PRJROOT/build/$platform/binary
-
-echo "--------------------------------------------------------------------------------"
-echo "Copy binary to NFS root......"
-echo "--------------------------------------------------------------------------------"
-
-# Copy distributions
-index=0
-install=`jq -r ".distros[$index].install" $CFGFILE 2>/dev/null`
-while [ x"$?" = x"0" ] && [ x"$install" != x"null" ] && [ x"$install" != x"" ];
+while test $# != 0
 do
-	if [ x"yes" = x"$install" ]; then
-		idx=${#distributions[@]}
-		distro=`jq -r ".distros[$index].name" $CFGFILE`
-		echo "copy distribution ${distro}_ARM64.tar.gz to $NFS_ROOT ......"
-		cp $binary_dir/${distro}_ARM64.tar.gz $NFS_ROOT/
-	fi
-	((index = index + 1))
-	install=`jq -r ".distros[$index].install" $CFGFILE 2>/dev/null`
+	case $1 in
+		--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
+			;;
+		*) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
+			;;
+	esac
+	
+	case $ac_option in
+		-h | --help) Usage ; exit ;;
+		--boardmac) BOARDSMAC=$ac_optarg ;;
+		--platform) PLATFORM=$ac_optarg ;;
+		--distros) DISTROS=$ac_optarg ;;
+		--capacity) CAPACITY=$ac_optarg ;;
+		--bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
+		--tftproot) TFTP_ROOT=$ac_optarg ;;
+		--nfsroot) NFS_ROOT=$ac_optarg ;;
+		--net) NETCARD_NAME=$ac_optarg ;;
+		*) echo "Unknow option $ac_option!" >&2 ; Usage ; exit 1 ;;
+	esac
+
+	shift
 done
 
-# Copy kernel, grub to NFS root......
-echo "copy kernel related files to $NFS_ROOT......"
-cp $binary_dir/grub*.efi $NFS_ROOT/
-cp $binary_dir/hip*.dtb $NFS_ROOT/
-cp $binary_dir/Image* $NFS_ROOT/
-echo "--------------------------------------------------------------------------------"
-echo "Copy binary to NFS root done!"
-echo "--------------------------------------------------------------------------------"
+###################################################################################
+# Check parameters
+###################################################################################
+if  [ x"$PLATFORM" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ] || [ x"$BOARDSMAC" = x"" ]; then
+	echo "board mac: $BOARDSMAC, platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
+	echo "Error! Please all parameters are right!" >&2
+	Usage ; exit 1
+fi
 
-# Copy kernel, grub to TFTP root......
-# echo "copy kernel related files to $TFTP_ROOT......"
-# cp $binary_dir/grub*.efi $TFTP_ROOT/
-# cp $binary_dir/hip*.dtb $TFTP_ROOT/
-# cp $binary_dir/Image* $TFTP_ROOT/
-
-PLATFORM=$platform
-BINARY_DIR=$binary_dir
+distros=($(echo "$DISTROS" | tr ',' ' '))
+capacity=($(echo "$CAPACITY" | tr ',' ' '))
+if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
+	echo "Error! Number of capacity is not eq the distros!" >&2
+	Usage ; exit 1
+fi
 
 ###################################################################################
-# initrd.gz
+# Setup PXE server
 ###################################################################################
+if [ x"$TFTP_ROOT" = x"" ];
+	get_pxe_tftproot TFTP_ROOT || exit 1
+fi
+
+if [ x"$NFS_ROOT" = x"" ];
+	get_pxe_nfsroot NFS_ROOT || exit 1
+fi
+
+if [ x"$NETCARD_NAME" = x"" ]; then
+	if ! get_pxe_interface NETCARD_NAME; then
+		exit 1
+	fi
+fi
+SERVER_IP=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=inet addr:)([^ ]*)"`
+
+
+mkdir -p $TFTP_ROOT $NFS_ROOT
+TFTP_ROOT=`cd $TFTP_ROOT; pwd`
+NFS_ROOT=`cd $NFS_ROOT; pwd`
+
+if ! setup-pxe.sh --tftproot=$TFTP_ROOT --nfsroot=$NFS_ROOT --net=$NETCARD_NAME; then
+	echo "Error! Setup PXE server failed!" >&2 || exit 1
+fi
+
+###################################################################################
+# Create Workspace
+###################################################################################
+WORKSPACE=`mktemp -d workspace.XXXX`
+
+###################################################################################
+# Copy kernel, grub, mini-rootfs, setup.sh ...
+###################################################################################
+cp $BINARY_DIR/grub*.efi $TFTP_ROOT/grubaa64.efi || exit 1
+cp $BINARY_DIR/Image $TFTP_ROOT/ || exit 1
+
+###################################################################################
+# Copy distros
+###################################################################################
+NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
+echo "Copy distributions to $NFS_ROOT......"
+
+distros=($(echo $DISTROS | tr ',' ' '))
+for distro in ${distros[*]}; do
+	echo "Copy distribution ${distro}_ARM64.tar.gz to $NFS_ROOT......"
+	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
+done
+
+echo "Copy distributions to $NFS_ROOT done!"
+echo ""
+
+###################################################################################
+# Switch to Workspace!!!
+###################################################################################
+pushd $WORKSPACE >/dev/null
+
+###################################################################################
+# Create initrd file
+###################################################################################
+cp $BINARY_DIR/mini-rootfs.cpio.gz ./ || exit 1
+cp $BINARY_DIR/deploy-utils.tar.bz2 ./ || exit 1
+cp $TOPDIR/setup.sh ./ || exit 1
+
+sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" setup.sh
+
 user=`whoami`
 group=`groups | awk '{print $1}'`
+mkdir rootfs
 
-mkdir workspace
-cp $binary_dir/mini-rootfs-arm64.cpio.gz workspace/
-cp $binary_dir/deploy-utils.tar.bz2 workspace/
-cp ./estuary/setup.sh workspace/
-cp ./estuary/estuarycfg.json workspace/
-
-pushd workspace
-
-# rootfs start
-mkdir rootfs ; pushd rootfs
-zcat ../mini-rootfs-arm64.cpio.gz | sudo cpio -dimv
+pushd rootfs >/dev/null
+zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv || exit 1
+rm -f ../mini-rootfs.cpio.gz
 sudo chown -R ${user}:${group} *
+
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
-	echo "/usr/bin/setup.sh" >> etc/init.d/rcS
+	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
 
-cp ../estuarycfg.json ./usr/bin/
+cat > ./usr/bin/Estuary.txt << EOF
+PLATFORM=$PLATFORM
+DISTROS=$DISTROS
+CAPACITY=$CAPACITY
+EOF
+
 mv ../setup.sh ./usr/bin/
-sed -i "s/\(INSTALL_TYPE=\"\).*\(\"\)/\1NFS\2/g" ./usr/bin/setup.sh
+tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
+rm -f ../deploy-utils.tar.bz2
 sudo chmod 755 ./usr/bin/setup.sh
-tar jxvf ../deploy-utils.tar.bz2 -C ./
+
 sudo chown -R root:root *
-find | sudo cpio -o -H newc | gzip -c > ../initrd.gz
-popd
-# rootfs end
-cp initrd.gz $TFTP_ROOT/
-popd
-sudo rm -rf workspace
+find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
+
+popd >/dev/null
+sudo rm -rf rootfs
 
 ###################################################################################
-#
+# Create grub.cfg
 ###################################################################################
-sudo rm -f $tftproot/grub.cfg*
-if [ x"D02" = x"$PLATFORM" ]; then
-	cmd_line="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=${inet_addr}:$NFS_ROOT ip=dhcp"
-else
-	cmd_line="rdinit=/init console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=${inet_addr}:$NFS_ROOT ip=dhcp"
-fi
+distros=`echo $DISTROS | tr ',' ' '`
+platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
 
-pushd $BINARY_DIR
 Image="`ls Image*`"
-Dtb="`ls hip*.dtb`"
-Grub="`ls grub*.efi`"
-popd
+Initrd="`ls initrd*.gz`"
+eval cmd_line=\$${PLATFORM}_CMDLINE
 
-cp $BINARY_DIR/$Image $TFTP_ROOT/
-cp $BINARY_DIR/$Dtb $TFTP_ROOT/
-cp $BINARY_DIR/$Grub $TFTP_ROOT/
+cat > grub.cfg << EOF
+# NOTE: Please remove the unused boot items according to your real condition.
+# Sample GRUB configuration file
+#
 
-idx=0
-mac_addr=`jq -r ".boards[$idx].mac" $CFGFILE`
-sudo rm -f $tftproot/grub.cfg*
-while [ x"$mac_addr" != x"null" ];
-do
-	grub_suffix=$mac_addr
-cat > $tftproot/grub.cfg-$grub_suffix << EOM
-set timeout=5
-set default=minilinux
-menuentry "Install estuary" --id minilinux {
-        set root=(tftp,${inet_addr})
-        linux /$Image $cmd_line
-        initrd /initrd.gz
-        # devicetree /$Dtb
+# Boot automatically after 0 secs.
+set timeout=3
+
+# By default, boot the Linux
+set default=${platform}_minilinux
+
+# Booting from PXE with mini rootfs
+menuentry "Install estuary" --id ${platform}_minilinux {
+    linux /$Image $cmd_line root=/dev/nfs rw nfsroot=${SERVER_IP}:$NFS_ROOT ip=dhcp
+    initrd /$Initrd
 }
-EOM
-	let idx=$idx+1
-	mac_addr=`jq -r ".boards[$idx].mac" $CFGFILE`
+
+EOF
+
+boards_mac=($(echo $BOARDSMAC | tr ',' ' '))
+for board_mac in ${boards_mac[*]}; do
+	cp grub.cfg $TFTP_ROOT/grub.cfg-${board_mac} || exit 1
 done
 
 ###################################################################################
-# 08. Stat all services
+# Pop Workspace!!!
 ###################################################################################
-sudo update-inetd --enable BOOT
+popd >/dev/null
 
-echo
-echo "Restarting tftp server"
-sudo service isc-dhcp-server stop
-sudo service openbsd-inetd stop
-sudo service tftpd-hpa stop
-check_status
-sleep 1
-sudo service isc-dhcp-server start
-sudo service openbsd-inetd start
-sudo service tftpd-hpa start
-check_status
-echo "--------------------------------------------------------------------------------"
+# sync
+
+###################################################################################
+# Delete workspace
+###################################################################################
+sudo rm -rf $WORKSPACE 2>/dev/null
+echo "Setup PXE deployment environment successful!"
+echo ""
 
 exit 0
-
 

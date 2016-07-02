@@ -88,11 +88,11 @@ if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
 fi
 
 ###################################################################################
-# Create Workspace
+# Create Workspace and Switch to Workspace!!!
 ###################################################################################
 WORKSPACE=`mktemp -d /tmp/workspace.XXXX`
 rm -f ${DISK_LABEL}_${PLATFORM}.iso
-pushd $WORKSPACE
+pushd $WORKSPACE >/dev/null
 
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh ...
@@ -101,7 +101,6 @@ cp $BINARY_DIR/grub*.efi ./ || exit 1
 cp $BINARY_DIR/Image ./ || exit 1
 cp $BINARY_DIR/mini-rootfs.cpio.gz ./ || exit 1
 cp $BINARY_DIR/deploy-utils.tar.bz2 ./ || exit 1
-
 cp $TOPDIR/setup.sh ./ || exit 1
 
 ###################################################################################
@@ -115,7 +114,7 @@ for distro in ${distros[*]}; do
 	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
 done
 
-echo "Copy distributions to workspace done!"
+echo "Copy distributions to $WORKSPACE done!"
 echo ""
 
 ###################################################################################
@@ -127,7 +126,7 @@ user=`whoami`
 group=`groups | awk '{print $1}'`
 mkdir rootfs
 
-pushd rootfs
+pushd rootfs >/dev/null
 zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv || exit 1
 rm -f ../mini-rootfs.cpio.gz
 sudo chown -R ${user}:${group} *
@@ -150,7 +149,7 @@ sudo chmod 755 ./usr/bin/setup.sh
 sudo chown -R root:root *
 find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
 
-popd
+popd >/dev/null
 sudo rm -rf rootfs
 
 ###################################################################################
@@ -186,7 +185,7 @@ EOF
 # Create EFI System
 ###################################################################################
 mkdir -p EFI/GRUB2/
-cp grubaa64.efi EFI/GRUB2/grubaa64.efi
+cp grubaa64.efi EFI/GRUB2/grubaa64.efi || exit 1
 
 sudo dd if=/dev/zero of=boot.img bs=1M count=4 2>/dev/null || exit 1
 sudo mkfs.vfat boot.img || exit 1
@@ -201,16 +200,16 @@ sudo umount /mnt/
 genisoimage -e boot.img -no-emul-boot -J -R -c boot.catalog -hide boot.catalog -hide boot.img -V "$DISK_LABEL" -o /tmp/${DISK_LABEL}.iso . || exit 1
 
 ###################################################################################
-# Pop Workspace
+# Pop Workspace!!!
 ###################################################################################
-popd
+popd >/dev/null
 
 ###################################################################################
 # Delete workspace
 ###################################################################################
 mv /tmp/${DISK_LABEL}.iso ${DISK_LABEL}_${PLATFORM}.iso || exit 1
 sudo rm -rf $WORKSPACE 2>/dev/null
-echo "mkisoimg successful!"
+echo "Create ISO deployment environment successful!"
 echo ""
 
 exit 0
