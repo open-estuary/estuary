@@ -1,6 +1,6 @@
 [version]
 release: estuary-v2.3rc0
-download_address: http://open-estuary.org/download/AllDownloads/EstuaryInternalConfig
+download_address: http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig
 
 [toolchain]
 gcc-linaro-aarch64-linux-gnu: toolchain/gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux.tar.xz
