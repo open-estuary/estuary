@@ -223,7 +223,7 @@ for plat in ${platforms[*]}; do
 	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
 	cat >> grub.cfg << EOF
 # Booting initrd for $plat
-menuentry "$Install $plat estuary" --id ${platform}_minilinux {
+menuentry "Install $plat estuary" --id ${platform}_minilinux {
 	linux /$Image $cmd_line
 	initrd /$Initrd
 }
