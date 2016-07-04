@@ -11,7 +11,6 @@ copy_plat_doc()
 	target_dir=$3
 	for doc in `find $src_dir -type f -name "*.4$plat.md" 2>/dev/null`; do
 		target_doc=`basename $doc | sed "s/\(.*\)\(.4$plat\)\(.md\)$/\1\3/"`
-		echo $target_doc
 		cp $doc $target_dir/$target_doc || return 1
 	done
 

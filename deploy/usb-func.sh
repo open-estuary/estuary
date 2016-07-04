@@ -28,7 +28,7 @@ check_usb_device()
 	if [ x"usb_device" = x"" ] || [ ! -b $usb_device ]; then
 		echo "Device $usb_device is not exist!" ; return 1
 	else
-		if ! sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | grep $usb_device; then
+		if sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | grep $usb_device >/dev/null; then
 			return 0
 		else
 			echo "Device $usb_device is not an usb device!" ; return 1

@@ -4,7 +4,7 @@
 # mkusbinstall.sh --target=/dev/sdb --platforms=D02,D03 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
-. $TOPDIR/usb-func.sh
+. usb-func.sh
 
 ###################################################################################
 # Global variable
@@ -225,7 +225,7 @@ for plat in ${platforms[*]}; do
 	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
 	cat >> grub.cfg << EOF
 # Booting initrd for $plat
-menuentry "$Install $plat estuary" --id ${platform}_minilinux {
+menuentry "Install $plat estuary" --id ${platform}_minilinux {
 	linux /$Image $cmd_line
 	initrd /$Initrd
 }
