@@ -1,7 +1,7 @@
 #!/bin/bash
 ###################################################################################
 # Notice: Only support grubaa64.efi at present
-# setup-pxe.sh --tftproot=/var/lib/tftpboot --nfsroot=/var/nfsroot --net=eth0
+# setup-pxe.sh --tftproot=/var/lib/tftpboot --nfsroot=/var/lib/nfsroot --net=eth0
 ###################################################################################
 
 ###################################################################################
@@ -34,7 +34,7 @@ Usage: setup-pxe.sh --tftproot=xxx --nfsroot=xxx --net=xxx
 	--net                   wich ethernet card that the device will connect to (eth0, eth1 ...)
 
 for example:
-	setup-pxe.sh --tftproot=/var/lib/tftpboot --nfsroot=/var/nfsroot
+	setup-pxe.sh --tftproot=/var/lib/tftpboot --nfsroot=/var/nfsroot --net=eth0
 
 EOF
 }
@@ -139,11 +139,10 @@ sudo mv /tmp/dhcpd.conf /etc/dhcp/dhcpd.conf
 ###################################################################################
 # Set tftp server
 ###################################################################################
-mkdir -p $TFTP_ROOT
-tftproot=`cd $TFTP_ROOT; pwd`
+sudo mkdir -p $TFTP_ROOT
+tftp_root=`cd $TFTP_ROOT; pwd`
 tftpcfg=/etc/default/tftpd-hpa
 
-sudo mkdir -p $tftp_root 2>/dev/null || exit 1
 cat > /tmp/tftpd-hpa << EOM
 # /etc/default/tftpd-hpa
 
@@ -174,7 +173,7 @@ TFTP_ROOT=$tftp_root
 # Set up NFS server
 ###################################################################################
 sudo mkdir -p $NFS_ROOT
-nfsroot=`cd $NFS_ROOT; pwd`
+nfs_root=`cd $NFS_ROOT; pwd`
 
 sudo chmod 777 $nfs_root
 if ! grep $nfs_root /etc/exports >/dev/null 2>&1; then
