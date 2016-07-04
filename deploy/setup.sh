@@ -1,6 +1,10 @@
 #!/bin/bash
-
+###################################################################################
+# initialize
+###################################################################################
+trap 'exit 0' INT
 echo 0 > /proc/sys/kernel/printk
+
 D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp"
 HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
@@ -31,18 +35,18 @@ DISTRO_CAPACITIES=()
 # Install parameters
 ###################################################################################
 platforms=`cat $ESTUARY_CFG | grep -Eo "PLATFORMS=[^ ]*"`
-PLATFORMS=(`expr "X$platform" : 'X[^=]*=\(.*\)' | tr ',' ' '`
+PLATFORMS=(`expr "X$platforms" : 'X[^=]*=\(.*\)' | tr ',' ' '`)
 PLATFORM=${PLATFORMS[0]}
 
-if [ ${#[PLATFORMS[@]} -gt 1 ]; then
+if [ ${#PLATFORMS[@]} -gt 1 ]; then
 	echo "Notice! Multiple platforms found."
 	while true; do
 		echo ""
 		echo "---------------------------------------------------------------"
 		echo "- platfrom: ${PLATFORMS[*]}"
 		echo "---------------------------------------------------------------"
-		read -p "Please input the platfrom name to install " plat
-		if `echo ${PLATFORMS[*]} | grep -E "\b${plat}\b"`; then
+		read -p "Please input the platfrom name to install. " plat
+		if echo ${PLATFORMS[*]} | grep -E "\b${plat}\b" >/dev/null; then
 			PLATFORM=$plat ; break
 		fi
 	done
@@ -108,7 +112,7 @@ else
 			echo "Found install disk labelled $DISK_LABEL."
 			break
 		fi
-		printf "\r%Wait for install source disk $DISK_LABEL to be ready...... [ %2d ]" $index 
+		printf "\rWait for install source disk $DISK_LABEL to be ready...... [ %2d ]" $index 
 		sleep 3
 		disk_info=`blkid | grep LABEL=\"$DISK_LABEL\"`
 	done

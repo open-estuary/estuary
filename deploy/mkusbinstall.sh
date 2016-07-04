@@ -183,7 +183,7 @@ if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
 	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
 
-cat > ./usr/bin/Estuary.txt << EOF
+cat > ./usr/bin/estuary.txt << EOF
 PLATFORMS=$PLATFORMS
 DISTROS=$DISTROS
 CAPACITY=$CAPACITY
