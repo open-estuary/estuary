@@ -59,17 +59,15 @@ build_grub()
 	(
 	prefix_dir=$(cd $1; pwd)
 	output_dir=$(cd $2; pwd)
+	core_num=`cat /proc/cpuinfo | grep "processor" | wc -l`
 	
 	pushd $GRUB_DIR
-	git reset --hard
-	git clean -fdx
-	git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
 
 	./autogen.sh
 	./configure --prefix=$prefix_dir --with-platform=efi \
 		--build=x86_64-linux-gnu --target=aarch64-linux-gnu \
 		--disable-werror --host=x86_64-linux-gnu
-	make -j40 && make install
+	make -j${core_num} && make install
 	
 	pushd $prefix_dir
 	./bin/grub-mkimage -v -o grubaa64.efi -O arm64-efi -p / boot chain configfile efinet ext2 fat \
