@@ -63,7 +63,6 @@ build_grub()
 	pushd $GRUB_DIR
 	git reset --hard
 	git clean -fdx
-	git apply ../patches/001-Search-for-specific-config-file-for-netboot.patch
 
 	./autogen.sh
 	./configure --prefix=$prefix_dir --with-platform=efi \
