@@ -104,11 +104,11 @@ fi
 ###################################################################################
 # Setup PXE server
 ###################################################################################
-if [ x"$TFTP_ROOT" = x"" ];
+if [ x"$TFTP_ROOT" = x"" ]; then
 	get_pxe_tftproot TFTP_ROOT || exit 1
 fi
 
-if [ x"$NFS_ROOT" = x"" ];
+if [ x"$NFS_ROOT" = x"" ]; then
 	get_pxe_nfsroot NFS_ROOT || exit 1
 fi
 
@@ -120,52 +120,51 @@ fi
 SERVER_IP=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=inet addr:)([^ ]*)"`
 
 
-mkdir -p $TFTP_ROOT $NFS_ROOT
+sudo mkdir -p $TFTP_ROOT $NFS_ROOT
+sudo chown -R $USER $TFTP_ROOT
+sudo chown -R $USER $NFS_ROOT
+
 TFTP_ROOT=`cd $TFTP_ROOT; pwd`
 NFS_ROOT=`cd $NFS_ROOT; pwd`
 
 if ! setup-pxe.sh --tftproot=$TFTP_ROOT --nfsroot=$NFS_ROOT --net=$NETCARD_NAME; then
-	echo "Error! Setup PXE server failed!" >&2 || exit 1
+	echo "Error! Setup PXE server failed!" >&2 ; exit 1
 fi
 
+NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
+
 ###################################################################################
-# Create Workspace
+# Create Workspace and Switch to Workspace!!!
 ###################################################################################
 WORKSPACE=`mktemp -d workspace.XXXX`
+pushd $WORKSPACE >/dev/null
 
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
-cp $BINARY_DIR/grub*.efi $TFTP_ROOT/grubaa64.efi || exit 1
-cp $BINARY_DIR/Image $TFTP_ROOT/ || exit 1
-
-###################################################################################
-# Copy distros
-###################################################################################
-NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
-echo "Copy distros to $WORKSPACE......"
-
-distros=($(echo $DISTROS | tr ',' ' '))
-for distro in ${distros[*]}; do
-	echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
-	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
-done
-
-echo "Copy distros to $WORKSPACE done!"
-echo ""
-
-###################################################################################
-# Switch to Workspace!!!
-###################################################################################
-pushd $WORKSPACE >/dev/null
-
-###################################################################################
-# Create initrd file
-###################################################################################
+cp $BINARY_DIR/grub*.efi ./ || exit 1
+cp $BINARY_DIR/Image ./ || exit 1
 cp $BINARY_DIR/mini-rootfs.cpio.gz ./ || exit 1
 cp $BINARY_DIR/deploy-utils.tar.bz2 ./ || exit 1
 cp $TOPDIR/setup.sh ./ || exit 1
 
+###################################################################################
+# Copy distros
+###################################################################################
+echo "Copy distros to $NFS_ROOT......"
+
+distros=($(echo $DISTROS | tr ',' ' '))
+for distro in ${distros[*]}; do
+	echo "Copy distro ${distro}_ARM64.tar.gz to $NFS_ROOT......"
+	cp $BINARY_DIR/${distro}_ARM64.tar.gz $NFS_ROOT || exit 1
+done
+
+echo "Copy distros to $NFS_ROOT done!"
+echo ""
+
+###################################################################################
+# Create initrd file
+###################################################################################
 sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" setup.sh
 
 user=`whoami`
@@ -203,6 +202,8 @@ sudo rm -rf rootfs
 ###################################################################################
 Image="`ls Image*`"
 Initrd="`ls initrd*.gz`"
+Grubfile="`ls grub*.efi`"
+
 platforms=(`echo $PLATFORMS | tr ',' ' '`)
 default_plat=`echo ${platforms[0]} | tr "[:upper:]" "[:lower:]"`
 
@@ -225,16 +226,21 @@ for plat in ${platforms[*]}; do
 	cat >> grub.cfg << EOF
 # Booting initrd for $plat
 menuentry "Install $plat estuary" --id ${platform}_minilinux {
-	linux /$Image $cmd_line
+	linux /$Image $cmd_line root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp
 	initrd /$Initrd
 }
 
 EOF
+done
 
 boards_mac=($(echo $BOARDSMAC | tr ',' ' '))
 for board_mac in ${boards_mac[*]}; do
 	cp grub.cfg $TFTP_ROOT/grub.cfg-${board_mac} || exit 1
 done
+
+mv $Grubfile $TFTP_ROOT/ || exit 1
+mv $Image $TFTP_ROOT/ || exit 1
+mv $Initrd $TFTP_ROOT/grubaa64.efi || exit 1
 
 ###################################################################################
 # Pop Workspace!!!

@@ -283,12 +283,12 @@ do
 	(yes | mkfs.ext4 ${TARGET_DISK}${part_index}) >/dev/null 2>&1
 	echo "Create and format ${TARGET_DISK}${part_index} for $distro_name."
 	
-	echo "Installing $rootfs_package into ${TARGET_DISK}${part_index}."
+	echo "Installing $rootfs_package into ${TARGET_DISK}${part_index}. Please wait patiently!"
 	# Mount root dev to mnt and uncompress rootfs to root dev
 	if ! mount ${TARGET_DISK}${part_index} /mnt/ 2>/dev/null; then
 		echo "Error!!! Unable mount ${TARGET_DISK}${part_index} to /mnt!" >&2 ; exit 1
 	fi
-	if ! tar xvf $rootfs_package -C /mnt/ 2>/dev/null; then
+	if ! tar xf $rootfs_package -C /mnt/; then
 		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; exit 1
 	fi
 	echo "Install $rootfs_package into ${TARGET_DISK}${part_index} done."
@@ -377,7 +377,8 @@ echo "- All install finished!"
 echo "---------------------------------------------------------------*/"
 for ((i=1; i<16; i++)); do
 	printf "\r"
-	if read -t 1 -p "The system will restart in $i second(s)! Press any key to stop." c; then
+	left_time=$[16 - i]
+	if read -t 1 -p "The system will restart in $left_time second(s)! Press any key to stop." c; then
 		echo "" ; exit 0
 	fi
 done

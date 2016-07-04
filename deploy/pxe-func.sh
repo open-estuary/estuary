@@ -12,12 +12,11 @@ get_pxe_tftproot()
 	echo "--------------------------------------------------------------------------------"
 	read -p "[ /var/lib/tftpboot ] " tftproot
 	if [ x"$tftproot" = x"" ]; then
-		echo "No TFTP root is specified!" >&2
-		return 1
-	else
-		eval $__tftproot="$tftproot"
-		return 0
+		tftproot="/var/lib/tftpboot"
 	fi
+
+	eval $__tftproot="$tftproot"
+	return 0
 }
 
 ###################################################################################
@@ -32,12 +31,11 @@ get_pxe_nfsroot()
 	echo "--------------------------------------------------------------------------------"
 	read -p "[ /var/lib/nfsroot ] " nfsroot
 	if [ x"$nfsroot" = x"" ]; then
-		echo "No NFS root is specified!" >&2
-		return 1
-	else
-		eval $__nfsroot="'$nfsroot'"
-		return 0
+		nfsroot="/var/lib/nfsroot"
 	fi
+
+	eval $__nfsroot="'$nfsroot'"
+	return 0
 }
 
 ###################################################################################
