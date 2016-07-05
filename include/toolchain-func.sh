@@ -32,3 +32,25 @@ download_toolchain()
 	)
 }
 
+###################################################################################
+# copy_toolchain <toolchain> <src_dir> <target_dir>
+###################################################################################
+copy_toolchain()
+{
+	(
+	toolchain=$1
+	src_dir=$2
+	target_dir=$3
+	if ! (diff $src_dir/.toolchain.sum $target_dir/.toolchain.sum >/dev/null 2>&1) \
+		|| [ !- f $target_dir/$toolchain ]; then
+		rm -f $target_dir/$toolchain 2>/dev/null
+		cp $src_dir/$toolchain $target_dir/$toolchain || return 1
+		rm -f $target_dir/.toolchain.sum 2>/dev/null
+		cp $src_dir/.toolchain.sum $target_dir/.toolchain.sum || return 1
+	fi
+
+	return 0
+	)
+}
+
+

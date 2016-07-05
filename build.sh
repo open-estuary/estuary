@@ -137,6 +137,11 @@ if [ x"$LOCALARCH" = x"x86_64" ]; then
 		echo -e "\033[31mError! Download toolchains failed!\033[0m" ; exit 1
 	fi
 	toolchain=`get_toolchain $TOPDIR/checksum/toolchain/toolchain.sum`
+	mkdir -p $BUILD_DIR/binary/arm64
+	if ! copy_toolchain $toolchain toolchain $BUILD_DIR/binary/arm64; then
+		echo "Copy $toolchain to $BUILD_DIR/binary/arm64 failed!" >&2 ; exit 1
+	fi
+
 	toolchain_dir=`get_compress_file_prefix $toolchain`
 	if [ ! -d toolchain/$toolchain_dir ]; then
 		if ! uncompress_file toolchain/$toolchain toolchain; then
@@ -237,6 +242,19 @@ for plat in ${platfroms[*]}; do
 done
 echo "Build estuary done!"
 echo ""
+
+###################################################################################
+# Create distros softlink
+###################################################################################
+echo "##############################################################################"
+echo "# Create distros softlink"
+echo "##############################################################################"
+distros=`echo $DISTROS | tr ',' ' '`
+binary_dir=$BUILD_DIR/binary/arm64 
+for distro in ${distros[*]}; do
+	rm -f $binary_dir/${distro}_ARM64.tar.gz 2>/dev/null
+	ln -s ../../distro/${distro}_ARM64.tar.gz $binary_dir/${distro}_ARM64.tar.gz
+done
 
 ###################################################################################
 # Quick Deployment
