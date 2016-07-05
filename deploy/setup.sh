@@ -228,10 +228,12 @@ echo "Installing grub and kernel to ${TARGET_DISK}1."
 pushd /scratch >/dev/null
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
-grub-install --efi-directory=/boot --target=arm64-efi $BOOT_DEV
 cp Image* /boot/
+mkdir -p /boot/EFI/GRUB2 2>/dev/null
+cp grubaa64.efi /boot/EFI/GRUB2 || exit 1
+efibootmgr -c -d ${TARGET_DISK} -p 1 -L "Estuary" -l "\EFI\GRUB2\grubaa64.efi"
 
-cat > /boot/grub/grub.cfg << EOF
+cat > /boot/grub.cfg << EOF
 # NOTE: Please remove the unused boot items according to your real condition.
 # Sample GRUB configuration file
 #
@@ -337,7 +339,7 @@ for ((index=0; index<distro_number; index++)); do
 	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
 	distro_name=${INSTALL_DISTROS[$index]}
 	
-cat >> /boot/grub/grub.cfg << EOF
+cat >> /boot/grub.cfg << EOF
 # Booting from SATA with $distro_name rootfs
 menuentry "${PLATFORM} $distro_name" --id ${platform}_${distro_name} {
     set root=(hd0,gpt1)
@@ -351,7 +353,7 @@ done
 
 # Set the first distro to default
 default_menuentry_id="${platform}_""${INSTALL_DISTROS[0]}"
-sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub/grub.cfg
+sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub.cfg
 
 echo "Update grub.cfg done!"
 echo ""
@@ -376,8 +378,8 @@ echo "/*---------------------------------------------------------------"
 echo "- All install finished!"
 echo "---------------------------------------------------------------*/"
 for ((i=1; i<16; i++)); do
-	printf "\r"
 	left_time=$[16 - i]
+	printf "                                                                         \r"
 	if read -t 1 -p "The system will restart in $left_time second(s)! Press any key to stop." c; then
 		echo "" ; exit 0
 	fi

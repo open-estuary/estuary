@@ -14,15 +14,16 @@ download_binaries()
 	pushd $target_dir >/dev/null
 	for checksum_file in ${checksum_files[*]}; do
 		remote_file=`cat $checksum_dir/$checksum_file | awk '{print $2}'`
+		origin_file=`echo $remote_file | sed 's/.*\///'`
+		target_file=`echo $checksum_file | sed 's/\.sum$//'`
 		if ! check_sum . $checksum_dir/$checksum_file; then
+			rm -f $origin_file 2>/dev/null
 			wget -c $binary_source/$remote_file || return 1
 			if ! check_sum . $checksum_dir/$checksum_file; then
 				return 1
 			fi
 		fi
 
-		origin_file=`echo $remote_file | sed 's/.*\///'`
-		target_file=`echo $checksum_file | sed 's/\.sum$//'`
 		if [ x"$target_file" != x"$origin_file" ]; then
 			rm -f $target_file 2>/dev/null
 			ln -s $origin_file $target_file

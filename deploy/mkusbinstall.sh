@@ -86,7 +86,7 @@ if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] ||
 	Usage ; exit 1
 fi
 
-if ! check_usb_device $TARGET || ! get_default_usb TARGET; then
+if ! check_usb_device $TARGET && ! get_default_usb TARGET; then
 	echo "Error! Can't find available usb device!" >&2 ; exit 1
 fi
 
@@ -113,7 +113,7 @@ echo "---------------------------------------------------------------"
 echo "- Please note this operation will format the device $TARGET!!!"
 echo "- $device_info"
 echo "---------------------------------------------------------------"
-read -p "Continue to create the usb install disk on $TARGET? (y/n)" choice
+read -p "Continue to create the usb install disk on $TARGET? (y/n) " choice
 if [ x"$choice" != x"y" ]; then
 	echo "Exit ......" ; exit 1
 fi
