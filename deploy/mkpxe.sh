@@ -143,6 +143,7 @@ pushd $WORKSPACE >/dev/null
 # Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
 cp $BINARY_DIR/grub*.efi ./ || exit 1
+cp $BINARY_DIR/grub*.efi $NFS_ROOT/grubaa64.efi || exit 1
 cp $BINARY_DIR/Image ./ || exit 1
 cp $BINARY_DIR/mini-rootfs.cpio.gz ./ || exit 1
 cp $BINARY_DIR/deploy-utils.tar.bz2 ./ || exit 1
@@ -238,9 +239,9 @@ for board_mac in ${boards_mac[*]}; do
 	cp grub.cfg $TFTP_ROOT/grub.cfg-${board_mac} || exit 1
 done
 
-mv $Grubfile $TFTP_ROOT/ || exit 1
+mv $Grubfile $TFTP_ROOT/grubaa64.efi || exit 1
 mv $Image $TFTP_ROOT/ || exit 1
-mv $Initrd $TFTP_ROOT/grubaa64.efi || exit 1
+mv $Initrd $TFTP_ROOT/ || exit 1
 
 ###################################################################################
 # Pop Workspace!!!

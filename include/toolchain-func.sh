@@ -34,6 +34,10 @@ download_toolchains()
 			wget -c $toolchain_source/$toolchain_file || return 1
 		done
 		popd >/dev/null
+
+		if ! check_sum $target_dir $checksum_dir/$checksum_file >/dev/null 2>&1; then
+			return 1
+		fi
 	fi
 
 	return 0

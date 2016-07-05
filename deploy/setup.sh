@@ -231,7 +231,15 @@ mount $BOOT_DEV /boot/ >/dev/null 2>&1
 cp Image* /boot/
 mkdir -p /boot/EFI/GRUB2 2>/dev/null
 cp grubaa64.efi /boot/EFI/GRUB2 || exit 1
-efibootmgr -c -d ${TARGET_DISK} -p 1 -L "Estuary" -l "\EFI\GRUB2\grubaa64.efi"
+
+# Delete old Estuary bootorder
+efi_bootorder=(`efibootmgr | grep -E "Boot[0-9]+\* Estuary" | awk '{print $1}'`)
+for bootorder in ${efi_bootorder[*]}; do
+        order=`expr "$bootorder" : 'Boot\([0-9]*\)\*'`
+        efibootmgr -q -b $order -B 2>/dev/null
+done
+
+efibootmgr -c -q -d ${TARGET_DISK} -p 1 -L "Estuary" -l "\EFI\GRUB2\grubaa64.efi"
 
 cat > /boot/grub.cfg << EOF
 # NOTE: Please remove the unused boot items according to your real condition.
@@ -377,11 +385,16 @@ echo ""
 echo "/*---------------------------------------------------------------"
 echo "- All install finished!"
 echo "---------------------------------------------------------------*/"
+echo "Press y to restart at now, other key to stop!"
 for ((i=1; i<16; i++)); do
 	left_time=$[16 - i]
-	printf "                                                                         \r"
-	if read -t 1 -p "The system will restart in $left_time second(s)! Press any key to stop." c; then
-		echo "" ; exit 0
+	printf "                                                     \r"
+	if read -t 1 -p "Restart in $left_time second(s)!" c; then
+		if [ x"$c" = x"y" ]; then
+			reboot
+		else
+			echo "" ; exit 0
+		fi
 	fi
 done
 
