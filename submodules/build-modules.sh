@@ -44,8 +44,8 @@ build_modules()
 	if [ x"$modules_file" = x"" ]; then
 		pushd kernel
 		make ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} modules INSTALL_MOD_PATH=$rootfs \
-		&& sudo make ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} modules_install INSTALL_MOD_PATH=$rootfs \
-		&& sudo make ARCH=$ARCH CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} firmware_install INSTALL_FW_PATH=$rootfs/lib/firmware
+		&& sudo make PATH=$PATH ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} modules_install INSTALL_MOD_PATH=$rootfs \
+		&& sudo make PATH=$PATH ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} firmware_install INSTALL_FW_PATH=$rootfs/lib/firmware
 		if [ ! $? ]; then
 			return 1
 		fi
