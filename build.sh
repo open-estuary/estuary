@@ -132,22 +132,26 @@ if [ x"$LOCALARCH" = x"x86_64" ]; then
 	echo "# Download/Uncompress toolchain"
 	echo "##############################################################################"
 	mkdir -p toolchain
-	download_toolchain toolchain $TOPDIR/checksum/toolchain/toolchain.sum $ESTUARY_INTERAL_FTP/toolchain
+	download_toolchains toolchain $TOPDIR/checksum/toolchain/toolchain.sum $ESTUARY_INTERAL_FTP/toolchain
 	if [[ $? != 0 ]]; then
-		echo -e "\033[31mError! Download toolchains failed!\033[0m" ; exit 1
+		echo -e "\033[31mError! Download toolchains failed!\033[0m" >&2 ; exit 1
 	fi
-	toolchain=`get_toolchain $TOPDIR/checksum/toolchain/toolchain.sum`
+
+	if ! uncompress_toolchains $TOPDIR/checksum/toolchain/toolchain.sum toolchain; then
+		echo -e "\033[31mError! Uncompress toolchains failed!\033[0m" >&2 ; exit 1
+	fi
+
+	toolchain=`get_toolchain arm $TOPDIR/checksum/toolchain/toolchain.sum`
+	toolchain_dir=`get_compress_file_prefix $toolchain`
+	export PATH=`pwd`/toolchain/$toolchain_dir/bin:$PATH
+
+	toolchain=`get_toolchain aarch64 $TOPDIR/checksum/toolchain/toolchain.sum`
+	toolchain_dir=`get_compress_file_prefix $toolchain`
 	mkdir -p $BUILD_DIR/binary/arm64
 	if ! copy_toolchain $toolchain toolchain $BUILD_DIR/binary/arm64; then
 		echo "Copy $toolchain to $BUILD_DIR/binary/arm64 failed!" >&2 ; exit 1
 	fi
 
-	toolchain_dir=`get_compress_file_prefix $toolchain`
-	if [ ! -d toolchain/$toolchain_dir ]; then
-		if ! uncompress_file toolchain/$toolchain toolchain; then
-			echo -e "\033[31mError! Uncompress toolchain failed!\033[0m" ; exit 1
-		fi
-	fi
 	TOOLCHAIN=$toolchain
 	TOOLCHAIN_DIR=`cd toolchain/$toolchain_dir; pwd`
 	CROSS_COMPILE=`get_cross_compile $LOCALARCH $TOOLCHAIN_DIR`
