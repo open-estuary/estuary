@@ -4,6 +4,7 @@
 # mkusbinstall.sh --target=/dev/sdb --platforms=D02,D03 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
+export PATH=$TOPDIR:$PATH
 . usb-func.sh
 
 ###################################################################################
