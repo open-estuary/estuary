@@ -6,7 +6,7 @@
 
   <remote  name="qemu"
            fetch="git://git.qemu-project.org/" />
-		   
+
   <remote  name="grub"
            fetch="git://git.savannah.gnu.org/" />
 
@@ -16,9 +16,9 @@
   <default revision="master"
            remote="open-estuary"
            sync-j="4" />
-  
+
   <!-- kernel -->
-  <project name="kbase" path="kernel" revision="release/d0x-4.4" />
+  <project name="kernel" />
 
   <!-- uefi -->
   <project name="uefi" revision="estuary-rp" />
@@ -41,7 +41,7 @@
 
   <!-- caliper -->
   <project name="caliper" />
-  
+
   <!-- tools -->
   <project name="tools" />
 
