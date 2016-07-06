@@ -1,32 +1,31 @@
-# Change list for Estuary v2.2:
-1. Formally support D03 based on DTS.
-2. Completely compatible for HiKey\D01\D02 and D03 boards.
-3. Firstly support booting system from SAS disk for D02 by default.
-4. Upgraded kernel to v4.4.
-5. Partly enabled ACPI (Only D02).
+# Change list for Estuary v2.3:
+1. Officially support D02/D03 based on ACPI
+2. Completely compatible for HiKey\D02 and D03 boards
+3. Improve boot speed for D03 board
+4. Linux kernel version upgraded to v4.4.11 (based on Linaro RPB 16.06)
+5. Enabled KVM (ACPI+DTS) support for D02/D03
 6. Improved build script:
-	- Support native building.
-	- Support both USB-Disk\CD-ISO installation methods.
-	- Support automatic PXE environment setup.
-	- Support to terminate and restart build task druing building.
-7. Improved mini-rootfs to support more useful commands.
-8. Enabled CentOS firstly.
-9. Firstly integrated ODP and MySQL into Estuary.
-10. Added collaboration feature in website.
-11. Enabled Docker & Armor tools for all distributions.
-12. Improved all documents, and change them into markdown format.
-13. Fixed most issues found in rc0 & rc1, include but not limited to: UEFI, network, grub, usb compatibility, build and etc.
-14. Support D01 better, to enable boot from NorFlash, PXE, SATA.
-15. Enable both 32bits and 64bits minirrotfs for different arch.
-16. Improved Caliper as follows:
-	- Fixes and improvements in the Caliper Report html and in graphs:
-	- New sections, titles added in the report to make the report more detailed, still few hardcoded information are present, to be improved in further releases.
-	- New features (like caliper -c option), NFS interface for test log capture are added and existing configuration options of test tools modified as required.
-	- Tinymembench memory benchmarking has been added for memory benchmarking.
-	- Many small improvements and bug fixes.
+	- Split to multi modules
+	- Support build instance
+	- Avoid to repeat uncessary building
+	- Unified prebuild files
+7. CI system: ~20% test cases will run in CI system
+8. Enable RancherOS distribution
+9. Improved mini-rootfs to support full functional ssh server/client
+10. Enable LAMP based on docker officially
+11. Enable and validate ODP officially
+12. Chagne issue tracker system on website
+13. Provide mail list feature on website
+14. Improved all documents, including project documents and open-estuary.org
+15. Fixed most issues found in RPB 16.06 rc stage (UEFI, ACPI, KVM, Grub, SAS, etc)
+16. Enhanced Caliper functionalities
+	- Unixbench tool integrated
+	- Stress-ng tool integrated
+	- CPU benchmarking functionality of sysbench added
+	- Various bug fixes
 
 # Remained issues:
-1. ACPI is not available for D03 yet.
-2. KVM is not available based on kernel v4.4 yet.
-3. PCIE-SATA card can't work well on D03.
-4. SATA is very unstable on D02 board.
+1. Website access speed need to be improved
+2. HiKey ACPI not supported
+3. OpenEmbedded distribution not enabled
+4. ARM ACPI not fully supported(e.g. ESL/NOR Flash booting, earlycon)
