@@ -92,7 +92,7 @@ fi
 ###################################################################################
 # Create Workspace and Switch to Workspace!!!
 ###################################################################################
-WORKSPACE=`mktemp -d /tmp/workspace.XXXX`
+WORKSPACE=`mktemp -d workspace.XXXX`
 rm -f ${DISK_LABEL}.iso
 pushd $WORKSPACE >/dev/null
 
@@ -205,7 +205,8 @@ sudo umount /mnt/
 ###################################################################################
 # Create bootable iso
 ###################################################################################
-genisoimage -e boot.img -no-emul-boot -J -R -c boot.catalog -hide boot.catalog -hide boot.img -V "$DISK_LABEL" -o /tmp/${DISK_LABEL}.iso . || exit 1
+genisoimage -e boot.img -no-emul-boot -J -R -c boot.catalog -hide boot.catalog -hide boot.img -V "$DISK_LABEL" -o ${DISK_LABEL}.iso . || exit 1
+mv ${DISK_LABEL}.iso ../ || exit 1
 
 ###################################################################################
 # Pop Workspace!!!
@@ -215,7 +216,6 @@ popd >/dev/null
 ###################################################################################
 # Delete workspace
 ###################################################################################
-mv /tmp/${DISK_LABEL}.iso ${DISK_LABEL}.iso || exit 1
 sudo rm -rf $WORKSPACE 2>/dev/null
 echo "Create ISO deployment environment successful!"
 echo ""
