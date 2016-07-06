@@ -9,7 +9,17 @@
 # Const Variables, PATH
 ###################################################################################
 LOCALARCH=`uname -m`
+CURDIR=`pwd`
 TOPDIR=$(cd `dirname $0` ; pwd)
+if [ x"$CURDIR" = x"$TOPDIR" ]; then
+	echo "---------------------------------------------------------------"
+	echo "- Please execute build.sh in open-estuary project root directory!"
+	echo "- Example:"
+	echo "-     ./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=build"
+	echo "---------------------------------------------------------------"
+	exit 1
+fi
+
 ESTUARY_INTERAL_FTP=`grep -Po "(?<=download_address: )(.*)" $TOPDIR/estuary.txt`
 export PATH=$TOPDIR:$TOPDIR/include:$TOPDIR/submodules:$TOPDIR/deploy:$PATH
 
