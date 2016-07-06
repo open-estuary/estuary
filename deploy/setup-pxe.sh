@@ -100,12 +100,15 @@ BROAD_CAST=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=Bcast:)([^ ]*)"`
 INET_MASK=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=Mask:)([^ ]*)"`
 SUB_NET=`route | grep "$NETCARD_NAME" | grep -v default | awk '{print $1}'`
 ROUTER=`route | grep "$NETCARD_NAME" | grep default | awk '{print $2}'`
+if [ x"$ROUTER" = x"" ]; then
+	ROUTER=$INET_ADDR
+fi
 
 ###################################################################################
 # Set up DHCP server
 ###################################################################################
 cat > /tmp/isc-dhcp-server << EOM
-INTERFACES="$NETCARDNAME"
+INTERFACES="$NETCARD_NAME"
 EOM
 
 sudo mv /tmp/isc-dhcp-server /etc/default/isc-dhcp-server
