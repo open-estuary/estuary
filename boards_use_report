@@ -1,0 +1,35 @@
+#!/bin/bash
+OPENLAB_TOPDIR=/usr/local/openlab
+source $OPENLAB_TOPDIR/Include/common.sh
+source $OPENLAB_TOPDIR/Include/userop.sh
+source $OPENLAB_TOPDIR/Include/boardop.sh
+source $OPENLAB_TOPDIR/Include/telnetop.sh
+source $OPENLAB_TOPDIR/Include/bmcop.sh
+source $OPENLAB_TOPDIR/Include/board_serial_op.sh
+source $OPENLAB_TOPDIR/Include/board_power_op.sh
+source $OPENLAB_TOPDIR/Include/pduop.sh
+board_all_no=`grep -E "^(BOARD)" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=BOARD)([^:]*)" | tr '\n' " "`
+
+############## Check how many boards have been used ###############################
+for value in ${board_all_no[*]}
+do
+    a=`grep -w "boardno:${value}" boards_used_log`
+    if [ -n "${a}" ];then
+        a1=`grep -w "boardno:${value}" boards_used_log | grep -Po "(?<=boardno:)([^ ]+)" | sort -u `
+        boards_used[n]=$a1
+        let n=n+1
+    fi
+done
+for value in ${boards_used[*]}
+do
+    a=`grep -w "boardno:${value}" boards_used_log | grep -Po "(?<=usr:)([^ ]+)" |awk '{a[$0]++} END {for(i in a) printf("over past one week, %-10s: use->%-2s times\n"),i, a[i]}' | sort`
+    echo "==================================================="
+    echo -e "boardno:$value\n$a"
+    b=`grep -w "boardno:${value}" boards_used_log | grep -Po "(?<=totaluse:)([^ ]+)" | awk 'BEGIN {max = 0} {if ($1+0 > max+0) max=$1} END {print max}'`
+    echo "toatal connecting time:${b}s"
+    c=`grep -w "boardno:${value}" boards_used_log | grep -Po "(?<=onceuse:)([^ ]+)" |awk 'BEGIN {max = 0} {if ($1+0 > max+0) max=$1} END {print max}'`
+    echo "max using time:${c}s"
+    d=`grep -w "totaluse:${b}" boards_used_log | grep -Po "(?<=rating:)([^ ]+)"`
+    echo "rating:$d"
+done
+
