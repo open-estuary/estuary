@@ -73,11 +73,11 @@ function boards()
 ############## See the help of ./board_report.sh###############################
 function help()
 {
-    echo "execute \"./board_report.sh busy\" to check the current usage of all the boards"
-    echo "execute \"./board_report.sh boards\" to check how many boards per user haved"
-    echo "execute \"./board_report.sh usr\" to check all the boards are owned by which user"
-    echo "execute \"./board_report.sh area\" to check how many people are there in each area"
-    echo "execute \"./board_report.sh org\" to　check how many people are there in each organization"
+    echo "execute \"board_report busy\" to check the current usage of all the boards"
+    echo "execute \"board_report boards\" to check how many boards per user haved"
+    echo "execute \"board_report usr\" to check all the boards are owned by which user"
+    echo "execute \"board_report area\" to check how many people are there in each area"
+    echo "execute \"board_report org\" to　check how many people are there in each organization"
 }
 
 case $command in
