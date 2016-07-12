@@ -22,7 +22,7 @@ function busy()
     do
         usr=$(get_board_current_user $boardno)
         board_type=$(get_board_type $boardno)
-        printf "%3s:  %8s is used by  -> %s\n" ${boardno} ${board_type} ${usr}
+        printf "%3s:  %8s is used by  -> %s\n" "${boardno}" "${board_type}" "${usr}"
     done
 }
 
@@ -38,9 +38,9 @@ function usr()
         usrinfo=$(grep -E "\b${boardno}\b" $OPENLAB_CONF_DIR/$USER_INFO_FILE | cut -d ":" -f1 | grep ^[a-zA-Z] | tr '\n' ";" | sed 's/;/; /g')
 
         if [ x"" = x"$usrinfo" ]; then
-            printf "%3s: has no user\n" ${boardno}
+            printf "%3s: has no user\n" "${boardno}"
         else
-            printf "%3s: %8s  -> %s\n" ${boardno} ${board_type} ${usrinfo}
+            printf "%3s: %8s  -> %s\n" "${boardno}" "${board_type}" "${usrinfo}"
         fi
     done
 }
@@ -69,8 +69,8 @@ function boards()
 
     for usr in ${board_all_usr[*]}
     do
-        board_lists=$(get_user_boards $usr)
-        printf "%-14s -> %s \n" ${usr} $(echo $board_list | tr ' ' ";")
+        board_lists=$(grep -E "^(${usr})" $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep -Po "(?<=boards=)[^,]*"|tr ' ' ";")
+        printf "%-14s -> %s \n"  "${usr}" "${board_lists}"
     done
 }
 
@@ -78,11 +78,11 @@ function boards()
 function usage()
 {
 cat <<-EOF
-	execute "board_report busy" to check the current usage of all the boards
-	execute "board_report boards" to check how many boards per user haved
-	execute "board_report usr" to check all the boards are owned by which user
-	execute "board_report area" to check how many people are there in each area
-	execute "board_report org" to　check how many people are there in each organization
+    execute "board_report busy" to check the current usage of all the boards
+    execute "board_report boards" to check how many boards per user haved
+    execute "board_report usr" to check all the boards are owned by which user
+    execute "board_report area" to check how many people are there in each area
+    execute "board_report org" to　check how many people are there in each organization
 EOF
 }
 
