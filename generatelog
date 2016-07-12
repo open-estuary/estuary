@@ -1,5 +1,5 @@
 #!/bin/bash
-command=$1
+
 OPENLAB_TOPDIR=/usr/local/openlab
 source $OPENLAB_TOPDIR/Include/common.sh
 source $OPENLAB_TOPDIR/Include/userop.sh
@@ -9,48 +9,56 @@ source $OPENLAB_TOPDIR/Include/bmcop.sh
 source $OPENLAB_TOPDIR/Include/board_serial_op.sh
 source $OPENLAB_TOPDIR/Include/board_power_op.sh
 source $OPENLAB_TOPDIR/Include/pduop.sh
-cat /dev/null > boards_used_log
 
-board_all_no=`grep -E "^(BOARD)" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=BOARD)([^:]*)" | tr '\n' " "`
+:> boards_used_log
+echo -e "We start to test at `date`" >> boards_used_log
 
-board_all_usr=$(cut -d ":" -f1 $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep ^[a-zA-Z]|tr '\n' " ")
+board_all_no=$(grep -E "^BOARD" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=BOARD)([^:]*)" | tr '\n' " ")
+board_all_cur_usr=$(cut -d ":" -f1 $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep ^[a-zA-Z]|tr '\n' " ")
 
-echo -e "We start to test at `date`">>boards_used_log
-
-for value in ${board_all_no[*]}
+for boardno in ${board_all_no[*]}
 do
-    declare -A board_$value
-    boardinfo=board_$value
-    eval ${boardinfo}=\([usr]="" [starttime]="" [startuse]="" [enduse]="" [onceuse]="" [totaluse]=0 [totaltime]=""\)
-    eval ${boardinfo}["starttime"]=$`(date +%s)`
+    declare -A board_$boardno
+    boardinfo=board_$boardno
+    eval $boardinfo=\([cur_usr]="" [status]=0 [start_time]=0 [session_start]=0 [session_end]=0 [session_time]=0 [total_use]=0 [total_time]=0\)
+    eval $boardinfo[start_time]=$(date +%s)
 done
 
-while [ "1" == "1" ]
+while true
 do
-    for value in ${board_all_no[*]}
+    for boardno in ${board_all_no[*]}
     do
-        declare -A board_$value
-        boardinfo=board_$value
-        board_type=`grep -E "^(BOARD${value}:).*" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=type=)([^ ,]*)"`
-        usr=$(get_board_current_user $value)
-        if [ x"$usr" != x"" -a "$(eval echo \${${boardinfo}[usr]})" == "" ];then
-            eval ${boardinfo}["status"]=1
-            eval ${boardinfo}["usr"]=$usr
-            eval ${boardinfo}["startuse"]=$`(date +%s)`
-        elif [ x"$usr" == x"" -a "$(eval echo \${${boardinfo}[status]})" == 1 ];then
-            eval ${boardinfo}["status"]=0
-            eval ${boardinfo}["enduse"]=$`(date +%s)`
-            echo "-----------------------------------------------------------------------------------------------">>boards_used_log
-            eval let ${boardinfo}["onceuse"]=\${${boardinfo}["enduse"]}-\${${boardinfo}["startuse"]}
-            eval let ${boardinfo}["oncetime"]=\${${boardinfo}["enduse"]}-\${${boardinfo}["starttime"]}
-            eval let ${boardinfo}["totaluse"]=\${${boardinfo}["onceuse"]}+\${${boardinfo}["totaluse"]}
-            eval let ${boardinfo}["totaltime"]=\${${boardinfo}["enduse"]}-\${${boardinfo}["starttime"]}
-            printf "starttime:%-6s usr:%-6s boardtype: %-6s boardno:%-6s startuse:%-6s enduse:%-6s onceuse:%-6s totaluse:%-6s totaltime:%-6s rating:%-6s\n" $(eval echo "\${${boardinfo}["starttime"]}") $(eval echo "\${${boardinfo}["usr"]}") $board_type $value $(eval echo "\${${boardinfo}["startuse"]}") $(eval echo "\${${boardinfo}["enduse"]}") $(eval echo "\${${boardinfo}["onceuse"]}")  $(eval echo "\${${boardinfo}["totaluse"]}") $(eval echo "\${${boardinfo}["totaltime"]}") $(awk 'BEGIN{printf "%.2f\n", '$(eval echo "\${${boardinfo}[totaluse]}"/"\${${boardinfo}[totaltime]}")'}') >>boards_used_log
-            eval ${boardinfo}["usr"]=""
+        boardinfo=board_$boardno
+        boardtype=$(get_board_type $boardno)
+        cur_usr=$(get_board_current_user $boardno)
+
+        if [[ x"$cur_usr" != x"" && x"$(eval echo \${$boardinfo[cur_usr]})" == x"" ]]; then
+            eval $boardinfo[status]=1
+            eval $boardinfo[cur_usr]=$cur_usr
+            eval $boardinfo[session_start]=$(date +%s)
+        elif [[ x"$cur_usr" == x"" && "$(eval echo \${$boardinfo[status]})" == "1" ]]; then
+        #elif [[ "$(eval echo \${${boardinfo}[status]})" == "1" ]]; then # for testing
+            eval $boardinfo[status]=0
+            eval $boardinfo[session_end]=$(date +%s)
+            eval let $boardinfo[session_time]=\${$boardinfo[session_end]}-\${$boardinfo[session_start]}
+            eval let $boardinfo[total_use]+=\${$boardinfo[session_time]}
+            eval let $boardinfo[total_time]=\${$boardinfo[session_end]}-\${$boardinfo[start_time]}
+            echo "-----------------------------------------------------------------------------------------------" >> boards_used_log
+            printf "boardno:%-6s boardtype: %-6s start_time:%-6s usr:%-6s session_start:%-6s session_end:%-6s session_time:%-6s total_use:%-6s total_time:%-6s rating:%-6s\n" \
+                $boardno \
+                $boardtype \
+                $(eval echo \${$boardinfo[start_time]}) \
+                $(eval echo \${$boardinfo[cur_usr]}) \
+                $(eval echo \${$boardinfo[session_start]}) \
+                $(eval echo \${$boardinfo[session_end]}) \
+                $(eval echo \${$boardinfo[session_time]}) \
+                $(eval echo \${$boardinfo[total_use]}) \
+                $(eval echo \${$boardinfo[total_time]}) \
+                $(awk 'BEGIN{printf "%.2f\n",'$(eval echo \${$boardinfo[total_use]}/\${$boardinfo[total_time]})'}') >> boards_used_log
+            eval $boardinfo[cur_usr]=""
         fi
     done
+
     sleep 10
 done
-
-
 

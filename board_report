@@ -1,7 +1,6 @@
 #!/bin/bash
-command=$1
-OPENLAB_TOPDIR=/usr/local/openlab
 
+OPENLAB_TOPDIR=/usr/local/openlab
 source $OPENLAB_TOPDIR/Include/common.sh
 source $OPENLAB_TOPDIR/Include/userop.sh
 source $OPENLAB_TOPDIR/Include/boardop.sh
@@ -11,18 +10,19 @@ source $OPENLAB_TOPDIR/Include/board_serial_op.sh
 source $OPENLAB_TOPDIR/Include/board_power_op.sh
 source $OPENLAB_TOPDIR/Include/pduop.sh
 
-board_all_no=`grep -E "^(BOARD)" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=BOARD)([^:]*)" | tr '\n' " "`
-board_all_usr=$(cut -d ":" -f1 $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep ^[a-zA-Z]|tr '\n' " ")
+board_all_no=$(grep -E "^(BOARD)" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=BOARD)([^:]*)" | tr '\n' " ")
+board_all_usr=$(cut -d ":" -f1 $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep ^[a-zA-Z] | tr '\n' " ")
 
 ################# Check the current usage of all the boards########################
 function busy()
 {
     printf "%3s: %8s is used by -> %s\n" "Board No" "Board Type" "usr"
-    for value in ${board_all_no[*]}
+
+    for boardno in ${board_all_no[*]}
     do
-        usr=$(get_board_current_user $value)
-        board_type=`grep -E "^(BOARD${value}:).*" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=type=)([^ ,]*)"`
-        printf "%3s:  %8s is used by  -> %s\n"  "${value}" "${board_type}" "${usr}"
+        usr=$(get_board_current_user $boardno)
+        board_type=$(get_board_type $boardno)
+        printf "%3s:  %8s is used by  -> %s\n" ${boardno} ${board_type} ${usr}
     done
 }
 
@@ -31,14 +31,16 @@ function usr()
 {
     echo "board_no is possessed as followsing list:"
     printf "%3s: %8s -> Users list\n" "Board No" "Board Type"
-    for value in ${board_all_no[*]}
+
+    for boardno in ${board_all_no[*]}
     do
-        board_type=`grep -E "^(BOARD${value}:).*" $OPENLAB_CONF_DIR/$BOARD_INFO_FILE | grep -Po "(?<=type=)([^ ,]*)"`
-        usrinfo=`grep -E "boards=.*\b${value}\b" $OPENLAB_CONF_DIR/$USER_INFO_FILE| cut -d ":" -f1 | grep ^[a-zA-Z]|tr '\n' ";" | sed "s/;/; /g"`
+        board_type=$(get_board_type $boardno)
+        usrinfo=$(grep -E "\b${boardno}\b" $OPENLAB_CONF_DIR/$USER_INFO_FILE | cut -d ":" -f1 | grep ^[a-zA-Z] | tr '\n' ";" | sed 's/;/; /g')
+
         if [ x"" = x"$usrinfo" ]; then
-            printf "%3s: is not exists\n" "${value}"
+            printf "%3s: has no user\n" ${boardno}
         else
-            printf "%3s: %8s  -> %s\n"  "${value}" "${board_type}" "${usrinfo}"
+            printf "%3s: %8s  -> %s\n" ${boardno} ${board_type} ${usrinfo}
         fi
     done
 }
@@ -46,16 +48,17 @@ function usr()
 ############## Check how many people are there in each organization ###############
 function org()
 {
-    a=`grep -Po "^([^#]*)" $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep -Po "(?<=org=)[^,]+" | awk '{a[$0]++} END {for(i in a) printf("%-40s: appears ->%-4s \n"),i, a[i]}' | sort`
+    a=$(grep -v "^#" $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep -Po "(?<=org=)[^,]+" | awk '{a[$0]++} END {for(i in a) printf("%-40s: appears ->%-4s \n"),i, a[i]}' | sort)
     echo "$a"
 }
 
 ############## Check how many people are there in each area #######################
 function area()
 {
-    a=`grep -Po "^([^#]*)" $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep -Po "(?<=area=\")([^\"]*)(?=\")" | awk '{a[$0]++} END {for(i in a) printf("%-16s: appears ->%-4s \n"),i, a[i]}' | sort`
+    a=$(grep -v "^#" $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep -Po "(?<=area=\")([^\"]*)(?=\")" | awk '{a[$0]++} END {for(i in a) printf("%-16s: appears ->%-4s \n"),i, a[i]}' | sort)
     echo "$a"
 }
+
 ############## Check how many boards per user haved ###############################
 function boards()
 {
@@ -63,24 +66,32 @@ function boards()
     echo "130-135 is 1612_boards(D03 board)  104 is overdrive board  18,19,20 is D01 board  others boars is D02 board"
     echo "all usrs possessed boards details as following :"
     printf "%10s: -> Boards list \n" "Board usrs"
-    for value in ${board_all_usr[*]}
+
+    for usr in ${board_all_usr[*]}
     do
-        board_lists=$(grep -E "^(${value})" $OPENLAB_CONF_DIR/$USER_INFO_FILE | grep -Po "(?<=boards=)[^,]*"|tr ' ' ";")
-        printf "%-14s -> %s \n"  "${value}" "${board_lists}"
+        board_lists=$(get_user_boards $usr)
+        printf "%-14s -> %s \n" ${usr} $(echo $board_list | tr ' ' ";")
     done
 }
 
 ############## See the help of ./board_report.sh###############################
-function help()
+function usage()
 {
-    echo "execute \"board_report busy\" to check the current usage of all the boards"
-    echo "execute \"board_report boards\" to check how many boards per user haved"
-    echo "execute \"board_report usr\" to check all the boards are owned by which user"
-    echo "execute \"board_report area\" to check how many people are there in each area"
-    echo "execute \"board_report org\" to　check how many people are there in each organization"
+cat <<-EOF
+	execute "board_report busy" to check the current usage of all the boards
+	execute "board_report boards" to check how many boards per user haved
+	execute "board_report usr" to check all the boards are owned by which user
+	execute "board_report area" to check how many people are there in each area
+	execute "board_report org" to　check how many people are there in each organization
+EOF
 }
 
-case $command in
+if [ $# -lt 1 ]; then
+    usage
+    exit 0
+fi
+
+case $1 in
     busy)
         busy
         ;;
@@ -96,11 +107,11 @@ case $command in
     boards)
         boards
         ;;
-    --help|--h)
-        help
+    --help|-h)
+        usage
         ;;
     (*)
         echo "Error command"
-        echo "$usage"
+        usage
         ;;
 esac
