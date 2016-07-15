@@ -125,8 +125,9 @@ build_uefi_for_HiKey()
 	git submodule init
 	git submodule update
 
+	local local_arch=`uname -m`
 	grep -P "PLATFORM_FLAGS.*-fno-stack-protector" OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
-	if [ x"$?" != x"0" ] && [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]]; then
+	if [ x"$?" != x"0" ] && [[ $local_arch == arm* || $local_arch == aarch64 ]]; then
 		sed -i '/_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
 	fi
 
