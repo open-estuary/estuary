@@ -86,9 +86,9 @@ build_uefi_for_all()
 			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dsc"
 		fi
 
-		grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" $hisi_dsc_file
+		grep -P "AARCH64_PLATFORM_FLAGS.*-fno-stack-protector" $hisi_dsc_file
 		if [ x"$?" != x"0" ]; then
-			sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' $hisi_dsc_file
+			sed -i '/AARCH64_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' $hisi_dsc_file
 		fi
 	fi
 
@@ -125,8 +125,9 @@ build_uefi_for_HiKey()
 	git submodule init
 	git submodule update
 
+	local local_arch=`uname -m`
 	grep -P "PLATFORM_FLAGS.*-fno-stack-protector" OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
-	if [ x"$?" != x"0" ] && [[ $LOCALARCH == arm* || $LOCALARCH == aarch64 ]]; then
+	if [ x"$?" != x"0" ] && [[ $local_arch == arm* || $local_arch == aarch64 ]]; then
 		sed -i '/_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
 	fi
 
