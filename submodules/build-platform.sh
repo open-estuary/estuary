@@ -145,7 +145,7 @@ if [ x"$PACKAGES" != x"" ]; then
 		echo "---------------------------------------------------------------"
 		echo "- Build packages (pkgs: $PACKAGES, kerneldir: $OUTPUT/kernel, distro: $distro, rootfs: $OUTPUT/distro/$distro)"
 		echo "---------------------------------------------------------------"
-		build-packages.sh --packages=$PACKAGES --platform=none --kernel=$OUTPUT/kernel --distro=$distro --rootfs=$OUTPUT/distro/$distro
+		build-packages.sh --packages=$PACKAGES --output=$OUTPUT --kernel=$OUTPUT/kernel --distro=$distro --rootfs=$OUTPUT/distro/$distro
 		echo "- Build packages done!"
 		echo ""
 	done
