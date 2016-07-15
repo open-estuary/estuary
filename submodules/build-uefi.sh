@@ -86,9 +86,9 @@ build_uefi_for_all()
 			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dsc"
 		fi
 
-		grep -P "AARCH64_ARCHCC_FLAGS.*-fno-stack-protector" $hisi_dsc_file
+		grep -P "AARCH64_PLATFORM_FLAGS.*-fno-stack-protector" $hisi_dsc_file
 		if [ x"$?" != x"0" ]; then
-			sed -i '/AARCH64_ARCHCC_FLAGS.*$/s//& -fno-stack-protector/g' $hisi_dsc_file
+			sed -i '/AARCH64_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' $hisi_dsc_file
 		fi
 	fi
 
