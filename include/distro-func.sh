@@ -47,6 +47,7 @@ uncompress_distros()
 			! (diff $src_dir/.${distro}_ARM64.tar.gz.sum $target_dir/.${distro}_ARM64.tar.gz.sum >/dev/null 2>&1); then
 			sudo rm -rf $target_dir/$distro
 			rm -f $target_dir/.${distro}_ARM64.tar.gz.sum 2>/dev/null
+			rm -rf $target_dir/${distro}_ARM64.* 2>/dev/null
 			mkdir -p $target_dir/$distro
 			if ! uncompress_file_with_sudo $src_dir/${distro}_ARM64.tar.gz $target_dir/$distro; then
 				echo -e "\033[31mError! Uncompress ${distro}_ARM64.tar.gz failed!\033[0m" >&2
