@@ -16,7 +16,7 @@ download_binaries()
 		remote_file=`cat $checksum_dir/$checksum_file | awk '{print $2}'`
 		origin_file=`echo $remote_file | sed 's/.*\///'`
 		target_file=`echo $checksum_file | sed 's/\.sum$//'`
-		if ! check_sum . $checksum_dir/$checksum_file; then
+		if ! check_sum . $checksum_dir/$checksum_file || [ ! -f $target_file ] ; then
 			rm -f $origin_file 2>/dev/null
 			wget -c $binary_source/$remote_file || return 1
 			if ! check_sum . $checksum_dir/$checksum_file; then
