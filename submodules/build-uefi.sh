@@ -224,6 +224,10 @@ done
 ###################################################################################
 # Check args
 ###################################################################################
+if [ x"$PLATFORM" = x"QEMU" ]; then
+	exit 0
+fi
+
 if [ x"" = x"$PLATFORM" ] || [ x"" = x"$OUTPUT_DIR" ]; then
 	echo -e "\033[31mError! Platform: $PLATFORM, Output: $OUTPUT_DIR!\033[0m"
 	build_uefi_usage ; exit 1

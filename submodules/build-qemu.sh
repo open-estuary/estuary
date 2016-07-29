@@ -1,6 +1,12 @@
 #!/bin/bash
 
+TOPDIR=$(cd `dirname $0` ; pwd)
 CORE_NUM=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
+###################################################################################
+# Include
+###################################################################################
+. $TOPDIR/submodules-common.sh
 
 ###################################################################################
 # global vars
@@ -87,12 +93,14 @@ fi
 
 mkdir -p $QEMU_DIR 2>/dev/null
 qemu_dir=`cd $QEMU_DIR ; pwd`
-if [ ! -f $qemu_dir/bin/qemu-system-aarch64 ]; then
+if [ ! -f $qemu_dir/bin/qemu-system-aarch64 ] || ! update_module_check qemu $OUTPUT_DIR; then
 	pushd qemu/ >/dev/null
+	[ -d $qemu_dir ] && rm -rf $qemu_dir
 	if ! (./configure --prefix=$qemu_dir --target-list=aarch64-softmmu && make -j${CORE_NUM} && make install); then
 		exit 1
 	fi
 	popd >/dev/null
+	gen_module_build_log qemu $OUTPUT_DIR
 fi
 
 export PATH=$qemu_dir/bin:$PATH
