@@ -16,7 +16,7 @@ download_distros()
 	for distro in ${distros[@]}; do
 		checksum_file="${distro}_ARM64.tar.gz.sum"
 		distro_file=`cat $checksum_dir/$checksum_file | awk '{print $2}'`
-		if ! check_sum . $checksum_dir/$checksum_file; then
+		if ! check_sum . $checksum_dir/$checksum_file || [ ! -f $distro_file ]; then
 			rm -f $distro_file 2>/dev/null
 			wget -c $distro_source/$distro/$distro_file || return 1
 			check_sum . $checksum_dir/$checksum_file || return 1

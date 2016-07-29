@@ -2,7 +2,8 @@
 "system":[
 {"platform":"D02","install":"yes"},
 {"platform":"D03","install":"yes"},
-{"platform":"HiKey","install":"yes"}
+{"platform":"HiKey","install":"yes"},
+{"platform":"QEMU","install":"no"}
 ],
 
 "distros":[
@@ -10,7 +11,8 @@
 {"name":"Debian","install":"no","capacity":"50G"},
 {"name":"Fedora","install":"no","capacity":"50G"},
 {"name":"OpenSuse","install":"yes","capacity":"50G"},
-{"name":"CentOS","install":"no","capacity":"50G"}
+{"name":"CentOS","install":"no","capacity":"50G"},
+{"name":"Rancher","install":"no","capacity":"50G"}
 ],
 
 "boards":[

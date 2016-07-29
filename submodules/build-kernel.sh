@@ -32,7 +32,7 @@ build_kernel_usage()
 cat << EOF
 Usage: build-kernel.sh [clean] --platform=xxx --cross=xxx --output=xxx
 	clean: clean the kernel binary files (include dtb)
-	--platform: which platform to build (D02, D03, HiKey)
+	--platform: which platform to build (D02, D03, HiKey, QEMU)
 	--cross: cross compile prefix (if the host is not arm architecture, it must be specified.)
 	--output: target binary output directory
 
@@ -70,15 +70,18 @@ build_kernel()
 
 	# build dtb
 	eval dtb_bin=$kernel_dir/arch/arm64/boot/dts/hisilicon/\$${platform}_DTB
-
-	make O=$kernel_dir ${dtb_bin#*/boot/dts/}
+	if [ x"$dtb_bin" != x"" ]; then
+		make O=$kernel_dir ${dtb_bin#*/boot/dts/}
+	fi
 	popd
 
 	mkdir -p $output/binary/arm64/ 2>/dev/null
 	cp $kernel_bin $output/binary/arm64/
 
-	mkdir -p $output/binary/$platform/
-	cp $dtb_bin $output/binary/$platform/
+	if [ x"$dtb_bin" != x"" ]; then
+		mkdir -p $output/binary/$platform/
+		cp $dtb_bin $output/binary/$platform/
+	fi
 	)
 }
 
@@ -93,7 +96,7 @@ build_check()
 	if [ x"$platform" != x"qemu" ]; then
 		kernel_dir=$output_dir/kernel
 		eval dtb_bin=\$${platform}_DTB
-		if [ ! -f $output_dir/binary/$platform/$dtb_bin ]; then
+		if [ x"$dtb_bin" != x"" ] && [ ! -f $output_dir/binary/$platform/$dtb_bin ]; then
 			return 1
 		fi
 	else
@@ -108,49 +111,6 @@ build_check()
 	fi
 
 	return 0
-	)
-}
-
-###################################################################################
-# build_kernel_qemu <platform> <output_dir>
-###################################################################################
-build_kernel_qemu()
-{
-	(
-	platform=$1
-	output_dir=$2
-	core_num=`cat /proc/cpuinfo | grep "processor" | wc -l`
-
-	export ARCH=arm64
-	mkdir -p $output_dir/kernel_qemu
-	kernel_dir=$(cd $output_dir/kernel_qemu; pwd)
-	kernel_bin=$kernel_dir/arch/arm64/boot/Image
-
-	pushd $KERNEL_DIR
-	# build Image
-	./scripts/kconfig/merge_config.sh -O $kernel_dir -m arch/arm64/configs/defconfig \
-		arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig arch/arm64/configs/qemu_defconfig
-	mv -f $kernel_dir/.config $kernel_dir/.merged.config
-	make O=$kernel_dir KCONFIG_ALLCONFIG=$kernel_dir/.merged.config alldefconfig
-	make O=$kernel_dir -j${core_num} ${kernel_bin##*/}
-	popd
-	)
-}
-
-###################################################################################
-# build_kernel_entry <platform> <output>
-###################################################################################
-build_kernel_entry()
-{
-	(
-	platform=$1
-	output=$2
-	mkdir -p $output 2>/dev/null
-	if [ x"QEMU" = x"$platform" ]; then
-		build_kernel_qemu $platform $output
-	else
-		build_kernel $platform $output
-	fi
 	)
 }
 
@@ -236,7 +196,7 @@ fi
 
 # build kernel and check result
 rm_module_build_log kernel $OUTPUT_DIR
-if build_kernel_entry $PLATFORM $OUTPUT_DIR && build_check $PLATFORM $OUTPUT_DIR; then
+if build_kernel $PLATFORM $OUTPUT_DIR && build_check $PLATFORM $OUTPUT_DIR; then
 	gen_module_build_log kernel $OUTPUT_DIR ; exit 0
 else
 	exit 1

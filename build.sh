@@ -302,4 +302,10 @@ echo ""
 echo "Create quick deploy done!"
 echo ""
 
+###################################################################################
+# Build and run QEMU
+###################################################################################
+if echo $PLATFORMS | tr ',' ' ' | grep -w QEMU >/dev/null 2>&1; then
+	build-qemu.sh --output=$BUILD_DIR --distros=$DISTROS
+fi
 
