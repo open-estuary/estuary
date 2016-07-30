@@ -75,12 +75,12 @@ build_kernel()
 	fi
 	popd
 
-	mkdir -p $output/binary/arm64/ 2>/dev/null
-	cp $kernel_bin $output/binary/arm64/
+	mkdir -p $output_dir/binary/arm64/ 2>/dev/null
+	cp $kernel_bin $output_dir/binary/arm64/
 
 	if [ x"$dtb_bin" != x"" ]; then
-		mkdir -p $output/binary/$platform/
-		cp $dtb_bin $output/binary/$platform/
+		mkdir -p $output_dir/binary/$platform/
+		cp $dtb_bin $output_dir/binary/$platform/
 	fi
 	)
 }
