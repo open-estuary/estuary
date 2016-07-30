@@ -93,21 +93,17 @@ build_check()
 	(
 	platform=$1
 	output_dir=$2
-	if [ x"$platform" != x"qemu" ]; then
-		kernel_dir=$output_dir/kernel
-		eval dtb_bin=\$${platform}_DTB
-		if [ x"$dtb_bin" != x"" ] && [ ! -f $output_dir/binary/$platform/$dtb_bin ]; then
-			return 1
-		fi
-	else
-		kernel_dir=$output_dir/kernel_qemu
-		if [ ! -f $output_dir/binary/arm64/Image_QEMU ]; then
-			return 1
-		fi
+	kernel_dir=$output_dir/kernel
+	eval dtb_bin=\$${platform}_DTB
+
+	if [ ! -f $kernel_dir/arch/arm64/boot/Image ] || [ ! -f $output_dir/binary/arm64/Image ]; then
+		return 1
 	fi
 
-	if [ ! -f $kernel_dir/arch/arm64/boot/Image ]; then
-		return 1
+	if [ x"$dtb_bin" != x"" ]; then
+		if [ ! -f $output_dir/binary/$platform/$dtb_bin ] || [ ! -f $kernel_dir/arch/arm64/boot/dts/hisilicon/$dtb_bin ]; then
+			return 1
+		fi
 	fi
 
 	return 0
