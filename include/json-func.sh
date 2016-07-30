@@ -107,13 +107,16 @@ get_boards_mac()
 {
 	(
 	cfgfile=$1
+	brdmacs=()
 	index=0
 	board_mac=`jq -r ".boards[$index].mac" $cfgfile 2>/dev/null`
 	while [ x"$?" = x"0" ] && [ x"$board_mac" != x"null" ] && [ x"$board_mac" != x"" ]; do
-		echo $board_mac
+		idx=${#brdmacs[@]}
+		brdmacs[$idx]=$board_mac
 		index=$[index + 1]
 		board_mac=`jq -r ".boards[$index].mac" $cfgfile 2>/dev/null`
 	done
+	echo ${brdmacs[@]}
 	)
 }
 
@@ -129,8 +132,14 @@ get_deploy_info()
 	install=`jq -r ".setup[$index].install" $cfgfile 2>/dev/null`
 	while [ x"$?" = x"0" ] && [ x"$install" != x"null" ] && [ x"$install" != x"" ]; do
 		if [ x"yes" = x"$install" ]; then
-			deploy_info=`jq -r ".setup[$index]" $cfgfile 2>/dev/null`
-			echo $deploy_info | sed -e 's/[ |{|}|"]//g' | tr ':' '=' | sed -e 's/install=yes,*//g'
+			deploy_info=`jq -r ".setup[$index]" $cfgfile 2>/dev/null | sed -e 's/[ |{|}|"]//g' | tr ':' '=' | sed -e 's/install=yes,*//g'`
+			deploy_type=`echo "$deploy_info" | grep -Po "(?<=type=)([^,]*)"`
+			deploy_device=`echo "$deploy_info" | grep -Po "(?<=device=)([^,]*)"`
+			if [ x"$deploy_device" != x"" ]; then
+				echo "$deploy_type:$deploy_device"
+			else
+				echo "$deploy_type"
+			fi
 		fi
 		index=$[index + 1]
 		install=`jq -r ".setup[$index].install" $cfgfile 2>/dev/null`
