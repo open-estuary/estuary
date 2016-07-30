@@ -3,6 +3,8 @@
 # ./estuary/build.sh --help
 # ./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=build
 # ./estuary/build.sh clean --cfgfile=./estuary/estuarycfg.json --builddir=build
+# ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse
+# ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse --deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
 ###################################################################################
 
 ###################################################################################
@@ -46,8 +48,9 @@ PLATFORMS= # Platforms to build
 DISTROS= # Distros to build
 PACKAGES= # Pakcages to build and install
 
-DISTRO_FILES= # Distro files (distro files with version)
-BINARY_FILES= # binary files (binary files with version)
+DEPLOY=() # Deploy
+CAPACITY=
+BOARDS_MAC=
 
 ###################################################################################
 # Usage
@@ -57,16 +60,34 @@ Usage()
 cat << EOF
 Usage: ./estuary/build.sh [options]
 Options:
-	--help:     Display this information
-	--cfgfile:  JSON configuration file
+	-h, --help: Display this information
+	-v, --version: print estuary version
+	clean: Clean all binary files
+
+	-f, --file: JSON configuration file
+	-p, --platform: the target platform, the -d must be specified if platform is QEMU
+	-d, --distro: the distribuations, the -p must be specified if -d is specified
+	--pkg: packages to install, the -d/--distros must be specified if --pkgs is specified
+
 	--builddir: Build output directory
-	clean:      Clean all binary files
-	--version:  print estuary version
+
+	--deploy: quick deploy type and target device
+		* for example: --deploy=usb:/dev/sdb, --deploy=iso, --deploy=pxe
+	--capacity: target distro partition size, default unit is GB
+	--mac: target board mac address, --mac must be specified if deploy type is pxe
 
 Example:
 	./estuary/build.sh --help
-	./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=./workspace
-	./estuary/build.sh clean --cfgfile=./estuary/estuarycfg.json --builddir=./workspace
+	./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
+	./estuary/build.sh clean --file=./estuary/estuarycfg.json --builddir=./workspace
+
+	./estuary/build.sh --builddir=./workspace --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse
+	./estuary/build.sh --builddir=./workspace \\
+		--platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse --pkg=armor,docker \\
+		--deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+		--deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
+
+	Please see ./estuary/estuarycfg.json for all support platform, distro, package.
 
 EOF
 }
@@ -77,28 +98,29 @@ EOF
 while test $# != 0
 do
         case $1 in
-        	--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ;;
-        	*) ac_option=$1 ;;
+        	--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=: ;;
+        	-*) ac_option=$1 ; ac_optarg=$2; ac_shift=shift ;;
+        	*) ac_option=$1 ; ac_shift=: ;;
         esac
 
         case $ac_option in
                 clean) CLEAN=yes ;;
-                --help) Usage ; exit 0 ;;
-		--version) print_version ./estuary ; exit 0 ;;
-                --cfgfile) CFG_FILE=$ac_optarg ;;
+                -h | --help) Usage ; exit 0 ;;
+                -v | --version) print_version ./estuary ; exit 0 ;;
+                -f | --file) CFG_FILE=$ac_optarg ;;
+                -p | --platform) PLATFORMS=$ac_optarg ;;
+                -d | --distro) DISTROS=$ac_optarg ;;
+                --pkg) PACKAGES=$ac_optarg ;;
                 --builddir) BUILD_DIR=$ac_optarg ;;
-                *) Usage ; exit 1 ;;
+                --deploy) DEPLOY[${#DEPLOY[@]}]=$ac_optarg ;;
+                --capacity) CAPACITY=$ac_optarg ;;
+                --mac) BOARDS_MAC=$ac_optarg ;;
+                *) Usage ; echo "Unknown option $1" ; exit 1 ;;
         esac
-
+	
+        $ac_shift
         shift
 done
-
-###################################################################################
-# Check args
-###################################################################################
-if [ x"$CFG_FILE" = x"" ] || [ x"$BUILD_DIR" = x"" ]; then
-	Usage ; exit 1
-fi
 
 ###################################################################################
 # Install development tools
@@ -117,21 +139,46 @@ fi
 ###################################################################################
 # Parse configuration file
 ###################################################################################
-PLATFORMS=$(get_install_platforms $CFG_FILE | tr ' ' ',')
-DISTROS=$(get_install_distros $CFG_FILE | tr ' ' ',')
-PACKAGES=$(get_install_packages $CFG_FILE | tr ' ' ',')
+if [ x"$CFG_FILE" != x"" ]; then
+	PLATFORMS=$(get_install_platforms $CFG_FILE | tr ' ' ',')
+	DISTROS=$(get_install_distros $CFG_FILE | tr ' ' ',')
+	PACKAGES=$(get_install_packages $CFG_FILE | tr ' ' ',')
+
+	DEPLOY=($(get_deploy_info $CFG_FILE))
+	CAPACITY=`get_install_capacity $CFG_FILE | tr ' ' ','`
+	BOARDS_MAC=`get_boards_mac $CFG_FILE | tr ' ' ','`
+fi
 
 cat << EOF
 ##############################################################################
-# PLAT:   $PLATFORMS
-# DISTRO: $DISTROS
-# PKG:    $PACKAGES
+# PLAT:     $PLATFORMS
+# DISTRO:   $DISTROS
+# PKG:      $PACKAGES
+# BUILDDIR: $BUILD_DIR
+# DEPLOY:   ${DEPLOY[@]}
+# CAPACITY: $CAPACITY
+# MAC:      $BOARDS_MAC
 ##############################################################################
 
 EOF
 
-if [ -z "$PLATFORMS" ] || [ -z $DISTROS ]; then
-	echo -e "\033[31mError! No platform or distro to build! Please check $CFG_FILE!\033[0m" ; exit 1
+###################################################################################
+# Check args
+###################################################################################
+if [ -z $PLATFORMS ] || [ -z $DISTROS ] || [ -z $BUILD_DIR ]; then
+	Usage; echo -e "\033[31mError! Platform, distro, builddir must be specified!\033[0m"; exit 1
+fi
+
+if [ ${#DEPLOY[@]} -ge 1 ]; then
+	if echo "${DEPLOY[@]}" | grep -w pxe >/dev/null && [ -z $BOARDS_MAC ]; then
+		echo -e "\033[31mError! Target board mac must be specified for pxe deploy!\033[0m" ; exit 1
+	fi
+
+	capacity=(`echo $CAPACITY | tr ',' ' '`)
+	distros=(`echo $DISTROS | tr ',' ' '`)
+	if [ ${#capacity[@]} -ne ${#distros[@]} ]; then
+		echo -e "\033[31mError! Capacity for each distro must be specified!\033[0m" ; exit 1
+	fi
 fi
 
 ###################################################################################
@@ -179,6 +226,8 @@ if [ x"$CLEAN" = x"yes" ]; then
 	for plat in ${platfroms[*]}; do
 		build-platform.sh clean --cross=$CROSS_COMPILE --platform=$plat --distros=$DISTROS --output=$BUILD_DIR
 	done
+	
+	rm -f $BUILD_DIR/binary/arm64/Estuary.iso 2>/dev/null
 	echo "Clean binary files done!"
 	exit 0
 fi
@@ -276,22 +325,17 @@ done
 echo "##############################################################################"
 echo "# Quick deployment"
 echo "##############################################################################"
-BOARDS_MAC=`get_boards_mac $CFG_FILE`
-boards_mac=`echo $BOARDS_MAC | tr ' ' ','`
-CAPACITY=`get_install_capacity $CFG_FILE`
-capacity=`echo $CAPACITY | tr ' ' ','`
- 
-deploy=($(get_deploy_info $CFG_FILE))
-for dep in ${deploy[*]}; do
+
+for dep in ${DEPLOY[*]}; do
 	deploy_type=`get_deploy_type $dep`
 	deploy_device=`get_deploy_device $dep`
 	echo "/*---------------------------------------------------------------"
-	echo "- deploy type: $deploy_type, target device: $deploy_device, boards mac: $boards_mac"
-	echo "- platform: $PLATFORMS, distros: $DISTROS, capacity: $capacity"
+	echo "- deploy type: $deploy_type, target device: $deploy_device, boards mac: $BOARDS_MAC"
+	echo "- platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY"
 	echo "- binary directory: $BUILD_DIR/binary/arm64"
 	echo "---------------------------------------------------------------*/"
-	quick-deploy.sh --target=$deploy_type:$deploy_device --boardmac=$boards_mac --platform=$PLATFORMS \
-		--distros=$DISTROS --capacity=$capacity --binary=$BUILD_DIR/binary/arm64
+	quick-deploy.sh --target=$deploy_type:$deploy_device --boardmac=$BOARDS_MAC --platform=$PLATFORMS \
+		--distros=$DISTROS --capacity=$CAPACITY --binary=$BUILD_DIR/binary/arm64
 	if [[ $? -ne 0 ]]; then
 		echo "Deploy of $deploy_type failed!" >&2 ; exit 1
 	fi
