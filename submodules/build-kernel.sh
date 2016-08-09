@@ -69,9 +69,9 @@ build_kernel()
 	make O=$kernel_dir -j${core_num} ${kernel_bin##*/}
 
 	# build dtb
-	eval dtb_bin=$kernel_dir/arch/arm64/boot/dts/hisilicon/\$${platform}_DTB
+	eval dtb_bin=\$${platform}_DTB
 	if [ x"$dtb_bin" != x"" ]; then
-		make O=$kernel_dir ${dtb_bin#*/boot/dts/}
+		make O=$kernel_dir hisilicon/${dtb_bin}
 	fi
 	popd
 
@@ -80,7 +80,7 @@ build_kernel()
 
 	if [ x"$dtb_bin" != x"" ]; then
 		mkdir -p $output_dir/binary/$platform/
-		cp $dtb_bin $output_dir/binary/$platform/
+		cp $kernel_dir/arch/arm64/boot/dts/hisilicon/$dtb_bin $output_dir/binary/$platform/
 	fi
 	)
 }
@@ -124,15 +124,11 @@ clean_kernel()
 
 	if [ x"$dtb_bin" != x"" ]; then
 		rm -f $output_dir/binary/$platform/$dtb_bin
+		rm -f $kernel_dir/arch/arm64/boot/dts/hisilicon/$dtb_bin
 	fi
 
-	if [ x"$platform" = x"QEMU" ]; then
-		sudo rm -rf $output_dir/kernel-qemu
-		rm -f $output_dir/binary/$platform/Image_$platform
-	else
-		sudo rm -rf $output_dir/kernel
-		rm -f $output_dir/binary/arm64/Image
-	fi
+	sudo rm -rf $output_dir/kernel
+	rm -f $output_dir/binary/arm64/Image
 	)
 }
 
