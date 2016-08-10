@@ -84,6 +84,9 @@ if [ x"$CLEAN" = x"yes" ]; then
 		build-uefi.sh clean --platform=$plat --output=$OUTPUT
 		build-grub.sh clean --output=$OUTPUT
 		build-kernel.sh clean --platform=$plat --cross=$CROSS_COMPILE --output=$OUTPUT
+		if [ x"$plat" = x"QEMU" ]; then
+			build-qemu.sh clean --output=$OUTPUT --distros=$DISTROS
+		fi
 	done
 
 	# clean distros
