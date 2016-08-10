@@ -76,11 +76,16 @@ KERNEL_BIN=$OUTPUT_DIR/binary/arm64/Image
 # clean qemu img
 ###################################################################################
 if [ x"$CLEAN" = x"yes" ]; then
+	echo "Clean qemu ..."
 	distros=(`echo $DISTROS | tr ',' ' '`)
 	for distro in ${distros[*]}; do
 		rm -f $DISTRO_DIR/${distro}_ARM64.img 2>/dev/null
 	done
 	
+	pushd qemu/ >/dev/null
+	make clean
+	popd >/dev/null
+
 	exit 0
 fi
 
