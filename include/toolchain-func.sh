@@ -1,85 +1,123 @@
 #!/bin/bash
 
 ###################################################################################
-# get_toolchain <arch> <toolchainsum_source_file>
+# get_toolchain <ftp_cfgfile> <arch>
 ###################################################################################
 get_toolchain()
 {
 	(
-	arch=$1
-	toolchainsum_source_file=$2
-	cat $toolchainsum_source_file 2>/dev/null | grep $arch | awk '{print $2}' | sed 's/.*\///'
+	ftp_cfgfile=$1
+	arch=$2
+	get_field_content $ftp_cfgfile toolchain | tr ' ' '\n' | grep $arch | awk -F ':' '{print $1}'
 	)
 }
 
 ###################################################################################
-# download_toolchains <target_dir> <toolchainsum_source_file> <toolchain_source>
+# int download_toolchains <ftp_cfgfile> <ftp_addr> <target_dir>
 ###################################################################################
 download_toolchains()
 {
 	(
-	target_dir=$(cd $1; pwd)
-	toolchainsum_source_file=$2
-	toolchain_source=$3
-	
-	checksum_file=`basename $toolchainsum_source_file`
-	checksum_dir=`dirname $toolchainsum_source_file`
-	checksum_dir=`cd $checksum_dir; pwd`
+	ftp_cfgfile=$1
+	ftp_addr=$2
+	target_dir=$3
+	toolchain_files=(`get_field_content $ftp_cfgfile toolchain`)
+	pushd $target_dir >/dev/null
+	for toolchain in ${toolchain_files[*]}; do
+		target_file=`expr "X$toolchain" : 'X\([^:]*\):.*' | sed 's/ //g'`
+		target_addr=`expr "X$toolchain" : 'X[^:]*:\(.*\)' | sed 's/ //g'`
+		toolchain_file=`basename $target_addr`
 
-	if ! check_sum $target_dir $checksum_dir/$checksum_file >/dev/null 2>&1; then
-		pushd $target_dir >/dev/null
-		toolchain_files=(`md5sum --quiet --check $checksum_dir/$checksum_file 2>/dev/null | grep "FAILED" | cut -d : -f 1`)
-		for toolchain_file in ${toolchain_files[*]}; do
-			rm -f $toolchain_file 2>/dev/null
-			wget -c $toolchain_source/$toolchain_file || return 1
-		done
-		popd >/dev/null
-
-		if ! check_sum $target_dir $checksum_dir/$checksum_file >/dev/null 2>&1; then
-			return 1
+		if [ ! -f ${toolchain_file}.sum ]; then
+			rm -f .${toolchain_file}.sum 2>/dev/null
+			wget -c $ftp_addr/${target_addr}.sum || return 1
 		fi
-	fi
+
+		if [ ! -f $toolchain_file ] || ! check_sum . ${toolchain_file}.sum; then
+			rm -f $toolchain_file 2>/dev/null
+			wget -c $ftp_addr/$target_addr || return 1
+			check_sum . ${toolchain_file}.sum || return 1
+		fi
+		
+		if [ x"$target_file" != x"$toolchain_file" ]; then
+			rm -f $target_file 2>/dev/null
+			ln -s $toolchain_file $target_file
+		fi
+	done
+	popd >/dev/null
 
 	return 0
 	)
 }
 
 ###################################################################################
-# copy_toolchain <toolchain> <src_dir> <target_dir>
+# int copy_toolchains <ftp_cfgfile> <src_dir> <target_dir>
 ###################################################################################
-copy_toolchain()
+copy_toolchains()
 {
 	(
-	toolchain=$1
+	ftp_cfgfile=$1
 	src_dir=$2
 	target_dir=$3
-	if ! (diff $src_dir/.toolchain.sum $target_dir/.toolchain.sum >/dev/null 2>&1) \
-		|| [ ! -f $target_dir/$toolchain ]; then
-		rm -f $target_dir/$toolchain 2>/dev/null
-		cp $src_dir/$toolchain $target_dir/$toolchain || return 1
-		rm -f $target_dir/.toolchain.sum 2>/dev/null
-		cp $src_dir/.toolchain.sum $target_dir/.toolchain.sum || return 1
-	fi
+	toolchain_files=(`get_field_content $ftp_cfgfile toolchain | tr ' ' '\n' | awk -F ':' '{print $1}'`)
+	for toolchain_file in ${toolchain_files[*]}; do
+		if ! (diff $src_dir/${toolchain_file}.sum $target_dir/.${toolchain_file}.sum >/dev/null 2>&1) \
+			|| [ ! -f $target_dir/$toolchain_file ]; then
+			rm -f $target_dir/$toolchain_file 2>/dev/null
+			cp $src_dir/$toolchain_file $target_dir/$toolchain_file || return 1
+			rm -f $target_dir/.${toolchain_file}.sum 2>/dev/null
+			cp $src_dir/${toolchain_file}.sum $target_dir/.${toolchain_file}.sum || return 1
+		fi
+	done
 
 	return 0
 	)
 }
 
 ###################################################################################
-# uncompress_toolchains <toolchainsum_source_file> <src_dir>
+# int uncompress_toolchains <ftp_cfgfile> <src_dir>
 ###################################################################################
 uncompress_toolchains()
 {
 	(
-	toolchainsum_source_file=$1
+	ftp_cfgfile=$1
 	src_dir=$2
 
-	toolchain_files=(`cat $toolchainsum_source_file 2>/dev/null | awk '{print $2}' | sed 's/.*\///'`)
+	toolchain_files=(`get_field_content $ftp_cfgfile toolchain | tr ' ' '\n' | awk -F ':' '{print $1}'`)
+
 	for toolchain_file in ${toolchain_files[*]}; do
 		toolchain_dir=`get_compress_file_prefix $toolchain_file`
 		if [ ! -d $src_dir/$toolchain_dir ]; then
 			if ! uncompress_file $src_dir/$toolchain_file $src_dir; then
 				rm -rf $src_dir/$toolchain_dir 2>/dev/null ; return 1
+			fi
+		fi
+	done
+
+	return 0
+	)
+}
+
+###################################################################################
+# int install_toolchain <ftp_cfgfile> <src_dir>
+###################################################################################
+install_toolchain()
+{
+	(
+	ftp_cfgfile=$1
+	src_dir=$2
+	toolchain_files=(`get_field_content $ftp_cfgfile toolchain | tr ' ' '\n' | awk -F ':' '{print $1}'`)
+	
+	for toolchain_file in ${toolchain_files[*]}; do
+		toolchain_dir=`get_compress_file_prefix $toolchain_file`
+		if [ ! -d /opt/$toolchain ]; then
+			if ! sudo cp -r $src_dir/$toolchain_dir/ /opt/; then
+				return 1
+			fi
+
+			str='export PATH=$PATH:/opt/'$toolchain_dir'/bin'
+			if ! grep "$str" ~/.bashrc >/dev/null; then
+				echo "$str">> ~/.bashrc
 			fi
 		fi
 	done

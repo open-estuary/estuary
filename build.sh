@@ -6,6 +6,10 @@
 # ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse
 # ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse --deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
 ###################################################################################
+DEFAULT_ESTUARYCFG="./estuary/estuarycfg.json"
+SUPPORT_PLATFORMS=(`sed -n '/^\"system\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=platform:)(.*?)(?=,)" | sort`)
+SUPPORT_DISTROS=(`sed -n '/^\"distros\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=name:)(.*?)(?=,)" | sort`)
+SUPPORT_PACKAGES=(`sed -n '/^\"packages\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=name:)(.*?)(?=,)" | sort`)
 
 ###################################################################################
 # Const Variables, PATH
@@ -37,6 +41,7 @@ export LANG=C
 # Global Variables
 ###################################################################################
 CLEAN= # Clean binary files
+ESTUARY_FTP_CFGFILE= # Estuary FTP configuration file
 CFG_FILE= # JSON configuration file
 BUILD_DIR= # Build output directory
 CROSS_COMPILE= # Cross compile
@@ -52,11 +57,17 @@ DEPLOY=() # Deploy
 CAPACITY=
 BOARDS_MAC=
 
+INSTALL= # toolchain/caliper
+
 ###################################################################################
 # Usage
 ###################################################################################
 Usage()
 {
+	local platforms=`echo ${SUPPORT_PLATFORMS[*]} | sed 's/ /, /g'`
+	local distros=`echo ${SUPPORT_DISTROS[*]} | sed 's/ /, /g'`
+	local packages=`echo ${SUPPORT_PACKAGES[*]} | sed 's/ /, /g'`
+
 cat << EOF
 Usage: ./estuary/build.sh [options]
 Options:
@@ -64,12 +75,16 @@ Options:
 	-v, --version: print estuary version
 	clean: Clean all binary files
 
+	-i: Insall Caliper, toolchain
 	-f, --file: JSON configuration file
 	-p, --platform: the target platform, the -d must be specified if platform is QEMU
+		* support platforms: $platforms
 	-d, --distro: the distribuations, the -p must be specified if -d is specified
+		* support distros: $distros
 	--pkg: packages to install, the -d/--distros must be specified if --pkgs is specified
+		* support packages: $packages
 
-	--builddir: Build output directory
+	--builddir: Build output directory, default is build
 
 	--deploy: quick deploy type and target device
 		* for example: --deploy=usb:/dev/sdb, --deploy=iso, --deploy=pxe
@@ -78,6 +93,10 @@ Options:
 
 Example:
 	./estuary/build.sh --help
+
+	./estuary/build.sh -f ./estuary/estuarycfg.json
+	./estuary/build.sh -p QEMU -d Ubuntu
+	./estuary/build.sh -f ./estuary/estuarycfg.json --builddir=./workspace
 	./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
 	./estuary/build.sh clean --file=./estuary/estuarycfg.json --builddir=./workspace
 
@@ -86,8 +105,6 @@ Example:
 		--platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse --pkg=armor,docker \\
 		--deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
 		--deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
-
-	Please see ./estuary/estuarycfg.json for all support platform, distro, package.
 
 EOF
 }
@@ -106,6 +123,7 @@ do
         case $ac_option in
                 clean) CLEAN=yes ;;
                 -h | --help) Usage ; exit 0 ;;
+                -i) INSTALL=$ac_optarg ;;
                 -v | --version) print_version ./estuary ; exit 0 ;;
                 -f | --file) CFG_FILE=$ac_optarg ;;
                 -p | --platform) PLATFORMS=$ac_optarg ;;
@@ -121,6 +139,11 @@ do
         $ac_shift
         shift
 done
+
+###################################################################################
+# Default values
+###################################################################################
+BUILD_DIR=${BUILD_DIR:-build}
 
 ###################################################################################
 # Install development tools
@@ -165,10 +188,6 @@ EOF
 ###################################################################################
 # Check args
 ###################################################################################
-if [ -z $PLATFORMS ] || [ -z $DISTROS ] || [ -z $BUILD_DIR ]; then
-	Usage; echo -e "\033[31mError! Platform, distro, builddir must be specified!\033[0m"; exit 1
-fi
-
 if [ ${#DEPLOY[@]} -ge 1 ]; then
 	if echo "${DEPLOY[@]}" | grep -w pxe >/dev/null && [ -z $BOARDS_MAC ]; then
 		echo -e "\033[31mError! Target board mac must be specified for pxe deploy!\033[0m" ; exit 1
@@ -176,9 +195,23 @@ if [ ${#DEPLOY[@]} -ge 1 ]; then
 
 	capacity=(`echo $CAPACITY | tr ',' ' '`)
 	distros=(`echo $DISTROS | tr ',' ' '`)
-	if [ ${#capacity[@]} -ne ${#distros[@]} ]; then
+	if [ ${#capacity[@]} -eq 0 ] || [ ${#capacity[@]} -ne ${#distros[@]} ]; then
 		echo -e "\033[31mError! Capacity for each distro must be specified!\033[0m" ; exit 1
 	fi
+fi
+
+###################################################################################
+# Update Estuary FTP configuration file
+###################################################################################
+estuary_version=`get_estuary_version ./estuary`
+ESTUARY_FTP_CFGFILE="${estuary_version}.xml"
+if ! check_ftp_update $estuary_version ./estuary; then
+	if ! update_ftp_cfgfile $estuary_version $ESTUARY_INTERAL_FTP ./estuary; then
+		echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
+	fi
+	rm -f distro/.*.sum distro/*.sum 2>/dev/null
+	rm -f prebuild/.*.sum prebuild/*.sum 2>/dev/null
+	rm -f toolchain/.*.sum toolchain/*.sum 2>/dev/null
 fi
 
 ###################################################################################
@@ -189,30 +222,53 @@ if [ x"$LOCALARCH" = x"x86_64" ]; then
 	echo "# Download/Uncompress toolchain"
 	echo "##############################################################################"
 	mkdir -p toolchain
-	download_toolchains toolchain $TOPDIR/checksum/toolchain/toolchain.sum $ESTUARY_INTERAL_FTP/toolchain
+	download_toolchains $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP toolchain
 	if [[ $? != 0 ]]; then
 		echo -e "\033[31mError! Download toolchains failed!\033[0m" >&2 ; exit 1
 	fi
 
-	if ! uncompress_toolchains $TOPDIR/checksum/toolchain/toolchain.sum toolchain; then
+	if ! uncompress_toolchains $ESTUARY_FTP_CFGFILE toolchain; then
 		echo -e "\033[31mError! Uncompress toolchains failed!\033[0m" >&2 ; exit 1
 	fi
-
-	toolchain=`get_toolchain arm $TOPDIR/checksum/toolchain/toolchain.sum`
+	
+	toolchain=`get_toolchain $ESTUARY_FTP_CFGFILE arm`
 	toolchain_dir=`get_compress_file_prefix $toolchain`
 	export PATH=`pwd`/toolchain/$toolchain_dir/bin:$PATH
 
-	toolchain=`get_toolchain aarch64 $TOPDIR/checksum/toolchain/toolchain.sum`
+	toolchain=`get_toolchain $ESTUARY_FTP_CFGFILE aarch64`
 	toolchain_dir=`get_compress_file_prefix $toolchain`
-	mkdir -p $BUILD_DIR/binary/arm64
-	if ! copy_toolchain $toolchain toolchain $BUILD_DIR/binary/arm64; then
-		echo "Copy $toolchain to $BUILD_DIR/binary/arm64 failed!" >&2 ; exit 1
-	fi
 
 	TOOLCHAIN=$toolchain
 	TOOLCHAIN_DIR=`cd toolchain/$toolchain_dir; pwd`
 	CROSS_COMPILE=`get_cross_compile $LOCALARCH $TOOLCHAIN_DIR`
 	export PATH=$TOOLCHAIN_DIR/bin:$PATH
+fi
+
+###################################################################################
+# Install toolchains
+###################################################################################
+if [ x"$LOCALARCH" = x"x86_64" ] && [ x"$INSTALL" = x"toolchain" ]; then
+	echo "##############################################################################"
+	echo "# Install toolchain"
+	echo "##############################################################################"
+	if ! install_toolchain $ESTUARY_FTP_CFGFILE toolchain; then
+		echo -e "\033[31mError! Install toolchains failed!\033[0m" ; exit 1 
+	fi
+	echo "Install toolchain done."
+	echo ""
+fi
+
+###################################################################################
+# Install Caliper for Estuary
+###################################################################################
+if [ x"$INSTALL" = x"Caliper" ]; then
+	pushd caliper >/dev/null
+	echo "Installing Caliper..."
+	if ! sudo python setup.py install; then
+		echo -e "\033[31mError! Installing Caliper failed!\033[0m" ; exit 1
+	fi
+	popd >/dev/null
+	echo "Install Caliper done."
 fi
 
 ###################################################################################
@@ -238,18 +294,22 @@ fi
 echo "##############################################################################"
 echo "# Download distros (distros: $DISTROS)"
 echo "##############################################################################"
-mkdir -p distro
-download_distros distro $TOPDIR/checksum/linux $ESTUARY_INTERAL_FTP/linux $DISTROS
-if [[ $? != 0 ]]; then
-	echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
+if [ x"$$DISTROS" != x"" ]; then
+	mkdir -p distro
+	download_distros $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP distro $DISTROS
+	if [[ $? != 0 ]]; then
+		echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
+	fi
 fi
 echo ""
 
 echo "##############################################################################"
 echo "# Uncompress distros (distros: $DISTROS)"
 echo "##############################################################################"
-if ! uncompress_distros $DISTROS distro $BUILD_DIR/distro; then
-	echo -e "\033[31mError! Uncompress distro files failed!\033[0m" ; exit 1
+if [ x"$DISTROS" != x"" ]; then
+	if ! uncompress_distros $DISTROS distro $BUILD_DIR/distro; then
+		echo -e "\033[31mError! Uncompress distro files failed!\033[0m" ; exit 1
+	fi
 fi
 echo ""
 
@@ -259,12 +319,22 @@ echo ""
 echo "##############################################################################"
 echo "# Download binaries"
 echo "##############################################################################"
-mkdir -p prebuild
-download_binaries prebuild $TOPDIR/checksum/prebuild $ESTUARY_INTERAL_FTP
-if [[ $? != 0 ]]; then
-	echo -e "\033[31mError! Download binaries failed!\033[0m" ; exit 1
+if [ x"$PLATFORMS" != x"" ]; then
+	mkdir -p prebuild
+	download_binaries $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP prebuild
+	if [[ $? != 0 ]]; then
+		echo -e "\033[31mError! Download binaries failed!\033[0m" ; exit 1
+	fi
 fi
 echo ""
+
+###################################################################################
+# Copy toolchains
+###################################################################################
+mkdir -p $BUILD_DIR/binary/arm64 2>/dev/null
+if ! copy_toolchains $ESTUARY_FTP_CFGFILE toolchain $BUILD_DIR/binary/arm64; then
+	echo -e "\033[31mError! Copy toolchains failed!\033[0m" ; exit 1
+fi
 
 ###################################################################################
 # Copy binaries/docs ...
@@ -272,18 +342,20 @@ echo ""
 echo "##############################################################################"
 echo "# Copy binaries/docs"
 echo "##############################################################################"
-platfroms=`echo $PLATFORMS | tr ',' ' '`
-binary_src_dir="./prebuild"
-doc_src_dir="./estuary/doc"
+if [ x"$PLATFORMS" != x"" ]; then
+	platfroms=`echo $PLATFORMS | tr ',' ' '`
+	binary_src_dir="./prebuild"
+	doc_src_dir="./estuary/doc"
 
-mkdir -p $BUILD_DIR/binary
-mkdir -p $BUILD_DIR/doc
-if ! copy_all_binaries $PLATFORMS $binary_src_dir $BUILD_DIR/binary; then
-	echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
-fi
+	mkdir -p $BUILD_DIR/binary
+	mkdir -p $BUILD_DIR/doc
+	if ! copy_all_binaries $PLATFORMS $binary_src_dir $BUILD_DIR/binary; then
+		echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
+	fi
 
-if ! copy_all_docs $PLATFORMS $doc_src_dir $BUILD_DIR/doc; then
-	echo -e "\033[31mError! Copy docs failed!\033[0m" ; exit 1
+	if ! copy_all_docs $PLATFORMS $doc_src_dir $BUILD_DIR/doc; then
+		echo -e "\033[31mError! Copy docs failed!\033[0m" ; exit 1
+	fi
 fi
 
 ###################################################################################
@@ -312,12 +384,14 @@ echo ""
 echo "##############################################################################"
 echo "# Create distros softlink"
 echo "##############################################################################"
-distros=`echo $DISTROS | tr ',' ' '`
-binary_dir=$BUILD_DIR/binary/arm64 
-for distro in ${distros[*]}; do
-	rm -f $binary_dir/${distro}_ARM64.tar.gz 2>/dev/null
-	ln -s ../../distro/${distro}_ARM64.tar.gz $binary_dir/${distro}_ARM64.tar.gz
-done
+if [ x"$DISTROS" != x"" ]; then
+	distros=`echo $DISTROS | tr ',' ' '`
+	binary_dir=$BUILD_DIR/binary/arm64 
+	for distro in ${distros[*]}; do
+		rm -f $binary_dir/${distro}_ARM64.tar.gz 2>/dev/null
+		ln -s ../../distro/${distro}_ARM64.tar.gz $binary_dir/${distro}_ARM64.tar.gz
+	done
+fi
 
 ###################################################################################
 # Quick Deployment
@@ -325,25 +399,27 @@ done
 echo "##############################################################################"
 echo "# Quick deployment"
 echo "##############################################################################"
+if [ x"$PLATFORMS" != x"" ] && [ x"$DISTROS" != x"" ]; then
+	for dep in ${DEPLOY[*]}; do
+		deploy_type=`get_deploy_type $dep`
+		deploy_device=`get_deploy_device $dep`
+		echo "/*---------------------------------------------------------------"
+		echo "- deploy type: $deploy_type, target device: $deploy_device, boards mac: $BOARDS_MAC"
+		echo "- platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY"
+		echo "- binary directory: $BUILD_DIR/binary/arm64"
+		echo "---------------------------------------------------------------*/"
+		quick-deploy.sh --target=$deploy_type:$deploy_device --boardmac=$BOARDS_MAC --platform=$PLATFORMS \
+			--distros=$DISTROS --capacity=$CAPACITY --binary=$BUILD_DIR/binary/arm64
+		if [[ $? -ne 0 ]]; then
+			echo "Deploy of $deploy_type failed!" >&2 ; exit 1
+		fi
+		echo ""
+	done
 
-for dep in ${DEPLOY[*]}; do
-	deploy_type=`get_deploy_type $dep`
-	deploy_device=`get_deploy_device $dep`
-	echo "/*---------------------------------------------------------------"
-	echo "- deploy type: $deploy_type, target device: $deploy_device, boards mac: $BOARDS_MAC"
-	echo "- platform: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY"
-	echo "- binary directory: $BUILD_DIR/binary/arm64"
-	echo "---------------------------------------------------------------*/"
-	quick-deploy.sh --target=$deploy_type:$deploy_device --boardmac=$BOARDS_MAC --platform=$PLATFORMS \
-		--distros=$DISTROS --capacity=$CAPACITY --binary=$BUILD_DIR/binary/arm64
-	if [[ $? -ne 0 ]]; then
-		echo "Deploy of $deploy_type failed!" >&2 ; exit 1
-	fi
 	echo ""
-done
+	echo "Create quick deploy done!"
+fi
 
-echo ""
-echo "Create quick deploy done!"
 echo ""
 
 ###################################################################################
