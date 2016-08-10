@@ -1,36 +1,40 @@
 #!/bin/bash
 
 ###################################################################################
-# download_binaries <target_dir> <checksum_dir> <binary_source>
+# int download_binaries <ftp_cfgfile> <ftp_addr> <target_dir>
 ###################################################################################
 download_binaries()
 {
 	(
-	target_dir=$1
-	checksum_dir=$(cd $2; pwd)
-	binary_source=$3
+	ftp_cfgfile=$1
+	ftp_addr=$2
+	target_dir=$3
 
-	checksum_files=$(cd $checksum_dir 2>/dev/null; ls *.sum 2>/dev/null)
+	binaries=(`get_field_content $ftp_cfgfile prebuild`)
+
 	pushd $target_dir >/dev/null
-	for checksum_file in ${checksum_files[*]}; do
-		remote_file=`cat $checksum_dir/$checksum_file | awk '{print $2}'`
-		origin_file=`echo $remote_file | sed 's/.*\///'`
-		target_file=`echo $checksum_file | sed 's/\.sum$//'`
-		if ! check_sum . $checksum_dir/$checksum_file || [ ! -f $target_file ] ; then
-			rm -f $origin_file 2>/dev/null
-			wget -c $binary_source/$remote_file || return 1
-			if ! check_sum . $checksum_dir/$checksum_file; then
-				return 1
-			fi
+	for binary in ${binaries[*]}; do
+		target_file=`expr "X$binary" : 'X\([^:]*\):.*' | sed 's/ //g'`
+		target_addr=`expr "X$binary" : 'X[^:]*:\(.*\)' | sed 's/ //g'`
+		binary_file=`basename $target_addr`
+		if [ ! -f ${binary_file}.sum ]; then
+			rm -f .${binary_file}.sum 2>/dev/null
+			wget -c $ftp_addr/${target_addr}.sum || return 1
 		fi
 
-		if [ x"$target_file" != x"$origin_file" ]; then
+		if [ ! -f $binary_file ] || ! check_sum . ${binary_file}.sum; then
+			rm -f $binary_file 2>/dev/null
+			wget -c $ftp_addr/$target_addr || return 1
+			check_sum . ${binary_file}.sum || return 1
+		fi
+		
+		if [ x"$target_file" != x"$binary_file" ]; then
 			rm -f $target_file 2>/dev/null
-			ln -s $origin_file $target_file
+			ln -s $binary_file $target_file
 		fi
 	done
-	popd
 
+	popd >/dev/null
 	return 0
 	)
 }

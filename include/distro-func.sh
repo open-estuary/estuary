@@ -1,33 +1,40 @@
 #!/bin/bash
 
 ###################################################################################
-# download_distros <target_dir> <checksum_dir> <distro_source> <distros>
+# int download_distros <ftp_cfgfile> <ftp_addr> <target_dir> <distros>
 ###################################################################################
 download_distros()
 {
 	(
-	target_dir=$1
-	checksum_dir=$(cd $2; pwd)
-	distro_source=$3
+	ftp_cfgfile=$1
+	ftp_addr=$2
+	target_dir=$3
 	distros=($(echo $4 | tr ',' ' '))
 
+	distro_files=(`get_field_content $ftp_cfgfile distro`)
 	mkdir -p $target_dir
 	pushd $target_dir >/dev/null
 	for distro in ${distros[@]}; do
-		checksum_file="${distro}_ARM64.tar.gz.sum"
-		distro_file=`cat $checksum_dir/$checksum_file | awk '{print $2}'`
-		if ! check_sum . $checksum_dir/$checksum_file || [ ! -f $distro_file ]; then
+		ftp_file=`echo ${distro_files[*]} | tr ' ' '\n' | grep -Po "(?<=${distro}_ARM64.tar.gz:)(.*)"`
+		distro_file=`basename $ftp_file`
+
+		if [ ! -f ${distro_file}.sum ]; then
+			wget -c $ftp_addr/${ftp_file}.sum || return 1
+		fi
+
+		if [ ! -f $distro_file ] || ! check_sum . ${distro_file}.sum; then
 			rm -f $distro_file 2>/dev/null
-			wget -c $distro_source/$distro/$distro_file || return 1
-			check_sum . $checksum_dir/$checksum_file || return 1
+			wget -c $ftp_addr/$ftp_file || return 1
+			check_sum . ${distro_file}.sum || return 1
 		fi
 
 		if [ x"$distro_file" != x"${distro}_ARM64.tar.gz" ]; then
-			rm -f ${distro}_ARM64.tar.gz
+			rm -f ${distro}_ARM64.tar.gz ${distro}_ARM64.tar.gz.sum 2>/dev/null
 			ln -s $distro_file ${distro}_ARM64.tar.gz
+			ln -s ${distro_file}.sum ${distro}_ARM64.tar.gz.sum
 		fi
 	done
-	popd
+	popd >/dev/null
 
 	return 0
 	)
@@ -44,7 +51,7 @@ uncompress_distros()
 	target_dir=$3
 	for distro in ${distros[*]}; do
 		if [ ! -f $target_dir/.${distro}_ARM64.tar.gz.sum ] || [ ! -d $target_dir/$distro ] || \
-			! (diff $src_dir/.${distro}_ARM64.tar.gz.sum $target_dir/.${distro}_ARM64.tar.gz.sum >/dev/null 2>&1); then
+			! (diff $src_dir/${distro}_ARM64.tar.gz.sum $target_dir/.${distro}_ARM64.tar.gz.sum >/dev/null 2>&1); then
 			sudo rm -rf $target_dir/$distro
 			rm -f $target_dir/.${distro}_ARM64.tar.gz.sum 2>/dev/null
 			rm -rf $target_dir/${distro}_ARM64.* 2>/dev/null
@@ -54,7 +61,7 @@ uncompress_distros()
 				sudo rm -rf $target_dir/$distro
 				return 1
 			else
-				cp $src_dir/.${distro}_ARM64.tar.gz.sum $target_dir/
+				cp $src_dir/${distro}_ARM64.tar.gz.sum $target_dir/.${distro}_ARM64.tar.gz.sum
 			fi
 		fi
 	done
