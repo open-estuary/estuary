@@ -41,37 +41,36 @@ You should change them acoording to your real local environment.
     # Booting from PXE with mini rootfs
     menuentry "D03 minilinux PXE" --id d03_minilinux_pxe {
     set root=(tftp,192.168.1.107)
-    linux /Image_D03 rdinit=/init crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
     initrd /mini-rootfs-arm64.cpio.gz
     } 
 
 
     menuentry "D03 Ubuntu NFS" --id d03_ubuntu_nfs {
     set root=(tftp,192.168.1.107)
-    linux /Image_D03 rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
     }
  
-
    # Booting from SATA with Ubuntu rootfs in /dev/sda2
     menuentry "D03 Ubuntu SATA" --id d03_ubuntu_sata {
     set root=(hd1,gpt1)
-    linux /Image_D03 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
     }
    
-   menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe {
+   menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image_D03 rdinit=/init crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
     initrd /mini-rootfs-arm64.cpio.gz
    }
 
-   menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs {
+   menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image_D03 rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
    }
 
-   menuentry "D03 Ubuntu SATA(ACPI)" --id d03_ubuntu_sata {
+   menuentry "D03 Ubuntu SATA(ACPI)" --id d03_ubuntu_sata_acpi {
     set root=(hd1,gpt1)
-    linux /Image_D03 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
    }
 
 
@@ -101,45 +100,45 @@ You should change them acoording to your real local environment.
    # Booting from PXE with mini rootfs
    menuentry "D02 minilinux PXE" --id d02_minilinux_pxe {
         set root=(tftp,192.168.1.107)
-        linux /Image_D02 rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
         initrd /mini-rootfs.cpio.gz
    }
     
    # Booting from NFS with Ubuntu rootfs
    menuentry "D02 Ubuntu NFS" --id d02_ubuntu_nfs {
         set root=(tftp,192.168.1.107)
-        linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+        linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
    }
     
    # Booting from SATA with Ubuntu rootfs in /dev/sda2
    menuentry "D02 Ubuntu SATA" --id d02_ubuntu_sata {
         set root=(hd1,gpt1)
-        linux /Image_D02 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
    }
 
    # Booting from SATA with Fedora rootfs in /dev/sda3
    menuentry "D02 Fedora SATA" --id d02_fedora_sata {
         set root=(hd1,gpt1)
-        linux /Image_D02 rdinit=/init root=/dev/sda3 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+        linux /Image rdinit=/init pcie_aspm=off root=/dev/sda3 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
    }
     
    # Booting from PXE with mini rootfs
-   menuentry "D02 minilinux PXE(ACPI)" --id d02_minilinux_pxe {
+   menuentry "D02 minilinux PXE(ACPI)" --id d02_minilinux_pxe_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image_D02 rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
     initrd /mini-rootfs.cpio.gz
    }
 
    # Booting from NFS with Ubuntu rootfs
-   menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs {
+   menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
   }
 
    # Booting from SATA with Ubuntu rootfs in /dev/sda2
-   menuentry "D02 Ubuntu SATA(ACPI)" --id d02_ubuntu_sata {
+   menuentry "D02 Ubuntu SATA(ACPI)" --id d02_ubuntu_sata_acpi {
     set root=(hd1,gpt1)
-    linux /Image_D02 rdinit=/init root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
    }
 
     # Booting from Norflash with mini rootfs
@@ -181,7 +180,7 @@ Normally they are placed into bootable partition as following structure.
 |
 |-------------grub.cfg          # grub config file
 |
-|-------------Image_D02         # kernel Image file only for D02 platform
+|-------------Image         # kernel Image file only for D02 platform
 |
 |-------------zImage_D01        # kernel zImage file only for D01 platform
 |
@@ -197,7 +196,7 @@ Note: In case of booting by PXE mode:
 
    4. If you use D02 board, you should not input DTB in the grub.cfg but you must flash the DTB file into spiflash to avoid a known Mac address duplicate issue.
 
-  You can get more information from the Deploy_Manual.txt guide.
+  You can get more information from the Deploy_Manual.md guide.
 
 <h2 id="4">FAQ</h2>  
 

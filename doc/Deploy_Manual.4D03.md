@@ -109,7 +109,7 @@ follow commands in EBL:
    ```
     e.g.: 
     
-    `provision 192.168.1.107 -u sch -p aaa -f Image_D03 -a 0x80000`
+    `provision 192.168.1.107 -u sch -p aaa -f Image -a 0x80000`
  
 2. Download dtb file from FTP server to target board's RAM
    ```
@@ -146,12 +146,10 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 3. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option and press "Enter".
   
    Note:
-
-    The value of `<No>` is depended on which D03 GE port is connected. D03 board support 4 on-board network ports at maximun.
-
-    To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE
      
-    ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
+    If you are connecting the D03 boards of openlab, please select "EFI Network 2".
+
+    The value of `<No>` is depended on which D03 GE port is connected. D03 board support 4 on-board network ports at maximun.To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
   
 4. After several seconds, D03 will boot by PXE automatically.
 
@@ -237,7 +235,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
               |
               |-------------grub.cfg           //grub config file
               |
-              |-------------Image_D03          //kernel binary Image
+              |-------------Image          //kernel binary Image
         sda2: Ubuntu distribution
         sda3: Fedora distribution
    ```     
@@ -261,7 +259,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
            menuentry "ubuntu" --id ubuntu {
            search --no-floppy --fs-uuid --set=root <UUID>
-           linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+           linux /Image rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
             }
        ```
 
@@ -277,7 +275,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
            menuentry "ubuntu" --id ubuntu {
            search --no-floppy --fs-uuid --set=root <UUID>
-           linux /Image_D03 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+           linux /Image rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
             }
        ```
 
@@ -315,7 +313,7 @@ e.g.:
 # Booting from NFS with Ubuntu rootfs
 menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs {
     set root=(tftp,192.168.1.107)
-    linux /Image_D03 rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+    linux /Image rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
 }
 ```
 
