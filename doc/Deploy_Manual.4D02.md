@@ -113,7 +113,7 @@ There are several methods to bring up system, you can select following anyone fi
  ```
  e.g.: 
  
- `provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x80000`
+ `provision 192.168.1.107 -u sch -p aaa -f Image -a 0x80000`
  
  
 2. Download dtb file from FTP server to target board's RAM
@@ -156,7 +156,7 @@ There are several methods to bring up system, you can select following anyone fi
  ```
  e.g.: 
  ```
- provision 192.168.1.107 -u sch -p aaa -f Image_D02 -a 0x100000
+ provision 192.168.1.107 -u sch -p aaa -f Image -a 0x100000
  norwfmem 0x100000 0x100000 0x1f00000
  ```
 
@@ -298,7 +298,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
               |
               |-------------grub.cfg           //grub config file
               |
-              |-------------Image_D02          //kernel binary Image
+              |-------------Image          //kernel binary Image
         sda2: Ubuntu distribution
         sda3: Fedora distribution
     ```     
@@ -333,7 +333,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
 
          menuentry "ubuntu" --id ubuntu {
          search --no-floppy --fs-uuid --set=root <UUID>
-         linux /Image_D02 rdinit=/init root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
+         linux /Image rdinit=/init pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
          }
      ```
     Note:
@@ -365,7 +365,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        * Modify arch/arm64/boot/dts/hisilicon/hip05-d02.dts file as follow:
          
         ```
-       　 bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+       　 bootargs = "rdinit=/init pcie_aspm=off root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
        After build the linux kernel from source, burn Image into Nor Flash and dtb file into SPI Flash. About how to burn Image and dtb file , please refer to "Boot via NORFLASH" and "Upgrade DTB file".
        
@@ -394,7 +394,7 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
        * Find the word "bootargs" and modify the value as follow:　
        
 	 ```shell
-         bootargs = "rdinit=/init root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
+         bootargs = "rdinit=/init pcie_aspm=off root=/dev/sda2 rootdelay=10 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp"
          ```
        * Find the word "&sas0", "&sas1" and delete as follow:
        
@@ -440,7 +440,7 @@ e.g.:
 # Booting from NFS with Ubuntu rootfs
 menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs {
     set root=(tftp,192.168.1.107)
-    linux /Image_D02 rdinit=/init console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
 }
 
 ```
