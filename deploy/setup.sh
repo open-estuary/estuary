@@ -233,9 +233,9 @@ mkdir -p /boot/EFI/GRUB2 2>/dev/null
 cp grubaa64.efi /boot/EFI/GRUB2 || exit 1
 
 # Delete old Estuary bootorder
-efi_bootorder=(`efibootmgr | grep -E "Boot[0-9]+\* Estuary" | awk '{print $1}'`)
+efi_bootorder=(`efibootmgr | grep -E "Boot[^ ]+\* Estuary" | awk '{print $1}'`)
 for bootorder in ${efi_bootorder[*]}; do
-        order=`expr "$bootorder" : 'Boot\([0-9]*\)\*'`
+        order=`expr "$bootorder" : 'Boot\([^ ]*\)\*'`
         efibootmgr -q -b $order -B 2>/dev/null
 done
 
