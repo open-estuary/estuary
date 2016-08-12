@@ -40,7 +40,8 @@ build_modules()
 	cross_compile=$3
 	core_num=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
-	modules_file=`find ${rootfs}/lib/modules -name modules.dep 2>/dev/null`
+	kernel_version=$(cat $kernel_dir/include/config/kernel.release)
+	modules_file=`find ${rootfs}/lib/modules -name $kernel_version 2>/dev/null`
 	if [ x"$modules_file" = x"" ]; then
 		pushd kernel
 		make ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} modules INSTALL_MOD_PATH=$rootfs \
