@@ -294,7 +294,7 @@ fi
 echo "##############################################################################"
 echo "# Download distros (distros: $DISTROS)"
 echo "##############################################################################"
-if [ x"$$DISTROS" != x"" ]; then
+if [ x"$DISTROS" != x"" ]; then
 	mkdir -p distro
 	download_distros $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP distro $DISTROS
 	if [[ $? != 0 ]]; then
