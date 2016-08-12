@@ -62,6 +62,7 @@ uncompress_distros()
 				return 1
 			else
 				cp $src_dir/${distro}_ARM64.tar.gz.sum $target_dir/.${distro}_ARM64.tar.gz.sum
+				sudo rm -rf $target_dir/$distro/lib/modules/*
 			fi
 		fi
 	done
