@@ -234,7 +234,7 @@ menuentry "Install $plat estuary" --id ${platform}_minilinux {
 EOF
 done
 
-boards_mac=($(echo $BOARDSMAC | tr ',' ' '))
+boards_mac=($(echo $BOARDSMAC | tr "[:upper:]" "[:lower:]" | tr ',' ' '))
 for board_mac in ${boards_mac[*]}; do
 	cp grub.cfg $TFTP_ROOT/grub.cfg-${board_mac} || exit 1
 done
