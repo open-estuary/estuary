@@ -16,7 +16,7 @@ For the supported tools in Armor on different distributions, please refer  https
 
 For the basic information of all the supported Armor tools please refer https://github.com/open-estuary/estuary/blob/master/doc/Armor_Tools_Basic_Info.4All.md
 
-Documentation for LLC support in perf https://github.com/open-estuary/estuary/blob/master/doc/README.armor.perf
+Documentation for L3 cache event counting support in perf https://github.com/open-estuary/estuary/blob/master/doc/README.armor.perf.md
 
 Documentation for using KGDB and KDB please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.kgdb.kdb
 
