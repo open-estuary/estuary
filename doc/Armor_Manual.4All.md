@@ -18,11 +18,11 @@ For the basic information of all the supported Armor tools please refer https://
 
 Documentation for L3 cache event counting support in perf https://github.com/open-estuary/estuary/blob/master/doc/README.armor.perf.md
 
-Documentation for using KGDB and KDB please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.kgdb.kdb
+Documentation for using KGDB and KDB please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.kgdb.kdb.md
 
-Documentation for LTTng user space tracing and kernel tracing, please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.lttng
+Documentation for LTTng user space tracing and kernel tracing, please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.lttng.md
 
-Documentation for how to verify iptables tool, please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.iptables
+Documentation for how to verify iptables tool, please refer https://github.com/open-estuary/estuary/blob/master/doc/README.armor.iptables.md
 
 <h2 id="3">Distributions</h2>
 
