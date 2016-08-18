@@ -1,5 +1,5 @@
 # Change list for Estuary v2.3rc1:
-1. Supported D03 board with 50MHz oscillator officially
+1. Supported D03 board with 50MHz crystal officially
 2. Firstly support BMC load ISO (Engineering mode)
 3. Improved website functionalities:
 	- Issue tracker anonymous login removed due to security issue
