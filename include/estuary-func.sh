@@ -6,7 +6,7 @@
 get_estuary_version()
 {
 	local version_regexp="(?<=<project name=\"estuary\" revision=\")([^\"]*)(?=\")"
-	local default_xml_file="`dirname $1`/default.xml"
+	local default_xml_file="$1/default.xml"
 	local current_version=`grep -Po "$version_regexp" $default_xml_file 2>/dev/null | sed 's/.*\///g' 2>/dev/null`
 	current_version=${current_version:-master}
 	echo $current_version
