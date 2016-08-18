@@ -72,7 +72,6 @@ build_uefi_for_all()
 	pushd $UEFI_DIR
 	git reset --hard
 	git clean -fdx
-	git checkout open-estuary/estuary-rp
 
 	export LC_CTYPE=C
 	git submodule init
@@ -121,7 +120,6 @@ build_uefi_for_HiKey()
 
 	git reset --hard
 	git clean -fdx
-	git checkout open-estuary/estuary-rp
 	git submodule init
 	git submodule update
 
