@@ -58,7 +58,7 @@ Note: Current building for x86_32 platform is not supported now. For cross compi
 
 <h2 id="2">Download and Install</h2>
 
-`git clone http://github.com/HTSAT/caliper.git`
+`git clone https://github.com/open-estuary/caliper.git`
 
 This will download a directory named caliper in your current operation directory.
 

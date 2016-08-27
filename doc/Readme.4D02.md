@@ -1,6 +1,6 @@
 This is the readme file for D02 platform
 
-After you executed `./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=./workspace` for D02, all targets files will be produced. they are:
+After you executed `./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace` for D02, all targets files will be produced. they are:
 
 ### UEFI_D02.fd 
 

@@ -239,7 +239,9 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
               |-------------Image          //kernel binary Image
         sda2: Ubuntu distribution
         sda3: Fedora distribution
-   ```     
+   ```
+   NOTE: The grubaa64.efi file must be put in /EFI/GRUB2 directory of dev/sda1(gpt partition), the distributions could be uncompressed in dev/sdaX(X can be 2,3,4,etc. exclude 1).  
+     
     To get kernel image and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D03.md).<br>
     To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).<br>
     To get different distributions, please refer to [Distributions_Guider](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br> 
@@ -301,21 +303,29 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
 <h3 id="3.5">Boot via ACPI</h3>
 
-D03 also supports booting via ACPI, you can bring up this systerm which is similar with DTS mode, you must fix some point as follow:
+D03 also supports booting via ACPI, you can bring up this system which is similar with DTS mode, you must fix some point as follow:
 
-1. Delete DTB file and don't burn DTB file
+1. Delete DTB file(comment out devicetree /<user>/hip06-d03.dtb as follow) and don't burn DTB file
 
+   ``` 
+    menuentry "D03 Ubuntu NFS" --id d03_ubuntu_nfs {
+    set root=(tftp,192.168.1.107)
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+    #devicetree /<user>/hip06-d03.dtb
+    }
+
+   ```
+   
 2. Set the parameters of booting via ACPI
 
-you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file.
+you must add `"acpi=force"` property in `"linux"` line for "grub.cfg" file. If not, system will booted up with DTS by default.
 
 e.g.:
 ```shell
 # Booting from NFS with Ubuntu rootfs
-menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs {
+menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs_acpi {
     set root=(tftp,192.168.1.107)
     linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
 }
 ```
-
 NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).

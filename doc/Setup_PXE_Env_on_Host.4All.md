@@ -110,7 +110,7 @@ Note:
 
    1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in `/etc/dhcp/dhcpd.conf`.<br>
    2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.<br>
-   3. The gurb binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.<br>
+   3. The grub binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.<br>
    4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.<br>
 
 To get and config grub and grub config files, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
