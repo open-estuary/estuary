@@ -23,10 +23,11 @@ build_uefi_usage()
 cat << EOF
 Usage: build-uefi.sh [clean] --platform=xxx --output=xxx
 	clean: clean the uefi binary files
-	--platform: which platform to build (D02, D03, HiKey)
+	--platform: which platform to build (D02, D03, D05, HiKey)
 	--output: target binary output directory
 
 Example:
+	build-uefi.sh --platform=D02
 	build-uefi.sh --platform=D02 --output=workspace
 	build-uefi.sh --platform=HiKey --output=workspace
 	build-uefi.sh clean --platform=HiKey --output=workspace
@@ -83,6 +84,8 @@ build_uefi_for_all()
 			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D02/Pv660D02.dsc"
 		elif [ x"D03" = x"$platform" ]; then
 			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dsc"
+		elif [ x"D05" = x"$platform" ]; then
+			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D05/D05.dsc"
 		fi
 
 		grep -P "AARCH64_PLATFORM_FLAGS.*-fno-stack-protector" $hisi_dsc_file
@@ -96,6 +99,8 @@ build_uefi_for_all()
 		uefi_bin=`find Build/Pv660D02 -name "*.fd" 2>/dev/null`
 	elif [ x"D03" = x"$platform" ]; then
 		uefi_bin=`find Build/D03 -name "*.fd" 2>/dev/null`
+	elif [ x"D05" = x"$platform" ]; then
+		uefi_bin=`find Build/D05 -name "*.fd" 2>/dev/null`
 	fi
 	mkdir -p $output_dir/binary/$platform/
 	cp $uefi_bin $output_dir/binary/$platform/UEFI_${platform}.fd
@@ -174,7 +179,7 @@ build_uefi()
 
 	if [ x"HiKey" = x"$platform" ]; then
 		build_uefi_for_HiKey $platform $output_dir
-	elif [ x"D02" = x"$platform" ] || [ x"D03" = x"$platform" ]; then
+	elif [ x"D02" = x"$platform" ] || [ x"D03" = x"$platform" ] || [ x"D05" = x"$platform" ]; then
 		build_uefi_for_all $platform $output_dir
 	fi
 }
@@ -218,6 +223,12 @@ do
 
 	shift
 done
+
+###################################################################################
+# Default values
+###################################################################################
+OUTPUT_DIR=${OUTPUT_DIR:-build}
+
 
 ###################################################################################
 # Check args
