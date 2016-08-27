@@ -302,7 +302,8 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
         sda2: Ubuntu distribution
         sda3: Fedora distribution
     ```     
-   
+   NOTE: The grubaa64.efi file must be put in /EFI/GRUB2 directory of dev/sda1(gpt partition), the distributions could be uncompressed in dev/sdaX(X can be 2,3,4,etc. exclude 1).
+
    （SATA）Related files are placed as follow:
     ```
  
@@ -426,23 +427,34 @@ For SAS and USB, the UEFI will directly get the grub from the EFI system partiti
    	
 <h3 id="3.6">Boot via ACPI</h3>
 
-D02 also supports booting via ACPI, you can bring up this systerm which is similar with DTS mode, you must fix some point as follow:
+D02 also supports booting via ACPI, you can bring up this system which is similar with DTS mode, you must fix some point as follow:
 
-1. Delete DTB file and don't burn DTB file
+* Delete DTB file(comment out devicetree /<user>/hip05-d02.dtb as follow) and don't burn DTB file
 
-2. Set the parameters of booting via ACPI
+  e.g.:
 
-you must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file.
+  ```shell
+ menuentry "D02 Ubuntu NFS" --id d02_ubuntu_nfs {
+        set root=(tftp,192.168.1.107)
+        linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+         # devicetree /<user>/hip05-d02.dtb
+   }
 
-e.g.:
+  ```
 
-```shell
+* Set the parameters of booting via ACPI
+
+  you must add `"acpi=force"` property in `"linux"` line for "grub.cfg" file. If not, system will booted up with DTS by default.
+
+  e.g.:
+ 
+  ```shell
 # Booting from NFS with Ubuntu rootfs
-menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs {
+menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs_acpi {
     set root=(tftp,192.168.1.107)
     linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
-}
+  }
 
-```
+  ```
 
 NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).

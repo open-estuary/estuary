@@ -188,7 +188,7 @@ Normally they are placed into bootable partition as following structure.
 ```
 Note: In case of booting by PXE mode:
 
-   1. The gurb binary and grub.cfg files must be placed in the TFTP root directory.
+   1. The grub binary and grub.cfg files must be placed in the TFTP root directory.
 
    2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
 

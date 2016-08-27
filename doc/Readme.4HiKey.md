@@ -5,7 +5,7 @@ sudo apt-get install -y wget automake1.11 make bc libncurses5-dev libtool li
 bc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-esse
 ntial iasl gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev
 
-After you executed `./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=./workspace` for HiKey, all targets files will be produced. they are:
+After you executed `./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace` for HiKey, all targets files will be produced. they are:
 
 ### l-loader.bin
 ### ptable-linux.img 
