@@ -7,11 +7,11 @@
 UEFI is a kind of BIOS to boot system and provide runtime service to OS which can do some basic IO operation with the runtime service, e.g.: reboot, power off and etc.
 Normally, there are some trust firmware will be produce from UEFI building, they are responsible for trust reprogram, they include:
 
-  UEFI_D03.fd         //UEFI executable binary file.
+  UEFI_D05.fd         //UEFI executable binary file.
   
   CH02TEVBC_V03.bin   //CPLD binary to control power supplier.
 
-Where to get them, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D03.md).
+Where to get them, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D05.md).
 
 <h2 id="2">Upgrade UEFI</h2>
 
@@ -25,7 +25,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
 * Connect the board's UART port to a host machine
 
-  Please refer to [Deploy_Manual.4D03.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D03.md) "Prerequisite" chapter.
+  Please refer to [Deploy_Manual.4D05.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Deploy_Manual.4D05.md) "Prerequisite" chapter.
   
  If you choose Method 1, use another console window, use `board_reboot` command to reset the board.
  
@@ -56,7 +56,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   ESL Start OS
   Embedded Boot Loader(EBL)
   ```
-  D03 board support 4 on-board network ports at maximun. To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by the two 2GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
+  D05 board support 4 on-board network ports at maximun. To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by the two 2GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
  
   EFI Internal Shell mode is a standard command shell in UEFI.
  
@@ -87,7 +87,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
      ```
     e.g.: 
     ```shell
-    provision 192.168.1.107 -u sch -p aaa -f UEFI_D03.fd -a 0x100000
+    provision 192.168.1.107 -u sch -p aaa -f UEFI_D05.fd -a 0x100000
     spiwfmem 0x100000 0x0000000 0x300000
     ```
     
@@ -98,7 +98,7 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 Actually the board can restore two UEFI in case of the default one breaks, then you can restore it as following way:
 
   1. Power off the board and disconnect power supply.<br>
-  2. Push the dial switch 's3' to 'off' with a '3' on the board, please check the Hardware Boards to find where it is: http://open-estuary.com/d03-2/.<br>
+  2. Push the dial switch 's3' to 'off' with a '3' on the board, please check the Hardware Boards to find where it is: http://open-estuary.com/d05-2/.<br>
   3. Power on and enter UEFI SHELL again as above description.<br>
   4. Push the dial swift 's3' to 'on' with a '3' on the board.<br>
   5. Burn UEFI file for BIOS as above step3 "Update UEFI files".<br>
