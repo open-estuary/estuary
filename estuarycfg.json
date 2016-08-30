@@ -1,17 +1,18 @@
 {
 "system":[
-{"platform":"D02","install":"yes"},
-{"platform":"D03","install":"yes"},
-{"platform":"HiKey","install":"yes"},
+{"platform":"D02","install":"no"},
+{"platform":"D03","install":"no"},
+{"platform":"D05","install":"yes"},
+{"platform":"HiKey","install":"no"},
 {"platform":"QEMU","install":"no"}
 ],
 
 "distros":[
-{"name":"Ubuntu","install":"yes","capacity":"50G"},
+{"name":"Ubuntu","install":"no","capacity":"50G"},
 {"name":"Debian","install":"no","capacity":"50G"},
 {"name":"Fedora","install":"no","capacity":"50G"},
-{"name":"OpenSuse","install":"yes","capacity":"50G"},
-{"name":"CentOS","install":"no","capacity":"50G"},
+{"name":"OpenSuse","install":"no","capacity":"50G"},
+{"name":"CentOS","install":"yes","capacity":"50G"},
 {"name":"Rancher","install":"no","capacity":"50G"}
 ],
 
@@ -30,7 +31,7 @@
 ],
 
 "setup":[
-{"type":"iso","install":"yes"},
+{"type":"iso","install":"no"},
 {"type":"usb","device":"/dev/sdx","install":"no"},
 {"type":"pxe","install":"no"}
 ]

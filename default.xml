@@ -18,7 +18,7 @@
            sync-j="4" />
 
   <!-- kernel -->
-  <project name="kernel" />
+  <project name="kernel" revision="cust-lts4.7.1-d05-3.0b" />
 
   <!-- uefi -->
   <project name="uefi" />
@@ -57,6 +57,6 @@
   <project name="qemu" />
 
   <!-- estuary -->
-  <project name="estuary" />
+  <project name="estuary" revision="estuary-d05-3.0b" />
 
 </manifest>
