@@ -22,12 +22,12 @@
 ],
 
 "packages":[
-{"name":"armor","install":"yes"},
+{"name":"armor","install":"no"},
 {"name":"lamp","install":"no"},
 {"name":"docker","install":"no"},
-{"name":"mysql","install":"yes"},
-{"name":"odp","install":"yes"},
-{"name":"docker_apps","install":"yes"}
+{"name":"mysql","install":"no"},
+{"name":"odp","install":"no"},
+{"name":"docker_apps","install":"no"}
 ],
 
 "setup":[
