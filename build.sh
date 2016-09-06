@@ -395,23 +395,8 @@ if [ x"$PLATFORMS" != x"" ]; then
 		fi
 		echo ""
 	done
-	echo "Build estuary done!"
+	echo "Build platfroms done!"
 	echo ""
-fi
-
-###################################################################################
-# Create distros softlink
-###################################################################################
-if [ x"$DISTROS" != x"" ]; then
-	echo "##############################################################################"
-	echo "# Create distros softlink"
-	echo "##############################################################################"
-	distros=`echo $DISTROS | tr ',' ' '`
-	binary_dir=$BUILD_DIR/binary/arm64 
-	for distro in ${distros[*]}; do
-		rm -f $binary_dir/${distro}_ARM64.tar.gz 2>/dev/null
-		ln -s ../../distro/${distro}_ARM64.tar.gz $binary_dir/${distro}_ARM64.tar.gz
-	done
 fi
 
 ###################################################################################
@@ -454,4 +439,33 @@ if echo $PLATFORMS | tr ',' ' ' | grep -w QEMU >/dev/null 2>&1; then
 	echo "##############################################################################"
 	build-qemu.sh --output=$BUILD_DIR --distros=$DISTROS
 fi
+echo ""
+
+###################################################################################
+# Create binary softlink
+###################################################################################
+echo "##############################################################################"
+echo "# Create binary/distro softlink"
+echo "##############################################################################"
+# Please note that the platform directory must be in the same level directory with arm64!
+# We'll not check the softlink under arm64 (copy it directly).
+platforms=`echo $PLATFORMS | tr ',' ' '`
+distros=`echo $DISTROS | tr ',' ' '`
+for plat in ${platforms[*]}; do
+	plat_dir=$BUILD_DIR/binary/$plat
+	mkdir -p plat_dir 2>/dev/null
+	pushd $plat_dir >/dev/null
+	find . -maxdepth 1 -type l -print | xargs rm -f
+	find ../arm64/ -maxdepth 1 -type f | xargs -i ln -s {}
+	find ../arm64 -type l | xargs -i cp -a {} ./
+	popd >/dev/null
+done
+
+echo "Create binary/distro softlink done!"
+echo ""
+
+###################################################################################
+#
+###################################################################################
+echo "Build Estuary done!"
 
