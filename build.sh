@@ -26,7 +26,9 @@ if [ x"$CURDIR" = x"$TOPDIR" ]; then
 	exit 1
 fi
 
-ESTUARY_INTERAL_FTP=`grep -Po "(?<=download_address: )(.*)" $TOPDIR/estuary.txt`
+DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $TOPDIR/estuary.txt`
+CHINA_INTERAL_FTP_ADDR=`grep -Po "(?<=china_interal_ftp: )(.*)" $TOPDIR/estuary.txt`
+
 export PATH=$TOPDIR:$TOPDIR/include:$TOPDIR/submodules:$TOPDIR/deploy:$PATH
 
 export LC_ALL=C
@@ -91,10 +93,15 @@ Options:
 	--capacity: target distro partition size, default unit is GB
 	--mac: target board mac address, --mac must be specified if deploy type is pxe
 
+	-a: download address, China or Estuary(default Estuary)
+
 Example:
 	./estuary/build.sh --help
 
 	./estuary/build.sh -f ./estuary/estuarycfg.json
+	./estuary/build.sh -f ./estuary/estuarycfg.json -a Estuary
+	./estuary/build.sh -f ./estuary/estuarycfg.json -a China
+
 	./estuary/build.sh -p QEMU -d Ubuntu
 	./estuary/build.sh -f ./estuary/estuarycfg.json --builddir=./workspace
 	./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
@@ -133,6 +140,7 @@ do
                 --deploy) DEPLOY[${#DEPLOY[@]}]=$ac_optarg ;;
                 --capacity) CAPACITY=$ac_optarg ;;
                 --mac) BOARDS_MAC=$ac_optarg ;;
+                -a) if [ x"$ac_optarg" = x"China" ]; then DOWNLOAD_FTP_ADDR=$CHINA_INTERAL_FTP_ADDR; fi ;;
                 *) Usage ; echo "Unknown option $1" ; exit 1 ;;
         esac
 	
@@ -217,7 +225,7 @@ if ! check_ftp_update $estuary_version ./estuary; then
 	echo "##############################################################################"
 	echo "# Update estuary configuration file"
 	echo "##############################################################################"
-	if ! update_ftp_cfgfile $estuary_version $ESTUARY_INTERAL_FTP ./estuary; then
+	if ! update_ftp_cfgfile $estuary_version $DOWNLOAD_FTP_ADDR ./estuary; then
 		echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
 	fi
 	rm -f distro/.*.sum distro/*.sum 2>/dev/null
@@ -233,7 +241,7 @@ if [ x"$LOCALARCH" = x"x86_64" ]; then
 	echo "# Download/Uncompress toolchain"
 	echo "##############################################################################"
 	mkdir -p toolchain
-	download_toolchains $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP toolchain
+	download_toolchains $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR toolchain
 	if [[ $? != 0 ]]; then
 		echo -e "\033[31mError! Download toolchains failed!\033[0m" >&2 ; exit 1
 	fi
@@ -311,7 +319,7 @@ if [ x"$DISTROS" != x"" ]; then
 	echo "# Download distros (distros: $DISTROS)"
 	echo "##############################################################################"
 	mkdir -p distro
-	download_distros $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP distro $DISTROS
+	download_distros $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR distro $DISTROS
 	if [[ $? != 0 ]]; then
 		echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
 	fi
@@ -335,7 +343,7 @@ if [ x"$PLATFORMS" != x"" ]; then
 	echo "# Download binaries"
 	echo "##############################################################################"
 	mkdir -p prebuild
-	download_binaries $ESTUARY_FTP_CFGFILE $ESTUARY_INTERAL_FTP prebuild
+	download_binaries $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR prebuild
 	if [[ $? != 0 ]]; then
 		echo -e "\033[31mError! Download binaries failed!\033[0m" ; exit 1
 	fi
@@ -453,7 +461,7 @@ platforms=`echo $PLATFORMS | tr ',' ' '`
 distros=`echo $DISTROS | tr ',' ' '`
 for plat in ${platforms[*]}; do
 	plat_dir=$BUILD_DIR/binary/$plat
-	mkdir -p plat_dir 2>/dev/null
+	mkdir -p $plat_dir 2>/dev/null
 	pushd $plat_dir >/dev/null
 	find . -maxdepth 1 -type l -print | xargs rm -f
 	find ../arm64/ -maxdepth 1 -type f | xargs -i ln -s {}
