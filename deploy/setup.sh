@@ -7,13 +7,14 @@ echo 0 > /proc/sys/kernel/printk
 
 D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off ip=dhcp"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off ip=dhcp"
+D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force ip=dhcp"
 HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
 
 ###################################################################################
 # Global variable
 ###################################################################################
 INSTALL_TYPE=""
-ACPI="NO"
+ACPI="YES"
 ACPI_ARG="acpi=force"
 
 PART_BASE_INDEX=2
@@ -187,9 +188,9 @@ sleep 1s
 ###################################################################################
 # Select ACPI choice
 ###################################################################################
-read -p "Use ACPI by force? y/n (n by default)" c
-if [ x"$c" = x"y" ]; then
-	ACPI="YES"
+read -p "Use ACPI by force? y/n (y by default)" c
+if [ x"$c" = x"n" ]; then
+	ACPI="NO"
 fi
 
 ###################################################################################
