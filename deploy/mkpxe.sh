@@ -140,6 +140,12 @@ NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
 WORKSPACE=`mktemp -d workspace.XXXX`
 pushd $WORKSPACE >/dev/null
 
+cat > $NFS_ROOT/estuary.txt << EOF
+PLATFORM=$PLATFORMS
+DISTRO=$DISTROS
+CAPACITY=$CAPACITY
+EOF
+
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
@@ -183,12 +189,6 @@ sudo chown -R ${user}:${group} *
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
 	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
-
-cat > ./usr/bin/estuary.txt << EOF
-PLATFORMS=$PLATFORMS
-DISTROS=$DISTROS
-CAPACITY=$CAPACITY
-EOF
 
 mv ../setup.sh ./usr/bin/
 tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
