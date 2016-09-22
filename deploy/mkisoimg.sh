@@ -20,6 +20,7 @@ WORKSPACE=
 
 D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off"
+D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force ip=dhcp"
 HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
 
 ###################################################################################
@@ -96,6 +97,12 @@ WORKSPACE=`mktemp -d workspace.XXXX`
 rm -f ${DISK_LABEL}.iso
 pushd $WORKSPACE >/dev/null
 
+cat > estuary.txt << EOF
+PLATFORM=$PLATFORMS
+DISTRO=$DISTROS
+CAPACITY=$CAPACITY
+EOF
+
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
@@ -136,12 +143,6 @@ sudo chown -R ${user}:${group} *
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
 	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
-
-cat > ./usr/bin/estuary.txt << EOF
-PLATFORMS=$PLATFORMS
-DISTROS=$DISTROS
-CAPACITY=$CAPACITY
-EOF
 
 mv ../setup.sh ./usr/bin/
 tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1

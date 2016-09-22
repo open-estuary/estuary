@@ -26,60 +26,11 @@ INSTALL_DISK="/dev/sdx"
 TARGET_DISK=
 BOOT_DEV=
 
-ESTUARY_CFG="/usr/bin/estuary.txt"
+ESTUARY_CFG="/scratch/estuary.txt"
 
 PLATFORM=
-INSTALL_DISTROS=()
-DISTRO_CAPACITIES=()
-
-###################################################################################
-# Install parameters
-###################################################################################
-platforms=`cat $ESTUARY_CFG | grep -Eo "PLATFORMS=[^ ]*"`
-PLATFORMS=(`expr "X$platforms" : 'X[^=]*=\(.*\)' | tr ',' ' '`)
-PLATFORM=${PLATFORMS[0]}
-
-if [ ${#PLATFORMS[@]} -gt 1 ]; then
-	echo "Notice! Multiple platforms found."
-	while true; do
-		echo ""
-		echo "---------------------------------------------------------------"
-		echo "- platfrom: ${PLATFORMS[*]}"
-		echo "---------------------------------------------------------------"
-		read -p "Please input the platfrom name to install. " plat
-		if echo ${PLATFORMS[*]} | grep -E "\b${plat}\b" >/dev/null; then
-			PLATFORM=$plat ; break
-		fi
-	done
-fi
-
-install_distros=`cat $ESTUARY_CFG | grep -Eo "DISTROS=[^ ]*"`
-INSTALL_DISTROS=($(expr "X$install_distros" : 'X[^=]*=\(.*\)' | tr ',' ' '))
-distro_capacities=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
-DISTRO_CAPACITIES=($(expr "X$distro_capacities" : 'X[^=]*=\(.*\)' | tr ',' ' '))
-
-if cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"; then
-	INSTALL_TYPE="NFS"
-fi
-
-###################################################################################
-# Install parameters check
-###################################################################################
-if [[ ${#INSTALL_DISTROS[@]} == 0 ]]; then
-	echo "Error!!! Distros are not specified" ; exit 1
-fi
-
-if [[ ${#DISTRO_CAPACITIES[@]} == 0 ]]; then
-	echo "Error! Capacities is not specified!" ; exit 1
-fi
-
-###################################################################################
-# Display install info
-###################################################################################
-echo "/*---------------------------------------------------------------"
-echo "- platform: $PLATFORM, distros: ${INSTALL_DISTROS[@]}, capacities: ${DISTRO_CAPACITIES[@]}, type: $INSTALL_TYPE"
-echo "---------------------------------------------------------------*/"
-echo "" ; sleep 1
+INSTALL_DISTRO=()
+DISTRO_CAPACITY=()
 
 ###################################################################################
 # Create mountpointer
@@ -91,6 +42,10 @@ mkdir /scratch 2>/dev/null
 ###################################################################################
 # Find install disk and mount it to /scratch
 ###################################################################################
+if cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"; then
+	INSTALL_TYPE="NFS"
+fi
+
 if [ x"$INSTALL_TYPE" = x"NFS" ]; then
 	nfs_root=`cat /proc/cmdline | grep -Eo "nfsroot=[^ ]*"`
 	NFS_ROOT=`expr "X$nfs_root" : 'X[^=]*=\(.*\)'`
@@ -131,6 +86,51 @@ else
 fi
 
 ###################################################################################
+# Get install parameters
+###################################################################################
+platform=`cat $ESTUARY_CFG | grep -Eo "PLATFORM=[^ ]*"`
+platform=(`expr "X$platform" : 'X[^=]*=\(.*\)' | tr ',' ' '`)
+PLATFORM=${platform[0]}
+
+if [ ${#platform[@]} -gt 1 ]; then
+	echo "Notice! Multiple platforms found."
+	while true; do
+		echo ""
+		echo "---------------------------------------------------------------"
+		echo "- platfrom: ${platform[*]}"
+		echo "---------------------------------------------------------------"
+		read -p "Please input the platfrom name to install. " plat
+		if echo ${platform[*]} | grep -E "\b${plat}\b" >/dev/null; then
+			PLATFORM=$plat ; break
+		fi
+	done
+fi
+
+install_distro=`cat $ESTUARY_CFG | grep -Eo "DISTRO=[^ ]*"`
+INSTALL_DISTRO=($(expr "X$install_distro" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+distro_capacity=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
+DISTRO_CAPACITY=($(expr "X$distro_capacity" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+
+###################################################################################
+# Install parameters check
+###################################################################################
+if [[ ${#INSTALL_DISTRO[@]} == 0 ]]; then
+	echo "Error!!! Distro is not specified" ; exit 1
+fi
+
+if [[ ${#DISTRO_CAPACITY[@]} == 0 ]]; then
+	echo "Error! Capacity is not specified!" ; exit 1
+fi
+
+###################################################################################
+# Display install info
+###################################################################################
+echo "/*---------------------------------------------------------------"
+echo "- platform: $PLATFORM, distro: ${INSTALL_DISTRO[@]}, capacity: ${DISTRO_CAPACITY[@]}, type: $INSTALL_TYPE"
+echo "---------------------------------------------------------------*/"
+echo "" ; sleep 1
+
+###################################################################################
 # Get all disk info (exclude the install disk)
 ###################################################################################
 disk_list=()
@@ -142,7 +142,7 @@ echo "/*---------------------------------------------------------------"
 echo "- Find target distk to install. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 install_disk_dev=`echo "${INSTALL_DISK}" | sed 's/[0-9]*$//g'`
-read -a disk_list <<< $(lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}')
+disk_list=(`lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}'`)
 
 if [[ ${#disk_list[@]} = 0 ]]; then
 	echo "Error!!! Can't find disk to install distros!" >&2 ; exit 1
@@ -273,19 +273,19 @@ end_address=
 
 pushd /scratch >/dev/null
 index=0
-distro_number=${#INSTALL_DISTROS[@]}
+distro_number=${#INSTALL_DISTRO[@]}
 
 for ((index=0; index<distro_number; index++))
 do
 	# Get necessary info for current distro.
 	part_index=$((PART_BASE_INDEX + index))
-	distro_name=${INSTALL_DISTROS[$index]}
+	distro_name=${INSTALL_DISTRO[$index]}
 	rootfs_package="${distro_name}""_ARM64.tar.gz"
-	distro_capacity=${DISTRO_CAPACITIES[$index]%G*}
+	distro_capacity=${DISTRO_CAPACITY[$index]%G*}
 	
 	start_address=$allocate_address
 	end_address=$((start_address + distro_capacity * 1000))
-	allocate_address=$((end_address + 1))
+	allocate_address=$end_address
 	
 	# Create and fromat partition for current distro.
 	echo "Creating and formatting ${TARGET_DISK}${part_index} for $distro_name."
@@ -338,7 +338,7 @@ Image="`ls Image*`"
 popd >/dev/null
 
 echo "Updating grub.cfg."
-distro_number=${#INSTALL_DISTROS[@]}
+distro_number=${#INSTALL_DISTRO[@]}
 for ((index=0; index<distro_number; index++)); do
 	part_index=$((PART_BASE_INDEX + index))
 	root_dev="${TARGET_DISK}${part_index}"
@@ -346,7 +346,7 @@ for ((index=0; index<distro_number; index++)); do
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
 	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
-	distro_name=${INSTALL_DISTROS[$index]}
+	distro_name=${INSTALL_DISTRO[$index]}
 	
 cat >> /boot/grub.cfg << EOF
 # Booting from SATA with $distro_name rootfs
@@ -361,7 +361,7 @@ EOF
 done
 
 # Set the first distro to default
-default_menuentry_id="${platform}_""${INSTALL_DISTROS[0]}"
+default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}"
 sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub.cfg
 
 echo "Update grub.cfg done!"
