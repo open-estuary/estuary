@@ -1,81 +1,340 @@
 #!/bin/bash
-###################################################################################
-# mkdeploydisk.sh --target=/dev/sdb --platforms=D05 --distros=CentOS --capacity=50 \
-#   --server=http://download.open-estuary.org/AllDownloads/DownloadsEstuary/pre-releases/2.3/rc1/linux
-###################################################################################
-TOPDIR=$(cd `dirname $0` ; pwd)
 
 ###################################################################################
-# Global variable
+# Const variables
 ###################################################################################
-TARGET=
-PLATFORMS=
-DISTROS=
-CAPACITY=
-ESTUARY_FTP=
+TOPDIR=`pwd`
+ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary/releases"
+ESTUARY_FTP_ADDR="ftp://117.78.41.188/releases/"
+D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force ip=dhcp"
+D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force ip=dhcp"
+
+BOOT_PARTITION_SIZE=4
 DISK_LABEL="Estuary"
 
-BOOT_PARTITION_SIZE=200
-WORKSPACE=
+###################################################################################
+# Global variables
+###################################################################################
+TARGET=
+VERSION=
+PLATFORM=D05
+DISTRO=
+CAPACITY=50
+BINDIR=
 
-D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off"
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
-HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
+WORKSPACE=Workspace
+ESTUARY_WEB_ADDR=$ESTUARY_HTTP_ADDR
 
 ###################################################################################
 # Usage
 ###################################################################################
-Usage()
-{
+Usage() {
 cat << EOF
 ###################################################################
 # mkdeploydisk.sh usage
 ###################################################################
 Usage: mkdeploydisk.sh [OPTION]... [--OPTION=VALUE]...
 	-h, --help              display this help and exit
-	--target=xxx            deploy usb device
-	--platforms=xxx,xxx     which platforms to deploy (D02, D03)
-	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
-	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
-	--server=xxx            release binary version files http address, see example for detials
-	--workspace=            workspace directory
-	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
-  
-for example:
-	mkdeploydisk.sh --target=/dev/sdb --platforms=D05 --distros=CentOS \\
-	--capacity=50 --server=http://download.open-estuary.org/AllDownloads/DownloadsEstuary/pre-releases/2.3/rc1/linux
+	--target=xxx            target usb device which is used to make a bootable install usb disk
+                                If not specified, the first usb storage device will be default
+	--version=xxx           target estuary release version. If not specified, the latest will be default
+	--platform=xxx          target platform to install
+	--distro=xxx            target distro to install
+	--capacity=xxx          target root file system partition size (GB)
 
-	mkdeploydisk.sh --target=/dev/sdb --platforms=D05 --distros=CentOS \\
-	--capacity=50 --server=http://download.open-estuary.org/AllDownloads/DownloadsEstuary/releases/2.2/linux
+for example:
+	mkdeploydisk.sh --help
+	mkdeploydisk.sh
+	mkdeploydisk.sh --target=/dev/sdc --platform=D05 --distro=CentOS
 
 EOF
 }
 
 ###################################################################################
-# int download_binary(string file_name, string http_addr)
+# int get_index(int &__index)
 ###################################################################################
-download_binary()
-{
-	local file_name=$1
-	local http_addr=$2
-	
-	rm -f .${file_name}.sum 2>/dev/null
-	wget -c ${http_addr}/${file_name}.sum || return 1
-	mv ${file_name}.sum .${file_name}.sum
+get_index() {
+	local __index=$1
+	local _index=0
+	if read -t 15 -p "Input index (default 1): " _index && expr $_index "+" 1 &> /dev/null && [ ! -z $_index ]; then
+		eval $__index='"$_index"'
+	else
+		eval $__index='"1"'
+	fi
+}
 
-	if ! md5sum --quiet --check .${file_name}.sum 2>/dev/null; then
-		rm -f ${file_name} 2>/dev/null
-		wget -c ${http_addr}/${file_name} || return 1
-		md5sum --quiet --check .${file_name}.sum 2>/dev/null || return 1
+###################################################################################
+# string[] get_usb_devices(void)
+###################################################################################
+get_usb_devices() {
+	(
+	root=$(mount | grep " / " | grep  -Po "(/dev/sd[^ ])")
+	if [ $? -ne 0 ]; then
+		root="/dev/sdx"
 	fi
 	
+	usb_devices=(`sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | \
+		grep -v $root | grep -Po "(/dev/sd.*)" | sort`)
+	
+	echo ${usb_devices[*]}
+	)
+}
+
+###################################################################################
+# int get_default_usb(sting &__usb_device)
+###################################################################################
+get_default_usb() {
+	local __usb_device=$1
+	local usb_devices=(`get_usb_devices`)
+	local first_usb=${usb_devices[0]}
+	if [ x"$first_usb" != x"" ]; then
+		eval $__usb_device="'$first_usb'" ; return 0
+	else
+		return 1
+	fi
+}
+
+###################################################################################
+# int check_usb_device(string usb_device)
+###################################################################################
+check_usb_device() {
+	(
+	usb_device=$1
+	if [ x"$usb_device" = x"" ] || [ ! -b $usb_device ]; then
+		echo "Device $usb_device is not exist!" ; return 1
+	else
+		if sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | grep $usb_device >/dev/null; then
+			return 0
+		else
+			echo "Device $usb_device is not an usb device!" ; return 1
+		fi
+	fi
+	)
+}
+
+###################################################################################
+# int umount_device(string device)
+###################################################################################
+umount_device() {
+	(
+	device=$1
+	mounted_partition=(`mount | grep -Po "^(${device}[^ ]*)"`)
+	for part in ${mounted_partition[@]}; do
+		sudo umount $part || return 1
+	done
+	)
+
+	return 0
+}
+
+###################################################################################
+# string get_proto_type(string web_addr)
+###################################################################################
+get_proto_type() {
+	local web_addr=$1
+	echo $web_addr | grep -Po "^(http|ftp)(?=\:.*)"
+}
+
+###################################################################################
+# string[] get_ftp_dir(string ftp_addr)
+###################################################################################
+get_ftp_dir() {
+	# local ftp_addr=`echo $1 | sed 's/\/\+/\//g' | sed 's/[^\/]$/&\//g'`
+	local ftp_addr=`echo $1 | sed 's/\/\{2,\}$/\//g' | sed 's/[^\/]$/&\//g'`
+	curl -s $ftp_addr | grep "^d.*" | awk '{print $NF}'
+}
+
+###################################################################################
+# string[] get_http_dir(string http_addr)
+###################################################################################
+get_http_dir() {
+	local http_addr=$1
+	curl -s $http_addr 2>/dev/null | grep 'class="item dir"' | sed 's/<[^<>]*>//g'
+}
+
+###################################################################################
+# string[] get_all_version(string web_addr)
+###################################################################################
+get_all_version()
+{
+	local web_addr=$1
+	local proto_type=`get_proto_type $web_addr`
+	eval get_${proto_type}_dir $web_addr 2>/dev/null
+}
+
+###################################################################################
+# string[] get_all_distro(string web_addr)
+###################################################################################
+get_all_distro()
+{
+	local web_addr=$1
+	local proto_type=`get_proto_type $web_addr`
+	eval get_${proto_type}_dir $web_addr 2>/dev/null | grep -Pv "Common|Minirootfs" | sort
+}
+
+###################################################################################
+# int download_file(string target_file, string target_dir)
+###################################################################################
+download_file() {
+	(
+	target_file=$1
+	target_dir=$2
+	
+	pushd $target_dir >/dev/null
+	target_file_name=`basename $target_file`
+	md5sum --quiet --check .${target_file_name}.sum 2>/dev/null && return 0
+
+	rm -f ${target_file_name}.sum .${target_file_name}.sum 2>/dev/null
+	wget -c ${target_file}.sum || return 1
+	mv ${target_file_name}.sum .${target_file_name}.sum
+	md5sum --quiet --check .${target_file_name}.sum && return 0
+	rm -f $target_file_name 2>/dev/null
+	wget -c $target_file && md5sum --quiet --check .${target_file_name}.sum && return 0
+	popd >/dev/null
+
+	return 1
+	)
+}
+
+###################################################################################
+# int create_partition(string device, int efi_partition_size, string rootfs_label)
+###################################################################################
+create_partition() {
+	(
+	device=$1
+	efi_partition_size=$2
+	rootfs_label=$3
+
+	umount_device $device || return 1
+	yes | sudo mkfs.ext4 $device >/dev/null || return 1
+	echo -e "n\n\n\n\n+${efi_partition_size}M\nw\n" | sudo fdisk $device >/dev/null || return 1
+	echo -e "t\nef\nw\n" | sudo fdisk $device >/dev/null || return 1
+	yes | sudo mkfs.vfat ${device}1 >/dev/null || return 1
+
+	echo -e "n\n\n\n\n\nw\n" | sudo fdisk $device >/dev/null || return 1
+	yes | sudo mkfs.ext4 -L $rootfs_label ${device}2 >/dev/null || return 1
+	)
+
+	return 0
+}
+
+###################################################################################
+# int create_grub_header(string grub_cfg_file)
+###################################################################################
+create_grub_header() {
+	(
+	grub_cfg_file=$1
+cat > $grub_cfg_file << EOF
+# NOTE: Please remove the unused boot items according to your real condition.
+# Sample GRUB configuration file
+#
+
+# Boot automatically after 5 secs.
+set timeout=5
+
+# By default, boot the Linux
+set default=xxxx
+
+EOF
+	)
+}
+
+###################################################################################
+# int create_grub_menuentry(string grub_cfg_file, string title, string menuentry_id, sting image, string cmdline, string initrd)
+###################################################################################
+create_grub_menuentry() {
+	(
+	grub_cfg_file=$1
+	title=$2
+	menuentry_id=$3
+	image=$4
+	cmdline=$5
+	initrd=$6
+cat >> $grub_cfg_file << EOF
+# Booting initrd for $plat
+menuentry "$title" --id $menuentry_id {
+	search --no-floppy --label --set=root $DISK_LABEL
+	linux $image $cmdline
+	initrd $initrd
+}
+
+EOF
+	return 0
+	)
+}
+
+###################################################################################
+# int download_common_binary(string common_bin_dir)
+###################################################################################
+download_common_binary() {
+	local common_bin_dir=$1
+	download_file ${common_bin_dir}/Image ./ || return 1
+	download_file ${common_bin_dir}/grubaa64.efi ./ || return 1
+	download_file ${common_bin_dir}/mini-rootfs.cpio.gz ./ || return 1
+	download_file ${common_bin_dir}/deploy-utils.tar.bz2 ./ || return 1
+	return 0
+}
+
+###################################################################################
+# int download_distro(string distro_dir, string[] distro)
+###################################################################################
+download_distro() {
+	(
+	distro_dir=$1
+	distro=$2
+	for dist in ${distro[@]}; do
+		download_file ${distro_dir}/${dist}/Common/${dist}_ARM64.tar.gz ./ || return 1
+	done
+
+	return 0
+	)
+}
+
+###################################################################################
+# int create_initrd(string rootfs, string deploy_utils)
+###################################################################################
+create_initrd() {
+	(
+	rootfs=$1
+	deploy_utils=$2
+
+	user=`whoami`
+	group=`groups | awk '{print $1}'`
+
+	zcat $rootfs | sudo cpio -dimv || return 1
+	sudo tar jxvf $deploy_utils -C ./ || return 1
+
+	sudo chown -R ${user}:${group} *
+	if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
+		echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
+	fi
+
+	sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ./usr/bin/setup.sh
+	sudo chmod 755 ./usr/bin/setup.sh
+
+	sudo chown -R root:root *
+	find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || return 1
+
+	return 0
+	)
+}
+
+###################################################################################
+# int clean_workspace(void)
+###################################################################################
+clean_workspace() {
+	cd $TOPDIR
+	umount_device $TARGET
+	rmdir $WORKSPACE 2>/dev/null
+
 	return 0
 }
 
 ###################################################################################
 # Get parameters
 ###################################################################################
+clear
+
 while test $# != 0
 do
 	case $1 in
@@ -88,12 +347,10 @@ do
 	case $ac_option in
 		-h | --help) Usage ; exit ;;
 		--target) TARGET=$ac_optarg ;;
-		--platforms) PLATFORMS=$ac_optarg ;;
-		--distros) DISTROS=$ac_optarg ;;
+		--platform) PLATFORM=$ac_optarg ;;
+		--distro) DISTRO=$ac_optarg ;;
 		--capacity) CAPACITY=$ac_optarg ;;
-		--server) ESTUARY_FTP=`echo $ac_optarg | sed 's/?dir=//g' | sed 's/\/*$//g'` ;;
-		--workspace) WORKSPACE=$ac_optarg ;;
-		--disklabel) DISK_LABEL=$ac_optarg ;;
+		--version) VERSION=$ac_optarg ;;
 		*) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
 	esac
 
@@ -101,204 +358,141 @@ do
 done
 
 ###################################################################################
-# Check parameters
+# Get/Check version info
 ###################################################################################
-if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$ESTUARY_FTP" = x"" ]; then
-	echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, server: $ESTUARY_FTP"
-	echo "Error! Please all parameters are right!" >&2
-	Usage ; exit 1
+echo -e "\nGet version info from $ESTUARY_WEB_ADDR. Please wait!"
+version_list=(`get_all_version $ESTUARY_WEB_ADDR | sort -r`)
+if [ ${#version_list[@]} -eq 0 ]; then
+	echo "Get version info from $ESTUARY_WEB_ADDR failed!"; exit 1
 fi
 
-distros=($(echo "$DISTROS" | tr ',' ' '))
-capacity=($(echo "$CAPACITY" | tr ',' ' '))
-if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
-	echo "Error! Number of capacity is not eq the distros!" >&2
-	Usage ; exit 1
+if [ x"$VERSION" = x"" ] || !(echo ${version_list[@]} | grep -w $VERSION >/dev/null 2>&1); then
+	echo ""
+	echo "Please select the version index to install!"
+	for ((index=0; index<${#version_list[@]};index++)); do printf "%2d) %s\n" $[index+1] ${version_list[$index]}; done
+	get_index index
+	VERSION=${version_list[$index-1]}
+	VERSION=${VERSION:-${version_list[0]}}
 fi
 
 ###################################################################################
-# Check target usb device
+# Get/Check distro info
 ###################################################################################
-usb_devices=(`sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | grep -Po "(/dev/sd.*)" | sort`)
-if [ ${#usb_devices[@]} -eq 0 ]; then
-	echo "Error! No usb device found!" >&2 ; exit 1
+echo -e "\nGet distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux. Please wait!"
+distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/${VERSION}/linux`)
+if [ ${#distro_list[@]} -eq 0 ]; then
+	echo "Get distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux failed!"; exit 1
 fi
 
-if [ x"$TARGET" = x"" ]; then
-	TARGET=${usb_devices[0]}
+if [ x"$DISTRO" = x"" ] || !(echo ${distro_list[@]} | grep -w $DISTRO >/dev/null 2>&1); then
+	echo ""
+	echo "Please select the distro index to install!"
+	for ((index=0; index<${#distro_list[@]};index++)); do printf "%2d) %s\n" $[index+1] ${distro_list[$index]}; done
+	get_index index
+	DISTRO=${distro_list[$index-1]}
+	DISTRO=${DISTRO:-${distro_list[0]}}
+fi
+
+###################################################################################
+# Check/Set parameters
+###################################################################################
+BINDIR=${ESTUARY_WEB_ADDR}/${VERSION}/linux
+
+###################################################################################
+# check/get USB storage device
+###################################################################################
+if [ x"$TARGET" != x"" ]; then
+	echo -e "\nCheck the target USB storage device. Please wait a moment."
+	check_usb_device $TARGET || { echo "Error!!! Device $TARGET is not a USB device or not exist!"; exit 1;}
 else
-	if ! echo ${usb_devices[*]} | grep $TARGET >/dev/null 2>&1; then
-		echo "Error! $TARGET is not a usb device!" >&2 ; exit 1
-	fi
+	echo -e "\nNotice. No USB storage device is specified.\nUse the first USB storage device by default."
+	get_default_usb TARGET || { echo "Error!!! Can't find an available USB storage device!"; exit 1;}
+fi
+
+echo -e "\nNotice! The device $TARGET will be formatted."
+read -p "Continue to do this? (y/N) " c
+if ! create_partition $TARGET $BOOT_PARTITION_SIZE $DISK_LABEL; then
+	echo "Error!!! Create partition on $TARGET failed!"; exit 1
 fi
 
 ###################################################################################
-# Notice the user to continue this operation
+# create workspace and switch into workspace
 ###################################################################################
-if mount | grep -Po "^($TARGET[^ ]* on / ).*" >/dev/null 2>&1; then
-	echo "Error!!! Target device $TARGET is mounted as root system! Please use another usb device!" >&2 ; exit 1
+if [ -d $WORKSPACE ]; then
+	WORKSPACE=`mktemp -d Workspace.XXXX`
 fi
 
-device_info=`sudo fdisk -l 2>/dev/null | grep -Po "^(Disk $TARGET: ).*"`
-if [ x"$device_info" = x"" ]; then
-	echo "Error! Target device $TARGET is not exist!" >&2 ; exit 1
-fi
+mkdir -p $WORKSPACE
+WORKSPACE=`cd $WORKSPACE; pwd`
+trap 'trap EXIT; clean_workspace; exit 1' INT EXIT
 
-echo "---------------------------------------------------------------"
-echo "- Please note this operation will format the device $TARGET!!!"
-echo "- $device_info"
-echo "---------------------------------------------------------------"
-read -p "Continue to create the usb install disk on $TARGET? (y/n) " choice
-if [ x"$choice" != x"y" ]; then
-	echo "Exit ......" ; exit 1
-fi
-
-###################################################################################
-# Partition USB disk
-###################################################################################
-read -a mounted_partition <<< $(mount | grep -Po "(${TARGET}.)")
-for partition in ${mounted_partition[@]}
-do
-	sudo umount $partition
-done
-
-yes | sudo mkfs.ext4 $TARGET
-echo -e "n\n\n\n\n+${BOOT_PARTITION_SIZE}M\nw\n" | sudo fdisk $TARGET
-echo -e "t\nef\nw\n" | sudo fdisk $TARGET
-yes | sudo mkfs.vfat ${TARGET}1
-
-echo -e "n\n\n\n\n\nw\n" | sudo fdisk $TARGET
-yes | sudo mkfs.ext4 -L $DISK_LABEL ${TARGET}2
-
-###################################################################################
-# Create Workspace and Switch to Workspace!!!
-###################################################################################
-if [ x"$WORKSPACE" = x"" ]; then
-	WORKSPACE=`mktemp -d workspace.XXXX`
-fi
-sudo mount ${TARGET}2 $WORKSPACE
-sudo chmod a+w $WORKSPACE
+sudo mount ${TARGET}2 $WORKSPACE || exit 1
+sudo chmod a+rw $WORKSPACE
 pushd $WORKSPACE >/dev/null
 
-###################################################################################
-# Download kernel, grub, mini-rootfs, setup.sh ...
-###################################################################################
-download_binary grubaa64.efi $ESTUARY_FTP/Common || exit 1
-download_binary Image $ESTUARY_FTP/Common || exit 1
-download_binary mini-rootfs.cpio.gz $ESTUARY_FTP/Common || exit 1
-download_binary deploy-utils.tar.bz2 $ESTUARY_FTP/Common || exit 1
-wget -c https://raw.githubusercontent.com/open-estuary/estuary/master/deploy/setup.sh || exit 1
+cat > estuary.txt << EOF
+PLATFORM=$PLATFORM
+DISTRO=$DISTRO
+CAPACITY=$CAPACITY
+EOF
 
 ###################################################################################
-# Download distros
+# download all binary file from estuary
 ###################################################################################
-echo "Download distros to $WORKSPACE......"
+if ! download_common_binary ${BINDIR}/Common; then
+	echo "Error!!! Download common binary failed!"; exit 1
+fi
 
-distros=($(echo $DISTROS | tr ',' ' '))
-for distro in ${distros[*]}; do
-	echo "Download distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
-	download_binary ${distro}_ARM64.tar.gz $ESTUARY_FTP/${distro}/Common || exit 1
+if ! download_distro ${BINDIR} "${DISTRO[@]}"; then
+	echo "Error!!! Download distro failed!"; exit 1
+fi
+
+###################################################################################
+# create grub.cfg
+###################################################################################
+create_grub_header grub.cfg
+platform=(`echo $PLATFORM | tr ',' ' '`)
+default_menuentry="`echo ${platform[0]} | tr "[:upper:]" "[:lower:]"`_menuentry"
+sed -i "s/\(set default=\)\(.*\)/\1${default_menuentry}/g" grub.cfg
+for plat in ${platform[@]}; do
+	eval cmd_line=\$${plat}_CMDLINE
+	title="Install Estuary $plat"
+	menuentry_id="`echo $plat | tr "[:upper:]" "[:lower:]"`_menuentry"
+	create_grub_menuentry grub.cfg "$title" $menuentry_id /Image "$cmd_line" /initrd.gz
 done
 
-echo "Download distros to $WORKSPACE done!"
-echo ""
+###################################################################################
+# copy grub to efi partition
+###################################################################################
+sudo mount ${TARGET}1 /mnt || exit 1
+sudo cp grub.cfg /mnt/
+mkdir -p EFI/GRUB2/
+cp grubaa64.efi EFI/GRUB2/grubaa64.efi || exit 1
+sudo cp -r EFI /mnt/ || exit 1
+sudo umount ${TARGET}1 || exit 1
 
 ###################################################################################
-# Create initrd file
+# create initrd.gz
 ###################################################################################
-sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" setup.sh
-
 user=`whoami`
 group=`groups | awk '{print $1}'`
 mkdir rootfs
 
 pushd rootfs >/dev/null
-zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv || exit 1
-rm -f ../mini-rootfs.cpio.gz
-sudo chown -R ${user}:${group} *
-
-if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
-	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
+if ! create_initrd ../mini-rootfs.cpio.gz ../deploy-utils.tar.bz2; then
+	echo "Error!!! Create initrd.gz failed!"; exit 1
 fi
-
-cat > ./usr/bin/estuary.txt << EOF
-PLATFORMS=$PLATFORMS
-DISTROS=$DISTROS
-CAPACITY=$CAPACITY
-EOF
-
-mv ../setup.sh ./usr/bin/
-tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
-rm -f ../deploy-utils.tar.bz2
-sudo chmod 755 ./usr/bin/setup.sh
-
-sudo chown -R root:root *
-find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
-
 popd >/dev/null
 sudo rm -rf rootfs
+rm -f mini-rootfs.cpio.gz deploy-utils.tar.bz2
 
 ###################################################################################
-# Create grub.cfg
+# switch out from workspace...
 ###################################################################################
-Image="`ls Image*`"
-Initrd="`ls initrd*.gz`"
-platforms=(`echo $PLATFORMS | tr ',' ' '`)
-default_plat=`echo ${platforms[0]} | tr "[:upper:]" "[:lower:]"`
-
-cat > grub.cfg << EOF
-# NOTE: Please remove the unused boot items according to your real condition.
-# Sample GRUB configuration file
-#
-
-# Boot automatically after 5 secs.
-set timeout=5
-
-# By default, boot the Linux
-set default=${default_plat}_minilinux
-
-EOF
-
-for plat in ${platforms[*]}; do
-	eval cmd_line=\$${plat}_CMDLINE
-	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
-	cat >> grub.cfg << EOF
-# Booting initrd for $plat
-menuentry "Install $plat estuary" --id ${platform}_minilinux {
-	linux /$Image $cmd_line
-	initrd /$Initrd
-}
-
-EOF
-
-done
-
-###################################################################################
-# Create EFI System
-###################################################################################
-mkdir -p EFI/GRUB2/
-cp grubaa64.efi EFI/GRUB2/grubaa64.efi || exit 1
-
-sudo mount ${TARGET}1 /mnt/ || exit 1
-sudo cp -r EFI /mnt/ || exit 1
-sudo cp Image* initrd*.gz grub.cfg /mnt/ || exit 1
-# sync
-sudo umount /mnt/
-
-###################################################################################
-# Pop Workspace!!!
-###################################################################################
-sudo chown -R root:root *
 popd >/dev/null
-
-# sync
-sudo umount ${TARGET}2
-###################################################################################
-# Delete workspace
-###################################################################################
-sudo rm -rf $WORKSPACE 2>/dev/null
-echo "Create USB disk deployment environment successful!"
-echo ""
-
+echo "umount ${TARGET}2...... Please wait!"
+sudo umount ${TARGET}2 || exit 1
+trap EXIT
+rmdir $WORKSPACE
 exit 0
 
