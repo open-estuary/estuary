@@ -1,7 +1,7 @@
 * [Introduction](#1)
 * [Quick Deploy System](#2)
    * [Deploy system via USB Disk](#2.1)
-   * [Deploy system via DVD](#2.2)
+   * [Deploy system via DVD/BMC](#2.2)
    * [Deploy system via PXE](#2.3)
 
 
@@ -17,14 +17,14 @@ Note: In my case, the working directory is `~/workdir`.
 
 1. Prepare usb install disk.
     * Modify estuary/estuarycfg.json. Make sure the platform, distros are all right.
-    
+
     * Change the value of "install" to "yes" in object "setup" for usb and the value "device" to your USB install disk.
     (Notice: if the specified usb device does not exist, the first usb device will be selected by default.)
-    
+
     * Use build.sh to create the usb install disk.
-    
+
        eg: `./estuary/build.sh -f estuary/estuarycfg.json`
-       
+
 2. Connect the usb install disk to the board.
 
 3. Reboot the board.
@@ -35,29 +35,43 @@ Note: In my case, the working directory is `~/workdir`.
 
 6. Start the boards from "grub" menu of UEFI by default.
 
-<h3 id="2.2">Deploy system via DVD</h3>
+<h3 id="2.2">Deploy system via DVD/BMC</h3>
 
-1. Prepare ISO image and install disk. 
+1. Prepare ISO image and install disk.
 
     * Modify estuary/estuarycfg.json. Make sure the platform, distros are all right.
-    
+
     * Change the value of "install" to "yes" in object "setup" for iso and the value "name" to your target iso image file name.
-    
+
     * Use build.sh to create the target install iso image file.
-    
+
        eg: `./estuary/build.sh -f estuary/estuarycfg.json`
-       
+
+2. Via DVD
+
     * Burn the iso image file to DVD disk if you use the physical DVD driver.
 
-2. Connect the physical DVD driver to the board, plug in the install DVD disk.
+    * Connect the physical DVD driver to the board, plug in the install DVD disk.
 
-3. Reboot the board.
+    * Reboot the board.
 
-4. Boot from the DVD device. (About how to boot from DVD device, please refer to the UEFI related manual.)
+    * Boot from the DVD device. (About how to boot from DVD device, please refer to the UEFI related manual.)
 
-5. According to the prompt to deploy the system.
+    * According to the prompt to deploy the system.
 
-6. Start the boards from "grub" menu of UEFI by default.
+    * Start the boards from "grub" menu of UEFI by default.
+
+3. Via BMC
+
+    * Login BMC website of specified IP with browser(IE browser is suggested to use), The `username` & `password` is `root` & `Huawei12#$`.
+
+    * Click "Remote" on the top of BMC webiste. Select "Remote Virtual Console (Private Mode)" to enter into KVM interface. Click "Image File" and choose the iso image, then click "Connect" button.
+
+    * Click "Config" on the top of BMC website, click "Boot Option" to select "DVD-ROM drive", then click "Save" button.
+
+    * Reboot the board
+
+    * According to the prompt to deploy the system.
 
 <h3 id="2.3">Deploy system via PXE</h3>
 
@@ -65,7 +79,7 @@ Note: In my case, the working directory is `~/workdir`.
 
 2. Modify the configuration file of estuary/estuarycfg.json based on you hardware boards. Change the values of mac to physical addresses of the connected network cards on the board. Change the value of "install" to "yes" in object "setup" for PXE.
 
-3. Backup files under the tftp root directory if necessary. Use build.sh to build project and setup the PXE server on Ubuntu PC.
+3. Backup files under the tftp root directory if necessary. Use build.sh to bBMCd project and setup the PXE server on Ubuntu PC.
 
    eg: `./estuary/build.sh -f estuary/estuarycfg.json`
 

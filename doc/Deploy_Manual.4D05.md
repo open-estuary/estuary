@@ -3,12 +3,10 @@
    * [Prerequisite](#2.1)
    * [Check the hardware board](#2.2)
    * [Upgrade UEFI and trust firmware](#2.3)
-* [Bring up System](#3)
-   * [Boot via ESL](#3.1)
-   * [Boot via PXE](#3.2)
-   * [Boot via NFS](#3.3)
-   * [Boot via DISK(SAS/USB/SATA)](#3.4)
-   * [Boot via ACPI](#3.5)
+* [Bring up System via ACPI mode](#3)
+   * [Boot via PXE(ACPI)](#3.1)
+   * [Boot via NFS(ACPI)](#3.2)
+   * [Boot via DISK(SAS/USB/SATA)(ACPI)](#3.3)
 
 <h2 id="1">Introduction</h2>
 
@@ -47,194 +45,9 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 You can upgrade UEFI and trust firmware yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/UEFI_Manual.4D05.md).
 
-<h2 id="3">Bring up System</h2>
+<h2 id="3">Bring up System via ACPI mode</h2>
 
 There are several methods to bring up system, you can select following anyone fitting you to boot up.
-
-<h3 id="3.1">Boot via ESL</h3>
-
-In this boot mode, the kernel image, rootfs file should be downloaded into
-RAM at first and then start the system by ESL.
-After reboot or power off, all downloaded data will be lost.
-This boot mode is just used for debugging.
-
-Boot D05 to UEFI menu. Select "Boot Manager"->"Eebedded Boot Loader(EBL)" and type the
-follow commands in EBL:
-
-1. Download Image binary file from FTP server to target board's RAM
-   ```
-    # Download Image binary file from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
-   ```
-    e.g.: 
-    
-    `provision 192.168.1.107 -u sch -p aaa -f Image -a 0x80000`
- 
-2. Download rootfs file from FTP server
-    ```
-    # Download rootfs file from FTP server to target board's RAM
-    provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
-     ```
-     e.g.:
-  
-    `provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000`
- 
-3. Start operating system
-  
-  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operating system.
-
-<h3 id="3.2">Boot via PXE</h3>
-
-In this boot mode, the UEFI will get grub from PXE server.The grub will get the configuration file from TFTP service configured by PXE server.
-
-1. Setup PXE environment on host
-
-   Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
-   
-2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
-
-3. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option and press "Enter".
-  
-   Note:
-     
-    If you are connecting the D05 board of openlab, please select "EFI Network 2".
-
-    The value of `<No>` is depended on which D05 GE port is connected. D05 board support 4 on-board network ports at maximun.To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
-  
-4. After several seconds, D05 will boot by PXE automatically.
-
-To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
-
-<h3 id="3.3">Boot via NFS</h3>
-
-In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `"showmount -e <server ip address>" `to list the exported NFS directories on the NFS server.
- 
-D05 supports booting via NFS, you can try it as following steps:
-
-1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
-
-2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
-
-Note: D05 only supports booting via ACPI mode with Centos distribution, so please refer to Grub_Manual.md to get correct configuration.
-
-3. Reboot D05 and press anykey except "enter" to enter UEFI Boot Menu
-
-4. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option to enter.
-  
-  Note:
-If you are connecting the D05 board of openlab, please select "EFI Network 2". The value of `<No>` is depended on which D05 GE port is connected.
-   
-<h3 id="3.4">Boot via DISK(SAS/USB/SATA)</h3>
-
-D05 board supports booting via SAS, USB and SATA by default. The UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So grubaa64.efi, grub.cfg, Image and different estuary release distributions are stored on disk.
-
-1. Boot by PXE (please refer to "Boot via PXE") to part and format hardware disk before booting D05 board
-
-   Format hardware disk, e.g.: 
-   
-   `sudo mkfs.vfat /dev/sda1`; `sudo mkfs.ext4 /dev/sda2`
-   
-   Part hardware disk with `"sudo fdisk /dev/sda"` as follow:<br>
-    add a gpt to this disk : 
-       
-      `fdisk /dev/sda` 
-        
-      `g`-------add a gpt partition
-       
-     add some EFI partition : 
-       
-      `n`-------add a partition
-       
-      `1`-------the number of partition
-     
-      type "Enter" key ------ First sector
-       
-      `+200M`---------Last sector, size of partition
-       
-      `t`-------change the type of partition
-       
-       EFI system
-      
-       add some another partition  `...`<br>
-       save the change           : `w`<br>
-       format EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
-       format ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
-       
-       ```
-          +---------+-----------+--------------+------------------+
-          | Name    |   Size    |    Type      |   USB/SAS/SATA   |
-          +---------+-----------+--------------+------------------+
-          | sda1    |   200M    |  EFI system  |   EFI            |
-          +---------+-----------+--------------+------------------+
-          | sda2    |   10G     |    ext4      | linux filesystem |
-          +---------+-----------+--------------+------------------+
-          | sda3    |   10G     |    ext4      | linux filesystem |
-          +---------+-----------+--------------+------------------+
-          | sda4    |   10G     |    ext4      | linux filesystem |
-          +---------+-----------+--------------+------------------+
-          | sda5    |rest space |    ext4      | linux swap       |
-          +---------+-----------+--------------+------------------+
-       ```
-        
-   Note: EFI partition must be a fat filesystem, so you should format sda1 with `“sudo mkfs.vfat /dev/sda1″`.
-
-2. Download files and store them into hardware disk as below.
-
-  （SAS/USB/SATA）Related files are placed as follow: 
-   ```
-       sda1: -------EFI
-              |       |
-              |       GRUB2------grubaa64.efi  //grub binary file
-              |
-              |-------------grub.cfg           //grub config file
-              |
-              |-------------Image          //kernel binary Image
-        sda2: Centos distribution
-   ```    
-
-    Note: D05 only supports booting system with Centos, so Centos distribution should be uncompressed in sda2. The grubaa64.efi file must be put in /EFI/GRUB2 directory of dev/sda1(gpt partition)
- 
-    To get kernel image file, please refer to [Readme.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Readme.4D05.md).<br>
-    To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).<br>
-    To get Centos distribution, please refer to [Distributions_Guider](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br> 
-    
-3. Boot the board via SAS/USB/SATA
-
-   a. Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/Grub_Manual.4All.md))<br>
-       e.g.: <br>
-       ``` 
-	        # Sample GRUB configuration file
-	        #
-	        # Boot automatically after 5 secs.
-	        set timeout=5
-	        # By default, boot the Estuary with Centos filesystem
-	        set default=centos
-	        # For booting GNU/Linux
-
-           menuentry "centos" --id centos {
-           search --no-floppy --fs-uuid --set=root <UUID>
-           linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw ip=dhcp
-            }
-       ```
-
-       Note:<br>
-	* `<UUID> `means the UUID of that partition which your EFI System is located in.<br>
-          `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. <br>
-           To see the values of UUID and PARTUUID, please use the command: `$blkid`.<br>
-            
-  b. Reboot and press anykey except "enter" to enter UEFI main menu.
-
-  c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
-
-    For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
-
-    For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
-
-  
-  d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
-
-
-<h3 id="3.5">Boot via ACPI</h3>
 
 D05 only supports booting via ACPI, not support DTS mode. Set the parameters as follow to boot via ACPI.
 
@@ -242,13 +55,164 @@ You must add `"acpi=force"` property in `"linux=...."` line for "grub.cfg" file.
 
 e.g.:
 
-```shell
+```bash
 # Booting from NFS with Centos rootfs
  menuentry "D05 Centos NFS(ACPI)" --id d05_centos_nfs_acpi {
-    set root=(tftp,192.168.1.107)
-    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/centos ip=dhcp
-    }
-
+set root=(tftp,192.168.1.107)
+linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/centos ip=dhcp
+}
 ```
-
 NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
+<h3 id="3.1">Boot via PXE(ACPI)</h3>
+
+In this boot mode, the UEFI will get grub from PXE server.The grub will get the configuration file from TFTP service configured by PXE server.
+
+1. Setup PXE environment on host
+
+   Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
+
+2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
+
+3. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option and press "Enter".
+
+   Note:
+
+   If you are connecting the D05 board of openlab, please select "EFI Network 2".
+
+   The value of `<No>` is depended on which D05 GE port is connected. D05 board support 4 on-board network ports at maximun.To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
+
+4. After several seconds, D05 will boot by PXE automatically.
+
+To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
+
+<h3 id="3.2">Boot via NFS(ACPI)</h3>
+
+In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `"showmount -e <server ip address>" `to list the exported NFS directories on the NFS server.
+
+D05 supports booting via NFS, you can try it as following steps:
+
+1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
+
+2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
+
+   Note: D05 only supports booting via ACPI mode with Centos distribution, so please refer to Grub_Manual.md to get correct configuration.
+
+3. Reboot D05 and press anykey except "enter" to enter UEFI Boot Menu
+
+4. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option to enter.
+
+  Note:
+If you are connecting the D05 board of openlab, please select "EFI Network 2". The value of `<No>` is depended on which D05 GE port is connected.
+
+<h3 id="3.3">Boot via DISK(SAS/USB/SATA)(ACPI)</h3>
+
+D05 board supports booting via SAS, USB and SATA by default. The UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So grubaa64.efi, grub.cfg, Image and different estuary release distributions are stored on disk.
+
+1. Boot by PXE (please refer to "Boot via PXE") to part and format hardware disk before booting D05 board
+
+   Format hardware disk
+
+   e.g.:
+   ```bash
+   sudo mkfs.vfat /dev/sda1
+   sudo mkfs.ext4 /dev/sda2
+   ```
+   Part hardware disk with `"sudo fdisk /dev/sda"` as follow:<br>
+   add a gpt to this disk :
+
+   `fdisk /dev/sda`
+
+   `g`-------add a gpt partition
+
+   add some EFI partition :
+
+   `n`-------add a partition
+
+   `1`-------the number of partition
+
+   type "Enter" key ------ First sector
+
+   `+200M`---------Last sector, size of partition
+
+   `t`-------change the type of partition
+
+   EFI system
+
+   add some another partition  `...`<br>
+   save the change           : `w`<br>
+   format EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
+   format ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
+
+   ```bash
+   +---------+-----------+--------------+------------------+
+   | Name    |   Size    |    Type      |   USB/SAS/SATA   |
+   +---------+-----------+--------------+------------------+
+   | sda1    |   200M    |  EFI system  |   EFI            |
+   +---------+-----------+--------------+------------------+
+   | sda2    |   10G     |    ext4      | linux filesystem |
+   +---------+-----------+--------------+------------------+
+   | sda3    |   10G     |    ext4      | linux filesystem |
+   +---------+-----------+--------------+------------------+
+   | sda4    |   10G     |    ext4      | linux filesystem |
+   +---------+-----------+--------------+------------------+
+   | sda5    |rest space |    ext4      | linux swap       |
+   +---------+-----------+--------------+------------------+
+    ```
+
+   Note: EFI partition must be a fat filesystem, so you should format sda1 with `“sudo mkfs.vfat /dev/sda1″`.
+
+2. Download files and store them into hardware disk as below.
+
+   (SAS/USB/SATA)Related files are placed as follow:
+   ```bash
+   sda1: -------EFI
+          |       |
+          |       GRUB2------grubaa64.efi  //grub binary file
+          |
+          |-------------grub.cfg           //grub config file
+          |
+          |-------------Image          //kernel binary Image
+    sda2: Centos distribution
+   ```
+
+   Note: D05 only supports booting system with Centos, so Centos distribution should be uncompressed in sda2. The grubaa64.efi file must be put in /EFI/GRUB2 directory of dev/sda1(gpt partition)
+
+   To get kernel image file, please refer to [Readme.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Readme.4D05.md).<br>
+   To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).<br>
+   To get Centos distribution, please refer to [Distributions_Guider](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).<br>
+
+3. Boot the board via SAS/USB/SATA
+
+   a. Modify grub config file, please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/estuary-d05-3.0b/doc/Grub_Manual.4All.md)<br>
+   e.g.: <br>
+   ```bash
+    # Sample GRUB configuration file
+    #
+    # Boot automatically after 5 secs.
+    set timeout=5
+    # By default, boot the Estuary with Centos filesystem
+    set default=d05_centos_sata_acpi
+    # For booting GNU/Linux
+
+    menuentry "D05 Centos SATA(ACPI)" --id d05_centos_sata_acpi {
+    search --no-floppy --fs-uuid --set=root <UUID>
+    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw ip=dhcp
+    }
+   ```
+
+   Note:<br>
+   `<UUID> `means the UUID of that partition which your EFI System is located in.<br>
+   `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. <br>
+    To see the values of UUID and PARTUUID, please use the command: `$blkid`.<br>
+
+   b. Reboot and press anykey except "enter" to enter UEFI main menu.
+
+   c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
+
+   For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
+
+   For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
+
+   d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+
+
