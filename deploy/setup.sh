@@ -94,14 +94,13 @@ PLATFORM=${platform[0]}
 
 if [ ${#platform[@]} -gt 1 ]; then
 	echo "Notice! Multiple platforms found."
-	while true; do
-		echo ""
-		echo "---------------------------------------------------------------"
-		echo "- platfrom: ${platform[*]}"
-		echo "---------------------------------------------------------------"
-		read -p "Please input the platfrom name to install. " plat
-		if echo ${platform[*]} | grep -E "\b${plat}\b" >/dev/null; then
-			PLATFORM=$plat ; break
+	echo "---------------------------------------------------------------"
+	echo "- platfrom: ${platform[*]}"
+	echo "---------------------------------------------------------------"
+	echo "Please select the platfrom to install."
+	select plat in ${platform[*]}; do
+		if [ x"$plat" != x"" ]; then
+			PLATFORM=$plat; break
 		fi
 	done
 fi
@@ -299,7 +298,9 @@ do
 	if ! mount ${TARGET_DISK}${part_index} /mnt/ 2>/dev/null; then
 		echo "Error!!! Unable mount ${TARGET_DISK}${part_index} to /mnt!" >&2 ; exit 1
 	fi
-	if ! tar xf $rootfs_package -C /mnt/; then
+	
+	blocking_factor=$[$(gzip --list $rootfs_package | grep $rootfs_package | awk '{print $2}') / 51200 + 1]
+	if ! tar --blocking-factor=${blocking_factor} --checkpoint=1 --checkpoint-action='ttyout=Uncompressed %u%  ...\r' -zxf $rootfs_package -C /mnt/; then
 		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; exit 1
 	fi
 	echo "Install $rootfs_package into ${TARGET_DISK}${part_index} done."
@@ -386,17 +387,23 @@ echo ""
 echo "/*---------------------------------------------------------------"
 echo "- All install finished!"
 echo "---------------------------------------------------------------*/"
+echo -e "\033[?25l"
 echo "Press y to restart at now, other key to stop!"
+(
 for ((i=1; i<16; i++)); do
 	left_time=$[16 - i]
-	printf "                                                     \r"
-	if read -t 1 -p "Restart in $left_time second(s)!" c; then
-		if [ x"$c" = x"y" ]; then
-			reboot
-		else
-			echo "" ; exit 0
-		fi
-	fi
+	printf "                                          \r"
+	printf "Restart in %2d second(s)! Reboot now? (y/N) " $left_time
+	sleep 1
 done
 
 reboot
+) &
+child_pid=$!
+read -n1 c
+kill -s 9 $child_pid 2>/dev/null
+if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
+	reboot
+fi
+
+echo -e "\033[?25h"
