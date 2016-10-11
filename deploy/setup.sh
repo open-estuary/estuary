@@ -299,10 +299,12 @@ do
 		echo "Error!!! Unable mount ${TARGET_DISK}${part_index} to /mnt!" >&2 ; exit 1
 	fi
 	
-	blocking_factor=$[$(gzip --list $rootfs_package | grep $rootfs_package | awk '{print $2}') / 51200 + 1]
-	if ! tar --blocking-factor=${blocking_factor} --checkpoint=1 --checkpoint-action='ttyout=Uncompressed %u%  ...\r' -zxf $rootfs_package -C /mnt/; then
-		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; exit 1
+	echo -e "\033[?25l"
+	blocking_factor=$[$(gzip --list $rootfs_package | awk 'END {print $2}') / 51200 + 1]
+	if ! tar --blocking-factor=${blocking_factor} --checkpoint=5 --checkpoint-action='exec=printf "\rUncompressed [ %d%% ]..." $TAR_CHECKPOINT' -zxf $rootfs_package -C /mnt/; then
+		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; echo -e "\033[?25h"; exit 1
 	fi
+	echo -e "\033[?25h"
 	echo "Install $rootfs_package into ${TARGET_DISK}${part_index} done."
 
 	sync
