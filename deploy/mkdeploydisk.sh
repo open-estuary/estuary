@@ -4,6 +4,7 @@
 # Const variables
 ###################################################################################
 TOPDIR=`pwd`
+SUPPORTED_PLATFORM=(D03 D05)
 ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary/releases"
 ESTUARY_FTP_ADDR="ftp://117.78.41.188/releases/"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force ip=dhcp"
@@ -16,14 +17,14 @@ DISK_LABEL="Estuary"
 # Global variables
 ###################################################################################
 TARGET=
-VERSION=
+VERSION=2.2
 PLATFORM=D05
-DISTRO=
+DISTRO=CentOS
 CAPACITY=50
 BINDIR=
 
 WORKSPACE=Workspace
-ESTUARY_WEB_ADDR=$ESTUARY_HTTP_ADDR
+ESTUARY_WEB_ADDR=$ESTUARY_FTP_ADDR
 
 ###################################################################################
 # Usage
@@ -48,19 +49,6 @@ for example:
 	mkdeploydisk.sh --target=/dev/sdc --platform=D05 --distro=CentOS
 
 EOF
-}
-
-###################################################################################
-# int get_index(int &__index)
-###################################################################################
-get_index() {
-	local __index=$1
-	local _index=0
-	if read -t 15 -p "Input index (default 1): " _index && expr $_index "+" 1 &> /dev/null && [ ! -z $_index ]; then
-		eval $__index='"$_index"'
-	else
-		eval $__index='"1"'
-	fi
 }
 
 ###################################################################################
@@ -182,14 +170,14 @@ download_file() {
 	
 	pushd $target_dir >/dev/null
 	target_file_name=`basename $target_file`
-	md5sum --quiet --check .${target_file_name}.sum 2>/dev/null && return 0
+	md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
 
-	rm -f ${target_file_name}.sum .${target_file_name}.sum 2>/dev/null
+	rm -f ${target_file_name}.sum .${target_file_name}.sum >/dev/null 2>&1
 	wget -c ${target_file}.sum || return 1
 	mv ${target_file_name}.sum .${target_file_name}.sum
-	md5sum --quiet --check .${target_file_name}.sum && return 0
-	rm -f $target_file_name 2>/dev/null
-	wget -c $target_file && md5sum --quiet --check .${target_file_name}.sum && return 0
+	md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
+	rm -f $target_file_name >/dev/null 2>&1
+	wget -c $target_file && md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
 	popd >/dev/null
 
 	return 1
@@ -301,8 +289,8 @@ create_initrd() {
 	user=`whoami`
 	group=`groups | awk '{print $1}'`
 
-	zcat $rootfs | sudo cpio -dimv || return 1
-	sudo tar jxvf $deploy_utils -C ./ || return 1
+	zcat $rootfs | sudo cpio -dimv >/dev/null 2>/dev/null || return 1
+	sudo tar xf $deploy_utils -C ./ || return 1
 
 	sudo chown -R ${user}:${group} *
 	if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
@@ -333,8 +321,6 @@ clean_workspace() {
 ###################################################################################
 # Get parameters
 ###################################################################################
-clear
-
 while test $# != 0
 do
 	case $1 in
@@ -358,39 +344,54 @@ do
 done
 
 ###################################################################################
+# Get/Check platform info
+###################################################################################
+if [ x"$PLATFORM" = x"" ] || !(echo ${SUPPORTED_PLATFORM[@]} | grep -w $PLATFORM >/dev/null 2>&1); then
+	echo "------------------------------------------------------"
+	echo "- supported platform list"
+	echo "------------------------------------------------------"
+	old_ps3="$PS3"
+	PS3="Input the platform index to install: "
+	select PLATFORM in ${SUPPORTED_PLATFORM[*]}; do break; done
+	PS3="$old_ps3"
+fi
+
+###################################################################################
 # Get/Check version info
 ###################################################################################
-echo -e "\nGet version info from $ESTUARY_WEB_ADDR. Please wait!"
+# echo -e "\nGet version info from $ESTUARY_WEB_ADDR. Please wait!"
 version_list=(`get_all_version $ESTUARY_WEB_ADDR | sort -r`)
 if [ ${#version_list[@]} -eq 0 ]; then
 	echo "Get version info from $ESTUARY_WEB_ADDR failed!"; exit 1
 fi
 
 if [ x"$VERSION" = x"" ] || !(echo ${version_list[@]} | grep -w $VERSION >/dev/null 2>&1); then
-	echo ""
-	echo "Please select the version index to install!"
-	for ((index=0; index<${#version_list[@]};index++)); do printf "%2d) %s\n" $[index+1] ${version_list[$index]}; done
-	get_index index
-	VERSION=${version_list[$index-1]}
-	VERSION=${VERSION:-${version_list[0]}}
+	echo "------------------------------------------------------"
+	echo "- released version list"
+	echo "------------------------------------------------------"
+	old_ps3="$PS3"
+	PS3="Input the version index to install: "
+	select VERSION in ${version_list[*]}; do break; done
+	PS3="$old_ps3"
 fi
 
 ###################################################################################
 # Get/Check distro info
 ###################################################################################
-echo -e "\nGet distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux. Please wait!"
+# echo -e "\nGet distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux. Please wait!"
 distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/${VERSION}/linux`)
 if [ ${#distro_list[@]} -eq 0 ]; then
 	echo "Get distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux failed!"; exit 1
 fi
 
 if [ x"$DISTRO" = x"" ] || !(echo ${distro_list[@]} | grep -w $DISTRO >/dev/null 2>&1); then
-	echo ""
-	echo "Please select the distro index to install!"
-	for ((index=0; index<${#distro_list[@]};index++)); do printf "%2d) %s\n" $[index+1] ${distro_list[$index]}; done
-	get_index index
-	DISTRO=${distro_list[$index-1]}
-	DISTRO=${DISTRO:-${distro_list[0]}}
+	echo "------------------------------------------------------"
+	echo "- supported distro list"
+	echo "------------------------------------------------------"
+	old_ps3="$PS3"
+	PS3="Input the distro index to install: "
+	select DISTRO in ${distro_list[*]}; do DISTRO=$dis; break; done
+	PS3="$old_ps3"
 fi
 
 ###################################################################################
@@ -409,7 +410,27 @@ else
 	get_default_usb TARGET || { echo "Error!!! Can't find an available USB storage device!"; exit 1;}
 fi
 
-echo -e "\nNotice! The device $TARGET will be formatted."
+###################################################################################
+# Display install info
+###################################################################################
+cat << EOF
+------------------------------------------------------
+- PLATFROM: $PLATFORM, VERSION: $VERSION, DISTRO: $DISTRO, TARGET: $TARGET
+------------------------------------------------------
+
+EOF
+
+sleep 1
+
+###################################################################################
+# Create and format usb storage
+###################################################################################
+cat << EOF
+------------------------------------------------------
+- Format and create usb storage partisions
+------------------------------------------------------
+EOF
+echo -e "Notice! The device $TARGET will be formatted."
 read -p "Continue to do this? (y/N) " c
 if ! create_partition $TARGET $BOOT_PARTITION_SIZE $DISK_LABEL; then
 	echo "Error!!! Create partition on $TARGET failed!"; exit 1
@@ -439,6 +460,11 @@ EOF
 ###################################################################################
 # download all binary file from estuary
 ###################################################################################
+cat << EOF
+------------------------------------------------------
+- Download binary files from server
+------------------------------------------------------
+EOF
 if ! download_common_binary ${BINDIR}/Common; then
 	echo "Error!!! Download common binary failed!"; exit 1
 fi
@@ -474,6 +500,11 @@ sudo umount ${TARGET}1 || exit 1
 ###################################################################################
 # create initrd.gz
 ###################################################################################
+cat << EOF
+------------------------------------------------------
+- Generate initrd
+------------------------------------------------------
+EOF
 user=`whoami`
 group=`groups | awk '{print $1}'`
 mkdir rootfs
@@ -483,6 +514,7 @@ if ! create_initrd ../mini-rootfs.cpio.gz ../deploy-utils.tar.bz2; then
 	echo "Error!!! Create initrd.gz failed!"; exit 1
 fi
 popd >/dev/null
+echo "Clear temporary files. Please wait!"
 sudo rm -rf rootfs
 rm -f mini-rootfs.cpio.gz deploy-utils.tar.bz2
 
@@ -490,9 +522,23 @@ rm -f mini-rootfs.cpio.gz deploy-utils.tar.bz2
 # switch out from workspace...
 ###################################################################################
 popd >/dev/null
-echo "umount ${TARGET}2...... Please wait!"
-sudo umount ${TARGET}2 || exit 1
+cat << EOF
+------------------------------------------------------
+- Umount usb install device
+------------------------------------------------------
+EOF
+
 trap EXIT
+echo "umount ${TARGET}2...... Please wait!"
+(
+trap 'echo ""; exit' SIGINT
+while :; do echo -n "."; sleep 3; done
+) &
+child_pid=$!
+sudo umount ${TARGET}2 || exit 1
+kill -s SIGINT ${child_pid} 2>/dev/null
+wait ${child_pid}
+
 rmdir $WORKSPACE
 exit 0
 
