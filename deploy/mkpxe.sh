@@ -140,6 +140,12 @@ NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
 WORKSPACE=`mktemp -d workspace.XXXX`
 pushd $WORKSPACE >/dev/null
 
+cat > $NFS_ROOT/estuary.txt << EOF
+PLATFORM=$PLATFORMS
+DISTRO=$DISTROS
+CAPACITY=$CAPACITY
+EOF
+
 ###################################################################################
 # Copy kernel, grub, mini-rootfs, setup.sh ...
 ###################################################################################
@@ -169,8 +175,6 @@ echo ""
 ###################################################################################
 # Create initrd file
 ###################################################################################
-sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" setup.sh
-
 user=`whoami`
 group=`groups | awk '{print $1}'`
 mkdir rootfs
@@ -180,19 +184,15 @@ zcat ../mini-rootfs.cpio.gz | sudo cpio -dimv || exit 1
 rm -f ../mini-rootfs.cpio.gz
 sudo chown -R ${user}:${group} *
 
+tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
+rm -f ../deploy-utils.tar.bz2
+
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
 	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
 
-cat > ./usr/bin/estuary.txt << EOF
-PLATFORMS=$PLATFORMS
-DISTROS=$DISTROS
-CAPACITY=$CAPACITY
-EOF
-
+sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ../setup.sh
 mv ../setup.sh ./usr/bin/
-tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
-rm -f ../deploy-utils.tar.bz2
 sudo chmod 755 ./usr/bin/setup.sh
 
 sudo chown -R root:root *
