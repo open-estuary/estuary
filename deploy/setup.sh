@@ -95,15 +95,21 @@ PLATFORM=${platform[0]}
 
 if [ ${#platform[@]} -gt 1 ]; then
 	echo "Notice! Multiple platforms found."
+	echo ""
 	echo "---------------------------------------------------------------"
-	echo "- platfrom: ${platform[*]}"
+	echo "- platfrom: ${PLATFORMS[*]}"
 	echo "---------------------------------------------------------------"
-	echo "Please select the platfrom to install."
-	select plat in ${platform[*]}; do
-		if [ x"$plat" != x"" ]; then
-			PLATFORM=$plat; break
-		fi
+	for (( index=0; index<${#platform[@]}; index++ )); do
+		echo "$[index + 1]) ${platform[index]}"
 	done
+	read -t 5 -p "Please input the index of platfrom to install (default 1): " index
+	echo ""
+	
+	if [ x"$index" = x"" ] || ! (expr 1 + $index > /dev/null 2>&1); then
+		index=1
+	fi
+	PLATFORM=${platform[index-1]}
+	PLATFORM=${PLATFORM:${platform[0]}}
 fi
 
 install_distro=`cat $ESTUARY_CFG | grep -Eo "DISTRO=[^ ]*"`
@@ -169,6 +175,7 @@ for (( index=0; index<disk_number; index++)); do
 done
 
 read -t 5 -p "Input disk index to install or q to quit (default 0): " index
+echo ""
 if [ x"$index" = x"q" ]; then
 	exit 0
 fi
@@ -189,6 +196,7 @@ sleep 1s
 # Select ACPI choice
 ###################################################################################
 read -t 5 -p "Use ACPI by force? y/n (y by default)" c
+echo ""
 if [ x"$c" = x"n" ]; then
 	ACPI="NO"
 fi
