@@ -3,6 +3,7 @@
 # initialize
 ###################################################################################
 trap 'exit 0' INT
+set +m
 echo 0 > /proc/sys/kernel/printk
 
 D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off ip=dhcp"
@@ -94,15 +95,21 @@ PLATFORM=${platform[0]}
 
 if [ ${#platform[@]} -gt 1 ]; then
 	echo "Notice! Multiple platforms found."
+	echo ""
 	echo "---------------------------------------------------------------"
-	echo "- platfrom: ${platform[*]}"
+	echo "- platfrom: ${PLATFORMS[*]}"
 	echo "---------------------------------------------------------------"
-	echo "Please select the platfrom to install."
-	select plat in ${platform[*]}; do
-		if [ x"$plat" != x"" ]; then
-			PLATFORM=$plat; break
-		fi
+	for (( index=0; index<${#platform[@]}; index++ )); do
+		echo "$[index + 1]) ${platform[index]}"
 	done
+	read -t 5 -p "Please input the index of platfrom to install (default 1): " index
+	echo ""
+	
+	if [ x"$index" = x"" ] || ! (expr 1 + $index > /dev/null 2>&1); then
+		index=1
+	fi
+	PLATFORM=${platform[index-1]}
+	PLATFORM=${PLATFORM:${platform[0]}}
 fi
 
 install_distro=`cat $ESTUARY_CFG | grep -Eo "DISTRO=[^ ]*"`
@@ -147,8 +154,7 @@ if [[ ${#disk_list[@]} = 0 ]]; then
 	echo "Error!!! Can't find disk to install distros!" >&2 ; exit 1
 fi
 
-for disk in ${disk_list[@]}
-do
+for disk in ${disk_list[@]}; do
 	disk_model_info[${#disk_model_info[@]}]=`parted -s /dev/$disk print 2>/dev/null | grep "Model: "`
 	disk_size_info[${#disk_size_info[@]}]=`parted -s /dev/$disk print 2>/dev/null | grep "Disk /dev/$disk: "`
 	disk_sector_info[${#disk_sector_info[@]}]=`parted -s /dev/$disk print 2>/dev/null | grep "Sector size (logical/physical): "`
@@ -159,8 +165,8 @@ done
 ###################################################################################
 index=0
 disk_number=${#disk_list[@]}
-for (( index=0; index<disk_number; index++))
-do
+
+for (( index=0; index<disk_number; index++)); do
 	echo "Disk [$index] info: "
 	echo ${disk_model_info[$index]}
 	echo ${disk_size_info[$index]}
@@ -168,13 +174,15 @@ do
 	echo ""
 done
 
-read -p "Input disk index to install or q to quit (default 0): " index
+read -t 5 -p "Input disk index to install or q to quit (default 0): " index
+echo ""
 if [ x"$index" = x"q" ]; then
 	exit 0
 fi
 
 if [ x"$index" = x"" ] || [[ $index != [0-9]* ]] \
 	|| [[ $index -ge $disk_number ]]; then
+	echo ""
 	echo "Warning! We'll use the first disk to install!"
 	index=0
 fi
@@ -187,7 +195,8 @@ sleep 1s
 ###################################################################################
 # Select ACPI choice
 ###################################################################################
-read -p "Use ACPI by force? y/n (y by default)" c
+read -t 5 -p "Use ACPI by force? y/n (y by default)" c
+echo ""
 if [ x"$c" = x"n" ]; then
 	ACPI="NO"
 fi
@@ -195,6 +204,7 @@ fi
 ###################################################################################
 # Format target disk
 ###################################################################################
+echo ""
 echo "/*---------------------------------------------------------------"
 echo "- Format target disk $TARGET_DISK. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
@@ -307,6 +317,7 @@ do
 	echo -e "\033[?25h"
 	echo "Install $rootfs_package into ${TARGET_DISK}${part_index} done."
 
+	echo "Flush data to disk. Please wait a moment!"
 	sync
 	umount /mnt/
 
