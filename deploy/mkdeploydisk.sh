@@ -7,8 +7,8 @@ TOPDIR=`pwd`
 SUPPORTED_PLATFORM=(D03 D05)
 ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary/releases"
 ESTUARY_FTP_ADDR="ftp://117.78.41.188/releases/"
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force ip=dhcp"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force ip=dhcp"
+D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
+D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
 
 BOOT_PARTITION_SIZE=4
 DISK_LABEL="Estuary"
@@ -17,7 +17,7 @@ DISK_LABEL="Estuary"
 # Global variables
 ###################################################################################
 TARGET=
-VERSION=2.2
+VERSION=3.0b2
 PLATFORM=D05
 DISTRO=CentOS
 CAPACITY=50
