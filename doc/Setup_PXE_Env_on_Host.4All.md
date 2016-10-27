@@ -1,4 +1,3 @@
-
 * [Introduction](#1)
 * [Setup DHCP server on Ubuntu](#2)
 * [Setup TFTP server on Ubuntu](#3)
@@ -7,11 +6,11 @@
 
 This is a guide to setup a PXE environment on host machine.
 
-<h3 id="1">Introduction</h3>
+### <a name="1">Introduction</a>
 
 PXE boot depends on DHCP, TFTP and NFS services. So before verifing PXE, you need to setup a working DHCP, TFTP, NFS server on one of your host machine in local network. In this case, my host OS is Ubuntu 12.04.
 
-<h3 id="2">Setup DHCP server on Ubuntu</h3>
+### <a name="2">Setup DHCP server on Ubuntu</a>
 
 Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified direction, try these steps:
 
@@ -19,11 +18,10 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 
   `sudo apt-get install -y isc-dhcp-server syslinux`
 
-* Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.
-
-   Make sure filename is consistent with the file in tftp root directory. 
-    Here is an example: This will enable board to load "grubaa64.efi" from TFTP root to target board and run it, when you boot from PXE in UEFI Boot Menu. 
-    ```shell
+* Edit /etc/dhcp/dhcpd.conf to suit your needs and particular configuration.  
+  Make sure filename is consistent with the file in tftp root directory.  
+  Here is an example: This will enable board to load "grubaa64.efi" from TFTP root to target board and run it, when you boot from PXE in UEFI Boot Menu. 
+  ```bash
     $ cat /etc/dhcp/dhcpd.conf
     # Sample /etc/dhcpd.conf
     # (add your comments here)
@@ -45,97 +43,83 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
         #next-server 192.168.1.107
     }
     #
-    ```
-* Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd should listen to. By default it listens to eth0.
-
+   ```
+* Edit /etc/default/isc-dhcp-server to specify the interfaces dhcpd should listen to. By default it listens to eth0.  
    INTERFACES=""
-   
-* Use these commands to start and check DHCP service
-  sudo service isc-dhcp-server restart
 
-    Check status with "netstat -lu"
-
-   Expected output:
-    Proto Recv-Q Send-Q Local Address           Foreign Address         State      
-    udp        0      0 *:bootpc                *:*                                
-
-<h3 id="3">Setup TFTP server on Ubuntu</h3>
+* Use these commands to start and check DHCP service  
+  `sudo service isc-dhcp-server restart`  
+  Check status with `netstat -lu`  
+  Expected output:  
+  ```
+    Proto Recv-Q Send-Q Local Address           Foreign Address         State
+    udp        0      0 *:bootpc                *:*
+  ```
+### <a name="3">Setup TFTP server on Ubuntu</a>
 
 * Install TFTP server and TFTP client(optional, tftp-hpa is the client package)
 
-  `sudo apt-get install -y openbsd-inetd tftpd-hpa tftp-hpa lftp`
-  
+  `sudo apt-get install -y openbsd-inetd tftpd-hpa tftp-hpa lftp`  
 * Edit /etc/inetd.conf
 
-  Remove "#" from the beginning of tftp line or add if it’s not there under “#:BOOT:” comment as follow.
- 
-  `tftp    dgram   udp wait    root    /usr/sbin/in.tftpd  /usr/sbin/in.tftpd -s /var/lib/tftpboot`
- 
-* Enable boot service for inetd
-  `sudo update-inetd --enable BOOT`
-  
+  Remove "#" from the beginning of tftp line or add if it’s not there under “#:BOOT:” comment as follow.  
+  `tftp    dgram   udp wait    root    /usr/sbin/in.tftpd  /usr/sbin/in.tftpd -s /var/lib/tftpboot`  
+* Enable boot service for inetd  
+  `sudo update-inetd --enable BOOT`  
 * Configure the TFTP server, update /etc/default/tftpd-hpa like follows:
-  ```shell
-    TFTP_USERNAME="tftp"
-    TFTP_ADDRESS="0.0.0.0:69"
-    TFTP_DIRECTORY="/var/lib/tftpboot"
-    TFTP_OPTIONS="-l -c -s"
- ```
-* Set up TFTP server directory
-  ```shell
-    sudo mkdir /var/lib/tftpboot
-    sudo chmod -R 777 /var/lib/tftpboot/
+
+  ```bash
+  TFTP_USERNAME="tftp"
+  TFTP_ADDRESS="0.0.0.0:69"
+  TFTP_DIRECTORY="/var/lib/tftpboot"
+  TFTP_OPTIONS="-l -c -s"
   ```
+
+* Set up TFTP server directory
+  ```bash
+  sudo mkdir /var/lib/tftpboot
+  sudo chmod -R 777 /var/lib/tftpboot/
+  ```
+
 * Restart inet & TFTP server
-  ```shell
-    sudo service openbsd-inetd restart
-    sudo service tftpd-hpa restart
-   ``` 
-    Check status with "netstat -lu"
-    
-    Expected output:
-    ```
-   Proto Recv-Q Send-Q Local Address           Foreign Address         State 
-    udp        0      0 *:tftp                  *:*                          
-   ```
-   
-<h3 id="4">Put files in the TFTP root path</h3>
+  ```bash
+  sudo service openbsd-inetd restart
+  sudo service tftpd-hpa restart
+  ```
+  Check status with `netstat -lu`  
+  Expected output:
+  ```
+  Proto Recv-Q Send-Q Local Address           Foreign Address         State
+  udp        0      0 *:tftp                  *:*
+  ```
 
-Put the corresponding files into TFTP root directory, they are:
+### <a name="4">Put files in the TFTP root path</a>
 
-The files include: grub binary file, grub configure file, kernel Image and dtb file. 
+Put the corresponding files into TFTP root directory, they are: grub binary file, grub configure file, kernel Image and dtb file.  
 In my case, they are grubaa64.efi, Image_D02 and grub.cfg-01-xx-xx-xx-xx-xx-xx, hip05-d02.dtb.
 
-Note: 
+Note:  
+   1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in `/etc/dhcp/dhcpd.conf`.  
+   2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.  
+   3. The grub binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.  
+   4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.  
 
-   1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in `/etc/dhcp/dhcpd.conf`.<br>
-   2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.<br>
-   3. The grub binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.<br>
-   4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.<br>
-
-To get and config grub and grub config files, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
-
+To get and config grub and grub config files, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).  
 To get kernel and dtb file, please refer to Readme.md.
 
-<h3 id="5">Setup NFS server on Ubuntu</h3>
+### <a name="5">Setup NFS server on Ubuntu</a>
 
-* Install NFS server package
-        
-    sudo apt-get install nfs-kernel-server nfs-common portmap
-                
-* Modify configure file `/etc/exports` for NFS server
+* Install NFS server package  
+  `sudo apt-get install nfs-kernel-server nfs-common portmap`  
+* Modify configure file `/etc/exports` for NFS server  
+  Add following contents at the end of this file.  
+  ```bash
+  </rootnfs> *(rw,sync,no_root_squash)
+  ```
+  Note: `</rootnfs>` is your real shared directory of rootfs of distributions for NFS server.
 
-    Add following contents at the end of this file.
-                      
-    </rootnfs> *(rw,sync,no_root_squash)
-                                    
-    Note: `</rootnfs>` is your real shared directory of rootfs of distributions for NFS server.
-
-* Uncompress a distribution to `</rootnfs>`
-
-    To get them, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md)
-
-* Restart NFS service
-    
-    sudo service nfs-kernel-server restart
+* Uncompress a distribution to `</rootnfs>`  
+    To get them, please refer to [Distributions_Guider.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md)  
+* Restart NFS service  
+  `sudo service nfs-kernel-server restart`
 
