@@ -1,22 +1,25 @@
-# Change list for Estuary v2.3rc1:
+# Change list for Estuary v2.3:
 1. Supported D03 board with 50MHz crystal officially
-2. Firstly support BMC load ISO (Engineering mode)
-3. Improved website functionalities:
-	- Issue tracker anonymous login removed due to security issue
-	- Binary download from China enabled
-	- New collaboration feature added
-4. Improved build script:
+2. Officially supported D02/D03 based on ACPI
+3. Linux kernel version upgraded to v4.4.11 (based on Linaro RPB 16.06)
+4. Greatly improved stability of D02 SAS disk (UUID, Grub loading)
+5. Enabled KVM(ACPI+DTS) support for D02/D03
+6. Firstly support BMC load ISO
+7. Fixed most major issues found in rc0 & rc1, include but not limited to: UEFI, USB speed, build, distribution, etc
+8. Improved build script:
+	- Split to multi modules
+	- Support build instance
 	- Add compatibility with v2.2 and previous build commands
-	- Use release binaries configuration file in ftp server now
-	- Various bug fixes
-5. Fix packages/app building issues found in v2.3rc0
-6. Deployed CI System officially
-	- OpenLab 2 CI deployed
-	- Regular CI test report email supported
-	- Added Fedora/CentOS virtualization test case support
-7. Upgraded Ubuntu ARM64 distro to 16.04
-8. Support running QEMU with Estuary image
-9. Updated documentation on project and website
+9. Improved website functionalities:
+	- Issue tracker anonymous login removed due to security issue
+	- Binary download mirror for China to improve the speed of download for China Users
+10. Enhanced Caliper functionalities
+	- Integrated Unixbench tool
+	- Integrated Stree-ng tool
+	- Added CPU benchmarking functionalities of sysbench
+11. Improved mini-rootfs to support full functional ssh server/client
+12. Enabled LAMP based on docker officially
+13. Updated documentation on project and website
 
 # Remained issues:
 1. OpenEmbedded distribution not enabled
