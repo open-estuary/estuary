@@ -1,54 +1,55 @@
 This is the readme file for D03 platform
 
-After you executed `./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace` for D03, all targets files will be produced. they are:
+After you executed
+```bash
+./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
+```
+for D03, all targets files will be produced. they are:
 
-### UEFI_D03.fd 
+### UEFI_D03.fd
 
-**description**: UEFI_D03.fd is the UEFI bios for D03 platform.
-
-**target**: `<project root>/workspace/binary/D03/UEFI_D03.fd`
-
+**description**: `UEFI_D03.fd` is the UEFI bios for D03 platform.  
+**target**: `<project root>/workspace/binary/D03/UEFI_D03.fd`  
 **source**: `<project root>/uefi`
 
 build commands(supposedly, you are in `<project root>` currently):
-```shell
+```bash
 ./estuary/submodules/build-uefi.sh --platform=D03 --output=workspace
 ```
 
-### grubaa64.efi 
+### grubaa64.efi
 
-**description**: 
-
-grubaa64.efi is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.
-    
-**target**: `<project root>/workspace/binary/arm64/grubaa64.efi`
-
+**description**: `grubaa64.efi` is used to load kernel image and dtb files from SATA, SAS, USB Disk, or NFS into RAM and start the kernel.  
+**target**: `<project root>/workspace/binary/arm64/grubaa64.efi`  
 **source**: `<project root>/grub`
 
 build commands(supposedly, you are in `<project root>` currently):
+```bash
+./estuary/submodules/build-grub.sh --output=./workspace
+```
+if your host is not arm architecture, please execute
+```bash
+./estuary/submodules/build-grub.sh --output=./workspace --cross=aarch64-linux-gnu-
+```
+Note: more details about how to install `gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux`, please refer to <https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md>.
 
-`./estuary/submodules/build-grub.sh --output=./workspace`, if your host is not arm architecture, please execute`build-grub.sh --output=./workspace --cross=aarch64-linux-gnu-`
+### Image & hip06-d03.dtb
 
-Note: more details about how to install gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux, please refer to https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md.
-
-### Image 
-### hip06-d03.dtb 
-
-**descriptions**: Image is the kernel executable program, and hip06-d03.dtb is the device tree binary.
-
+**descriptions**: `Image` is the kernel executable program, and `hip06-d03.dtb` is the device tree binary.  
 **target**:
- 
-Image in `<project root>/workspace/binary/arm64/Image`
-
-hip06-d03.dtb in `<project root>/workspace/binary/D03/hip06-d03.dtb`
-
+`Image` in `<project root>/workspace/binary/arm64/Image`  
+`hip06-d03.dtb` in `<project root>/workspace/binary/D03/hip06-d03.dtb`  
 **source**: `<project root>/kernel`
 
 build commands(supposedly, you are in `<project root>` currently):
-
-`./estuary/submodules/build-kernel.sh --platform=D03 --output=workspace`, if your host is not arm architecture, please execute `./estuary/submodules/build-kernel.sh --platform=D03 --output=workspace --cross=aarch64-linux-gnu-`.
-
-Note: more details about how to install gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux, please refer to https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md.
+```bash
+./estuary/submodules/build-kernel.sh --platform=D03 --output=workspace
+```
+if your host is not arm architecture, please execute
+```bash
+./estuary/submodules/build-kernel.sh --platform=D03 --output=workspace --cross=aarch64-linux-gnu-
+```
+Note: more details about how to install `gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux`, please refer to <https://github.com/open-estuary/estuary/blob/master/doc/Toolchains_Guide.4All.md>.
 
 More detail about distributions, please refer to [Distributions_Guide.md](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).
 
