@@ -14,14 +14,16 @@
 	- Issue tracker anonymous login removed due to security issue
 	- Binary download mirror for China to improve the speed of download for China Users
 10. Enhanced Caliper functionalities
-	- Integrated Unixbench tool
-	- Integrated Stree-ng tool
-	- Added CPU benchmarking functionalities of sysbench
+	- Automatic test report generation in excel and linking of the same in the report
+	- Caliper automation script updates
+	- Caliper Multi target support from single host
+	- Caliper incremental build on multi targets
+	- Caliper integration on Jenkins
+	- Report re-organization and formatting
 11. Improved mini-rootfs to support full functional ssh server/client
 12. Enabled LAMP based on docker officially
 13. Updated documentation on project and website
 
 # Remained issues:
-1. OpenEmbedded distribution not enabled
+1. ARM ACPI not fully supported(e.g. ESL/NOR Flash booting, earlycon)
 2. HiKey ACPI not supported
-3. ARM ACPI not fully supported(e.g. ESL/NOR Flash booting, earlycon)
