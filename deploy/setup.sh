@@ -359,7 +359,7 @@ for ((index=0; index<distro_number; index++)); do
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
-	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
+	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $cmd_line"
 	distro_name=${INSTALL_DISTRO[$index]}
 	
 cat >> /boot/grub.cfg << EOF
