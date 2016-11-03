@@ -410,7 +410,7 @@ for ((i=1; i<16; i++)); do
 	sleep 1
 done
 
-reboot
+reboot -f
 ) &
 child_pid=$!
 read -n1 c
