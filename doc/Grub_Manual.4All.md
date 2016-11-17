@@ -182,10 +182,10 @@ Normally they are placed into bootable partition as following structure.
 |
 |-------------hip04-d01.dtb       # kernel data tree binary file only for D01 platform
 ```
-Note: In case of booting by PXE mode:
-1. The grub binary and `grub.cfg` files must be placed in the TFTP root directory.
-2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.
-3. The grub binary name (`grubxxx.efi`) must be consistent with the "filename" in `/etc/dhcp/dhcpd.conf`, for more detail, please refer to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md)
+Note: In case of booting by PXE mode:  
+1. The grub binary and `grub.cfg` files must be placed in the TFTP root directory.  
+2. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.  
+3. The grub binary name (`grubxxx.efi`) must be consistent with the "filename" in `/etc/dhcp/dhcpd.conf`, for more detail, please refer to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md)  
 4. If you use D02 board, you should not input DTB in the `grub.cfg` but you must flash the DTB file into spiflash to avoid a known Mac address duplicate issue.
 
 You can get more information from the `Deploy_Manual.md` guide.

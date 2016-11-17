@@ -1,13 +1,3 @@
----
-title: UEFI_Manual.4D02.md
-date: 2016-10-10 10:10:01
-tags:
-  - D02
-categories:
-  - Estuary
-  - Documents
-  - D02
----
 * [Introduction](#1)
 * [Upgrade UEFI](#2)
 * [Recover the UEFI when it broke](#3)
@@ -28,17 +18,16 @@ Where to get them, please refer to [Readme.md](https://github.com/open-estuary/e
 
 Note: This is not necessary unless you want to upgrade UEFI really.
 
-1. Prepare files about UEFI on local computer  
-FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.  
-All files mentioned above should be ready firstly, then put them in the root directory of FTP.
+1. Prepare UEFI_D02.fd on computer which installed FTP service  
 
+  FTP service is used to download files from the FTP server to hardware boards. Please prepare a computer installed FTP service with local network firstly, so that boards can get needed files frome FTP server with FTP protocol. Then put the UEFI files mentioned above into the root directory of FTP service.  
 2. Connect the board's UART port to a host machine  
-Please refer to [Deploy_Manual.4D02.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D02.md) "Prerequisite" chapter.
+   Please refer to [Deploy_Manual.4D02.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D02.md) "Prerequisite" chapter.
 
-If you choose Method 1 in Deploy_Manual.4D02.md, use another console window, use `board_reboot` command to reset the board.  
-If you choose Method 2 in Deploy_Manual.4D02.md, press the reset key on the board to reset the board.
+   If you choose Method 1 in Deploy_Manual.4D02.md, use another console window, use `board_reboot` command to reset the board.  
+   If you choose Method 2 in Deploy_Manual.4D02.md, press the reset key on the board to reset the board.
 
-When system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key to enter UEFI main menu.
+   When system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key to enter UEFI main menu.
 
 ### UEFI menu introduction
   UEFI main menu option is showed as follow:  
@@ -85,7 +74,8 @@ When system showing "Press Any key in 10 seconds to stop automatical booting..."
   ```
 * Burn CPLD file  
   Notes: This is a very dangerous operation, please don't do it when not necessary.  
-  If you really want to do it, please make sure the power can **NOT** be shut off suddenly during updating CPLD.  
+  If you really want to do it, please make sure the power can **NOT** be shut off suddenly during updating CPLD.
+
   ```bash
   # Download file from FTP server to board's RAM
   provision <server IP> -u <ftp user name> -p <ftp password> -f <cpld bin> -a <target address>
