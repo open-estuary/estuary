@@ -1,9 +1,21 @@
 #!/bin/bash
 
 ###################################################################################
-# install_dev_tools <arch>
+# int install_jq
 ###################################################################################
-install_dev_tools()
+install_jq()
+{
+	if [ ! -d jq ]; then
+		git clone https://github.com/stedolan/jq.git
+	fi
+
+	(cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install)
+}
+
+###################################################################################
+# int install_dev_tools_ubuntu <arch>
+###################################################################################
+install_dev_tools_ubuntu()
 {
 	local arch=$1
 	if [ x"$arch" = x"x86_64" ]; then
@@ -24,6 +36,38 @@ install_dev_tools()
 	fi
 	
 	return 0
+}
+
+###################################################################################
+# int install_dev_tools_centos_linux <arch>
+###################################################################################
+install_dev_tools_centos_linux()
+{
+	local arch=$1
+	local dev_tools="automake bc ncurses-devel libtool ncurses bison flex libuuid-devel uuid-devel iasl genisoimage openssl-devel bzip2 lshw dosfstools"
+	if yum install -y $dev_tools; then
+		return 0
+	fi
+	
+	if ! (yum makecache && yum install -y $dev_tools); then
+		return 0
+	fi
+
+	which jq || install_jq
+}
+
+###################################################################################
+# install_dev_tools <arch>
+###################################################################################
+install_dev_tools()
+{
+	local arch=$1
+	local host_distro=`cat /etc/os-release | grep -Po "(?<=^NAME=\")([^\"]*)(?=\")" | tr "[:upper:]" "[:lower:]" | tr ' ' '_'`
+	if ! declare -F install_dev_tools_${host_distro} >/dev/null; then
+		echo "Unspported distro!" >&2; return 1
+	fi
+
+	install_dev_tools_${host_distro} $arch
 }
 
 ###################################################################################

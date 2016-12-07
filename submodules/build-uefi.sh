@@ -104,6 +104,9 @@ build_uefi_for_all()
 	fi
 	mkdir -p $output_dir/binary/$platform/
 	cp $uefi_bin $output_dir/binary/$platform/UEFI_${platform}.fd
+
+	# roll back submodule
+	git submodule deinit -f .
 	popd
 	)
 }

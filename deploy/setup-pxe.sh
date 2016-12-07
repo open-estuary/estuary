@@ -40,6 +40,23 @@ EOF
 }
 
 ###################################################################################
+# string calculate_subnet(string host_ip, string netmask)
+###################################################################################
+calculate_subnet() {
+	(
+	host_ip=$1
+	netmask=$2
+	ip_addr=(`echo $host_ip | sed 's/\./ /g'`)
+	netmasks=(`echo $netmask | sed 's/\./ /g'`)
+	subnet=()
+	for ((index=0; index<4; index++)); do
+		subnet[$index]=$[${ip_addr[index]}&${netmasks[index]}]
+	done
+	echo ${subnet[*]} | tr ' ' '.'
+	)
+}
+
+###################################################################################
 # Check host
 ###################################################################################
 host=`lsb_release -a 2>/dev/null | grep Codename: | awk {'print $2'}`
@@ -98,7 +115,7 @@ HWADDR=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=HWaddr )([^ ]*)"`
 INET_ADDR=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=inet addr:)([^ ]*)"`
 BROAD_CAST=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=Bcast:)([^ ]*)"`
 INET_MASK=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=Mask:)([^ ]*)"`
-SUB_NET=`route | grep "$NETCARD_NAME" | grep -v default | awk '{print $1}'`
+SUB_NET=`calculate_subnet $INET_ADDR $INET_MASK`
 ROUTER=`route | grep "$NETCARD_NAME" | grep default | awk '{print $2}'`
 if [ x"$ROUTER" = x"" ]; then
 	ROUTER=$INET_ADDR
