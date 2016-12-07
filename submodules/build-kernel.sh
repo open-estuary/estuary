@@ -77,6 +77,8 @@ build_kernel()
 
 	mkdir -p $output_dir/binary/arm64/ 2>/dev/null
 	cp $kernel_bin $output_dir/binary/arm64/
+	cp $kernel_dir/vmlinux $output_dir/binary/arm64/
+	cp $kernel_dir/System.map $output_dir/binary/arm64/
 
 	if [ x"$dtb_bin" != x"" ]; then
 		mkdir -p $output_dir/binary/$platform/
@@ -96,7 +98,9 @@ build_check()
 	kernel_dir=$output_dir/kernel
 	eval dtb_bin=\$${platform}_DTB
 
-	if [ ! -f $kernel_dir/arch/arm64/boot/Image ] || [ ! -f $output_dir/binary/arm64/Image ]; then
+	if [ ! -f $kernel_dir/arch/arm64/boot/Image ] || [ ! -f $output_dir/binary/arm64/Image ] \
+		|| [ ! -f $kernel_dir/vmlinux ] || [ ! -f $output_dir/binary/arm64/vmlinux ] \
+		|| [ ! -f $kernel_dir/System.map ] || [ ! -f $output_dir/binary/arm64/System.map ]; then
 		return 1
 	fi
 
@@ -124,11 +128,10 @@ clean_kernel()
 
 	if [ x"$dtb_bin" != x"" ]; then
 		rm -f $output_dir/binary/$platform/$dtb_bin
-		rm -f $kernel_dir/arch/arm64/boot/dts/hisilicon/$dtb_bin
 	fi
 
 	sudo rm -rf $output_dir/kernel
-	rm -f $output_dir/binary/arm64/Image
+	rm -f $output_dir/binary/arm64/Image $output_dir/binary/arm64/vmlinux $output_dir/binary/arm64/System.map
 	)
 }
 

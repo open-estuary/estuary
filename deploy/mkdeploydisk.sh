@@ -390,7 +390,7 @@ if [ x"$DISTRO" = x"" ] || !(echo ${distro_list[@]} | grep -w $DISTRO >/dev/null
 	echo "------------------------------------------------------"
 	old_ps3="$PS3"
 	PS3="Input the distro index to install: "
-	select DISTRO in ${distro_list[*]}; do DISTRO=$dis; break; done
+	select dis in ${distro_list[*]}; do DISTRO=$dis; break; done
 	PS3="$old_ps3"
 fi
 

@@ -6,9 +6,9 @@ trap 'exit 0' INT
 set +m
 echo 0 > /proc/sys/kernel/printk
 
-D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off acpi=force"
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
+D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off"
+D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off"
+D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M"
 HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
 
 ###################################################################################
@@ -359,7 +359,7 @@ for ((index=0; index<distro_number; index++)); do
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
-	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rw $cmd_line"
+	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $cmd_line"
 	distro_name=${INSTALL_DISTRO[$index]}
 	
 cat >> /boot/grub.cfg << EOF
@@ -410,7 +410,7 @@ for ((i=1; i<16; i++)); do
 	sleep 1
 done
 
-reboot
+reboot -f
 ) &
 child_pid=$!
 read -n1 c
