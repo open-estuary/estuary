@@ -52,6 +52,21 @@ build_modules()
 		popd
 	fi
 
+	# install kernel devel
+	if [ ! -d "$rootfs/usr/src/kernels/$kernel_version" ]; then
+		sudo mkdir -p $rootfs/usr/src/kernels/$kernel_version
+		pushd kernel
+		sudo cp $kernel_dir/Module.symvers $rootfs/usr/src/kernels/$kernel_version
+		sudo cp -a scripts $rootfs/usr/src/kernels/$kernel_version
+		sudo cp $kernel_dir/.config $rootfs/usr/src/kernels/$kernel_version
+		sudo mkdir -p $rootfs/usr/src/kernels/$kernel_version
+		sudo cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` $rootfs/usr/src/kernels/$kernel_version
+		sudo make PATH=$PATH ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} INSTALL_HDR_PATH=$rootfs/usr/src/kernels/$kernel_version headers_install || return 1
+		sudo rm -f $rootfs/lib/modules/$kernel_version/build $rootfs/lib/modules/$kernel_version/source
+		sudo ln -sf /usr/src/kernels/$kernel_version $rootfs/lib/modules/$kernel_version/build
+		popd
+	fi
+
 	return 0
 	)
 }
