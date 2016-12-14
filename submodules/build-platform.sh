@@ -24,15 +24,15 @@ cat << EOF
 Usage: build-platform.sh [clean] --cross=xxx --platform=xxx,xxx --distros=xxx,xxx --packages=xxx,xxx --output=xxx
 	clean: clean the platform binary files
 	--cross: cross compile prefix (if the host is not arm architecture, it must be specified.)
-	--platform: which platform to build (D02, D03, HiKey)
+	--platform: which platform to build (D03, D05, HiKey)
 	--distros: which distros to install (Ubuntu, CentOS, Fedora, Debian)
 	--packages: packages to build (armor, lamp, docker, mysql, odp)
 	--output: target binary output directory
 
 Example:
-	build-platform.sh --cross=aarch64-linux-gnu- --platform=D02 --distros=Ubuntu --output=workspace
-	build-platform.sh --cross=aarch64-linux-gnu- --platform=D02 --distros=Ubuntu --packages=armor,docker --output=workspace
-	build-platform.sh --cross=aarch64-linux-gnu- --platform=D02,D03,HiKey --distros=Ubuntu --packages=armor,docker --output=workspace
+	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03 --distros=Ubuntu --output=workspace
+	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03 --distros=Ubuntu --packages=armor,docker --output=workspace
+	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03,D05,HiKey --distros=Ubuntu --packages=armor,docker --output=workspace
 
 EOF
 }

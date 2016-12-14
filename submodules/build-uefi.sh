@@ -3,6 +3,10 @@
 UEFI_DIR=uefi
 TOPDIR=$(cd `dirname $0` ; pwd)
 
+D03_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dsc"
+D05_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D05/D05.dsc"
+HiKey_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc"
+
 ###################################################################################
 # build arguments
 ###################################################################################
@@ -23,11 +27,11 @@ build_uefi_usage()
 cat << EOF
 Usage: build-uefi.sh [clean] --platform=xxx --output=xxx
 	clean: clean the uefi binary files
-	--platform: which platform to build (D02, D03, HiKey)
+	--platform: which platform to build (D03, D05, HiKey)
 	--output: target binary output directory
 
 Example:
-	build-uefi.sh --platform=D02 --output=workspace
+	build-uefi.sh --platform=D03 --output=workspace
 	build-uefi.sh --platform=HiKey --output=workspace
 	build-uefi.sh clean --platform=HiKey --output=workspace
 
@@ -79,12 +83,7 @@ build_uefi_for_all()
 
 	local local_arch=`uname -m`
 	if [[ $local_arch = arm* || $local_arch = aarch64 ]]; then
-		if [ x"D02" = x"$platform" ]; then
-			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D02/Pv660D02.dsc"
-		elif [ x"D03" = x"$platform" ]; then
-			hisi_dsc_file="OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dsc"
-		fi
-
+		eval hisi_dsc_file=\$${platform}_dsc_file
 		grep -P "AARCH64_PLATFORM_FLAGS.*-fno-stack-protector" $hisi_dsc_file
 		if [ x"$?" != x"0" ]; then
 			sed -i '/AARCH64_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' $hisi_dsc_file
@@ -92,11 +91,7 @@ build_uefi_for_all()
 	fi
 
 	uefi-tools/uefi-build.sh -c LinaroPkg/platforms.config $target_platform
-	if [ x"D02" = x"$platform" ]; then
-		uefi_bin=`find Build/Pv660D02 -name "*.fd" 2>/dev/null`
-	elif [ x"D03" = x"$platform" ]; then
-		uefi_bin=`find Build/D03 -name "*.fd" 2>/dev/null`
-	fi
+	uefi_bin=`find Build/${platform} -name "*.fd" 2>/dev/null`
 	mkdir -p $output_dir/binary/$platform/
 	cp $uefi_bin $output_dir/binary/$platform/UEFI_${platform}.fd
 
@@ -127,9 +122,9 @@ build_uefi_for_HiKey()
 	git submodule update
 
 	local local_arch=`uname -m`
-	grep -P "PLATFORM_FLAGS.*-fno-stack-protector" OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
+	grep -P "PLATFORM_FLAGS.*-fno-stack-protector" $HiKey_dsc_file
 	if [ x"$?" != x"0" ] && [[ $local_arch == arm* || $local_arch == aarch64 ]]; then
-		sed -i '/_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' OpenPlatformPkg/Platforms/Hisilicon/HiKey/HiKey.dsc
+		sed -i '/_PLATFORM_FLAGS.*$/s//& -fno-stack-protector/g' $HiKey_dsc_file
 	fi
 
 	${UEFI_TOOLS_DIR}/uefi-build.sh -b DEBUG -a arm-trusted-firmware hikey
@@ -175,9 +170,9 @@ build_uefi()
 	fi
 	output_dir=$(cd $output_dir; pwd)
 
-	if [ x"HiKey" = x"$platform" ]; then
-		build_uefi_for_HiKey $platform $output_dir
-	elif [ x"D02" = x"$platform" ] || [ x"D03" = x"$platform" ]; then
+	if declare -F build_uefi_for_${platform} >/dev/null; then
+		build_uefi_for_${platform} $platform $output_dir
+	else
 		build_uefi_for_all $platform $output_dir
 	fi
 }
@@ -221,6 +216,11 @@ do
 
 	shift
 done
+
+###################################################################################
+# Default values
+###################################################################################
+OUTPUT_DIR=${OUTPUT_DIR:-build}
 
 ###################################################################################
 # Check args

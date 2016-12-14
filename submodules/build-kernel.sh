@@ -21,7 +21,6 @@ CLEAN=
 # target files
 ###################################################################################
 HiKey_DTB="hi6220-hikey.dtb"
-D02_DTB="hip05-d02.dtb"
 D03_DTB="hip06-d03.dtb"
 
 ###################################################################################
@@ -32,15 +31,15 @@ build_kernel_usage()
 cat << EOF
 Usage: build-kernel.sh [clean] --platform=xxx --cross=xxx --output=xxx
 	clean: clean the kernel binary files (include dtb)
-	--platform: which platform to build (D02, D03, HiKey, QEMU)
+	--platform: which platform to build (D03, D05, HiKey, QEMU)
 	--cross: cross compile prefix (if the host is not arm architecture, it must be specified.)
 	--output: target binary output directory
 
 Example:
 	build-kernel.sh --platform=HiKey --output=workspace
 	build-kernel.sh --platform=HiKey --output=workspace --cross=aarch64-linux-gnu-
-	build-kernel.sh --platform=D02 --output=workspace
-	build-kernel.sh --platform=D02 --output=workspace --cross=aarch64-linux-gnu-
+	build-kernel.sh --platform=D03 --output=workspace
+	build-kernel.sh --platform=D05 --output=workspace --cross=aarch64-linux-gnu-
 	build-kernel.sh clean --platform=HiKey --output=workspace
 
 EOF

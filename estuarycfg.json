@@ -1,6 +1,5 @@
 {
 "system":[
-{"platform":"D02","install":"yes"},
 {"platform":"D03","install":"yes"},
 {"platform":"D05","install":"no"},
 {"platform":"HiKey","install":"yes"},
