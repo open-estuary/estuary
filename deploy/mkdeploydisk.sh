@@ -258,9 +258,17 @@ download_common_binary() {
 	local common_bin_dir=$1
 	download_file ${common_bin_dir}/Image ./ || return 1
 	download_file ${common_bin_dir}/grubaa64.efi ./ || return 1
-	download_file ${common_bin_dir}/mini-rootfs.cpio.gz ./ || return 1
 	download_file ${common_bin_dir}/deploy-utils.tar.bz2 ./ || return 1
 	return 0
+}
+
+###################################################################################
+# int download_mini_rootfs(string mini_rootfs_dir)
+###################################################################################
+download_mini_rootfs()
+{
+	local mini_rootfs_dir=$1
+	download_file ${mini_rootfs_dir}/mini-rootfs.cpio.gz ./ || return 1
 }
 
 ###################################################################################
@@ -465,6 +473,11 @@ cat << EOF
 - Download binary files from server
 ------------------------------------------------------
 EOF
+
+if ! download_mini_rootfs ${BINDIR}/Minirootfs/Common; then
+	echo "Error!!! Download mini rootfs failed!"; exit 1
+fi
+
 if ! download_common_binary ${BINDIR}/Common; then
 	echo "Error!!! Download common binary failed!"; exit 1
 fi

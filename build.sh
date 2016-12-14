@@ -1,10 +1,10 @@
 #!/bin/bash
 ###################################################################################
 # ./estuary/build.sh --help
-# ./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=build
-# ./estuary/build.sh clean --cfgfile=./estuary/estuarycfg.json --builddir=build
-# ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse
-# ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse --deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
+# ./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=build
+# ./estuary/build.sh clean --file=./estuary/estuarycfg.json --builddir=build
+# ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse
+# ./estuary/build.sh --builddir=./workspace --pkg=armor,docker --platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse --deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
 ###################################################################################
 DEFAULT_ESTUARYCFG="./estuary/estuarycfg.json"
 SUPPORT_PLATFORMS=(`sed -n '/^\"system\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=platform:)(.*?)(?=,)" | sort`)
@@ -107,9 +107,9 @@ Example:
 	./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
 	./estuary/build.sh clean --file=./estuary/estuarycfg.json --builddir=./workspace
 
-	./estuary/build.sh --builddir=./workspace --platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse
+	./estuary/build.sh --builddir=./workspace --platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse
 	./estuary/build.sh --builddir=./workspace \\
-		--platform=D02,D03,HiKey --distro=Ubuntu,OpenSuse --pkg=armor,docker \\
+		--platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse --pkg=armor,docker \\
 		--deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
 		--deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
 

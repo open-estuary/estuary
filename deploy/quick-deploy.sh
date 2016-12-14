@@ -41,11 +41,11 @@ Usage: quick-deploy.sh --target=xxx --boardmac=xxx,xxx --platform=xxx,xxx --dist
 	--binary: target binary directory
 
 Example:
-	quick-deploy.sh --target=usb --platform=D02,D03 --distros=Ubuntu,CentOS --binary=./workspace
-	quick-deploy.sh --target=usb:/dev/sdb --platform=D02 --distros=Ubuntu,CentOS --binary=./workspace
-	quick-deploy.sh --target=iso --platform=D02 --distros=Ubuntu,CentOS --binary=./workspace/binary
-	quick-deploy.sh --target=iso:Estuary_D02.iso --platform=D02 --distros=Ubuntu,CentOS --binary=./workspace
-	quick-deploy.sh --target=pxe --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --platform=D02 --distros=Ubuntu,CentOS --binary=./workspace
+	quick-deploy.sh --target=usb --platform=D03,D05 --distros=Ubuntu,CentOS --binary=./workspace
+	quick-deploy.sh --target=usb:/dev/sdb --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
+	quick-deploy.sh --target=iso --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace/binary
+	quick-deploy.sh --target=iso:Estuary_D03.iso --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
+	quick-deploy.sh --target=pxe --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
 
 EOF
 }

@@ -64,46 +64,6 @@ Copy_Comm_binaries()
 }
 
 ###################################################################################
-# Copy_D02_binaries <src_dir> <target_dir>
-###################################################################################
-Copy_D02_binaries()
-{
-	(
-	src_dir=$1
-	target_dir=$2
-	if [ ! -f $target_dir/CH02TEVBC_V03.bin ]; then
-		cp $src_dir/CH02TEVBC_V03.bin $target_dir/ || return 1
-	fi
-
-	return 0
-	)
-}
-
-###################################################################################
-# Copy_D03_binaries <src_dir> <target_dir>
-###################################################################################
-Copy_D03_binaries()
-{
-	(
-	src_dir=$1
-	target_dir=$2
-	return 0
-	)
-}
-
-###################################################################################
-# Copy_D05_binaries <src_dir> <target_dir>
-###################################################################################
-Copy_D05_binaries()
-{
-        (
-        src_dir=$1
-        target_dir=$2
-        return 0
-        )
-}
-
-###################################################################################
 # Copy_HiKey_binaries <src_dir> <target_dir>
 ###################################################################################
 Copy_HiKey_binaries()
@@ -124,19 +84,6 @@ Copy_HiKey_binaries()
 }
 
 ###################################################################################
-# Copy_QEMU_binaries <src_dir> <target_dir>
-###################################################################################
-Copy_QEMU_binaries()
-{
-	(
-	src_dir=$1
-	target_dir=$2
-	return 0
-	)
-}
-
-
-###################################################################################
 # copy_all_binaries <platforms> <src_dir> <target_dir>
 ###################################################################################
 copy_all_binaries()
@@ -151,7 +98,9 @@ copy_all_binaries()
 
 	for plat in ${platfroms[*]}; do
 		mkdir -p $target_dir/$plat
-		Copy_${plat}_binaries $src_dir $target_dir/$plat || return 1
+		if declare -F Copy_${plat}_binaries >/dev/null; then
+			Copy_${plat}_binaries $src_dir $target_dir/$plat || return 1
+		fi
 	done
 
 	return 0

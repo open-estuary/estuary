@@ -1,7 +1,7 @@
 #!/bin/bash
 ###################################################################################
-# mkusbinstall.sh --target=/dev/sdb --platforms=D02 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
-# mkusbinstall.sh --target=/dev/sdb --platforms=D02,D03 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
+# mkusbinstall.sh --target=/dev/sdb --platforms=D03 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
+# mkusbinstall.sh --target=/dev/sdb --platforms=D03,D05 --distros=Ubuntu,OpenSuse --capacity=50,50 --bindir=./workspace
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
 export PATH=$TOPDIR:$PATH
@@ -20,7 +20,6 @@ DISK_LABEL="Estuary"
 BOOT_PARTITION_SIZE=4
 WORKSPACE=
 
-D02_CMDLINE="rdinit=/init crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 pcie_aspm=off acpi=force"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
 D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
 HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
@@ -37,16 +36,16 @@ cat << EOF
 Usage: mkusbinstall.sh [OPTION]... [--OPTION=VALUE]...
 	-h, --help              display this help and exit
 	--target=xxx            deploy usb device
-	--platforms=xxx,xxx     which platforms to deploy (D02, D03)
+	--platforms=xxx,xxx     which platforms to deploy (D03, D05)
 	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
 	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
 	--bindir=xxx            binary directory
 	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
   
 for example:
-	mkusbinstall.sh --target=/dev/sdb --platforms=D02 --distros=Ubuntu,OpenSuse \\
+	mkusbinstall.sh --target=/dev/sdb --platforms=D03 --distros=Ubuntu,OpenSuse \\
 	--capacity=50,50 --bindir=./workspace
-	mkusbinstall.sh --target=/dev/sdb --platforms=D02,D03 --distros=Ubuntu,OpenSuse \\
+	mkusbinstall.sh --target=/dev/sdb --platforms=D03,D05 --distros=Ubuntu,OpenSuse \\
 	--capacity=50,50 --bindir=./workspace --disklabel=Estuary
 
 EOF
