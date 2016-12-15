@@ -21,7 +21,6 @@ CLEAN=
 # target files
 ###################################################################################
 HiKey_DTB="hi6220-hikey.dtb"
-D03_DTB="hip06-d03.dtb"
 
 ###################################################################################
 # build_kernel_usage
@@ -61,10 +60,7 @@ build_kernel()
 	kernel_bin=$kernel_dir/arch/arm64/boot/Image
 
 	pushd $KERNEL_DIR
-	./scripts/kconfig/merge_config.sh -O $kernel_dir -m arch/arm64/configs/defconfig \
-		arch/arm64/configs/distro.config arch/arm64/configs/estuary_defconfig
-	mv -f $kernel_dir/.config $kernel_dir/.merged.config
-	make O=$kernel_dir KCONFIG_ALLCONFIG=$kernel_dir/.merged.config alldefconfig
+	make O=$kernel_dir estuary_defconfig
 	make O=$kernel_dir -j${core_num} ${kernel_bin##*/}
 
 	# build dtb
