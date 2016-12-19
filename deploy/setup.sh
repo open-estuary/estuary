@@ -6,16 +6,13 @@ trap 'exit 0' INT
 set +m
 echo 0 > /proc/sys/kernel/printk
 
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M"
-HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
+D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
+D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
 
 ###################################################################################
 # Global variable
 ###################################################################################
 INSTALL_TYPE=""
-ACPI="YES"
-ACPI_ARG="acpi=force"
 
 PART_BASE_INDEX=2
 BOOT_PARTITION_SIZE=200
@@ -192,15 +189,6 @@ echo ""
 sleep 1s
 
 ###################################################################################
-# Select ACPI choice
-###################################################################################
-read -t 5 -p "Use ACPI by force? y/n (y by default)" c
-echo ""
-if [ x"$c" = x"n" ]; then
-	ACPI="NO"
-fi
-
-###################################################################################
 # Format target disk
 ###################################################################################
 echo ""
@@ -337,9 +325,6 @@ echo "---------------------------------------------------------------*/"
 
 platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
 eval cmd_line=\$${PLATFORM}_CMDLINE
-if [ x"$ACPI" = x"YES" ]; then
-	cmd_line="${cmd_line} ${ACPI_ARG}"
-fi
 
 boot_dev_info=`blkid -s UUID $BOOT_DEV 2>/dev/null | grep -o "UUID=.*" | sed 's/\"//g'`
 boot_dev_uuid=`expr "${boot_dev_info}" : '[^=]*=\(.*\)'`
@@ -409,12 +394,14 @@ for ((i=1; i<16; i++)); do
 	sleep 1
 done
 
+echo -e "\033[?25h"
 reboot -f
 ) &
 child_pid=$!
 read -n1 c
 kill -s 9 $child_pid 2>/dev/null
 if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
+	echo -e "\033[?25h"
 	reboot
 fi
 
