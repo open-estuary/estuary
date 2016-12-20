@@ -6,8 +6,10 @@ trap 'exit 0' INT
 set +m
 echo 0 > /proc/sys/kernel/printk
 
+D03_VGA_CMDLINE="rdinit=/init console=tty0 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
+D05_VGA_CMDLINE="rdinit=/init console=tty0 pcie_aspm=off crashkernel=256M@32M acpi=force"
+D05_CMDLINE="rdinit=/init pcie_aspm=off crashkernel=256M@32M acpi=force"
 
 ###################################################################################
 # Global variable
@@ -324,7 +326,9 @@ echo "- Update grub configuration file. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 
 platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
-eval cmd_line=\$${PLATFORM}_CMDLINE
+
+eval vga_cmd_line=\$${PLATFORM}_VGA_CMDLINE
+eval console_cmd_line=\$${PLATFORM}_CMDLINE
 
 boot_dev_info=`blkid -s UUID $BOOT_DEV 2>/dev/null | grep -o "UUID=.*" | sed 's/\"//g'`
 boot_dev_uuid=`expr "${boot_dev_info}" : '[^=]*=\(.*\)'`
@@ -343,12 +347,20 @@ for ((index=0; index<distro_number; index++)); do
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
-	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $cmd_line"
+	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $console_cmd_line"
+	linux_vga_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $vga_cmd_line"
 	distro_name=${INSTALL_DISTRO[$index]}
 	
 cat >> /boot/grub.cfg << EOF
-# Booting from SATA with $distro_name rootfs
-menuentry "${PLATFORM} $distro_name" --id ${platform}_${distro_name} {
+# Booting from SATA/SAS with $distro_name rootfs (VGA)
+menuentry "${PLATFORM} $distro_name (VGA)" --id ${platform}_${distro_name}_vga {
+    set root=(hd0,gpt1)
+    search --no-floppy --fs-uuid --set=root $boot_dev_uuid
+    linux $linux_vga_arg
+}
+
+# Booting from SATA/SAS with $distro_name rootfs (Console)
+menuentry "${PLATFORM} $distro_name (Console)" --id ${platform}_${distro_name}_console {
     set root=(hd0,gpt1)
     search --no-floppy --fs-uuid --set=root $boot_dev_uuid
     linux $linux_arg
@@ -359,7 +371,7 @@ EOF
 done
 
 # Set the first distro to default
-default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}"
+default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}""_vga"
 sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub.cfg
 
 echo "Update grub.cfg done!"

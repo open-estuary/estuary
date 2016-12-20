@@ -20,9 +20,10 @@ DISK_LABEL="Estuary"
 BOOT_PARTITION_SIZE=4
 WORKSPACE=
 
+D03_VGA_CMDLINE="rdinit=/init console=tty0 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
-HiKey_CMDLINE="rdinit=/init console=tty0 console=ttyAMA3,115200 rootwait rw loglevel=8 efi=noruntime"
+D05_VGA_CMDLINE="rdinit=/init console=tty0 pcie_aspm=off crashkernel=256M@32M acpi=force"
+D05_CMDLINE="rdinit=/init pcie_aspm=off crashkernel=256M@32M acpi=force"
 
 ###################################################################################
 # Usage
@@ -218,18 +219,24 @@ cat > grub.cfg << EOF
 set timeout=5
 
 # By default, boot the Linux
-set default=${default_plat}_minilinux
+set default=${default_plat}_minilinux_vga
 
 EOF
 
 for plat in ${platforms[*]}; do
-	eval cmd_line=\$${plat}_CMDLINE
+	eval vga_cmd_line=\$${plat}_VGA_CMDLINE
+	eval console_cmd_line=\$${plat}_CMDLINE
 	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
 	cat >> grub.cfg << EOF
-# Booting initrd for $plat
-menuentry "Install $plat estuary" --id ${platform}_minilinux {
-	search --no-floppy --label --set=root $DISK_LABEL
-	linux /$Image $cmd_line
+# Booting initrd for $plat (VGA)
+menuentry "Install $plat estuary (VGA)" --id ${platform}_minilinux_vga {
+	linux /$Image $vga_cmd_line
+	initrd /$Initrd
+}
+
+# Booting initrd for $plat (Console)
+menuentry "Install $plat estuary (Console)" --id ${platform}_minilinux_console {
+	linux /$Image $console_cmd_line
 	initrd /$Initrd
 }
 
