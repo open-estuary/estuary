@@ -3,13 +3,10 @@
    * [Prerequisite](#2.1)
    * [Check the hardware board](#2.2)
    * [Upgrade UEFI and trust firmware](#2.3)
-   * [Upgrade DTB file](#2.4)
-* [Bring up System](#3)
-   * [Boot via ESL](#3.1)
-   * [Boot via PXE](#3.2)
-   * [Boot via NFS](#3.3)
-   * [Boot via DISK(SAS/USB/SATA)](#3.4)
-   * [Boot via ACPI](#3.5)
+* [Bring up System via ACPI mode](#3)
+   * [Boot via PXE(ACPI)](#3.1)
+   * [Boot via NFS(ACPI)](#3.2)
+   * [Boot via DISK(SAS/USB/SATA)(ACPI)](#3.3)
 
 ## <a name="1">Introduction</a>
 
@@ -40,81 +37,11 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
-### <a name="2.4">Upgrade DTB file(Necessary step) </a>
-
-Because this dtb file is important to this D03 boards, firstly you must flash this DTB file into spiflash before any methods of bringing up systerm.
-
- "EFI internal shell" mode and "Embedded Boot Loader(EBL)" mode often used to upgrade DTB file , about how to enter two modes and how to switch between them, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md) "Upgarde UEFI" chapter.
-
-1. IP address config at "EFI Internal Shell" mode (Optional, you can ignore this step if DHCP works well)  
-   Press any key except "enter" key to enter into UEFI main menu. Select "Boot Manager"->"EFI Internal Shell".
-   ```bash
-   # Config board's IP address
-   ifconfig -s eth0 static <IP address> <mask> <gateway>
-   ```
-   e.g. `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
-
-2. Download dtb file from FTP at "Embedded Boot Loader(EBL)" mode  
-   Enter "exit" from "EFI internal shell" to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.
-   ```bash
-   # Download file from FTP server to target board's RAM
-   provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
-   # Write data into FLASH
-   sfcerase <source address> <target address> <data length>
-   sfcwrite <source address> <target address> <data length>
-   ```
-   e.g.
-   ```bash
-   provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x100000
-   sfcerase 0x7C0000 0x10000
-   sfcwrite 0x100000 0x7C0000 0x10000
-   ```
-
-3. Reboot your D03 board  
-   You must reboot your D03 board after above two steps, this new DTB file will be used on booting board.  
-   Note: It is necessary to flash the DTB file to SPI flash to solve a known MAC address duplicate Issue. Also it is to be noted that the DTB file should not be input in the Grub config file. So if you wish to use a modified DTB file, then you should always have it flashed to SPI flash before bootup.
-
 ## <a name="3">Bring up System</a>
 
 There are several methods to bring up system, you can select following anyone fitting you to boot up.
 
-### <a name="3.1">Boot via ESL</a>
-
-In this boot mode, the kernel image, dtb file and rootfs file should be downloaded into RAM at first and then start the system by ESL.  
-After reboot or power off, all downloaded data will be lost.  
-This boot mode is just used for debugging.
-
-Boot D03 to UEFI menu. Select "Boot Manager"->"Eebedded Boot Loader(EBL)" and type the
-follow commands in EBL:
-
-1. Download Image binary file from FTP server to target board's RAM
-   ```bash
-   # Download Image binary file from FTP server to target board's RAM
-   provision <server IP> -u <ftp user name> -p <ftp password> -f <Image binary file> -a <download target address>
-   ```
-    e.g. `provision 192.168.1.107 -u sch -p aaa -f Image -a 0x80000`
-
-2. Download dtb file from FTP server to target board's RAM
-   ```bash
-   # Download dtb file from FTP server to target board's RAM
-   provision <server IP> -u <ftp user name> -p <ftp password> -f <dtb file> -a <download target address>
-   ```
-   e.g. `provision 192.168.1.107 -u sch -p aaa -f hip06-d03.dtb -a 0x06000000`
-
-3. Download rootfs file from FTP server
-   ```bash
-   # Download rootfs file from FTP server to target board's RAM
-   provision <server IP> -u <ftp user name> -p <ftp password> -f <rootfs file> -a <download target address>
-     ```
-   e.g.
-   ```bash
-   provision 192.168.1.107 -u sch -p aaa -f mini-rootfs-arm64.cpio.gz -a 0x07000000
-   ```
-
-4. Start operating system  
-  Type "exit" to exit EBL. Select "Boot Manager"->"ESL Start OS" menu to start operating system.
-
-### <a name="3.2">Boot via PXE</a>
+### <a name="3.1">Boot via PXE</a>
 
 In this boot mode, the UEFI will get grub from PXE server.The grub will get the configuration file from TFTP service configured by PXE server.
 
@@ -129,7 +56,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 
 To config the `grub.cfg` to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
-<h3 id="3.3">Boot via NFS</h3>
+<h3 id="3.2">Boot via NFS</h3>
 
 In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `showmount -e <server ip address>` to list the exported NFS directories on the NFS server.
 
@@ -141,7 +68,7 @@ D03 supports booting via NFS, you can try it as following steps:
 4. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option to enter.  
   **Note**: If you are connecting the D03 board of openlab, please select "EFI Network 2". The value of `<No>` is depended on which D03 GE port is connected.
 
-### <a name="3.4">Boot via DISK(SAS/USB/SATA)</a>
+### <a name="3.3">Boot via DISK(SAS/USB/SATA)</a>
 
 D03 board supports booting via SAS, USB and SATA by default. The UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So `grubaa64.efi`, `grub.cfg`, `Image` and different estuary release distributions are stored on disk.
 
@@ -218,7 +145,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
       menuentry "ubuntu" --id ubuntu {
         search --no-floppy --fs-uuid --set=root <UUID>
-        linux /Image rdinit=/init pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+        linux /Image rdinit=/init acpi=force pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
       }
       ```
       grub.cfg file for official V2.2 and previous versions is modified as follow:
@@ -233,7 +160,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
       menuentry "ubuntu" --id ubuntu {
         search --no-floppy --fs-uuid --set=root <UUID>
-        linux /Image rdinit=/init pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+        linux /Image rdinit=/init acpi=force pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
       }
       ```
       **Note**:  
@@ -248,26 +175,3 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
       *  For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
    d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
 
-### <a name="3.5">Boot via ACPI</a>
-
-D03 also supports booting via ACPI, you can bring up this system which is similar with DTS mode, you must fix some point as follow:
-
-1. Delete DTB file(comment out devicetree `/<user>/hip06-d03.dtb` as follow) and don't burn DTB file
-   ```bash
-   menuentry "D03 Ubuntu NFS" --id d03_ubuntu_nfs {
-     set root=(tftp,192.168.1.107)
-     linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
-     #devicetree /<user>/hip06-d03.dtb
-   }
-   ```
-
-2. Set the parameters of booting via ACPI  
-   you must add `acpi=force` property in `linux` line for "grub.cfg" file. If not, system will booted up with DTS by default. e.g.:
-   ```bash
-   # Booting from NFS with Ubuntu rootfs
-   menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs_acpi {
-       set root=(tftp,192.168.1.107)
-       linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
-   }
-   ```
-NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).

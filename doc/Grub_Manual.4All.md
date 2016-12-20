@@ -25,6 +25,8 @@ You can edit a `grub.cfg` file to support various boot mode or multi boot partit
 
 You should change them acoording to your real local environment.
 
+***Note: D03, D05 only supports booting system via ACPI mode with Centos.***
+
 ```bash
 #
 # Sample GRUB configuration file
@@ -37,21 +39,22 @@ set timeout=5
 set default=d05_centos_nfs_acpi
 
 # Booting from PXE with mini rootfs
-menuentry "D03 minilinux PXE" --id d03_minilinux_pxe {
+menuentry "D05 minilinux PXE(ACPI)" --id d05_minilinux_pxe_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 ip=dhcp
     initrd /mini-rootfs-arm64.cpio.gz
 }
 
-menuentry "D03 Ubuntu NFS" --id d03_ubuntu_nfs {
+# Booting from Centos NFS
+menuentry "D05 Centos NFS(ACPI)" --id d05_centos_nfs_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
+    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/centos ip=dhcp
 }
 
-# Booting from SATA with Ubuntu rootfs in /dev/sda2
-menuentry "D03 Ubuntu SATA" --id d03_ubuntu_sata {
-    set root=(hd1,gpt1)
-    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+# Booting from Centos SATA
+menuentry "D05 Centos SATA(ACPI)" --id d05_centos_sata_acpi{
+    search --no-floppy --fs-uuid --set=root <UUID>
+    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw ip=dhcp
 }
 
 menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe_acpi {
@@ -93,73 +96,6 @@ menuentry 'HiKey Fastboot mode' {
     chainloader (hd0,gpt6)/fastboot.efi
 }
 
-# Booting from PXE with mini rootfs
-menuentry "D02 minilinux PXE" --id d02_minilinux_pxe {
-    set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-    initrd /mini-rootfs.cpio.gz
-}
-
-# Booting from NFS with Ubuntu rootfs
-menuentry "D02 Ubuntu NFS" --id d02_ubuntu_nfs {
-    set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp
-}
-
-# Booting from SATA with Ubuntu rootfs in /dev/sda2
-menuentry "D02 Ubuntu SATA" --id d02_ubuntu_sata {
-    set root=(hd1,gpt1)
-    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-}
-
-# Booting from SATA with Fedora rootfs in /dev/sda3
-menuentry "D02 Fedora SATA" --id d02_fedora_sata {
-    set root=(hd1,gpt1)
-    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda3 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp
-}
-
-# Booting from PXE with mini rootfs
-menuentry "D02 minilinux PXE(ACPI)" --id d02_minilinux_pxe_acpi {
-    set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
-    initrd /mini-rootfs.cpio.gz
-}
-
-# Booting from NFS with Ubuntu rootfs
-menuentry "D02 Ubuntu NFS(ACPI)" --id d02_ubuntu_nfs_acpi {
-    set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
-}
-
-# Booting from SATA with Ubuntu rootfs in /dev/sda2
-menuentry "D02 Ubuntu SATA(ACPI)" --id d02_ubuntu_sata_acpi {
-    set root=(hd1,gpt1)
-    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=uart8250,mmio32,0x80300000 ip=dhcp acpi=force
-}
-
-# Booting from Norflash with mini rootfs
-menuentry "D01 minilinux Norflash" --id d01_minilinux_nor {
-    devicetree (hd0,msdos1)/hip04-d01.dtb
-    linux (hd0,msdos1)/zImage_D01 console=ttyS0,115200 earlyprintk initrd=0x10d00000,0x1800000 rdinit=/linuxrc ip=dhcp
-}
-
-# Booting from SATA with Ubuntu rootfs in /dev/sda4
-menuentry "D01 Ubuntu SATA" --id d01_ubuntu_sata {
-    devicetree (hd0,msdos1)/hip04-d01.dtb
-    linux (hd0,msdos1)/zImage_D01 console=ttyS0,115200 earlyprintk root=/dev/sda4 rootfstype=ext4 rw ip=dhcp
-}
-
-# Booting from SATA with OpenSuse rootfs in /dev/sda5
-menuentry "D01 OpenSuse" --id d01_opensuse_sata {
-    devicetree (hd0,msdos1)/hip04-d01.dtb
-    linux (hd0,msdos1)/zImage_D01 console=ttyS0,115200 earlyprintk root=/dev/sda5 rootfstype=ext4 rw ip=dhcp
-}
-
-# Booting from NFS with Ubuntu rootfs
-menuentry "D01 Ubuntu NFS" --id d01_ubuntu_nfs {
-    devicetree (hd0,msdos1)/hip04-d01.dtb
-    linux (hd0,msdos1)/zImage_D01 console=ttyS0,115200 earlyprintk rootfstype=nfsroot root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu32 ip=dhcp
- }
 ```
 Note: You should only select the parts from above sample which are suitable for your real situation.
 
@@ -167,20 +103,14 @@ Note: You should only select the parts from above sample which are suitable for 
 
 Normally they are placed into bootable partition as following structure.
 ```bash
--------EFI
+sdx-------EFI
 |       |
 |       GRUB2------grubaa64.efi   # grub binary file only for ARM64 architecture
-|           |
-|           |
-|            ------grubarm32.efi  # grub binary file only for ARM32 architecture
 |
 |-------------grub.cfg            # grub config file
 |
 |-------------Image               # kernel Image file only for D02 platform
 
-|-------------zImage_D01          # kernel zImage file only for D01 platform
-|
-|-------------hip04-d01.dtb       # kernel data tree binary file only for D01 platform
 ```
 Note: In case of booting by PXE mode:  
 1. The grub binary and `grub.cfg` files must be placed in the TFTP root directory.  
