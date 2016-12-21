@@ -196,7 +196,7 @@ mv ../setup.sh ./usr/bin/
 sudo chmod 755 ./usr/bin/setup.sh
 
 sudo chown -R root:root *
-find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
+sudo find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
 
 popd >/dev/null
 sudo rm -rf rootfs

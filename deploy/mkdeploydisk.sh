@@ -5,10 +5,13 @@
 ###################################################################################
 TOPDIR=`pwd`
 SUPPORTED_PLATFORM=(D03 D05)
-ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary/releases"
-ESTUARY_FTP_ADDR="ftp://117.78.41.188/releases/"
+ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary"
+ESTUARY_FTP_ADDR="ftp://117.78.41.188"
+
+D03_VGA_CMDLINE="rdinit=/init console=tty0 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
 D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_CMDLINE="rdinit=/init console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 pcie_aspm=off crashkernel=256M@32M acpi=force"
+D05_VGA_CMDLINE="rdinit=/init console=tty0 pcie_aspm=off crashkernel=256M@32M acpi=force"
+D05_CMDLINE="rdinit=/init pcie_aspm=off crashkernel=256M@32M acpi=force"
 
 BOOT_PARTITION_SIZE=4
 DISK_LABEL="Estuary"
@@ -17,7 +20,8 @@ DISK_LABEL="Estuary"
 # Global variables
 ###################################################################################
 TARGET=
-VERSION=2.3
+VERSION=3.0
+RC=
 PLATFORM=D05
 DISTRO=CentOS
 CAPACITY=50
@@ -39,6 +43,7 @@ Usage: mkdeploydisk.sh [OPTION]... [--OPTION=VALUE]...
 	--target=xxx            target usb device which is used to make a bootable install usb disk
                                 If not specified, the first usb storage device will be default
 	--version=xxx           target estuary release version. If not specified, the latest will be default
+	--rc=xxx                target release　candidate version
 	--platform=xxx          target platform to install
 	--distro=xxx            target distro to install
 	--capacity=xxx          target root file system partition size (GB)
@@ -46,7 +51,9 @@ Usage: mkdeploydisk.sh [OPTION]... [--OPTION=VALUE]...
 for example:
 	mkdeploydisk.sh --help
 	mkdeploydisk.sh
-	mkdeploydisk.sh --target=/dev/sdc --platform=D05 --distro=CentOS
+	mkdeploydisk.sh --version=3.0 --target=/dev/sdx --platform=D05 --distro=CentOS
+	mkdeploydisk.sh --version=3.0 --rc=rc0 --target=/dev/sdx --platform=D05 --distro=CentOS
+	mkdeploydisk.sh --target=/dev/sdx --platform=D05 --distro=CentOS
 
 EOF
 }
@@ -136,7 +143,7 @@ get_ftp_dir() {
 # string[] get_http_dir(string http_addr)
 ###################################################################################
 get_http_dir() {
-	local http_addr=$1
+	local http_addr=`echo $1 | sed 's/\/\{2,\}$/\//g'`
 	curl -s $http_addr 2>/dev/null | grep 'class="item dir"' | sed 's/<[^<>]*>//g'
 }
 
@@ -148,6 +155,58 @@ get_all_version()
 	local web_addr=$1
 	local proto_type=`get_proto_type $web_addr`
 	eval get_${proto_type}_dir $web_addr 2>/dev/null
+}
+
+###################################################################################
+# int select_version(string estuary_web_addr, string &_version, string $_rc)
+###################################################################################
+select_version()
+{
+	local version=
+	local rc=
+	local use_releases=
+	local estuary_web_addr=$1
+	local _version=$2
+	local _rc=$3
+	read -t 5 -p "Use releases version? y/N (default y): " c
+	if [ x"$c" = x"" ] || [ x"$c" = x"y" ]; then
+		use_releases=yes
+		estuary_web_addr=${estuary_web_addr}/releases
+	else
+		estuary_web_addr=${estuary_web_addr}/pre-releases
+	fi
+
+	local version_list=(`get_all_version $estuary_web_addr/ | sort -r`)
+	if [ ${#version_list[@]} -eq 0 ]; then
+		echo "Error! Get version from $estuary_web_addr/ failed!"; return 1
+	fi
+
+	echo ""
+	echo "------------------------------------------------------"
+	echo "- released version list"
+	echo "------------------------------------------------------"
+	local old_ps3="$PS3"
+	PS3="Input the version index to install: "
+	select version in ${version_list[*]}; do break; done
+	PS3="$old_ps3"
+
+	if [ x"$use_releases" != x"yes" ]; then
+		local rc_list=(`get_all_version $estuary_web_addr/${version}/ | sort -r`)
+		if [ ${#rc_list[@]} -eq 0 ]; then
+			echo "Error! rc version from $estuary_web_addr/${version}/ failed!"; return 1
+		fi
+		echo "------------------------------------------------------"
+		echo "- rc version list"
+		echo "------------------------------------------------------"
+		PS3="Input the rc index to install: "
+		select rc in ${rc_list[*]}; do break; done
+		PS3="$old_ps3"
+	fi
+
+	eval $_version=$version
+	eval $_rc=$rc
+
+	return 0
 }
 
 ###################################################################################
@@ -309,7 +368,7 @@ create_initrd() {
 	sudo chmod 755 ./usr/bin/setup.sh
 
 	sudo chown -R root:root *
-	find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || return 1
+	sudo find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || return 1
 
 	return 0
 	)
@@ -345,6 +404,7 @@ do
 		--distro) DISTRO=$ac_optarg ;;
 		--capacity) CAPACITY=$ac_optarg ;;
 		--version) VERSION=$ac_optarg ;;
+		--rc) RC=$ac_optarg ;;
 		*) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
 	esac
 
@@ -367,27 +427,35 @@ fi
 ###################################################################################
 # Get/Check version info
 ###################################################################################
-# echo -e "\nGet version info from $ESTUARY_WEB_ADDR. Please wait!"
-version_list=(`get_all_version $ESTUARY_WEB_ADDR | sort -r`)
-if [ ${#version_list[@]} -eq 0 ]; then
-	echo "Get version info from $ESTUARY_WEB_ADDR failed!"; exit 1
-fi
+while true; do
+	if [ x"$VERSION" != x"" ]; then
+		if [ x"$RC" = x"" ]; then
+			if (get_all_version $ESTUARY_WEB_ADDR/releases/ | grep -w $VERSION >/dev/null 2>&1); then
+				break
+			fi
+		elif (get_all_version $ESTUARY_WEB_ADDR/pre-releases/ | grep -w $VERSION >/dev/null 2>&1 \
+			&& get_all_version $ESTUARY_WEB_ADDR/pre-releases/$VERSION | grep -w $RC >/dev/null 2>&1); then
+			break
+		fi
+	fi
 
-if [ x"$VERSION" = x"" ] || !(echo ${version_list[@]} | grep -w $VERSION >/dev/null 2>&1); then
-	echo "------------------------------------------------------"
-	echo "- released version list"
-	echo "------------------------------------------------------"
-	old_ps3="$PS3"
-	PS3="Input the version index to install: "
-	select VERSION in ${version_list[*]}; do break; done
-	PS3="$old_ps3"
-fi
+	if ! select_version $ESTUARY_WEB_ADDR VERSION RC; then
+		echo "Get version from $ESTUARY_WEB_ADDR failed!"; exit 1
+	fi
+
+	break
+done
 
 ###################################################################################
 # Get/Check distro info
 ###################################################################################
-# echo -e "\nGet distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux. Please wait!"
-distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/${VERSION}/linux`)
+distro_list=
+if [ x"$RC" = x"" ]; then
+	distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/releases/${VERSION}/linux`)
+else
+	distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/pre-releases/${VERSION}/${RC}/linux`)
+fi
+
 if [ ${#distro_list[@]} -eq 0 ]; then
 	echo "Get distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux failed!"; exit 1
 fi
@@ -403,9 +471,13 @@ if [ x"$DISTRO" = x"" ] || !(echo ${distro_list[@]} | grep -w $DISTRO >/dev/null
 fi
 
 ###################################################################################
-# Check/Set parameters
+# Set parameters
 ###################################################################################
-BINDIR=${ESTUARY_WEB_ADDR}/${VERSION}/linux
+if [ x"$RC" = x"" ]; then
+	BINDIR=${ESTUARY_WEB_ADDR}/releases/${VERSION}/linux
+else
+	BINDIR=${ESTUARY_WEB_ADDR}/pre-releases/${VERSION}/${RC}/linux
+fi
 
 ###################################################################################
 # check/get USB storage device
@@ -423,7 +495,8 @@ fi
 ###################################################################################
 cat << EOF
 ------------------------------------------------------
-- PLATFROM: $PLATFORM, VERSION: $VERSION, DISTRO: $DISTRO, TARGET: $TARGET
+- PLATFROM: $PLATFORM, VERSION: $VERSION, RC: $RC, DISTRO: $DISTRO, TARGET: $TARGET
+- BINDIR: $BINDIR/
 ------------------------------------------------------
 
 EOF
@@ -491,13 +564,15 @@ fi
 ###################################################################################
 create_grub_header grub.cfg
 platform=(`echo $PLATFORM | tr ',' ' '`)
-default_menuentry="`echo ${platform[0]} | tr "[:upper:]" "[:lower:]"`_menuentry"
+default_menuentry="`echo ${platform[0]} | tr "[:upper:]" "[:lower:]"`_menuentry_vga"
 sed -i "s/\(set default=\)\(.*\)/\1${default_menuentry}/g" grub.cfg
 for plat in ${platform[@]}; do
-	eval cmd_line=\$${plat}_CMDLINE
-	title="Install Estuary $plat"
+	eval vga_cmd_line=\$${plat}_VGA_CMDLINE
+	eval console_cmd_line=\$${plat}_CMDLINE
+	title="Install $plat estuary"
 	menuentry_id="`echo $plat | tr "[:upper:]" "[:lower:]"`_menuentry"
-	create_grub_menuentry grub.cfg "$title" $menuentry_id /Image "$cmd_line" /initrd.gz
+	create_grub_menuentry grub.cfg "$title (VGA)" "${menuentry_id}_vga" /Image "$vga_cmd_line" /initrd.gz
+	create_grub_menuentry grub.cfg "$title (Console)" "${menuentry_id}_console" /Image "$console_cmd_line" /initrd.gz
 done
 
 ###################################################################################
