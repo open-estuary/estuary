@@ -196,7 +196,7 @@ D05 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
     menuentry "D05 Centos SATA(ACPI)" --id d05_centos_sata_acpi {
     search --no-floppy --fs-uuid --set=root <UUID>
-    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw ip=dhcp
+    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw
     }
    ```
 

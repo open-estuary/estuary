@@ -25,7 +25,7 @@ You can edit a `grub.cfg` file to support various boot mode or multi boot partit
 
 You should change them acoording to your real local environment.
 
-***Note: D03, D05 only supports booting system via ACPI mode with Centos.***
+***Note: D05 only supports booting system via ACPI mode with Centos, Debian, Ubuntu.***
 
 ```bash
 #
@@ -41,36 +41,39 @@ set default=d05_centos_nfs_acpi
 # Booting from PXE with mini rootfs
 menuentry "D05 minilinux PXE(ACPI)" --id d05_minilinux_pxe_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 ip=dhcp
+    linux /Image acpi=force pcie_aspm=off rootwait rdinit=/init crashkernel=256M@32M 
     initrd /mini-rootfs-arm64.cpio.gz
 }
 
 # Booting from Centos NFS
 menuentry "D05 Centos NFS(ACPI)" --id d05_centos_nfs_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/centos ip=dhcp
+    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M  root=/dev/nfs rw nfsroot=192.168.1.107:/home/<user>/tftp/rootfs_ubuntu64 ip=dhcp
 }
 
 # Booting from Centos SATA
 menuentry "D05 Centos SATA(ACPI)" --id d05_centos_sata_acpi{
     search --no-floppy --fs-uuid --set=root <UUID>
-    linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw ip=dhcp
+    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M root=PARTUUID=<PARTUUID> rootfstype=ext4 rw
 }
 
+# Booting from PXE with mini rootfs
 menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off rootwait crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8  acpi=force
     initrd /mini-rootfs-arm64.cpio.gz
 }
 
+# Booting from Centos NFS
 menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 ip=dhcp acpi=force
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 acpi=force ip=dhcp
 }
 
+# Booting from Centos SATA
 menuentry "D03 Ubuntu SATA(ACPI)" --id d03_ubuntu_sata_acpi {
-    set root=(hd1,gpt1)
-    linux /Image rdinit=/init pcie_aspm=off root=/dev/sda2 rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp acpi=force
+    search --no-floppy --fs-uuid --set=root <UUID>
+    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait root=PARTUUID=<PARTUUID> rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
 }
 
 # Booting from eMMC with mini rootfs
