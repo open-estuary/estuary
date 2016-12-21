@@ -1,17 +1,17 @@
 {
 "system":[
 {"platform":"D03","install":"yes"},
-{"platform":"D05","install":"no"},
-{"platform":"HiKey","install":"yes"},
+{"platform":"D05","install":"yes"},
+{"platform":"HiKey","install":"no"},
 {"platform":"QEMU","install":"no"}
 ],
 
 "distros":[
 {"name":"Ubuntu","install":"yes","capacity":"50G"},
-{"name":"Debian","install":"no","capacity":"50G"},
+{"name":"Debian","install":"yes","capacity":"50G"},
 {"name":"Fedora","install":"no","capacity":"50G"},
-{"name":"OpenSuse","install":"yes","capacity":"50G"},
-{"name":"CentOS","install":"no","capacity":"50G"},
+{"name":"OpenSuse","install":"no","capacity":"50G"},
+{"name":"CentOS","install":"yes","capacity":"50G"},
 {"name":"Rancher","install":"no","capacity":"50G"}
 ],
 
