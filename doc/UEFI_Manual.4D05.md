@@ -15,23 +15,18 @@ Where to get them, please refer to [Readme.md](https://github.com/open-estuary/e
 
 Note: This is not necessary unless you want to upgrade UEFI really.
 
-* Prepare files about UEFI on local computer
+1. Prepare UEFI_D03.fd on computer which installed FTP service  
+  FTP service is used to download files from the FTP server to hardware boards. Please prepare a computer installed FTP service with local network firstly, so that boards can get needed files frome FTP server with FTP protocol. Then put the UEFI files mentioned above into the root directory of FTP service.  
+2. Connect the board's UART port to a host machine  
+   Please refer to [Deploy_Manual.4D03.md](https://github.com/open-estuary/estuary/blob/master/doc/Deploy_Manual.4D03.md) "Prerequisite" chapter.
 
-  FTP protocol is used for downloading between hardware boards and local network. Aboveall, please make sure you have a working FTP server in local network, so that board can get needed files from network by FTP.
+   If you choose Method 1 Deploy_Manual.4D03.md, use another console window, use `board_reboot` command to reset the board.  
+   If you choose Method 2 Deploy_Manual.4D03.md, press the reset key on the board to reset the board.
 
-  All files mentioned above should be ready firstly, then put them in the root directory of FTP.
+   when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key to enter UEFI main menu.
 
-* Connect the board's UART port to a host machine
 
-  Please refer to [Deploy_Manual.4D05.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Deploy_Manual.4D05.md) "Prerequisite" chapter.
-
-  If you choose Method 1, use another console window, use `board_reboot` command to reset the board.
-
-  If you choose Method 2, press the reset key on the board to reset the board.
-
-  when system showing "Press Any key in 10 seconds to stop automatical booting...", press any key except "enter" key to enter UEFI main menu.
-
-* UEFI menu introduction
+### UEFI menu introduction
 
   UEFI main menu option is showed as follow:
   ```bash
@@ -60,9 +55,9 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
   You can switch between two modes by typing "exit" from one mode to UEFI main menu and then choose the another mode.
 
-* Update UEFI files
+### Update UEFI files
 
-  a. IP address config at "EFI Internal Shell" mode(Optional, you can ignore this step if DHCP works well)
+*  IP address config at "EFI Internal Shell" mode(Optional, you can ignore this step if DHCP works well)
 
   Press any key except "enter" key to enter UEFI main menu. Select "Boot Manager"->"EFI Internal Shell".
 
@@ -72,9 +67,9 @@ Note: This is not necessary unless you want to upgrade UEFI really.
 
   `ifconfig -s eth0 static 192.168.1.4 255.255.255.0 192.168.1.1`
 
-  b. Burn BIOS file at "Embedded Boot Loader(EBL)" mode
+*  Burn BIOS file at "Embedded Boot Loader(EBL)" mode
 
-  Enter "exit" from "EFI Internal Shell" mode to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.
+   Enter "exit" from "EFI Internal Shell" mode to the UEFI main menu and choose "Boot Manager"-> "Embedded Boot Loader(EBL)"after setting the IP address done.
   ```bash
   # Download file from FTP server to board's RAM
   provision <server IP> -u <ftp user name> -p <ftp password> -f <UEFI binary> -a <download target address>
@@ -84,10 +79,12 @@ Note: This is not necessary unless you want to upgrade UEFI really.
   e.g.:
   ```bash
   provision 192.168.1.107 -u sch -p aaa -f UEFI_D05.fd -a 0x100000
+  ```
+  D03 board supports 4 network ports which including 2 GE ports and 2 10GE ports. Please select "Interface 3" when downloading bios file with openlab environment.  
+  ```bash
   spiwfmem 0x100000 0x0000000 0x300000
   ```
-
-  c. Power off and reboot board again.
+* Power off and reboot board again.
 
 <h2 id="3">Recover the UEFI when it broke</h2>
 
