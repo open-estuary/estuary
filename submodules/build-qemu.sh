@@ -92,10 +92,6 @@ fi
 ###################################################################################
 # build and install qemu
 ###################################################################################
-if ! (dpkg-query -l gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev >/dev/null 2>&1); then
-	sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev || exit 1
-fi
-
 mkdir -p $QEMU_DIR 2>/dev/null
 qemu_dir=`cd $QEMU_DIR ; pwd`
 if [ ! -f $qemu_dir/bin/qemu-system-aarch64 ] || ! update_module_check qemu $OUTPUT_DIR; then
