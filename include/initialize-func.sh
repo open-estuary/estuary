@@ -44,16 +44,19 @@ install_dev_tools_ubuntu()
 install_dev_tools_centos_linux()
 {
 	local arch=$1
-	local dev_tools="automake bc ncurses-devel libtool ncurses bison flex libuuid-devel uuid-devel iasl genisoimage openssl-devel bzip2 lshw dosfstools"
+	local dev_tools="automake bc ncurses-devel libtool ncurses bison flex libuuid-devel uuid-devel iasl genisoimage openssl-devel bzip2 lshw dosfstools glib2-devel pixman-devel libfdt-devel"
+
+	if !(which jq >/dev/null 2>&1 || install_jq); then
+		return 1
+	fi
+
 	if yum install -y $dev_tools; then
 		return 0
 	fi
 	
 	if ! (yum makecache && yum install -y $dev_tools); then
-		return 0
+		return 1
 	fi
-
-	which jq || install_jq
 }
 
 ###################################################################################
