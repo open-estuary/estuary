@@ -37,7 +37,7 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
-## <a name="3">Bring up System</a>
+## <a name="3">Bring up System via ACPI mode</a>
 
 There are several methods to bring up system, you can select following anyone fitting you to boot up.
 

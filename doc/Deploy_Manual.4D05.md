@@ -34,7 +34,7 @@ Two methods are provided to **connect the board's UART port to a host machine**:
    b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
    c. Config serial port setting:115200/8/N/1 on host machine.<br>
 
-For more details, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/UEFI_Manual.4D05.md)
+For more details, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D05.md)
 "Upgrade UEFI" chapter.
 
 <h3 id="2.2">Check the hardware board</h3>
@@ -43,7 +43,7 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 <h3 id="2.3">Upgrade UEFI and trust firmware</h3>
 
-You can upgrade UEFI and trust firmware yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/UEFI_Manual.4D05.md).
+You can upgrade UEFI and trust firmware yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D05.md).
 
 <h2 id="3">Bring up System via ACPI mode</h2>
 
@@ -59,10 +59,10 @@ e.g.:
 # Booting from NFS with Centos rootfs
  menuentry "D05 Centos NFS(ACPI)" --id d05_centos_nfs_acpi {
 set root=(tftp,192.168.1.107)
-linux /Image acpi=force pcie_aspm=off rdinit=/init crashkernel=256M@32M console=ttyAMA0,115200 earlycon=pl011,mmio,0x602B0000 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/centos ip=dhcp
+linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/<user>/centos ip=dhcp
 }
 ```
-NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
+NOTE: you can get more information about setting grub.cfg from [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 <h3 id="3.1">Boot via PXE(ACPI)</h3>
 
 In this boot mode, the UEFI will get grub from PXE server.The grub will get the configuration file from TFTP service configured by PXE server.
@@ -83,7 +83,7 @@ In this boot mode, the UEFI will get grub from PXE server.The grub will get the 
 
 4. After several seconds, D05 will boot by PXE automatically.
 
-To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
+To config the grub.cfg to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
 <h3 id="3.2">Boot via NFS(ACPI)</h3>
 
@@ -93,7 +93,7 @@ D05 supports booting via NFS, you can try it as following steps:
 
 1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
-2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/tree/estuary-d05-3.0b/doc/Grub_Manual.4All.md).
+2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
 
    Note: D05 only supports booting via ACPI mode with Centos distribution, so please refer to Grub_Manual.md to get correct configuration.
 

@@ -3,6 +3,7 @@
    * [Deploy system via USB install Disk](#2.1)
    * [Deploy system via DVD/BMC-website](#2.2)
    * [Deploy system via PXE](#2.3)
+* [View serial info via VGA/ipmitool/BMC-website](#3)
 
 ## <a name="1">Introduction</a>
 
@@ -50,8 +51,8 @@ Download ISO file from website:<ftp://117.78.41.188/releases/\<version\>> or <ht
    * Login the website of boards' BMC IP(e.g:https://192.168.2.100) with browser(IE browser is suggested to use), The `username` & `password` is `root` & `Huawei12#$`.
    * Click "Remote" on the top of BMC webiste. Select "Remote Virtual Console (Shared Mode)" to enter into KVM interface. Click "Image File" and choose the iso image, then click "Connect" button.
    * Click "Config" on the top of BMC website, click "Boot Option" to select "DVD-ROM drive", then click "Save" button.
-   * Reboot the board
-   * According to the prompt to deploy the system.
+   * Reboot the board at BMC website
+   * According to the prompt to deploy the system at BMC website
    * Reboot the boards to enter the system you deployed by default.
 
 ### <a name="2.3">Deploy system via PXE</a>
@@ -64,4 +65,18 @@ Download ISO file from website:<ftp://117.78.41.188/releases/\<version\>> or <ht
 5. Reboot the hardware boards and start the boards from the correct EFI Network.
 6. Install the system according to prompt. After install finished, the boards will restart automatically.
 7. Start the boards from "grub" menu of UEFI by default.
+
+### <a name="3">View serial info via VGA/ipmitool/BMC-website</a>
+
+**View serial info via VGA**  
+  * Connect board's vga port to your local pc and connect a keyboard to the board's usb interface.
+  * Connect usb install disk to your board and deploy the system 
+  * Reboot the system and you can see the serial info via VGA
+
+**View serial info via ipmitool**  
+  * Install ipmitool on your local pc by "sudo apt-get install ipmitool"
+  * Use command `ipmitool -H <board's bmc ip> -I lanplus -U root -P Huawei12#$ sol activate` to see the booting log
+
+**View serial info via BMC-website**  
+  * When you load iso from BMC website, you can the the process of booting via BMC website directly
 
