@@ -19,9 +19,9 @@ install_dev_tools_ubuntu()
 {
 	local arch=$1
 	if [ x"$arch" = x"x86_64" ]; then
-		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage libssl-dev"
+		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage libssl-dev gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev"
 	else
-		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage libssl-dev gcc-arm-linux-gnueabihf"
+		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage libssl-dev gcc-arm-linux-gnueabihf gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev"
 	fi
 
 	if ! (automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null); then
