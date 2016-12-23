@@ -410,12 +410,14 @@ for ((i=1; i<16; i++)); do
 	sleep 1
 done
 
+echo -e "\033[?25h"
 reboot -f
 ) &
 child_pid=$!
 read -n1 c
 kill -s 9 $child_pid 2>/dev/null
 if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
+	echo -e "\033[?25h"
 	reboot
 fi
 

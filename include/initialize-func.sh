@@ -19,9 +19,9 @@ install_dev_tools_ubuntu()
 {
 	local arch=$1
 	if [ x"$arch" = x"x86_64" ]; then
-		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage libssl-dev"
+		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage libssl-dev gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev"
 	else
-		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage libssl-dev gcc-arm-linux-gnueabihf"
+		local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage libssl-dev gcc-arm-linux-gnueabihf gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev"
 	fi
 
 	if ! (automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null); then
@@ -44,16 +44,19 @@ install_dev_tools_ubuntu()
 install_dev_tools_centos_linux()
 {
 	local arch=$1
-	local dev_tools="automake bc ncurses-devel libtool ncurses bison flex libuuid-devel uuid-devel iasl genisoimage openssl-devel bzip2 lshw dosfstools"
-	if yum install -y $dev_tools; then
-		return 0
-	fi
-	
-	if ! (yum makecache && yum install -y $dev_tools); then
-		return 0
+	local dev_tools="automake bc ncurses-devel libtool ncurses bison flex libuuid-devel uuid-devel iasl genisoimage openssl-devel bzip2 lshw dosfstools glib2-devel pixman-devel libfdt-devel"
+
+	if ! yum install -y $dev_tools; then
+		if ! (yum makecache && yum install -y $dev_tools); then
+			return 1
+		fi
 	fi
 
-	which jq || install_jq
+	if !(which jq >/dev/null 2>&1 || install_jq); then
+		return 1
+	fi
+
+	return 0
 }
 
 ###################################################################################

@@ -92,16 +92,18 @@ fi
 ###################################################################################
 # build and install qemu
 ###################################################################################
-if ! (dpkg-query -l gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev >/dev/null 2>&1); then
-	sudo apt-get install -y gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev || exit 1
-fi
-
 mkdir -p $QEMU_DIR 2>/dev/null
 qemu_dir=`cd $QEMU_DIR ; pwd`
 if [ ! -f $qemu_dir/bin/qemu-system-aarch64 ] || ! update_module_check qemu $OUTPUT_DIR; then
 	pushd qemu/ >/dev/null
 	[ -d $qemu_dir ] && rm -rf $qemu_dir
-	if ! (./configure --prefix=$qemu_dir --target-list=aarch64-softmmu && make -j${CORE_NUM} && make install); then
+	if [ "`uname -m`" = "aarch64" ]; then
+		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu --enable-kvm || exit 1
+	else
+		./configure --prefix=$qemu_dir --target-list=aarch64-softmmu || exit 1
+	fi
+
+	if ! (make -j${CORE_NUM} && make install); then
 		exit 1
 	fi
 	popd >/dev/null
@@ -168,6 +170,7 @@ ROOTFS=$DISTRO_DIR/${distro}_ARM64.img
 # start and run qemu
 ###################################################################################
 qemu-system-aarch64 -machine virt -cpu cortex-a57 \
+	-m 2048 \
 	-kernel $KERNEL_BIN \
 	-drive if=none,file=$ROOTFS,id=fs \
 	-device virtio-blk-device,drive=fs \
