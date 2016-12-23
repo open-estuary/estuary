@@ -117,7 +117,8 @@ D05 board supports booting via SAS, USB and SATA by default. The UEFI will direc
    sudo mkfs.vfat /dev/sda1
    sudo mkfs.ext4 /dev/sda2
    ```
-   Part hardware disk with `"sudo fdisk /dev/sda"` as follow:<br>
+   *For the disk capacity is less than 2T*, part hardware disk with `sudo fdisk /dev/sda` as follow:  
+ 
    add a gpt to this disk :
 
    `fdisk /dev/sda`
@@ -140,6 +141,28 @@ D05 board supports booting via SAS, USB and SATA by default. The UEFI will direc
 
    add some another partition  `...`<br>
    save the change           : `w`<br>
+
+   *For the disk capacity is more than 2T*, part hardware disk with `sudo parted /dev/sda` as follow:  
+   add a gpt to this disk:
+
+   (parted):--------`mklabel`  
+   New disk label type:-------`gpt`  
+
+   add EFI partition:  
+
+   (parted):------------`mkpart`  
+   Partition name?------`p1`  
+   File system type?----`ext2`  
+   Start?----------------`1G`  
+   End?------------------`2G`  
+
+   add some another partition `mkpart`  
+   `...`  
+
+   remove the partition by `rm <NO>`  
+   check out how many partitions by `p`  
+   exit the partition by `q`  
+ 
    format EFI partition  : `sudo mkfs.vfat /dev/sda1`<br>
    format ext4 partition : `sudo mkfs.ext4 /dev/sda2`<br>
 
