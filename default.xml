@@ -10,9 +10,6 @@
   <remote  name="grub"
            fetch="git://git.savannah.gnu.org/" />
 
-  <remote  name="boot-wrapper"
-           fetch="https://github.com/virtualopensystems/" />
-
   <default revision="master"
            remote="open-estuary"
            sync-j="4" />
@@ -35,9 +32,6 @@
   <!-- grub -->
   <!-- project name="grub" remote="grub" / -->
   <project name="grub" revision="refs/tags/v3.0-rc0-pretest1" />
-
-  <!-- bootwrapper -->
-  <project name="bootwrapper" revision="refs/tags/v3.0-rc0-pretest1" />
 
   <!-- caliper -->
   <project name="caliper" revision="refs/tags/v3.0-rc0-pretest1" />
