@@ -78,7 +78,7 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
    sudo mkfs.vfat /dev/sda1
    sudo mkfs.ext4 /dev/sda2
    ```
-   Part hardware disk with `sudo fdisk /dev/sda` as follow:  
+   **For the disk capacity is less than 2T**, part hardware disk with `sudo fdisk /dev/sda` as follow, EFI partition is set to 200M, distribution partition is set to 100G by default.  
    add a gpt to this disk:
    ```bash
    fdisk /dev/sda
@@ -93,24 +93,62 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
    `+200M`---------Last sector, size of partition  
    `t`-------change the type of partition to EFI system
 
+   add the second partition for distribution `mkpart`  
+
+   `n`-------add a partition  
+   `2`-------the number of partition
+
+   type "Enter" key ------ First sector  
+   `+100G`---------Last sector, size of partition  
+
    add some another partition `...`  
    save the change: `w`  
-   format EFI partition: `sudo mkfs.vfat /dev/sda1`  
-   format ext4 partition: `sudo mkfs.ext4 /dev/sda2`  
+
+   **For the disk capacity is more than 2T**, part hardware disk with `sudo parted /dev/sda` as follow , EFI partition is set to 200M, distribution partition is set to 100G by default.  
+   add a gpt to this disk:
+
+   (parted):--------`mklabel`  
+   New disk label type:-------`gpt`  
+
+   add EFI partition:  
+
+   (parted):------------`mkpart`  
+   Partition name?------`p1`  
+   File system type?----`fat32`  
+   Start?----------------`1`  
+   End?------------------`201`  
+
+   add the second partition for distribution `mkpart`  
+
+   (parted):------------`mkpart`  
+   Partition name?------`p2`  
+   File system type?----`ext4`  
+   Start?----------------`202`  
+   End?------------------`100000`  
+
+   add other partition for distribution `mkpart`  
+   `...`  
+
+   remove the partition by `rm <NO>`  
+   check out how many partitions by `p`  
+   exit the partition by `q`  
+
+   check the partitions with details by `parted -s /dev/sda print`
+
+   **format EFI partition:** `sudo mkfs.vfat /dev/sda1`  
+   **format ext4 partition:** `sudo mkfs.ext4 /dev/sda2`  
    ```
-   +---------+-----------+--------------+------------------+
-   | Name    |   Size    |    Type      |   USB/SAS/SATA   |
-   +---------+-----------+--------------+------------------+
-   | sda1    |   200M    |  EFI system  |   EFI            |
-   +---------+-----------+--------------+------------------+
-   | sda2    |   10G     |    ext4      | linux filesystem |
-   +---------+-----------+--------------+------------------+
-   | sda3    |   10G     |    ext4      | linux filesystem |
-   +---------+-----------+--------------+------------------+
-   | sda4    |   10G     |    ext4      | linux filesystem |
-   +---------+-----------+--------------+------------------+
-   | sda5    |rest space |    ext4      | linux swap       |
-   +---------+-----------+--------------+------------------+
+   +---------+------------+--------------+------------------+
+   | Name    |   Size     |    Type      |   USB/SAS/SATA   |
+   +---------+------------+--------------+------------------+
+   | sda1    |   200M     |  EFI system  |   EFI            |
+   +---------+------------+--------------+------------------+
+   | sda2    |   100G     |    ext4      | linux filesystem |
+   +---------+------------+--------------+------------------+
+   | sda3    |   100G     |    ext4      | linux filesystem |
+   +---------+------------+--------------+------------------+
+   | sda4    |   100G     |    ext4      | linux filesystem |
+   +---------+------------+--------------+------------------+
    ```
    Note: EFI partition must be a fat filesystem, so you should format sda1 with `sudo mkfs.vfat /dev/sda1`.
 2. Download files and store them into hardware disk as below.  
