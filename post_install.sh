@@ -62,9 +62,10 @@ echo function_graph > /sys/kernel/debug/tracing/current_tracer
 
 # Workaround for the tools modules which are not getting installed on rootfs automatically.
 depmod -a
+modprobe lttng-clock
+modprobe lttng-kprobes
 modprobe lttng-probe-kvm
 modprobe lttng-probe-sock
-modprobe lttng-probe-asoc
 modprobe lttng-ring-buffer-metadata-client
 modprobe lttng-probe-printk
 modprobe lttng-probe-napi
@@ -82,10 +83,10 @@ modprobe lttng-probe-signal
 modprobe lttng-probe-module
 modprobe lttng-ring-buffer-client-discard
 modprobe lttng-probe-timer
-modprobe lttng-types
 modprobe lttng-probe-net
 modprobe lttng-probe-writeback
 modprobe lttng-probe-gpio
+modprobe lttng-probe-i2c
 modprobe lttng-probe-udp
 modprobe lttng-ring-buffer-metadata-mmap-client
 modprobe lttng-lib-ring-buffer
@@ -105,4 +106,3 @@ modprobe lttng-probe-regulator
 modprobe lttng-probe-random
 modprobe lttng-probe-workqueue
 modprobe lttng-probe-irq
-
