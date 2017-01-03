@@ -230,12 +230,14 @@ for plat in ${platforms[*]}; do
 	cat >> grub.cfg << EOF
 # Booting initrd for $plat (VGA)
 menuentry "Install $plat estuary (VGA)" --id ${platform}_minilinux_vga {
+	search --no-floppy --label --set=root $DISK_LABEL
 	linux /$Image $vga_cmd_line
 	initrd /$Initrd
 }
 
 # Booting initrd for $plat (Console)
 menuentry "Install $plat estuary (Console)" --id ${platform}_minilinux_console {
+	search --no-floppy --label --set=root $DISK_LABEL
 	linux /$Image $console_cmd_line
 	initrd /$Initrd
 }
