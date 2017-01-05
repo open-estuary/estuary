@@ -18,9 +18,9 @@ Fedora_rc="etc/rc.d/rc.local"
 Default_rc="etc/rc.local"
 
 ###################################################################################
-# build_pcakages_usage
+# build_packages_usage
 ###################################################################################
-build_pcakages_usage()
+build_packages_usage()
 {
 cat << EOF
 Usage: build-packages.sh --platform=xxx --packages=xxx,xxx --distro=xxx --rootfs=xxx --kernel=xxx
@@ -160,7 +160,7 @@ do
                 --rootfs) ROOTFS=$ac_optarg ;;
                 --kernel) KERNEL=$ac_optarg ;;
                 *) echo -e "\033[31mUnknown option $ac_option!\033[0m"
-			build_pcakages_usage ; exit 1 ;;
+			build_packages_usage ; exit 1 ;;
         esac
 
         shift
@@ -175,7 +175,7 @@ fi
 
 if [ x"$OUTPUT_DIR" = x"" ] || [ x"$DISTRO" = x"" ] || [ x"$ROOTFS" = x"" ] || [ x"$KERNEL" = x"" ]; then
 		echo "Error! output: $OUTPUT_DIR, distro: $DISTRO, rootfs: $ROOTFS, kernel: $KERNEL"
-        build_pcakages_usage ; exit 1
+        build_packages_usage ; exit 1
 fi
 
 if [ ! -d $ROOTFS ] || [ ! -d $KERNEL ]; then
