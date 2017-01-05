@@ -58,7 +58,7 @@ do
 	fi
 done
 #enable function_graph as default tracer
-echo function_graph > /sys/kernel/debug/tracing/current_tracer
+#echo function_graph > /sys/kernel/debug/tracing/current_tracer
 
 # Workaround for the tools modules which are not getting installed on rootfs automatically.
 depmod -a
