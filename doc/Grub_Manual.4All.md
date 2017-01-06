@@ -67,13 +67,32 @@ menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe_acpi {
 # Booting from Centos NFS
 menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs_acpi {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/user/rootfs_ubuntu64 acpi=force ip=dhcp
+    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/<user>/rootfs_ubuntu64 acpi=force ip=dhcp
 }
 
 # Booting from Centos SATA
 menuentry "D03 Ubuntu SATA(ACPI)" --id d03_ubuntu_sata_acpi {
     search --no-floppy --fs-uuid --set=root <UUID>
     linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait root=PARTUUID=<PARTUUID> rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
+}
+
+# Booting from PXE with mini rootfs
+menuentry "minilinux_overdrive" --id minilinux_overdrive {
+    set root=(tftp,192.168.1.107)
+    linux /Image  plymouth.enable=0 console=ttyAMA0,115200n8 raid=noautodetect
+    initrd /mini-rootfs-arm64.cpio.gz
+}
+
+# Booting from Centos NFS
+menuentry "Centos Overdrive NFS" --id ubuntu_overdrive_nfs {
+    set root=(tftp,192.168.1.107)
+    linux /Image rdinit=/init raid=noautodetect plymouth.enable=0 console=ttyAMA0,115200n8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/<user>/Centos,nfsvers=3 ip=dhcp
+}
+
+# Booting from Centos SATA
+menuentry "Centos Overdrive SATA" --id centos_overdrive_sata {
+    search --no-floppy --fs-uuid --set=root <UUID>
+    linux /Image root=PARTUUID=<PARTUUID> rootfstype=ext4 rw  rdinit=/init raid=noautodetect plymouth.enable=0 console=ttyAMA0,115200n8
 }
 
 # Booting from eMMC with mini rootfs
