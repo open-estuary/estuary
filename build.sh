@@ -132,11 +132,11 @@ do
                 -h | --help) Usage ; exit 0 ;;
                 -i) INSTALL=$ac_optarg ;;
                 -v | --version) print_version ./estuary ; exit 0 ;;
-                -f | --file) CFG_FILE=$ac_optarg ;;
+                -f | --file) eval CFG_FILE=$ac_optarg ;;
                 -p | --platform) PLATFORMS=$ac_optarg ;;
                 -d | --distro) DISTROS=$ac_optarg ;;
                 --pkg) PACKAGES=$ac_optarg ;;
-                --builddir) BUILD_DIR=$ac_optarg ;;
+                --builddir) eval BUILD_DIR=$ac_optarg ;;
                 --deploy) DEPLOY[${#DEPLOY[@]}]=$ac_optarg ;;
                 --capacity) CAPACITY=$ac_optarg ;;
                 --mac) BOARDS_MAC=$ac_optarg ;;

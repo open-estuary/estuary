@@ -223,8 +223,8 @@ set default=${default_plat}_minilinux_vga
 EOF
 
 for plat in ${platforms[*]}; do
-	eval vga_cmd_line=\$${plat}_VGA_CMDLINE
-	eval console_cmd_line=\$${plat}_CMDLINE
+	vga_cmd_line="$(eval echo \$${plat}_VGA_CMDLINE) root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp"
+	console_cmd_line="$(eval echo \$${plat}_CMDLINE) root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp"
 	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
 	cat >> grub.cfg << EOF
 # Booting initrd for $plat (VGA)

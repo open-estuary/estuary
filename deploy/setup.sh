@@ -23,6 +23,7 @@ NFS_ROOT=""
 
 INSTALL_DISK="/dev/sdx"
 TARGET_DISK=
+PART_PREFIX=
 BOOT_DEV=
 
 ESTUARY_CFG="/scratch/estuary.txt"
@@ -205,7 +206,7 @@ echo ""
 # make gpt label and create EFI System partition
 ###################################################################################
 echo "/*---------------------------------------------------------------"
-echo "- Create and install kernel into EFI partition on ${TARGET_DISK}1. Please wait for a moment!"
+echo "- Create and install kernel into EFI partition on ${TARGET_DISK} part1. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 (parted -s $TARGET_DISK mklabel gpt) >/dev/null 2>&1
 
@@ -214,16 +215,20 @@ echo "Creating and formatting ${TARGET_DISK}1."
 efi_start_address=1
 efi_end_address=$(( start_address + BOOT_PARTITION_SIZE))
 
-BOOT_DEV=${TARGET_DISK}1
+BOOT_DEV=
 (parted -s $TARGET_DISK "mkpart UEFI $efi_start_address $efi_end_address") >/dev/null 2>&1
 (parted -s $TARGET_DISK set 1 boot on) >/dev/null 2>&1
+first_part=`lsblk ${TARGET_DISK} -ln -o NAME,TYPE | grep -m 1 part | awk '{print $1}'`
+PART_PREFIX=`echo "/dev/$first_part" | sed 's/[0-9]*$//g' | sed "s,^${TARGET_DISK},,g"`
+BOOT_DEV="${TARGET_DISK}${PART_PREFIX}1"
 (yes | mkfs.vfat $BOOT_DEV) >/dev/null 2>&1
-echo "Create and format ${TARGET_DISK}1 done."
+
+echo "Create and format ${TARGET_DISK} part1 done."
 
 ###################################################################################
 # Install grub and kernel to EFI System partition
 ###################################################################################
-echo "Installing grub and kernel to ${TARGET_DISK}1."
+echo "Installing grub and kernel to ${TARGET_DISK}${PART_PREFIX}1."
 pushd /scratch >/dev/null
 
 mount $BOOT_DEV /boot/ >/dev/null 2>&1
@@ -256,7 +261,7 @@ EOF
 popd >/dev/null
 sync
 umount /boot/
-echo "Install grub and kernel to ${TARGET_DISK}1 done!"
+echo "Install grub and kernel to ${TARGET_DISK}${PART_PREFIX}1 done!"
 echo ""
 
 ###################################################################################
@@ -286,15 +291,15 @@ do
 	allocate_address=$end_address
 	
 	# Create and fromat partition for current distro.
-	echo "Creating and formatting ${TARGET_DISK}${part_index} for $distro_name."
+	echo "Creating and formatting ${TARGET_DISK}${PART_PREFIX}${part_index} for $distro_name."
 	(parted -s $TARGET_DISK "mkpart ROOT ext4 $start_address $end_address") >/dev/null 2>&1
 	(echo -e "t\n$part_index\n13\nw\n" | fdisk $TARGET_DISK) >/dev/null 2>&1
-	(yes | mkfs.ext4 ${TARGET_DISK}${part_index}) >/dev/null 2>&1
+	(yes | mkfs.ext4 ${TARGET_DISK}${PART_PREFIX}${part_index}) >/dev/null 2>&1
 	echo "Create and format ${TARGET_DISK}${part_index} for $distro_name."
 	
-	echo "Installing $rootfs_package into ${TARGET_DISK}${part_index}. Please wait patiently!"
+	echo "Installing $rootfs_package into ${TARGET_DISK}${PART_PREFIX}${part_index}. Please wait patiently!"
 	# Mount root dev to mnt and uncompress rootfs to root dev
-	if ! mount ${TARGET_DISK}${part_index} /mnt/ 2>/dev/null; then
+	if ! mount ${TARGET_DISK}${PART_PREFIX}${part_index} /mnt/ 2>/dev/null; then
 		echo "Error!!! Unable mount ${TARGET_DISK}${part_index} to /mnt!" >&2 ; exit 1
 	fi
 	
@@ -304,7 +309,7 @@ do
 		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; echo -e "\033[?25h"; exit 1
 	fi
 	echo -e "\033[?25h"
-	echo "Install $rootfs_package into ${TARGET_DISK}${part_index} done."
+	echo "Install $rootfs_package into ${TARGET_DISK}${PART_PREFIX}${part_index} done."
 
 	echo "Flush data to disk. Please wait a moment!"
 	sync
@@ -343,7 +348,7 @@ echo "Updating grub.cfg."
 distro_number=${#INSTALL_DISTRO[@]}
 for ((index=0; index<distro_number; index++)); do
 	part_index=$((PART_BASE_INDEX + index))
-	root_dev="${TARGET_DISK}${part_index}"
+	root_dev="${TARGET_DISK}${PART_PREFIX}${part_index}"
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
