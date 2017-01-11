@@ -218,10 +218,10 @@ efi_end_address=$(( start_address + BOOT_PARTITION_SIZE))
 BOOT_DEV=
 (parted -s $TARGET_DISK "mkpart UEFI $efi_start_address $efi_end_address") >/dev/null 2>&1
 (parted -s $TARGET_DISK set 1 boot on) >/dev/null 2>&1
-(yes | mkfs.vfat $BOOT_DEV) >/dev/null 2>&1
 first_part=`lsblk ${TARGET_DISK} -ln -o NAME,TYPE | grep -m 1 part | awk '{print $1}'`
 PART_PREFIX=`echo "/dev/$first_part" | sed 's/[0-9]*$//g' | sed "s,^${TARGET_DISK},,g"`
 BOOT_DEV="${TARGET_DISK}${PART_PREFIX}1"
+(yes | mkfs.vfat $BOOT_DEV) >/dev/null 2>&1
 
 echo "Create and format ${TARGET_DISK} part1 done."
 
