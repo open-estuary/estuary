@@ -15,6 +15,7 @@ KERNEL=
 lastupdate="2015-10-15"
 OpenSuse_rc="etc/rc.d/after.local"
 Fedora_rc="etc/rc.d/rc.local"
+CentOS_rc="etc/rc.d/rc.local"
 Default_rc="etc/rc.local"
 
 ###################################################################################
@@ -80,9 +81,9 @@ EOF
 
 	if ! grep "/usr/bin/estuary/post_install.sh" $distro_dir/$rc_local_file >/dev/null; then
 		if grep -E "^(exit)" $distro_dir/$rc_local_file >/dev/null; then
-			sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh" $distro_dir/$rc_local_file
+			sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh &" $distro_dir/$rc_local_file
 		else
-			sudo sed -i '$ a /usr/bin/estuary/post_install.sh' $distro_dir/$rc_local_file
+			sudo sed -i '$ a /usr/bin/estuary/post_install.sh &' $distro_dir/$rc_local_file
 		fi
 	fi
 
