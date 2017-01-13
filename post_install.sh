@@ -5,6 +5,27 @@
 
 lastupdate="2015-10-15"
 post_dir="/usr/bin/estuary/postinstall"
+install_log_dir="/usr/bin/estuary/.log"
+install_one_dir="${install_log_dir}/one"
+install_always_dir="${install_log_dir}/always/"
+
+##################################################################################
+# 
+#  Package Installation(setup.sh) Return Code
+#  1) INSTALL_SUCCESS: It means that this package have been installed successfully,
+#              and wouldn't be installed during next boot stage 
+#
+#  2) INSTALL_FAILURE: It means that this package couldn't be installed at this time,
+#                      but it will be installed later (or during next boot stage)
+#
+#  3) INSTALL_ALWAYS: It means that this package has been installed successfully
+#              during this instllation stage, but they will also be re-installed 
+#              at next boot stage
+#              (such as loading modules during every boot stage)
+#
+INSTALL_SUCCESS=0
+INSTALL_FAILURE=1
+INSTALL_ALWAYS=2
 
 ###################################################################################
 ############################# Check initilization status ##########################
@@ -15,94 +36,75 @@ check_init()
     tmpdate=$2
 
     if [ -f "$tmpfile" ]; then
-	    inittime=`stat -c %Y $tmpfile`
-	    checktime=`date +%s -d $tmpdate`
+        inittime=`stat -c %Y $tmpfile`
+        checktime=`date +%s -d $tmpdate`
 
-	    if [ $inittime -gt $checktime ]; then
-	          return 1
-	    fi
-	fi
+        if [ $inittime -gt $checktime ]; then
+              return 1
+        fi
+    fi
 
-	return 0
+    return 0
 }
 
-netstatus=${post_dir}/.network
-if [ ! -f ${netstatus} ]; then
-	netrst=`ping www.baidu.com -c 4`
-	rcv=`echo "$netrst" | grep -E "..received" -o`
-	if [ x"0" != x"$?" ]; then
-		exit 1
-	fi
-	rcv=`echo "$rcv" | cut -d " " -f1`
-	if [ x"0" = x"$rcv" ]; then
-		exit 1
-	fi
+###################################################################################
+############################# Install Packages           ##########################
+###################################################################################
+install_packages() {
+    one_log_dir=${1}
+    always_log_dir=${2}
+    all_successful=0
+    
+    for fullfile in $post_dir/*
+    do
+        file=${fullfile##*/}
+        if [ -f $fullfile ]; then
+            check_init "${one_log_dir}/$file" $lastupdate
+            ret1="$?"
+            check_init "${always_log_dir}/$file" $lastupdate
+            ret2="$?"
+                
+            if [ x"1" != x"${ret1}" ] && [ x"1" != x"${ret2}" ] ; then
+                #Call script to install package
+                $fullfile
+                retcode="$?"
+                if [ x"${INSTALL_SUCCESS}" = x"${retcode}" ]; then
+                    touch "${one_log_dir}/$file"
+                elif [ x"${INSTALL_ALWAYS}" = x"${retcode}" ]; then
+                    touch "${always_log_dir}/$file"
+                else 
+                    all_successful=255
+                fi
+            fi
+        fi
+    done
+    return ${all_successful}
+}
+
+if [ ! -d "${install_one_dir}" ] ; then
+    mkdir -p "${install_one_dir}"
+fi
+if [ ! -d "${install_always_dir}" ] ; then 
+    mkdir -p "${install_always_dir}"
 fi
 
-# preprocess...
-if [ ! -f $netstatus ]; then
-	echo "$netrst" > $netstatus
-fi
+#Clear "always logs" during every boot stage
+rm -fr ${install_always_dir}/*
 
-for fullfile in $post_dir/*
+#Now begin to install packages
+cur_retry_num=0
+max_retry_num=24
+retry_sleep_interval=300
+
+while [[ ${cur_retry_num} -lt ${max_retry_num} ]]
 do
-	file=${fullfile##*/}
-	if [ -f $fullfile ]; then
-		check_init "$post_dir/.$file" $lastupdate
-		if [ x"0" = x"$?" ]; then
-			$fullfile
-			if [ x"0" = x"$?" ]; then
-				touch "$post_dir/.$file"
-			fi
-		fi
-	fi
-done
-#enable function_graph as default tracer
-#echo function_graph > /sys/kernel/debug/tracing/current_tracer
+    install_packages ${install_one_dir} ${install_always_dir}
+    if [ x"0" == x"$?" ] ; then
+        break
+    fi
 
-# Workaround for the tools modules which are not getting installed on rootfs automatically.
-depmod -a
-modprobe lttng-clock
-modprobe lttng-kprobes
-modprobe lttng-probe-kvm
-modprobe lttng-probe-sock
-modprobe lttng-ring-buffer-metadata-client
-modprobe lttng-probe-printk
-modprobe lttng-probe-napi
-modprobe lttng-probe-v4l2
-modprobe lttng-statedump
-modprobe lttng-probe-btrfs
-modprobe lttng-ring-buffer-client-mmap-discard
-modprobe lttng-probe-kmem
-modprobe lttng-probe-compaction
-modprobe lttng-ring-buffer-client-overwrite
-modprobe lttng-ring-buffer-client-mmap-overwrite
-modprobe lttng-probe-sunrpc
-modprobe lttng-ftrace
-modprobe lttng-probe-signal
-modprobe lttng-probe-module
-modprobe lttng-ring-buffer-client-discard
-modprobe lttng-probe-timer
-modprobe lttng-probe-net
-modprobe lttng-probe-writeback
-modprobe lttng-probe-gpio
-modprobe lttng-probe-i2c
-modprobe lttng-probe-udp
-modprobe lttng-ring-buffer-metadata-mmap-client
-modprobe lttng-lib-ring-buffer
-modprobe lttng-probe-jbd2
-modprobe lttng-probe-statedump
-modprobe lttng-probe-ext4
-modprobe lttng-probe-rcu
-modprobe lttng-tracer
-modprobe lttng-probe-power
-modprobe lttng-probe-sched
-modprobe lttng-probe-block
-modprobe lttng-probe-vmscan
-modprobe lttng-probe-scsi
-modprobe lttng-probe-regmap
-modprobe lttng-probe-skb
-modprobe lttng-probe-regulator
-modprobe lttng-probe-random
-modprobe lttng-probe-workqueue
-modprobe lttng-probe-irq
+    sleep ${retry_sleep_interval}
+    let "cur_retry_num++"
+done
+
+echo "Packages installation have been done"
