@@ -79,6 +79,8 @@ EOF
 		sudo chmod 755 $distro_dir/$rc_local_file
 	fi
 
+    sudo chmod +x $distro_dir/$rc_local_file
+
 	if ! grep "/usr/bin/estuary/post_install.sh" $distro_dir/$rc_local_file >/dev/null; then
 		if grep -E "^(exit)" $distro_dir/$rc_local_file >/dev/null; then
 			sudo sed -i "/^exit/i/usr/bin/estuary/post_install.sh &" $distro_dir/$rc_local_file
