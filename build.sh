@@ -376,6 +376,11 @@ if [ x"$PLATFORMS" != x"" ]; then
 
 	mkdir -p $BUILD_DIR/binary
 	mkdir -p $BUILD_DIR/doc
+
+	if ! Copy_deploy_utils $binary_src_dir/deploy-utils.tar.bz2 estuary/deploy/setup.sh $BUILD_DIR/binary/arm64; then
+		echo -e "\033[31mError! Copy deploy utils failed!\033[0m" ; exit 1
+	fi
+
 	if ! copy_all_binaries $PLATFORMS $binary_src_dir $BUILD_DIR/binary; then
 		echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
 	fi
