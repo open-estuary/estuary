@@ -1,6 +1,24 @@
 #!/bin/bash
 
 ###################################################################################
+# int binary_md5_compare <file1> <file2>
+###################################################################################
+binary_md5_compare()
+{
+	local file1=$1
+	local file2=$2
+	if [ ! -f "$file1" ] || [ ! -f "$file2" ]; then
+		return 1
+	fi
+
+	if [ "$(md5sum $file1 | awk '{print $1}')" != "$(md5sum $file2 | awk '{print $1}')" ]; then
+		return 1
+	fi
+
+	return 0
+}
+
+###################################################################################
 # int download_binaries <ftp_cfgfile> <ftp_addr> <target_dir>
 ###################################################################################
 download_binaries()
@@ -40,6 +58,68 @@ download_binaries()
 }
 
 ###################################################################################
+# int Copy_deploy_utils <deploy_utils_file> <setup_file> <target_dir>
+###################################################################################
+Copy_deploy_utils()
+{
+	(
+	deploy_utils_file=$1
+	setup_file=$2
+	target_dir=$3
+
+	tempdir=`mktemp -d deploy.XXXX`
+	while true; do
+		tar xf "$deploy_utils_file" -C "$tempdir" || break
+		rm -f $tempdir/usr/bin/setup.sh 2>/dev/null
+		cp $setup_file $tempdir/usr/bin/ || break
+		pushd $tempdir >/dev/null
+		tar cjf ../deploy-utils.tar.bz2 *
+		popd >/dev/null
+		mkdir -p $target_dir
+		rm -f $target_dir/deploy-utils.tar.bz2 2>/dev/null
+		mv deploy-utils.tar.bz2 $target_dir/ || break
+		rm -rf $tempdir 2>/dev/null
+		return 0
+	done
+
+	rm -f deploy-utils.tar.bz2 2>/dev/null
+	rm -rf $tempdir 2>/dev/null
+	return 1
+	)
+}
+
+###################################################################################
+# int Copy_grub_cfg <src_dir> <target_dir> <plat>
+###################################################################################
+Copy_grub_cfg()
+{
+	local src_dir=$1
+	local target_dir=$2
+	local plat=$3
+
+	default_menuentry=`grep -Po -i -m 1 "(?<=\-\-id )([^ ]*$plat[^ ]*)(?= *{)" $src_dir/grub.cfg`
+	if [ x"$default_menuentry" = x"" ]; then
+		return 0
+	fi
+
+	cat > $target_dir/grub.cfg << EOF
+# NOTE: Please remove the unused boot items according to your real condition.
+# Sample GRUB configuration file
+#
+
+# Boot automatically after 3 secs.
+set timeout=3
+
+# By default, boot the Linux
+set default=${default_menuentry}
+
+EOF
+	sed -n "/\"${plat}.*\" *--id .*{/,/}/p" $src_dir/grub.cfg >> $target_dir/grub.cfg
+	sed -i '/}/G' $target_dir/grub.cfg
+	return 0
+}
+
+###################################################################################
 # Copy_Comm_binaries <src_dir> <target_dir>
 ###################################################################################
 Copy_Comm_binaries()
@@ -47,16 +127,11 @@ Copy_Comm_binaries()
 	(
 	src_dir=$1
 	target_dir=$2
-	if [ ! -f $target_dir/mini-rootfs.cpio.gz ]; then
-		cp $src_dir/mini-rootfs.cpio.gz $target_dir/ || return 1
-	fi
-	
-	if [ ! -f $target_dir/deploy-utils.tar.bz2 ]; then
-		cp $src_dir/deploy-utils.tar.bz2 $target_dir/ || return 1
-	fi
 
-	if [ ! -f $target_dir/grub.cfg ]; then
-		cp $src_dir/grub.cfg $target_dir/ || return 1
+	# copy mini-rootfs.cpio.gz
+	if ! binary_md5_compare "$src_dir/mini-rootfs.cpio.gz" "$target_dir/mini-rootfs.cpio.gz"; then
+		rm -f $target_dir/mini-rootfs.cpio.gz 2>/dev/null
+		cp $src_dir/mini-rootfs.cpio.gz $target_dir/ || return 1
 	fi
 
 	return 0
@@ -98,6 +173,7 @@ copy_all_binaries()
 
 	for plat in ${platfroms[*]}; do
 		mkdir -p $target_dir/$plat
+		Copy_grub_cfg $src_dir $target_dir/$plat $plat || return 1
 		if declare -F Copy_${plat}_binaries >/dev/null; then
 			Copy_${plat}_binaries $src_dir $target_dir/$plat || return 1
 		fi
