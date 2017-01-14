@@ -86,7 +86,7 @@ else
 fi
 
 ###################################################################################
-# Get install parameters
+# Get install platform parameters
 ###################################################################################
 platform=`cat $ESTUARY_CFG | grep -Eo "PLATFORM=[^ ]*"`
 platform=(`expr "X$platform" : 'X[^=]*=\(.*\)' | tr ',' ' '`)
@@ -101,7 +101,7 @@ if [ ${#platform[@]} -gt 1 ]; then
 	for (( index=0; index<${#platform[@]}; index++ )); do
 		echo "$[index + 1]) ${platform[index]}"
 	done
-	read -t 5 -p "Please input the index of platfrom to install (default 1): " index
+	read -n1 -t 5 -p "Please input the index of platfrom to install (default 1): " index
 	echo ""
 	
 	if [ x"$index" = x"" ] || ! (expr 1 + $index > /dev/null 2>&1); then
@@ -111,20 +111,38 @@ if [ ${#platform[@]} -gt 1 ]; then
 	PLATFORM=${PLATFORM:${platform[0]}}
 fi
 
-install_distro=`cat $ESTUARY_CFG | grep -Eo "DISTRO=[^ ]*"`
-INSTALL_DISTRO=($(expr "X$install_distro" : 'X[^=]*=\(.*\)' | tr ',' ' '))
-distro_capacity=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
-DISTRO_CAPACITY=($(expr "X$distro_capacity" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+###################################################################################
+# Get install distro parameters
+###################################################################################
+all_distro=`cat $ESTUARY_CFG | grep -Eo "DISTRO=[^ ]*"`
+all_distro=($(expr "X$all_distro" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+all_capacity=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
+all_capacity=($(expr "X$all_capacity" : 'X[^=]*=\(.*\)' | tr ',' ' '))
 
-###################################################################################
-# Install parameters check
-###################################################################################
-if [[ ${#INSTALL_DISTRO[@]} == 0 ]]; then
+if [[ ${#all_distro[@]} == 0 ]]; then
 	echo "Error!!! Distro is not specified" ; exit 1
 fi
 
-if [[ ${#DISTRO_CAPACITY[@]} == 0 ]]; then
+if [[ ${#all_capacity[@]} == 0 ]]; then
 	echo "Error! Capacity is not specified!" ; exit 1
+fi
+
+if [[ ${#all_distro[@]} == 1 ]]; then
+	INSTALL_DISTRO=(${all_distro[@]})
+	DISTRO_CAPACITY=(${all_capacity[@]})
+else
+	echo "---------------------------------------------------------------"
+	echo "- distro: ${all_distro[*]}"
+	echo "---------------------------------------------------------------"
+	total_distro=${#all_distro[@]}
+	for ((index=0; index<total_distro; index++)); do
+		read -n1 -t 5 -p "Install ${all_distro[index]} (default y)? y/N " c
+		if [ x"$c" = x"" ] || [ x"$c" = x"y" ]; then
+			INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
+			DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
+		fi
+		echo ""
+	done
 fi
 
 ###################################################################################
@@ -173,7 +191,7 @@ for (( index=0; index<disk_number; index++)); do
 	echo ""
 done
 
-read -t 5 -p "Input disk index to install or q to quit (default 0): " index
+read -n1 -t 5 -p "Input disk index to install or q to quit (default 0): " index
 echo ""
 if [ x"$index" = x"q" ]; then
 	exit 0
@@ -203,10 +221,10 @@ echo "Format target disk $TARGET_DISK done."
 echo ""
 
 ###################################################################################
-# make gpt label and create EFI System partition
+# format gpt disk and create EFI System partition for kernel and grub
 ###################################################################################
 echo "/*---------------------------------------------------------------"
-echo "- Create and install kernel into EFI partition on ${TARGET_DISK} part1. Please wait for a moment!"
+echo "- Create and install kernel into boot partition on ${TARGET_DISK} part1. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 (parted -s $TARGET_DISK mklabel gpt) >/dev/null 2>&1
 
@@ -226,42 +244,16 @@ BOOT_DEV="${TARGET_DISK}${PART_PREFIX}1"
 echo "Create and format ${TARGET_DISK} part1 done."
 
 ###################################################################################
-# Install grub and kernel to EFI System partition
+# Install kernel to boot partition
 ###################################################################################
-echo "Installing grub and kernel to ${TARGET_DISK}${PART_PREFIX}1."
+echo "Installing kernel to ${TARGET_DISK}${PART_PREFIX}1."
 pushd /scratch >/dev/null
-
-mount $BOOT_DEV /boot/ >/dev/null 2>&1
+mount $BOOT_DEV /boot/ >/dev/null 2>&1 || exit 1
 cp Image* /boot/
-mkdir -p /boot/EFI/GRUB2 2>/dev/null
-cp grubaa64.efi /boot/EFI/GRUB2 || exit 1
-
-# Delete old Estuary bootorder
-efi_bootorder=(`efibootmgr | grep -E "Boot[^ ]+\* Estuary" | awk '{print $1}'`)
-for bootorder in ${efi_bootorder[*]}; do
-        order=`expr "$bootorder" : 'Boot\([^ ]*\)\*'`
-        efibootmgr -q -b $order -B 2>/dev/null
-done
-
-efibootmgr -c -q -d ${TARGET_DISK} -p 1 -L "Estuary" -l "\EFI\GRUB2\grubaa64.efi"
-
-cat > /boot/grub.cfg << EOF
-# NOTE: Please remove the unused boot items according to your real condition.
-# Sample GRUB configuration file
-#
-
-# Boot automatically after 3 secs.
-set timeout=3
-
-# By default, boot the Linux
-set default=default_menuentry
-
-EOF
-
 popd >/dev/null
 sync
 umount /boot/
-echo "Install grub and kernel to ${TARGET_DISK}${PART_PREFIX}1 done!"
+echo "Install kernel to ${TARGET_DISK}${PART_PREFIX}1 done!"
 echo ""
 
 ###################################################################################
@@ -324,21 +316,39 @@ echo "Install distros done!"
 echo "" ; sleep 1s
 
 ###################################################################################
-# Update grub configuration file
+# Install grub to EFI partition
 ###################################################################################
 echo "/*---------------------------------------------------------------"
-echo "- Update grub configuration file. Please wait for a moment!"
+echo "- Install grub to EFI partition. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 
-platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
+mount $BOOT_DEV /boot/ >/dev/null || exit 1
+# install grubaa64.efi
+mkdir -p /boot/EFI/GRUB2 2>/dev/null
+pushd /scratch >/dev/null
+cp grubaa64.efi /boot/EFI/GRUB2 || exit 1
+popd >/dev/null
 
+# create grub.cfg header
+cat > /boot/grub.cfg << EOF
+# NOTE: Please remove the unused boot items according to your real condition.
+# Sample GRUB configuration file
+#
+
+# Boot automatically after 3 secs.
+set timeout=3
+
+# By default, boot the Linux
+set default=default_menuentry
+
+EOF
+
+# create grub entry for each distro
+platform=$(echo $PLATFORM | tr "[:upper:]" "[:lower:]")
 eval vga_cmd_line=\$${PLATFORM}_VGA_CMDLINE
 eval console_cmd_line=\$${PLATFORM}_CMDLINE
-
 boot_dev_info=`blkid -s UUID $BOOT_DEV 2>/dev/null | grep -o "UUID=.*" | sed 's/\"//g'`
 boot_dev_uuid=`expr "${boot_dev_info}" : '[^=]*=\(.*\)'`
-
-mount $BOOT_DEV /boot/ >/dev/null 2>&1
 
 pushd /boot/ >/dev/null
 Image="`ls Image*`"
@@ -380,6 +390,18 @@ default_menuentry_id="${platform}_""${INSTALL_DISTRO[0]}""_vga"
 sed -i "s/\(set default=\)\(default_menuentry\)/\1$default_menuentry_id/g" /boot/grub.cfg
 
 echo "Update grub.cfg done!"
+echo ""
+
+# Delete old Estuary bootorder
+efi_bootorder=(`efibootmgr | grep -E "Boot[^ ]+\* Estuary" | awk '{print $1}'`)
+for bootorder in ${efi_bootorder[*]}; do
+        order=`expr "$bootorder" : 'Boot\([^ ]*\)\*'`
+        efibootmgr -q -b $order -B 2>/dev/null
+done
+
+efibootmgr -c -q -d ${TARGET_DISK} -p 1 -L "Estuary" -l "\EFI\GRUB2\grubaa64.efi"
+
+echo "Install grub and kernel to ${TARGET_DISK}${PART_PREFIX}1 done!"
 echo ""
 
 sync
