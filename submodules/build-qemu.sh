@@ -6,6 +6,7 @@ CORE_NUM=`cat /proc/cpuinfo | grep "processor" | wc -l`
 ###################################################################################
 # Include
 ###################################################################################
+. $TOPDIR/../include/file-check.sh
 . $TOPDIR/submodules-common.sh
 
 ###################################################################################
@@ -118,25 +119,30 @@ export PATH=$qemu_dir/bin:$PATH
 distros=(`echo $DISTROS | tr ',' ' '`)
 for distro in ${distros[*]}; do
 	rootfs=`ls $DISTRO_DIR/$distro*.img 2>/dev/null || ls $DISTRO_DIR/$distro*.raw 2>/dev/null`
-	if [ x"$rootfs" = x"" ]; then
-		if ! (sudo find $DISTRO_DIR/$distro -name "etc" | grep --quiet "etc"); then
-			exit 1
+	if [ x"$rootfs" != x"" ]; then
+		if check_file_update "$rootfs" $DISTRO_DIR/${distro}_ARM64.tar.gz; then
+			continue
 		fi
-	
-		echo "Creating new rootfs image file for QEMU..."
-		pushd $DISTRO_DIR >/dev/null
-		imagefile="$distro"_ARM64."img"
-		dd if=/dev/zero of=$imagefile bs=1M count=10240
-		mkfs.ext4 $imagefile -F
-		mkdir -p tempdir 2>/dev/null
-		sudo mount $imagefile tempdir
-	
-		echo "Producing the rootfs image file ${distro}_ARM64.img for QEMU..."
-		sudo cp -a $distro/* tempdir/
-		sudo umount tempdir
-		rm -rf tempdir
-		popd >/dev/null
+		rm -f $rootfs
 	fi
+
+	if ! (sudo find $DISTRO_DIR/$distro -name "etc" | grep --quiet "etc"); then
+		exit 1
+	fi
+
+	echo "Creating new rootfs image file for QEMU..."
+	pushd $DISTRO_DIR >/dev/null
+	imagefile="$distro"_ARM64."img"
+	dd if=/dev/zero of=$imagefile bs=1M count=10240
+	mkfs.ext4 $imagefile -F
+	mkdir -p tempdir 2>/dev/null
+	sudo mount $imagefile tempdir
+
+	echo "Producing the rootfs image file ${distro}_ARM64.img for QEMU..."
+	sudo cp -a $distro/* tempdir/
+	sudo umount tempdir
+	rm -rf tempdir
+	popd >/dev/null
 done
 
 ###################################################################################

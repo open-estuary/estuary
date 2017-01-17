@@ -4,6 +4,7 @@
 # mkisoimg.sh --platforms=D03,D05 --distros=Ubuntu,OpenSuse,CentOS --capacity=50,50 --bindir=./workspace
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
+. $TOPDIR/../include/file-check.sh
 
 ###################################################################################
 # Global variable
@@ -89,6 +90,26 @@ if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
 	echo "Error! Number of capacity is not eq the distros!" >&2
 	Usage ; exit 1
 fi
+
+###################################################################################
+# Check update
+###################################################################################
+if [ -f $BINARY_DIR/${DISK_LABEL}.iso ] && [ -f $BINARY_DIR/.${DISK_LABEL}.iso.txt ]; then
+	while true; do
+		platforms=`grep -Po "(?<=PLATFORMS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+		distros=`grep -Po "(?<=DISTROS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+		capacity=`grep -Po "(?<=CAPACITY=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+		if [ x"$platforms" != x"$PLATFORMS" ] || [ x"$distros" != x"$DISTROS" ] || [ x"$capacity" != x"$CAPACITY" ]; then
+			break
+		fi
+		distros=`echo ${DISTROS} | tr ',' ' '`
+		distro_files=($(for f in $distros; do echo $BINARY_DIR/${f}_ARM64.tar.gz; done))
+		check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} && exit 0
+		break
+	done
+fi
+
+rm -f $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/.${DISK_LABEL}.iso.txt
 
 ###################################################################################
 # Create Workspace and Switch to Workspace!!!
@@ -220,6 +241,13 @@ mv ${DISK_LABEL}.iso ../ || exit 1
 # Pop Workspace!!!
 ###################################################################################
 popd >/dev/null
+mv ${DISK_LABEL}.iso $BINARY_DIR/ || exit 1
+
+cat > $BINARY_DIR/.${DISK_LABEL}.iso.txt << EOF
+PLATFORMS=$PLATFORMS
+DISTROS=$DISTROS
+CAPACITY=$CAPACITY
+EOF
 
 ###################################################################################
 # Delete workspace
