@@ -408,6 +408,14 @@ if [ x"$PLATFORMS" != x"" ]; then
 		fi
 		echo ""
 	done
+
+	echo "/*---------------------------------------------------------------"
+	echo "- create distros (distros: $DISTROS, distro dir: $BUILD_DIR/distro)"
+	echo "---------------------------------------------------------------*/"
+	if ! create_distros $DISTROS $BUILD_DIR/distro; then
+		echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
+	fi
+
 	echo "Build platfroms done!"
 	echo ""
 fi

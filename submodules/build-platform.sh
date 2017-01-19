@@ -155,39 +155,6 @@ if [ x"$PACKAGES" != x"" ]; then
 fi
 
 ###################################################################################
-# Create <DISTRO>_ARM64.tar.gz
-###################################################################################
-echo "---------------------------------------------------------------"
-echo "- Create distros (distros: $DISTROS, distro dir: $OUTPUT/distro)"
-echo "---------------------------------------------------------------"
-if ! create_distros $DISTROS $OUTPUT/distro; then
-	echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
-fi
-echo "- Create distros done!"
-echo ""
-
-###################################################################################
-# Create distros softlink
-###################################################################################
-distros=`echo $DISTROS | tr ',' ' '`
-if [ x"$distros" != x"" ]; then
-	echo "---------------------------------------------------------------"
-	echo "- Create distros softlink (distros: $DISTROS)"
-	echo "---------------------------------------------------------------"
-
-	binary_dir=$OUTPUT/binary/arm64
-	mkdir -p $binary_dir 2>/dev/null
-	pushd $binary_dir >/dev/null
-	for distro in ${distros[*]}; do
-		rm -f ${distro}_ARM64.tar.gz 2>/dev/null
-		ln -s ../../distro/${distro}_ARM64.tar.gz
-	done
-	popd >/dev/null
-	echo "- Create distros softlink done!"
-	echo ""
-fi
-
-###################################################################################
 # End
 ###################################################################################
 exit 0

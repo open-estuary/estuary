@@ -67,6 +67,7 @@ Copy_deploy_utils()
 	setup_file=$2
 	target_dir=$3
 
+	check_file_update $target_dir/deploy-utils.tar.bz2 $deploy_utils_file $setup_file && return 0
 	tempdir=`mktemp -d deploy.XXXX`
 	while true; do
 		tar xf "$deploy_utils_file" -C "$tempdir" || break
@@ -96,6 +97,8 @@ Copy_grub_cfg()
 	local src_dir=$1
 	local target_dir=$2
 	local plat=$3
+
+	check_file_update $target_dir/grub.cfg $src_dir/grub.cfg && return 0
 
 	default_menuentry=`grep -Po -i -m 1 "(?<=\-\-id )([^ ]*$plat[^ ]*)(?= *{)" $src_dir/grub.cfg`
 	if [ x"$default_menuentry" = x"" ]; then
