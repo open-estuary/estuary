@@ -297,7 +297,9 @@ do
 	
 	echo -e "\033[?25l"
 	blocking_factor=$[$(gzip --list $rootfs_package | awk 'END {print $2}') / 51200 + 1]
-	if ! tar --blocking-factor=${blocking_factor} --checkpoint=5 --checkpoint-action='exec=printf "\rUncompressed [ %d%% ]..." $TAR_CHECKPOINT' -zxf $rootfs_package -C /mnt/; then
+	if ! tar --blocking-factor=${blocking_factor} --checkpoint=5 \
+		 --checkpoint-action='exec=printf "\rUncompressed [ %d%% ]..." $TAR_CHECKPOINT' \
+		 -zxf $rootfs_package -C /mnt/ 1>/dev/null 2>/tmp/${distro_name}_uncompress_log; then
 		echo "Error!!! Uncompress $rootfs_package failed!" >&2 ; echo -e "\033[?25h"; exit 1
 	fi
 	echo -e "\033[?25h"
