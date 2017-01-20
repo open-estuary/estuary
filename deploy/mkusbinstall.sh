@@ -196,6 +196,8 @@ sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ../setup.sh
 mv ../setup.sh ./usr/bin/
 sudo chmod 755 ./usr/bin/setup.sh
 
+sed -i '/eth0/s/^/#/g' ./etc/network/interfaces
+
 sudo chown -R root:root *
 sudo find | sudo cpio -o -H newc | gzip -c > ../initrd.gz || exit 1
 
