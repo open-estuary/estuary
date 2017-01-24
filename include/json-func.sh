@@ -76,27 +76,56 @@ get_install_capacity()
 }
 
 ###################################################################################
-# get_install_packages <cfgfile>
+# get_packages_cmd_and_elems <cfgfile>
+# input: estuarycfg json file
+# output: (package_cmd, package1, package2, ..., packagen)
 ###################################################################################
-get_install_packages()
+get_packages_cmd_and_elems()
 {
 	(
 	index=0
 	cfgfile=$1
-	packages=()
-	install=`jq -r ".packages[$index].install" $cfgfile 2>/dev/null`
-	while [ x"$?" = x"0" ] && [ x"$install" != x"null" ] && [ x"$install" != x"" ]; do
-		if [ x"yes" = x"$install" ]; then
-			package=`jq -r ".packages[$index].name" $cfgfile`
-			idx=${#packages[@]}
-			packages[$idx]=$package
-		fi
-		
-		(( index=index+1 ))
-		install=`jq -r ".packages[$index].install" $cfgfile`
-	done
+	package_list=()
 
-	echo ${packages[@]}
+    package_cmd=`jq -r ".packages.cmd" $cfgfile 2>/dev/null`
+    if [ x"${package_cmd}" != x"" ] && [ x"${package_cmd}" != x"null" ] && [ x"${package_cmd}" != x"none" ] ; then
+        package_list[$index]=$package_cmd
+        let "index++"
+
+        elem_index=0
+        package_name=`jq -r ".packages.elems[$elem_index].name" $cfgfile 2>/dev/null`
+        while [ x"${package_name}" != x"null" ] && [ x"${package_name}" != x"" ] ; do
+            package_requires=`jq -r ".packages.elems[$elem_index].requires" $cfgfile 2>/dev/null`
+            package_enabled=`jq -r ".packages.elems[$elem_index].enabled" $cfgfile 2>/dev/null`
+
+            if [ x"${package_enabled}" != x"no" ] ; then
+                if [ x"${package_requires}" != x"null" ] && [ x"${package_requires}" != x"" ] ; then
+                    requires_list=(${package_requires//,/ })
+                    for pkg1 in ${requires_list[@]}; do
+                        is_existed=0
+                        for pkg2 in ${package_list[@]}; do
+                            if [ x"${pkg1}" == x"${pkg2}" ] ; then
+                                is_existed=1
+                                break
+                            fi
+                        done
+
+                        if [ ${is_existed} -eq 0 ] ; then
+                            package_list[$index]=$pkg1
+                            let "index++"
+                        fi
+                    done
+                fi
+                package_list[$index]=${package_name}
+                let "index++"
+            fi
+
+            let "elem_index++"
+            package_name=`jq -r ".packages.elems[$elem_index].name" $cfgfile 2>/dev/null`
+        done
+    fi
+
+	echo ${package_list[@]}
 	)
 }
 
