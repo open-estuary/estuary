@@ -5,11 +5,11 @@
 According to [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/master/estuarycfg.json), Estuary could integrate packages accordingly. 
 
 <h2 id="2">Packages</h2>
-Currently the following packages are supported:
+Currently the following packages are supported on ARM64 platforms:
 
 * [Armor Manual](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md) 
 
-* [MySql]() 
+* [MySql](https://github.com/open-estuary/packages/blob/master/docker_apps/mysql/MySql_Manual.m) 
 
 * [Docker](https://github.com/open-estuary/estuary/blob/master/doc/Introduction_for_Docker.md)
 
