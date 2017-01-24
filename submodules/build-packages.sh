@@ -84,9 +84,14 @@ integrate_postinstall_scripts()
     local_dir=${rootfs}${install_dir}bin
     log_dir=${install_dir}.log
     log_file=${log_dir}/estuarylogs
+    
+    if [ ! -d "${local_dir}" ] ; then
+        sudo mkdir -p ${local_dir} 2>/dev/null
+    fi 
 
-    sudo mkdir -p ${local_dir} 2>/dev/null
-    sudo mkdir -p ${rootfs}/${log_dir}
+    if [ ! -d "${rootfs}/${log_dir}" ] ; then
+        sudo mkdir -p ${rootfs}/${log_dir}
+    fi
 
     rm -f /tmp/post_install.sh 2>/dev/null
     cp ${TOPDIR}/post_install.sh /tmp/
