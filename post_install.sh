@@ -1,13 +1,17 @@
 #!/bin/bash
 #author: Justin Zhao
-#date: 31/10/2015
-#description: automatically call all post install scripts in post_dir
+#date: 31/10/2015PACKAGE_INTEGRATE_DIR
+#description: automatically call all post install scripts in POST_DIR
 
-lastupdate="2015-10-15"
-post_dir="/usr/bin/estuary/postinstall"
-install_log_dir="/usr/bin/estuary/.log"
-install_one_dir="${install_log_dir}/one"
-install_always_dir="${install_log_dir}/always/"
+lastupdate="2017-01-22"
+INSTALL_DIR="/usr/estuary/"
+POST_DIR="${INSTALL_DIR}packages"
+PACKAGE_INTEGRATE_DIR="/usr/local/estuary/packages"
+# This file contains the list of packages which will be installed automatically 
+# during ARM64 boot up stage
+POSTINSTALL_PACKAGEFILELIST="${INSTALL_DIR}.postinstall_packagelist"
+INSTALL_ONE_DIR="${INSTALL_DIR}.log/one/"
+INSTALL_ALWAYS_DIR="${INSTALL_DIR}.log/always/"
 
 ##################################################################################
 # 
@@ -48,17 +52,55 @@ check_init()
 }
 
 ###################################################################################
+############################# Decompress Packages        ##########################
+###################################################################################
+decompress_tar_files()
+{
+    packages_files=${1}
+    package_dir=${2}
+    install_dir=${3} 
+   
+    if [ ! -d "${install_dir}" ] ; then
+        mkdir -p ${install_dir}
+    fi
+ 
+    cat ${packages_files} | while read line
+    do
+        if [ ! -z "${line}" ] ; then
+            packages_list=$(ls ${package_dir}/${line}*.tar.gz) 
+            for pkg_file in ${packages_list[@]}
+            do
+                filename=${pkg_file##*/}
+                filename=${filename%\.tar\.gz*}
+                if [ ! -d ${install_dir}/${filename} ] ; then
+                    mkdir -p ${install_dir}/${filename}
+                    tar -zxvf ${pkg_file} -C ${install_dir}/${filename}
+                fi
+            done
+        fi
+    done
+}
+
+###################################################################################
 ############################# Install Packages           ##########################
 ###################################################################################
 install_packages() {
-    one_log_dir=${1}
-    always_log_dir=${2}
+    install_file=${1}
+    one_log_dir=${2}
+    always_log_dir=${3}
     all_successful=0
-    
-    for fullfile in $post_dir/*
-    do
-        file=${fullfile##*/}
-        if [ -f $fullfile ]; then
+
+    cat ${install_file} | while read line
+    do     
+        if [ -z "${line}" ] ; then
+            continue
+        fi
+
+        #Not necessary to install packages which are not specified 
+        pkg_dir_lists=($(ls -d $POST_DIR/${line}*))
+        for fullfile in ${pkg_dir_lists[@]} ; do
+            file=${fullfile##*/}
+            
             check_init "${one_log_dir}/$file" $lastupdate
             ret1="$?"
             check_init "${always_log_dir}/$file" $lastupdate
@@ -66,7 +108,7 @@ install_packages() {
                 
             if [ x"1" != x"${ret1}" ] && [ x"1" != x"${ret2}" ] ; then
                 #Call script to install package
-                $fullfile
+                $fullfile/setup.sh "${INSTALL_DIR}"
                 retcode="$?"
                 if [ x"${INSTALL_SUCCESS}" = x"${retcode}" ]; then
                     touch "${one_log_dir}/$file"
@@ -76,20 +118,26 @@ install_packages() {
                     all_successful=255
                 fi
             fi
-        fi
+        done
     done
     return ${all_successful}
 }
 
-if [ ! -d "${install_one_dir}" ] ; then
-    mkdir -p "${install_one_dir}"
+if [ ! -d "${INSTALL_ONE_DIR}" ] ; then
+    mkdir -p "${INSTALL_ONE_DIR}"
 fi
-if [ ! -d "${install_always_dir}" ] ; then 
-    mkdir -p "${install_always_dir}"
+
+if [ ! -d "${INSTALL_ALWAYS_DIR}" ] ; then 
+    mkdir -p "${INSTALL_ALWAYS_DIR}"
+fi
+
+if [ ! -d "${POST_DIR}" ] ; then
+    mkdir -p "${POST_DIR}"
 fi
 
 #Clear "always logs" during every boot stage
-rm -fr ${install_always_dir}/*
+rm -fr ${INSTALL_ALWAYS_DIR}/*
+decompress_tar_files "${POSTINSTALL_PACKAGEFILELIST}" "${PACKAGE_INTEGRATE_DIR}" "${POST_DIR}"
 
 #Now begin to install packages
 cur_retry_num=0
@@ -98,7 +146,7 @@ retry_sleep_interval=300
 
 while [[ ${cur_retry_num} -lt ${max_retry_num} ]]
 do
-    install_packages ${install_one_dir} ${install_always_dir}
+    install_packages "${POSTINSTALL_PACKAGEFILELIST}" "${INSTALL_ONE_DIR}" "${INSTALL_ALWAYS_DIR}"
     if [ x"0" == x"$?" ] ; then
         break
     fi

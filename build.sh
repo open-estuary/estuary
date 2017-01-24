@@ -21,7 +21,7 @@ if [ x"$CURDIR" = x"$TOPDIR" ]; then
 	echo "---------------------------------------------------------------"
 	echo "- Please execute build.sh in open-estuary project root directory!"
 	echo "- Example:"
-	echo "-     ./estuary/build.sh --cfgfile=./estuary/estuarycfg.json --builddir=build"
+	echo "-     ./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=build"
 	echo "---------------------------------------------------------------"
 	exit 1
 fi
@@ -173,7 +173,6 @@ fi
 if [ x"$CFG_FILE" != x"" ]; then
 	PLATFORMS=$(get_install_platforms $CFG_FILE | tr ' ' ',')
 	DISTROS=$(get_install_distros $CFG_FILE | tr ' ' ',')
-	PACKAGES=$(get_install_packages $CFG_FILE | tr ' ' ',')
 
 	DEPLOY=($(get_deploy_info $CFG_FILE))
 	CAPACITY=`get_install_capacity $CFG_FILE | tr ' ' ','`
@@ -395,9 +394,9 @@ if [ x"$PLATFORMS" != x"" ]; then
 	platfroms=`echo $PLATFORMS | tr ',' ' '`
 	for plat in ${platfroms[*]}; do
 		echo "/*---------------------------------------------------------------"
-		echo "- build platform (platform: $plat, distros: $DISTROS, pkgs: $PACKAGES, builddir: $BUILD_DIR)"
+		echo "- build platform (platform: $plat, distros: $DISTROS, builddir: $BUILD_DIR, cfgfile: ${CFG_FILE})"
 		echo "---------------------------------------------------------------*/"
-		build-platform.sh --cross=$CROSS_COMPILE --platform=$plat --distros=$DISTROS --packages=$PACKAGES --output=$BUILD_DIR
+		build-platform.sh --cross=$CROSS_COMPILE --platform=$plat --distros=$DISTROS --output=$BUILD_DIR  --file=${CFG_FILE}
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi

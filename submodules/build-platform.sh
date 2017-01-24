@@ -14,25 +14,24 @@ PLATFORMS=
 DISTROS=
 PACKAGES=
 OUTPUT=
-
+CFG_FILE=
 ###################################################################################
 # build_platform_usage
 ###################################################################################
 build_platform_usage()
 {
 cat << EOF
-Usage: build-platform.sh [clean] --cross=xxx --platform=xxx,xxx --distros=xxx,xxx --packages=xxx,xxx --output=xxx
+Usage: build-platform.sh [clean] --cross=xxx --platform=xxx,xxx --distros=xxx,xxx --packages=xxx,xxx --output=xxx --file=./estuary/estuarycfg.json
 	clean: clean the platform binary files
 	--cross: cross compile prefix (if the host is not arm architecture, it must be specified.)
 	--platform: which platform to build (D03, D05, HiKey)
 	--distros: which distros to install (Ubuntu, CentOS, Fedora, Debian)
-	--packages: packages to build (armor, lamp, docker, mysql, odp)
 	--output: target binary output directory
 
 Example:
 	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03 --distros=Ubuntu --output=workspace
-	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03 --distros=Ubuntu --packages=armor,docker --output=workspace
-	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03,D05,HiKey --distros=Ubuntu --packages=armor,docker --output=workspace
+	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03 --distros=Ubuntu --output=workspace --file=./estuary/estuarycfg.json
+	build-platform.sh --cross=aarch64-linux-gnu- --platform=D03,D05,HiKey --distros=Ubuntu --output=workspace
 
 EOF
 }
@@ -52,8 +51,8 @@ do
 		--cross) CROSS_COMPILE=$ac_optarg ;;
 		--platform) PLATFORMS=$ac_optarg;;
 		--distros) DISTROS=$ac_optarg ;;
-		--packages) PACKAGES=$ac_optarg ;;
 		--output) OUTPUT=$ac_optarg ;;
+		--file) CFG_FILE=$ac_optarg ;;
 		*) echo "Unknown option $ac_option!"
 			build_platform_usage ; exit 1 ;;
         esac
@@ -140,19 +139,17 @@ for distro in ${distros[*]}; do
 done
 
 ###################################################################################
-# Inastall packages
+# Build packages
 ###################################################################################
 distros=`echo $DISTROS | tr ',' ' '`
-if [ x"$PACKAGES" != x"" ]; then
-	for distro in ${distros[*]}; do
-		echo "---------------------------------------------------------------"
-		echo "- Build packages (pkgs: $PACKAGES, kerneldir: $OUTPUT/kernel, distro: $distro, rootfs: $OUTPUT/distro/$distro)"
-		echo "---------------------------------------------------------------"
-		build-packages.sh --packages=$PACKAGES --output=$OUTPUT --kernel=$OUTPUT/kernel --distro=$distro --rootfs=$OUTPUT/distro/$distro
-		echo "- Build packages done!"
-		echo ""
-	done
-fi
+for distro in ${distros[*]}; do
+	echo "---------------------------------------------------------------"
+	echo "- Build packages (kerneldir: $OUTPUT/kernel, distro: $distro, rootfs: $OUTPUT/distro/$distro, cross: $CROSS_COMPILE, cfgfile: $CFG_FILE)"
+	echo "---------------------------------------------------------------"
+	build-packages.sh --output=$OUTPUT --kernel=$OUTPUT/kernel --distro=$distro --rootfs=$OUTPUT/distro/$distro --cross=$CROSS_COMPILE --file=${CFG_FILE}
+	echo "- Build packages done!"
+	echo ""
+done
 
 ###################################################################################
 # Create <DISTRO>_ARM64.tar.gz

@@ -20,14 +20,21 @@
 {"mac":"01-00-18-82-05-00-68"}
 ],
 
-"packages":[
-{"name":"armor","install":"yes"},
-{"name":"lamp","install":"no"},
-{"name":"docker","install":"yes"},
-{"name":"mysql","install":"yes"},
-{"name":"odp","install":"yes"},
-{"name":"docker_apps","install":"yes"}
-],
+"packages":{
+    "cmd": "install",
+    "cmd_comment": "it has three options:none, build_tar, build_rpm, build_deb, build_all, integrate, install",
+    "cmd_none_comment" : "do nothing",
+    "cmd_build_comment" : "build packages such as RPM/Deb or tar files, but donnot integrate them into <distro>_ARM64.tar.gz",
+    "cmd_integrate_comment" : "build packages and integrate them into <distro>_ARM64.tar.gz, but donot install them automatically",
+    "cmd_install_comment" : "build packages, integrate them into <distro>_ARM64.tar.gz, and install them automatically",
+
+    "elems": [
+        {"name":"armor",    "requires":"", "enabled":"yes" },
+        {"name":"docker",   "requires":"", "enabled":"yes" },
+        {"name":"odp",      "requires":"", "enabled":"yes" },
+        {"name":"docker_apps", "requires":"","enabled": "yes"}
+    ]
+},
 
 "setup":[
 {"type":"iso","install":"yes"},
