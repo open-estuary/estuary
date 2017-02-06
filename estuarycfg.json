@@ -32,7 +32,7 @@
         {"name":"armor",    "requires":"", "enabled":"yes" },
         {"name":"docker",   "requires":"", "enabled":"yes" },
         {"name":"odp",      "requires":"", "enabled":"yes" },
-        {"name":"docker_apps", "requires":"","enabled": "yes"}
+        {"name":"docker_apps", "requires":"","enabled": "no"}
     ]
 },
 
