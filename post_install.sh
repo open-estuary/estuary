@@ -155,4 +155,7 @@ do
     let "cur_retry_num++"
 done
 
+#To load Estuary dynamic libs 
+ldconfig
+
 echo "Packages installation have been done"

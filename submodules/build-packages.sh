@@ -157,21 +157,23 @@ update_system_variables()
 
     if [ -z "$(grep "/usr/estuary/libs" ${ld_conf} 2>/dev/null)" ] ; then
         echo "/usr/estuary" >> ${ld_conf}
-        echo "/usr/estuary/libs" >> ${ld_conf}
+        echo "/usr/estuary/lib" >> ${ld_conf}
         echo "/usr/estuary/lib64" >> ${ld_conf}
+        echo "/usr/estuary/usr/lib" >> ${ld_conf}
+        echo "/usr/estuary/usr/lib64" >> ${ld_conf}
     fi
 
     if [ -z "$(grep "/usr/estuary/bin" ${etc_file} 2>/dev/null)" ] ; then
         if [ ! -z "$(grep -E '^(exit)' ${etc_file} 2>/dev/null)" ] ; then
-            sudo sed -i "/^exit/iPATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:$PATH" ${etc_file}
-            sudo sed -i "/^exit/iC_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH" ${etc_file}
-            sudo sed -i "/^exit/iCPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH" ${etc_file}
-            sudo sed -i "/^exit/iLIBRARY_PATH=/usr/estuary/libs:/usr/estuary/lib64:$LIBRARY_PATH" ${etc_file}
+            sudo sed -i '/^exit/iexport PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:/usr/estuary/usr/bin:/usr/estuary/usr/sbin:$PATH' ${etc_file}
+            sudo sed -i '/^exit/iexport C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH' ${etc_file}
+            sudo sed -i '/^exit/iexport CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
+            sudo sed -i '/^exit/iexport LIBRARY_PATH=/usr/estuary/libs:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
         else
-            sudo sed -i "$ a PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:$PATH" ${etc_file}
-            sudo sed -i "$ a C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH" ${etc_file}
-            sudo sed -i "$ a CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH" ${etc_file}
-            sudo sed -i "$ a LIBRARY_PATH=/usr/estuary/libs:/usr/estuary/lib64:$LIBRARY_PATH" ${etc_file}
+            sudo sed -i '$ a export PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:/usr/estuary/usr/bin:/usr/estuary/usr/sbin:$PATH' ${etc_file}
+            sudo sed -i '$ a export C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH' ${etc_file}
+            sudo sed -i '$ a export CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
+            sudo sed -i '$ a export LIBRARY_PATH=/usr/estuary/libs:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
         fi
     fi
 }
