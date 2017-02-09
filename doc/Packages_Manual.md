@@ -7,9 +7,9 @@ According to [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/mast
 <h2 id="2">Packages</h2>
 Currently the following packages are supported on ARM64 platforms:
 
-* [Armor Manual](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md) 
-
-* [MySql](https://github.com/open-estuary/packages/blob/master/docker_apps/mysql/MySql_Manual.md) 
-
-* [Docker](https://github.com/open-estuary/estuary/blob/master/doc/Introduction_for_Docker.md)
-
+- [Armor Manual](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md) 
+- [OpenJDK](https://github.com/open-estuary/packages/blob/master/openjdk/OpenJdk_Manual.md) 
+- [Docker](https://github.com/open-estuary/estuary/blob/master/doc/Introduction_for_Docker.md)
+- [Docker App]
+   - [MySql(Percona Server)](https://github.com/open-estuary/packages/blob/master/docker_apps/mysql/MySql_Manual.md)
+   - [Redis](https://github.com/open-estuary/packages/blob/master/docker_apps/redis/Redis_Manual.md)
