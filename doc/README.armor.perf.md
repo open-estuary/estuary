@@ -1,95 +1,102 @@
-**Readme for Ubuntu ARM64**
+**Hisilicon SoC PMU (Performance Monitoring Unit)**
+=================================================
+The Hisilicon SoC hip05/06/07 chips consist of various independent system
+device PMU's such as L3 cache(L3C), Miscellaneous Nodes(MN) and DDR
+controllers. These PMU devices are independent and have hardware logic to
+gather statistics and performance information.
 
-Install the latest perf binary*  
-`$# sudo apt-get install linux-tools-3.19.0-23`  
-The latest version availabe can be installed.  
-Now use the perf tool installed in `/usr/lib/linux-tools-3.19.0-23/perf`  
-`$# /usr/lib/linux-tools-3.19.0-23/perf stat -e L1-dcache-stores ls -l`
+Hip0x chips are encapsulated by multiple CPU and IO die's. The CPU die is
+called as Super CPU cluster (SCCL) which includes 16 cpu-cores. Every SCCL
+is further grouped as CPU clusters (CCL) which includes 4 cpu-cores each.
+Each SCCL has 1 L3 cache and 1 MN units.
 
-The LLC, MN and DDR are added as RAW events.  
-The RAW event encoding format is as below  
-`<die ID(4 bit)><Module ID(4 bit)><Bank(4 bit)><event code(12 bit)>`
+The L3 cache is shared by all CPU cores in a CPU die. The L3C has four banks
+(or instances). Each bank or instance of L3C has Eight 32-bit counter
+registers and also event control registers. The hip05/06 chip L3 cache has
+22 statistics events. The hip07 chip has 66 statistics events. These events
+are very useful for debugging.
 
-Example: For LLC_READ_ALLOCATE event for TotemC will be 0x24f300, where 0x2 is DieID for TotemC, 0x4 is the ModuleID of LLC, 0xf is for all LLC banks, 0x300is the event code for LLC_READ_ALLOCATE  
-The Module ID's are as below  
-```bash
-LLC	= 0x4
-MN	= 0xb
-DDRC0	= 0x8
-DDRC1	= 0xd
-```
-The DieID for the CPU Die are as below
-```bash
-SOC0_TOTEMA = 0x1 /* TOTEM A in Socket 0 */
-SOC0_TOTEMC = 0x2
-SOC0_TOTEMB = 0x3
-SOC1_TOTEMA = 0x4
-SOC1_TOTEMC = 0x5
-SOC1_TOTEMB = 0x6
-```
+The MN module is also shared by all CPU cores in a CPU die. It receives
+barriers and DVM(Distributed Virtual Memory) messages from cpu or smmu, and
+perform the required actions and return response messages. These events are
+very useful for debugging. The MN has total 9 statistics events and support
+four 32-bit counter registers in hip05/06/07 chips.
 
-The 22 LLC events are added as RAW events starting from 0x300 to 0x315  
-The 9 MN event codes and also the DDRC read, write and latecy counters, event codes are listed below
-```bash
-LLC_READ_ALLOCATE 		= 0x300
-LLC_WRITE_ALLOCATE 		= 0x301
-LLC_READ_NOALLOCATE		= 0x302
-LLC_WRITE_NOALLOCATE		= 0x303
-LLC_READ_HIT			= 0x304
-LLC_WRITE_HIT			= 0x305
-LLC_CMO_REQUEST			= 0x306
-LLC_COPYBACK_REQ		= 0x307
-LLC_HCCS_SNOOP_REQ		= 0x308
-LLC_SMMU_REQ			= 0x309
-LLC_EXCL_SUCCESS		= 0x30A
-LLC_EXCL_FAIL			= 0x30B
-LLC_CACHELINE_OFLOW		= 0x30C
-LLC_RECV_ERR			= 0x30D
-LLC_RECV_PREFETCH		= 0x30E
-LLC_RETRY_REQ			= 0x30F
-LLC_DGRAM_2B_ECC		= 0x310
-LLC_TGRAM_2B_ECC		= 0x311
-LLC_SPECULATE_SNOOP		= 0x312
-LLC_SPECULATE_SNOOP_SUCCESS	= 0x313
-LLC_TGRAM_1B_ECC		= 0x314
-LLC_DGRAM_1B_ECC		= 0x315
+The DDR controller supports various statistics events. Every SCCL has 2 DDR
+channels and hence 2 DDR controllers. The hip05/06/07 has support for a
+total of 13 statistics events.
 
-MN_EO_BARR_REQ			= 0x316
-MN_EC_BARR_REQ			= 0x317
-MN_DVM_OP_REQ			= 0x318
-MN_DVM_SYNC_REQ			= 0x319
-MN_READ_REQ			= 0x31A
-MN_WRITE_REQ			= 0x31B
-MN_COPYBK_REQ			= 0x31C
-MN_OTHER_REQ			= 0x31D
-MN_RETRY_REQ			= 0x31E
+There is no memory mapping for L3 cache and MN registers. It can be accessed
+by using the Hisilicon djtag interface. The Djtag in a SCCL is an independent
+module which connects with some modules in the SoC by Debug Bus.
 
-DDRC0_FLUX_READ_BW		= 0x31F
-DDRC0_FLUX_WRITE_BW		= 0x320
-DDRC0_FLUX_READ_LAT		= 0x321
-DDRC0_FLUX_WRITE_LAT		= 0x322
-DDRC1_FLUX_READ_BW		= 0x323
-DDRC1_FLUX_WRITE_BW		= 0x324
-DDRC1_FLUX_READ_LAT		= 0x325
-DDRC1_FLUX_WRITE_LAT		= 0x326
-```
-```bash
-# To count LLC_WRITE_NOALLOCATE and LLC_READ_ALLOCATE for TotemC
-$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r24f303 -e r24f300 ls -l
-```
+**Hisilicon SoC (hip05/06/07) PMU driver**
+--------------------------------------
+The hip0x PMU driver shall register perf PMU drivers like L3 cache, MN, DDRC
+etc.
+The available events and configuration options shall be described in the sysfs.
+The "perf list" shall list the available events from sysfs.
+
+The L3 cache in a SCCL is divided as 4 banks. Each L3 cache bank have separate
+PMU registers for event counting and control. So each L3 cache bank is
+registered with perf as a separate PMU.
+The PMU name will appear in event listing as hisi_l3c<bank-id>_<scl-id>.
+where "bank-id" is the bank index (0 to 3) and "scl-id" is the SCCL identifier
+e.g. hisi_l3c0_2/read_hit is READ_HIT event of L3 cache bank #0 SCCL ID #2.
+
+The MN in a SCCL is registered as a separate PMU with perf.
+The PMU name will appear in event listing as hisi_mn_<scl-id>.
+e.g. hisi_mn_2/read_req. READ_REQUEST event of MN of Super CPU cluster #2.
+
+For DRR controller separate PMU shall be registered for each channel in a
+Super CPU cluster.
+The PMU name will appear in event listing as hisi_ddrc<ch-id>_<scl-id>.
+where "ch-id" is the channel identifier.
+eg: hisi_ddrc0_2/flux_read/ is FLUX_READ event of DDRC channel #0 in
+Super CPU cluster #2.
+
+The event code is represented by 12 bits.
+	i) event 0-11
+		The event code will be represented using the LSB 12 bits.
+
+The driver also provides a "cpumask" sysfs attribute, which shows the CPU core
+ID used to count the uncore PMU event.
 
 ```bash
-# To count MN_EO_BARR_REQ and LLC_READ_ALLOCATE for TotemA
-$# /usr/lib/linux-tols-3.19.0-23/perf stat -e r1bf316 -e r14f300 ls -l
+Example usage of perf:
+$# perf list
+hisi_l3c0_2/read_hit/ [kernel PMU event]
+------------------------------------------
+hisi_l3c1_2/write_hit/ [kernel PMU event]
+------------------------------------------
+hisi_l3c0_1/read_hit/ [kernel PMU event]
+------------------------------------------
+hisi_l3c0_1/write_hit/ [kernel PMU event]
+------------------------------------------
+hisi_mn_2/read_req/ [kernel PMU event]
+hisi_mn_2/write_req/ [kernel PMU event]
+------------------------------------------
+hisi_ddrc0_2/flux_read/ [kernel PMU event]
+------------------------------------------
+hisi_ddrc1_2/flux_read/ [kernel PMU event]
+------------------------------------------
+
+`$# perf stat -a -e "hisi_l3c0_2/read_allocate/" sleep 5`
+
+`$# perf stat -A -C 0 -e "hisi_l3c0_2/read_allocate/" sleep 5`
 ```
-```bash
-# To count LLC_READ_HIT and LLC_WRITE_HIT for a process with pid
-$# /usr/lib/linux-tools-3.19.0-23/perf stat -e r24f304,r24f305 -p <pid>
-```
+
+The current driver doesnot support sampling. so "perf record" is unsupported.
+Also attach to a task is unsupported as the events are all uncore.
+
+Note: Please contact the maintainer for a complete list of events supported for
+the PMU devices in the SoC and its information if needed.
 
 Known Issues:
 
-1. As Hisilicon hardware counters are not CPU core specific, the counter values maynot be accurate. To get more accurate count. please append the option "-C 0 -A" in perf stat command.  
-  `$# perf stat -C 0 -A -e r24f303 -e r24f300 ls -l`
+1. As Hisilicon hardware counters are not CPU core specific, the counter values maynot be accurate.
 
-2. As the counter registers in Hisiilicon are config and accessed via Djtag interface, it can affect the event counter readings as the access is not atomic.
+2. As the counter registers in Hisiilicon are config and accessed via Djtag interface, it can affect the
+   event counter readings as the access is not atomic.
+
+3. Counter are 32 bit and overflow handling is currently not supported.
