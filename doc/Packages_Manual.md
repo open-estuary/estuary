@@ -13,3 +13,4 @@ Currently the following packages are supported on ARM64 platforms:
 
 * [Docker](https://github.com/open-estuary/estuary/blob/master/doc/Introduction_for_Docker.md)
 
+* [OpenStack](https://github.com/open-estuary/packages/blob/master/openstack/OpenStack_Manual.md)
