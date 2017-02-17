@@ -30,6 +30,9 @@ DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $TOPDIR/estuary.txt
 CHINA_INTERAL_FTP_ADDR=`grep -Po "(?<=china_interal_ftp: )(.*)" $TOPDIR/estuary.txt`
 
 export PATH=$TOPDIR:$TOPDIR/include:$TOPDIR/submodules:$TOPDIR/deploy:$PATH
+if [ x"$(echo $PATH | grep "/usr/local/bin")" = x""  ]; then
+    export PATH=$PATH:/usr/local/bin
+fi
 
 export LC_ALL=C
 export LANG=C
