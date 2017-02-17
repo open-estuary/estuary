@@ -8,10 +8,10 @@ SUPPORTED_PLATFORM=(D03 D05)
 ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary"
 ESTUARY_FTP_ADDR="ftp://117.78.41.188"
 
-D03_VGA_CMDLINE="rdinit=/init console=tty0 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_VGA_CMDLINE="rdinit=/init console=tty0 pcie_aspm=off crashkernel=256M@32M acpi=force"
-D05_CMDLINE="rdinit=/init pcie_aspm=off crashkernel=256M@32M acpi=force"
+D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
+D03_CMDLINE="console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off pci=pci_bus_perf"
+D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
+D05_CMDLINE="earlycon=pl011,mmio,0x602B0000 pcie_aspm=off pci=pci_bus_perf"
 
 BOOT_PARTITION_SIZE=4
 DISK_LABEL="Estuary"
