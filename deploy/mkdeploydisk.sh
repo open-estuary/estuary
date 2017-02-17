@@ -23,7 +23,7 @@ TARGET=
 VERSION=3.0
 RC=
 PLATFORM=D05
-DISTRO=CentOS
+DISTRO=
 CAPACITY=50
 BINDIR=
 
@@ -44,7 +44,7 @@ Usage: mkdeploydisk.sh [OPTION]... [--OPTION=VALUE]...
                                 If not specified, the first usb storage device will be default
 	--version=xxx           target estuary release version. If not specified, the latest will be default
 	--rc=xxx                target release　candidate version
-	--platform=xxx          target platform to install
+	--platform=xxx          target platform to install, it can be D03 or D05
 	--distro=xxx            target distro to install
 	--capacity=xxx          target root file system partition size (GB)
 
@@ -56,23 +56,38 @@ for example:
 	mkdeploydisk.sh --target=/dev/sdx --platform=D05 --distro=CentOS
 
 EOF
+
+
+if [ x"$RC" = x"" ]; then
+    distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/releases/${VERSION}/linux`)
+else
+    distro_list=(`get_all_distro ${ESTUARY_WEB_ADDR}/pre-releases/${VERSION}/${RC}/linux`)
+fi
+
+echo "The Distros which can be selected are: ${distro_list[*]}"
 }
 
 ###################################################################################
 # string[] get_usb_devices(void)
 ###################################################################################
 get_usb_devices() {
-	(
-	root=$(mount | grep " / " | grep  -Po "(/dev/sd[^ ])")
-	if [ $? -ne 0 ]; then
-		root="/dev/sdx"
-	fi
-	
-	usb_devices=(`sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | \
-		grep -v $root | grep -Po "(/dev/sd.*)" | sort`)
-	
-	echo ${usb_devices[*]}
-	)
+    (
+    root=$(mount | grep " / " | grep  -Po "(/dev/sd[^ ])")
+    if [ $? -ne 0 ]; then
+        root="/dev/sdx"
+    fi
+
+    index=0
+    usb_devices=()
+    disk_devices=(`ls -l --color=auto /dev/disk/by-id/usb* | awk '{print $NF}' | grep -Pv "[0-9]"`)
+    for disk in ${disk_devices[@]}; do
+        name=${disk##*/}
+        usb_devices[$index]=/dev/$name
+        let index++
+    done
+
+    echo ${usb_devices[*]}
+    )
 }
 
 ###################################################################################
@@ -364,6 +379,7 @@ create_initrd() {
 		echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 	fi
 
+	sed -i '/eth0/s/^/#/g' ./etc/network/interfaces
 	sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ./usr/bin/setup.sh
 	sudo chmod 755 ./usr/bin/setup.sh
 
@@ -384,6 +400,64 @@ clean_workspace() {
 
 	return 0
 }
+
+###################################################################################
+# get the release of the current machine
+##################################################################################
+dist_name() {
+    if [ -f /etc/os-release ]; then
+        dist=$(. /etc/os-release && echo "${ID}")
+    elif [ -x /usr/bin/lsb_release ]; then
+        dist="$(lsb_release -si)"
+    elif [ -f /etc/lsb-release ]; then
+        dist="$(. /etc/lsb-release && echo "${DISTRIB_ID}")"
+    elif [ -f /etc/debian_version ]; then
+        dist="debian"
+    elif [ -f /etc/fedora-release ]; then
+        dist="fedora"
+    elif [ -f /etc/centos-release ]; then
+        dist="centos"
+    else
+        dist="unknown"
+        echo "Unsupported distro: cannot determine distribution name"
+    fi
+
+    # convert dist to lower case
+    dist=$(echo ${dist} | tr '[:upper:]' '[:lower:]')
+}
+
+###################################################################################
+# install packages
+###################################################################################
+install_deps(){
+    pkgs="$1"
+    [ -z "${pkgs}" ] && echo "Usage: install_deps pkgs"
+    echo "Installing ${pkgs}"
+    dist_name
+    case "${dist}" in
+        debian|ubuntu)
+            apt-get update -q -y
+            apt-get install -q -y ${pkgs}
+            ;;
+        centos)
+            yum -e 0 -y install ${pkgs}
+            ;;
+        fedora)
+            dnf -e 0 -y install ${pkgs}
+            ;;
+        opensuse)
+            zypper -q -y install ${pkgs}
+            ;;
+        *)
+            echo "Unsupported distro: ${dist}! Package installation skipped."
+            ;;
+    esac
+}
+
+command -v curl >/dev/null 2>&1 || install_deps curl
+command -v sudo >/dev/null 2>&1 || install_deps sudo
+command -v lshw >/dev/null 2>&1 || install_deps lshw
+command -v mkfs.vfat >/dev/null 2>&1 || install_deps dosfstools
 
 ###################################################################################
 # Get parameters
@@ -460,14 +534,75 @@ if [ ${#distro_list[@]} -eq 0 ]; then
 	echo "Get distro info from ${ESTUARY_WEB_ADDR}/${VERSION}/linux failed!"; exit 1
 fi
 
-if [ x"$DISTRO" = x"" ] || !(echo ${distro_list[@]} | grep -w $DISTRO >/dev/null 2>&1); then
-	echo "------------------------------------------------------"
-	echo "- supported distro list"
-	echo "------------------------------------------------------"
-	old_ps3="$PS3"
-	PS3="Input the distro index to install: "
-	select dis in ${distro_list[*]}; do DISTRO=$dis; break; done
-	PS3="$old_ps3"
+INSTALL_DISTRO=()
+all_distros=()
+
+if [ x"$DISTRO" != x"" ]; then
+    DISTRO=$(echo $DISTRO | tr ',' ' ')
+    all_distros=($DISTRO)
+    index=0
+    for distro in ${all_distros[*]};do
+        if [ x"$(echo ${distro_list[*]} | grep -iw $distro)" = x"" ]; then
+            DISTRO=${DISTRO/$distro/}
+            echo "the distro $distro you have selected are not valid"
+        else
+            if echo $distro | grep -wi ubuntu >/dev/null 2>&1; then
+                INSTALL_DISTRO[$index]="Ubuntu"
+            elif echo $distro | grep -wi centos >/dev/null 2>&1; then
+                INSTALL_DISTRO[$index]="CentOS"
+            elif echo $distro | grep -wi debian >/dev/null 2>&1; then
+                INSTALL_DISTRO[$index]="Debian"
+            elif echo $distro | grep -wi opensuse >/dev/null 2>&1; then
+                INSTALL_DISTRO[$index]="OpenSuse"
+            elif echo $distro | grep -wi rancher >/dev/null 2>&1; then
+                INSTALL_DISTRO[$index]="Rancher"
+            else
+                if echo $distro | grep -wi fedora >/dev/null 2>&1; then
+                    INSTALL_DISTRO[$index]="Fedora"
+                fi
+            fi
+            let ++index
+        fi
+    done
+fi
+
+echo "The valid distro(s) is/are: ${INSTALL_DISTRO[@]}"
+
+if [ x"$DISTRO" = x"" ];then
+    echo "---------------------------------------------------------------------------------"
+    echo "- select distros you want to install, CentOS will be default installed."
+    echo "---------------------------------------------------------------------------------"
+    total_distro=${#distro_list[@]}
+    for ((index=0; index<${total_distro}; index++)); do
+        if [ x"" != x"$(echo ${distro_list[index]} | grep -wi "centos")" ];then
+            INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${distro_list[index]}
+        else
+            read -n1 -t 5 -p "Install ${distro_list[index]} (default N)? y/N " c
+            if [ x"$c" = x"y" ]; then
+                INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${distro_list[index]}
+            fi
+            echo  ""
+        fi
+    done
+fi
+
+###################################################################################
+# Check distro capacity
+###################################################################################
+capacity_length=${#CAPACITY[@]}
+
+if [ ${#INSTALL_DISTRO[@]} -ne $capacity_length ] && [ $capacity_length -gt 1 ]; then
+    echo "The selected distros length is not the same with the capacity length"
+    exit 1
+fi
+
+if [ $capacity_length -eq 1 ]; then
+    length=${#INSTALL_DISTRO[@]}
+    CAPACITYS=`printf -v v "%-*s" ${length} "" ; echo "${v// /$CAPACITY }"`
+else
+    if [ ${#INSTALL_DISTRO[@]} -eq $capacity ] && [ $capacity_length -ne 1 ]; then
+        CAPACITYS=$CAPACITY
+    fi
 fi
 
 ###################################################################################
@@ -495,7 +630,7 @@ fi
 ###################################################################################
 cat << EOF
 ------------------------------------------------------
-- PLATFROM: $PLATFORM, VERSION: $VERSION, RC: $RC, DISTRO: $DISTRO, TARGET: $TARGET
+- PLATFROM: $PLATFORM, VERSION: $VERSION, RC: $RC, DISTRO: ${INSTALL_DISTRO[@]}, TARGET: $TARGET
 - BINDIR: $BINDIR/
 ------------------------------------------------------
 
@@ -512,7 +647,11 @@ cat << EOF
 ------------------------------------------------------
 EOF
 echo -e "Notice! The device $TARGET will be formatted."
-read -p "Continue to do this? (y/N) " c
+read -n1 -t 5 -p "Continue to do this? (y/N) " c
+if [ x"$c" = x"N" ] || [ x"$c" = x"n" ];then
+    echo "You need to format the USB to continue."
+    exit 1
+fi
 if ! create_partition $TARGET $BOOT_PARTITION_SIZE $DISK_LABEL; then
 	echo "Error!!! Create partition on $TARGET failed!"; exit 1
 fi
@@ -532,10 +671,12 @@ sudo mount ${TARGET}2 $WORKSPACE || exit 1
 sudo chmod a+rw $WORKSPACE
 pushd $WORKSPACE >/dev/null
 
+DISTROS=$(echo ${INSTALL_DISTRO[*]} | tr ' ' ',')
+CAPACITYS=$(echo ${CAPACITYS} | tr ' ' ',')
 cat > estuary.txt << EOF
 PLATFORM=$PLATFORM
-DISTRO=$DISTRO
-CAPACITY=$CAPACITY
+DISTRO=${DISTROS}
+CAPACITY=${CAPACITYS}
 EOF
 
 ###################################################################################
@@ -555,7 +696,8 @@ if ! download_common_binary ${BINDIR}/Common; then
 	echo "Error!!! Download common binary failed!"; exit 1
 fi
 
-if ! download_distro ${BINDIR} "${DISTRO[@]}"; then
+download_distros=$(echo ${INSTALL_DISTRO[*]})
+if ! download_distro ${BINDIR} "$download_distros"; then
 	echo "Error!!! Download distro failed!"; exit 1
 fi
 
@@ -619,12 +761,12 @@ EOF
 trap EXIT
 echo "umount ${TARGET}2...... Please wait!"
 (
-trap 'echo ""; exit' SIGINT
+trap 'echo ""; exit' SIGTERM EXIT
 while :; do echo -n "."; sleep 3; done
 ) &
 child_pid=$!
 sudo umount ${TARGET}2 || exit 1
-kill -s SIGINT ${child_pid} 2>/dev/null
+kill -s SIGTERM ${child_pid} 2>/dev/null
 wait ${child_pid}
 
 rmdir $WORKSPACE
