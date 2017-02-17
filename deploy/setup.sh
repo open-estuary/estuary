@@ -6,10 +6,10 @@ trap 'exit 0' INT
 set +m
 echo 0 > /proc/sys/kernel/printk
 
-D03_VGA_CMDLINE="rdinit=/init console=tty0 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_VGA_CMDLINE="rdinit=/init console=tty0 pcie_aspm=off crashkernel=256M@32M acpi=force"
-D05_CMDLINE="rdinit=/init pcie_aspm=off crashkernel=256M@32M acpi=force"
+D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
+D03_CMDLINE="console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off pci=pci_bus_perf"
+D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
+D05_CMDLINE="earlycon=pl011,mmio,0x602B0000 pcie_aspm=off pci=pci_bus_perf"
 
 ###################################################################################
 # Global variable
@@ -136,11 +136,16 @@ else
 	echo "---------------------------------------------------------------"
 	total_distro=${#all_distro[@]}
 	for ((index=0; index<total_distro; index++)); do
-		read -n1 -t 5 -p "Install ${all_distro[index]} (default y)? y/N " c
-		if [ x"$c" = x"" ] || [ x"$c" = x"y" ]; then
-			INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
-			DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
-		fi
+        if [ x"" =  x"$(echo ${all_distro[index]} | grep -Ei "ubuntu|centos")" ]; then
+            read -n1 -t 5 -p "Install ${all_distro[index]} (default N)? y/N " c
+            if [ x"$c" = x"y" ]; then
+                INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
+                DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
+            fi
+        else
+            INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
+            DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
+        fi
 		echo ""
 	done
 fi
@@ -364,8 +369,8 @@ for ((index=0; index<distro_number; index++)); do
 	root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
 	root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
-	linux_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $console_cmd_line"
-	linux_vga_arg="/$Image root=$root_dev_info rootfstype=ext4 rootwait rw $vga_cmd_line"
+	linux_arg="/$Image root=$root_dev_info rootwait rw $console_cmd_line"
+	linux_vga_arg="/$Image root=$root_dev_info rootwait rw $vga_cmd_line"
 	distro_name=${INSTALL_DISTRO[$index]}
 	
 cat >> /boot/grub.cfg << EOF
@@ -428,6 +433,7 @@ echo "---------------------------------------------------------------*/"
 echo -e "\033[?25l"
 echo "Press y to restart at now, other key to stop!"
 (
+trap 'exit' SIGTERM
 for ((i=1; i<16; i++)); do
 	left_time=$[16 - i]
 	printf "                                          \r"
@@ -440,7 +446,7 @@ reboot -f
 ) &
 child_pid=$!
 read -n1 c
-kill -s 9 $child_pid 2>/dev/null
+kill -15 $child_pid 2>/dev/null
 if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
 	echo -e "\033[?25h"
 	reboot
