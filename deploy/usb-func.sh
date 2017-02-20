@@ -10,10 +10,16 @@ get_usb_devices()
 	if [ $? -ne 0 ]; then
 		root="/dev/sdx"
 	fi
-	
-	usb_devices=(`sudo lshw 2>/dev/null | grep "bus info: usb" -A 12 | grep "logical name: /dev/sd" | \
-		grep -v $root | grep -Po "(/dev/sd.*)" | sort`)
-	
+
+    index=0
+    usb_devices=()
+	disk_devices=(`ls -l --color=auto /dev/disk/by-id/usb* 2>/dev/null| awk '{print $NF}' | grep -Pv "[0-9]"`)
+	for disk in ${disk_devices[@]}; do
+		name=${disk##*/}
+		usb_devices[$index]=/dev/$name
+		let index++
+	done
+
 	echo ${usb_devices[*]}
 	)
 }

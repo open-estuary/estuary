@@ -23,10 +23,10 @@ NFS_ROOT=
 NETCARD_NAME=
 SERVER_IP=
 
-D03_VGA_CMDLINE="rdinit=/init console=tty0 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D03_CMDLINE="rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off acpi=force"
-D05_VGA_CMDLINE="rdinit=/init console=tty0 pcie_aspm=off crashkernel=256M@32M acpi=force"
-D05_CMDLINE="rdinit=/init pcie_aspm=off crashkernel=256M@32M acpi=force"
+D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
+D03_CMDLINE="console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 pcie_aspm=off pci=pci_bus_perf"
+D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
+D05_CMDLINE="earlycon=pl011,mmio,0x602B0000 pcie_aspm=off pci=pci_bus_perf"
 
 ###################################################################################
 # Usage

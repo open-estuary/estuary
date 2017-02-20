@@ -93,11 +93,16 @@ integrate_postinstall_scripts()
         sudo mkdir -p ${rootfs}/${log_dir}
     fi
 
-    rm -f /tmp/post_install.sh 2>/dev/null
-    cp ${TOPDIR}/post_install.sh /tmp/
-    sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" /tmp/post_install.sh
-    sudo mv /tmp/post_install.sh ${local_dir}
-    sudo chmod 755 ${local_dir}/post_install.sh
+    build_post_md5=$(md5sum ${local_dir}/post_install.sh 2>/dev/null | awk '{print $1}' 2>/dev/null)
+    origin_post_md5=$(md5sum ${TOPDIR}/post_install.sh | awk '{print $1}')
+    if [ x"$build_post_md5" != x"$origin_post_md5" ];then
+        rm -f /tmp/post_install.sh 2>/dev/null
+        cp ${TOPDIR}/post_install.sh /tmp/
+        sed -i "s/lastupdate=.*/lastupdate=\"$lastupdate\"/" /tmp/post_install.sh
+        sudo mv /tmp/post_install.sh ${local_dir}
+        sudo chmod 755 ${local_dir}/post_install.sh
+    fi
+
     eval rc_local_file=\$${distro}_rc
     if [ x"$rc_local_file" = x"" ]; then
         rc_local_file=$Default_rc
@@ -191,7 +196,6 @@ build_packages()
     install_dir=${5}
 
     packages=${packages//,/ }
-    
     distro=${DISTRO}
     rootfs=$(cd "${ROOTFS}"; pwd)
     kernel=$(cd "${KERNEL}"; pwd)
@@ -211,13 +215,19 @@ build_packages()
     for pkg in ${packages[@]}; do
         subbuild_dir=${builddir_dir}/${pkg}
         
-        tar_file=$(ls ${pack_save_dir}/${pkg}*.tar.gz 2>/dev/null)
-        rpm_file=$(ls ${pack_save_dir}/${pkg}*.rpm 2>/dev/null)
-        deb_file=$(ls ${pack_save_dir}/${pkg}*.deb 2>/dev/null)
-  
+        if [ x"$pkg" = x"docker" ]; then
+            tar_file=$(ls ${pack_save_dir}/${pkg}*.tar.gz 2>/dev/null | grep -v 'docker_apps' 2>/dev/null)
+            rpm_file=$(ls ${pack_save_dir}/${pkg}*.rpm 2>/dev/null | grep -v 'docker_apps' 2>/dev/null)
+            deb_file=$(ls ${pack_save_dir}/${pkg}*.deb 2>/dev/null | grep -v 'docker_apps' 2>/dev/null)
+        else
+            tar_file=$(ls ${pack_save_dir}/${pkg}*.tar.gz 2>/dev/null)
+            rpm_file=$(ls ${pack_save_dir}/${pkg}*.rpm 2>/dev/null)
+            deb_file=$(ls ${pack_save_dir}/${pkg}*.deb 2>/dev/null)
+        fi
+
         has_built=0
         if [ x"${pack_type}" == x"all" ] ; then
-            if [ ! -z "${tar_file} ] && [ ! -z "${rpm_file} ] && [ ! -z "${deb_file}" ] ; then
+            if [ ! -z "${tar_file}" ] && [ ! -z "${rpm_file}" ] && [ ! -z "${deb_file}" ] ; then
                 has_built=1
             fi
         else 
@@ -225,6 +235,16 @@ build_packages()
             if [ ! -z `eval echo '$'$check_file` ]; then
                 has_built=1
             fi
+        fi
+
+        last_modify_time=`sudo find ${PACKAGE_ROOT_DIR}/${pkg} 2>/dev/null -exec stat -c %Y {} \; | sort -n -r | head -n1`
+        pkg_last_modify_time=`stat -c %Y $tar_file $rpm_file $deb_file 2>/dev/null`
+        if [ $last_modify_time -gt $pkg_last_modify_time ]; then
+            rm -fr $tar_file 2>/dev/null
+            rm -fr $rpm_file 2>/dev/null
+            rm -fr $deb_file 2>/dev/null
+            rm -fr ${subbuild_dir} 2>/dev/null
+            has_built=0
         fi
 
         echo "###################################################################################"
@@ -277,9 +297,31 @@ integrate_packages()
         sudo mkdir -p ${dst_dir}
     fi
 
+    local pkg_name=
+    local pkg_names=()
     packages=${packages//,/ }
     for pkg in ${packages[@]}; do
-        sudo cp ${pack_save_dir}/${pkg}*.tar.gz ${dst_dir}
+        if [ x"$pkg" = x"docker" ]; then
+            pkg_exists=$(ls $dst_dir | grep "docker" | grep -v "docker_apps")
+            pkg_name=$(ls ${pack_save_dir} | grep "docker" | grep -v "docker_apps")
+        else
+            pkg_exists=$(ls $dst_dir | grep $pkg)
+            pkg_name=$(ls ${pack_save_dir} | grep $pkg)
+        fi
+
+        pkg_names=($pkg_name)
+        for package in ${pkg_names[@]}; do
+            real_pkg=${package##*/}
+            if [ x"" = x"$pkg_exists" ]; then
+                sudo cp ${pack_save_dir}/${real_pkg} ${dst_dir}
+            else
+                last_build_time=`sudo find ${dst_dir}/${real_pkg} 2>/dev/null -exec stat -c %Y {} \; | sort -n -r | head -n1`
+                pkg_last_build_time=`stat -c %Y ${pack_save_dir}/${real_pkg} 2>/dev/null`
+                if [ $pkg_last_build_time -gt $last_build_time ]; then
+                    sudo cp ${pack_save_dir}/${real_pkg} ${dst_dir}
+                fi
+            fi
+        done
     done
 }
 
@@ -297,6 +339,33 @@ mark_package_installation()
     if [ ! -f ${mark_file} ]; then
         sudo touch ${mark_file}
         sudo chmod 755 ${mark_file}
+    fi
+
+    # check if the re-installed packages have not changed, do nothing
+    post_pkgs=(`cat ${mark_file}`)
+    build_pkgs=($packages)
+    IFS=$'\n' sorted_post_pkgs=($(sort <<<"${post_pkgs[*]}"))
+    unset IFS
+    IFS=$'\n' sorted_packages=($(sort <<<"${build_pkgs[*]}"))
+    unset IFS
+
+    echo ${sorted_post_pkgs[@]}
+    echo ${sorted_packages[@]}
+
+    pkg_flag=0
+    if [ ${#sorted_post_pkgs[@]} -eq ${#sorted_packages[@]} ]; then
+        for ((i=0;i<${#sorted_post_pkgs[@]}; i++)); do
+            if [ x"${sorted_packages[i]}" != x"${sorted_post_pkgs[i]}" ]; then
+                pkg_flag=1
+                break
+            fi
+        done
+    else
+        pkg_flag=1
+    fi
+
+    if [ $pkg_flag -eq 0 ]; then
+        return 
     fi
 
     #If it will re-installs packages which need to be installed before
@@ -368,7 +437,7 @@ elif [ -f "${CFG_FILE}" ] ; then
         unset PACKAGES_CMD_LIST[0]
         PACKAGES=$(echo ${PACKAGES_CMD_LIST[@]} | tr ' ' ','$)
     fi
-    
+
     #PACKAGES_CMD=${PACKAGES_CMD_ELEM%%,*}
     #PACKAGES=${PACKAGES_CMD_ELEM#*,}
 fi 
@@ -409,7 +478,7 @@ if [ ! -d ${PACKAGE_SAVE_DIR} ] ; then
     mkdir -p ${PACKAGE_SAVE_DIR}
 fi
 
-build_packages "${PACKAGES}" "${PACKAGES_CMD}" "${PACKAGE_BUILD_DIR}" "${PACKAGE_SAVE_DIR}" "${INSTALL_DIR}" 
+build_packages "${PACKAGES}" "${PACKAGES_CMD}" "${PACKAGE_BUILD_DIR}" "${PACKAGE_SAVE_DIR}" "${INSTALL_DIR}"
 integrate_postinstall_scripts ${DISTRO} ${ROOTFS} ${INSTALL_DIR}
 update_system_variables "${ROOTFS}" "${INSTALL_DIR}"
 
