@@ -160,7 +160,7 @@ update_system_variables()
         chmod 755 ${ld_conf}
     fi
 
-    if [ -z "$(grep "/usr/estuary/libs" ${ld_conf} 2>/dev/null)" ] ; then
+    if [ -z "$(grep "/usr/estuary/lib" ${ld_conf} 2>/dev/null)" ] ; then
         echo "/usr/estuary" >> ${ld_conf}
         echo "/usr/estuary/lib" >> ${ld_conf}
         echo "/usr/estuary/lib64" >> ${ld_conf}
@@ -173,12 +173,12 @@ update_system_variables()
             sudo sed -i '/^exit/iexport PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:/usr/estuary/usr/bin:/usr/estuary/usr/sbin:$PATH' ${etc_file}
             sudo sed -i '/^exit/iexport C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH' ${etc_file}
             sudo sed -i '/^exit/iexport CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
-            sudo sed -i '/^exit/iexport LIBRARY_PATH=/usr/estuary/libs:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
+            sudo sed -i '/^exit/iexport LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
         else
             sudo sed -i '$ a export PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:/usr/estuary/usr/bin:/usr/estuary/usr/sbin:$PATH' ${etc_file}
             sudo sed -i '$ a export C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH' ${etc_file}
             sudo sed -i '$ a export CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
-            sudo sed -i '$ a export LIBRARY_PATH=/usr/estuary/libs:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
+            sudo sed -i '$ a export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
         fi
     fi
 }
@@ -239,7 +239,13 @@ build_packages()
 
         last_modify_time=`sudo find ${PACKAGE_ROOT_DIR}/${pkg} 2>/dev/null -exec stat -c %Y {} \; | sort -n -r | head -n1`
         pkg_last_modify_time=`stat -c %Y $tar_file $rpm_file $deb_file 2>/dev/null`
-        if [ $last_modify_time -gt $pkg_last_modify_time ]; then
+        if [ x"$last_modify_time" = x"" ]; then
+            last_modify_time=0
+        fi
+        if [ x"$pkg_last_modify_time" = x"" ]; then
+            pkg_last_modify_time=0
+        fi
+        if [ $last_modify_time -gt $pkg_last_modify_time 2>/dev/null ]; then
             rm -fr $tar_file 2>/dev/null
             rm -fr $rpm_file 2>/dev/null
             rm -fr $deb_file 2>/dev/null
