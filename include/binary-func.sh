@@ -37,12 +37,12 @@ download_binaries()
 		binary_file=`basename $target_addr`
 		if [ ! -f ${binary_file}.sum ]; then
 			rm -f .${binary_file}.sum 2>/dev/null
-			wget -c $ftp_addr/${target_addr}.sum || return 1
+			wget $ftp_addr/${target_addr}.sum || return 1
 		fi
 
 		if [ ! -f $binary_file ] || ! check_sum . ${binary_file}.sum; then
 			rm -f $binary_file 2>/dev/null
-			wget -c $ftp_addr/$target_addr || return 1
+			wget ${WGET_OPTS} $ftp_addr/$target_addr || return 1
 			check_sum . ${binary_file}.sum || return 1
 		fi
 		

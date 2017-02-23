@@ -22,6 +22,7 @@ download_toolchains()
 	ftp_addr=$2
 	target_dir=$3
 	toolchain_files=(`get_field_content $ftp_cfgfile toolchain`)
+
 	pushd $target_dir >/dev/null
 	for toolchain in ${toolchain_files[*]}; do
 		target_file=`expr "X$toolchain" : 'X\([^:]*\):.*' | sed 's/ //g'`
@@ -30,12 +31,12 @@ download_toolchains()
 
 		if [ ! -f ${toolchain_file}.sum ]; then
 			rm -f .${toolchain_file}.sum 2>/dev/null
-			wget -c $ftp_addr/${target_addr}.sum || return 1
+			wget $ftp_addr/${target_addr}.sum || return 1
 		fi
 
 		if [ ! -f $toolchain_file ] || ! check_sum . ${toolchain_file}.sum; then
 			rm -f $toolchain_file 2>/dev/null
-			wget -c $ftp_addr/$target_addr || return 1
+			wget ${WGET_OPTS} $ftp_addr/$target_addr || return 1
 			check_sum . ${toolchain_file}.sum || return 1
 		fi
 		

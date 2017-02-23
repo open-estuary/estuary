@@ -19,12 +19,12 @@ download_distros()
 		distro_file=`basename $ftp_file`
 
 		if [ ! -f ${distro_file}.sum ]; then
-			wget -c $ftp_addr/${ftp_file}.sum || return 1
+			wget $ftp_addr/${ftp_file}.sum || return 1
 		fi
 
 		if [ ! -f $distro_file ] || ! check_sum . ${distro_file}.sum; then
 			rm -f $distro_file 2>/dev/null
-			wget -c $ftp_addr/$ftp_file || return 1
+			wget ${WGET_OPTS} $ftp_addr/$ftp_file || return 1
 			check_sum . ${distro_file}.sum || return 1
 		fi
 

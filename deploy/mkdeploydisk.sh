@@ -15,6 +15,7 @@ D05_CMDLINE="pcie_aspm=off pci=pci_bus_perf"
 
 BOOT_PARTITION_SIZE=4
 DISK_LABEL="Estuary"
+WGET_OPTS="-T 120 -c"
 
 ###################################################################################
 # Global variables
@@ -247,11 +248,11 @@ download_file() {
 	md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
 
 	rm -f ${target_file_name}.sum .${target_file_name}.sum >/dev/null 2>&1
-	wget -c ${target_file}.sum || return 1
+	wget ${target_file}.sum || return 1
 	mv ${target_file_name}.sum .${target_file_name}.sum
 	md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
 	rm -f $target_file_name >/dev/null 2>&1
-	wget -c $target_file && md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
+    wget ${WGET_OPTS} $target_file && md5sum --quiet --check .${target_file_name}.sum >/dev/null 2>&1 && return 0
 	popd >/dev/null
 
 	return 1

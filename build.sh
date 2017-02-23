@@ -33,6 +33,7 @@ export PATH=$TOPDIR:$TOPDIR/include:$TOPDIR/submodules:$TOPDIR/deploy:$PATH
 if [ x"$(echo $PATH | grep "/usr/local/bin")" = x""  ]; then
     export PATH=$PATH:/usr/local/bin
 fi
+export WGET_OPTS="-T 120 -c"
 
 export LC_ALL=C
 export LANG=C
