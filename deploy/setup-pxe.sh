@@ -28,13 +28,13 @@ cat << EOF
 # mkisoimg.sh usage
 ###################################################################
 Usage: setup-pxe.sh --tftproot=xxx --nfsroot=xxx --net=xxx
-	-h, --help              display this help and exit
-	--tftproot              TFTP server root directory
+    -h, --help              display this help and exit
+    --tftproot              TFTP server root directory
     --nfsroot               NFS server root directory
-	--net                   wich ethernet card that the device will connect to (eth0, eth1 ...)
+    --net                   wich ethernet card that the device will connect to (eth0, eth1 ...)
 
 for example:
-	setup-pxe.sh --tftproot=/var/lib/tftpboot --nfsroot=/var/nfsroot --net=eth0
+    setup-pxe.sh --tftproot=/var/lib/tftpboot --nfsroot=/var/nfsroot --net=eth0
 
 EOF
 }
@@ -43,17 +43,17 @@ EOF
 # string calculate_subnet(string host_ip, string netmask)
 ###################################################################################
 calculate_subnet() {
-	(
-	host_ip=$1
-	netmask=$2
-	ip_addr=(`echo $host_ip | sed 's/\./ /g'`)
-	netmasks=(`echo $netmask | sed 's/\./ /g'`)
-	subnet=()
-	for ((index=0; index<4; index++)); do
-		subnet[$index]=$[${ip_addr[index]}&${netmasks[index]}]
-	done
-	echo ${subnet[*]} | tr ' ' '.'
-	)
+    (
+    host_ip=$1
+    netmask=$2
+    ip_addr=(`echo $host_ip | sed 's/\./ /g'`)
+    netmasks=(`echo $netmask | sed 's/\./ /g'`)
+    subnet=()
+    for ((index=0; index<4; index++)); do
+        subnet[$index]=$[${ip_addr[index]}&${netmasks[index]}]
+    done
+    echo ${subnet[*]} | tr ' ' '.'
+    )
 }
 
 ###################################################################################
@@ -61,8 +61,8 @@ calculate_subnet() {
 ###################################################################################
 host=`lsb_release -a 2>/dev/null | grep Codename: | awk {'print $2'}`
 if [ "$host" != "lucid" -a "$host" != "precise" -a "$host" != "trusty" ]; then
-	echo "Unsupported host machine, only Ubuntu 12.04 LTS and Ubuntu 14.04 LTS are supported"
-	exit 1
+    echo "Unsupported host machine, only Ubuntu 12.04 LTS and Ubuntu 14.04 LTS are supported"
+    exit 1
 fi
 
 ###################################################################################
@@ -70,27 +70,27 @@ fi
 ###################################################################################
 while test $# != 0
 do
-	case $1 in
-		--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
-			;;
-		*) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
-			;;
-	esac
-	
-	case $ac_option in
-		-h | --help) Usage ; exit ;;
-		--tftproot) TFTP_ROOT=$ac_optarg ;;
-		--nfsroot) NFS_ROOT=$ac_optarg ;;
-		--net) NETCARD_NAME=$ac_optarg ;;
-		*) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
-	esac
+    case $1 in
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
+            ;;
+        *) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
+            ;;
+    esac
 
-	shift
+    case $ac_option in
+        -h | --help) Usage ; exit ;;
+        --tftproot) TFTP_ROOT=$ac_optarg ;;
+        --nfsroot) NFS_ROOT=$ac_optarg ;;
+        --net) NETCARD_NAME=$ac_optarg ;;
+        *) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
+    esac
+
+    shift
 done
 
 if [ x"$TFTP_ROOT" = x"" ] || [ x"$NFS_ROOT" = x"" ] || [ x"NETCARD_NAME" = x"" ]; then
-	echo "Tftp root, NFS root and Ethernet card must be specified!"
-	Usage ; exit 1
+    echo "Tftp root, NFS root and Ethernet card must be specified!"
+    Usage ; exit 1
 fi
 
 ###################################################################################
@@ -102,10 +102,10 @@ nfs_pkgs="nfs-kernel-server nfs-common rpcbind portmap"
 
 pxe_pkgs="$dhcp_pkgs $tftp_pkgs $nfs_pkgs"
 if ! dpkg-query -l $pxe_pkgs >/dev/null 2>&1; then
-	sudo apt-get update
-	if ! sudo apt-get install -y $pxe_pkgs; then
-		echo "Install $pxe_pkgs failed!" ; exit 1
-	fi
+    sudo apt-get update
+    if ! sudo apt-get install -y $pxe_pkgs; then
+        echo "Install $pxe_pkgs failed!" ; exit 1
+    fi
 fi
 
 ###################################################################################
@@ -118,7 +118,7 @@ INET_MASK=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=Mask:)([^ ]*)"`
 SUB_NET=`calculate_subnet $INET_ADDR $INET_MASK`
 ROUTER=`route | grep "$NETCARD_NAME" | grep default | awk '{print $2}'`
 if [ x"$ROUTER" = x"" ]; then
-	ROUTER=$INET_ADDR
+    ROUTER=$INET_ADDR
 fi
 
 ###################################################################################
@@ -174,10 +174,10 @@ EOM
 sudo mv /tmp/tftpd-hpa /etc/default/tftpd-hpa || exit 1
 
 if ! grep -E "^(TFTP_DIRECTORY=\"$tftp_root\")" $tftpcfg 2>/dev/null; then
-	sudo cp $tftpcfg $tftpcfg.old 2>/dev/null
-	if ! sudo sed -i "s/^\(TFTP_DIRECTORY=\"\)\([^\"]*\)\(\"\)/\1$tftp_root\3/g" tftpd-hpa $tftpcfg; then
-		exit 1
-	fi
+    sudo cp $tftpcfg $tftpcfg.old 2>/dev/null
+    if ! sudo sed -i "s/^\(TFTP_DIRECTORY=\"\)\([^\"]*\)\(\"\)/\1$tftp_root\3/g" tftpd-hpa $tftpcfg; then
+        exit 1
+    fi
 fi
 
 cat > /tmp/inetd.conf << EOM
@@ -197,9 +197,9 @@ nfs_root=`cd $NFS_ROOT; pwd`
 
 sudo chmod 777 $nfs_root
 if ! grep $nfs_root /etc/exports >/dev/null 2>&1; then
-	sudo chmod 666 /etc/exports || exit 1
-	sudo echo "$nfs_root *(rw,nohide,insecure,no_subtree_check,async,no_root_squash)" >> /etc/exports
-	sudo chmod 644 /etc/exports || exit 1
+    sudo chmod 666 /etc/exports || exit 1
+    sudo echo "$nfs_root *(rw,nohide,insecure,no_subtree_check,async,no_root_squash)" >> /etc/exports
+    sudo chmod 644 /etc/exports || exit 1
 fi
 
 ###################################################################################

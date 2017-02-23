@@ -28,24 +28,24 @@ quick_deploy_usage()
 {
 cat << EOF
 Usage: quick-deploy.sh --target=xxx --boardmac=xxx,xxx --platform=xxx,xxx --distros=xxx,xxx --capacity=xxx,xxx --output=xxx
-	--target: deploy type and device (usb, iso, pxe)
-		for usb, you can use "--target=usb:/dev/sdb" to install deploy files into /dev/sdb;
-		for iso, you can use "--target=iso:Estuary.iso" to create Estuary.iso deploy media;
-		for pxe, you can use "--target=pxe" to setup the pxe on the host.
-		if usb device is not specified, the first usb storage device will be default.
-		if iso file name not specified, the "Estuary_<PLAT>.iso" will be default.
-	--boardmac: if you pxe deploy type, use "--boardmac" to specify the target board mac addresses.
-	--platform: which platforms to deploy
-	--distros: which distros to deploy
-	--capacity: capacity for distros on install disk, unit GB (suggest 50GB)
-	--binary: target binary directory
+    --target: deploy type and device (usb, iso, pxe)
+        for usb, you can use "--target=usb:/dev/sdb" to install deploy files into /dev/sdb;
+        for iso, you can use "--target=iso:Estuary.iso" to create Estuary.iso deploy media;
+        for pxe, you can use "--target=pxe" to setup the pxe on the host.
+        if usb device is not specified, the first usb storage device will be default.
+        if iso file name not specified, the "Estuary_<PLAT>.iso" will be default.
+    --boardmac: if you pxe deploy type, use "--boardmac" to specify the target board mac addresses.
+    --platform: which platforms to deploy
+    --distros: which distros to deploy
+    --capacity: capacity for distros on install disk, unit GB (suggest 50GB)
+    --binary: target binary directory
 
 Example:
-	quick-deploy.sh --target=usb --platform=D03,D05 --distros=Ubuntu,CentOS --binary=./workspace
-	quick-deploy.sh --target=usb:/dev/sdb --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
-	quick-deploy.sh --target=iso --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace/binary
-	quick-deploy.sh --target=iso:Estuary_D03.iso --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
-	quick-deploy.sh --target=pxe --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
+    quick-deploy.sh --target=usb --platform=D03,D05 --distros=Ubuntu,CentOS --binary=./workspace
+    quick-deploy.sh --target=usb:/dev/sdb --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
+    quick-deploy.sh --target=iso --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace/binary
+    quick-deploy.sh --target=iso:Estuary_D03.iso --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
+    quick-deploy.sh --target=pxe --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 --platform=D03 --distros=Ubuntu,CentOS --binary=./workspace
 
 EOF
 }
@@ -55,30 +55,30 @@ EOF
 ###################################################################################
 while test $# != 0
 do
-        case $1 in
-        	--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ;;
-        	*) ac_option=$1 ;;
-        esac
+    case $1 in
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ;;
+        *) ac_option=$1 ;;
+    esac
 
-        case $ac_option in
-		--target) TARGET=$ac_optarg ;;
-		--boardmac) BOARDS_MAC=$ac_optarg ;;
-		--platform) PLATFORMS=$ac_optarg ;;
-		--distros) DISTROS=$ac_optarg ;;
-		--capacity) CAPACITY=$ac_optarg ;;
-		--binary) BIN_DIR=$ac_optarg ;;
-		*) echo "Error! Unknown option $ac_option!"
-			quick_deploy_usage ; exit 1 ;;
-        esac
+    case $ac_option in
+    --target) TARGET=$ac_optarg ;;
+    --boardmac) BOARDS_MAC=$ac_optarg ;;
+    --platform) PLATFORMS=$ac_optarg ;;
+    --distros) DISTROS=$ac_optarg ;;
+    --capacity) CAPACITY=$ac_optarg ;;
+    --binary) BIN_DIR=$ac_optarg ;;
+    *) echo "Error! Unknown option $ac_option!"
+        quick_deploy_usage ; exit 1 ;;
+    esac
 
-        shift
+    shift
 done
 
 ###################################################################################
 # Check args
 ###################################################################################
 if [ x"$TARGET" = x"" ] || [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$BIN_DIR" = x"" ]; then
-	quick_deploy_usage ; exit 1
+    quick_deploy_usage ; exit 1
 fi
 
 ###################################################################################
@@ -88,13 +88,13 @@ deploy_type=`echo "$TARGET" | awk -F ':' '{print $1}'`
 deploy_device=`echo "$TARGET" | awk -F ':' '{print $2}'`
 
 if [ x"$deploy_type" = x"usb" ]; then
-	mkusbinstall.sh --target=$deploy_device --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --bindir=$BIN_DIR || exit 1
+    mkusbinstall.sh --target=$deploy_device --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --bindir=$BIN_DIR || exit 1
 elif [ x"$deploy_type" = x"iso" ]; then
-	mkisoimg.sh --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --disklabel="Estuary" --bindir=$BIN_DIR || exit 1
+    mkisoimg.sh --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --disklabel="Estuary" --bindir=$BIN_DIR || exit 1
 elif [ x"$deploy_type" = x"pxe" ]; then
-	mkpxe.sh --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --boardmac=$BOARDS_MAC --bindir=$BIN_DIR || exit 1
+    mkpxe.sh --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --boardmac=$BOARDS_MAC --bindir=$BIN_DIR || exit 1
 else
-	echo "Unknow deploy type!" >&2 ; exit 1
+    echo "Unknow deploy type!" >&2 ; exit 1
 fi
 
 ###################################################################################

@@ -38,22 +38,22 @@ cat << EOF
 # mkusbinstall.sh usage
 ###################################################################
 Usage: mkpxe.sh [OPTION]... [--OPTION=VALUE]...
-	-h, --help              display this help and exit
-	--boardmac=xxx,xxx      target boards mac
-	--platforms=xxx,xxx     which platforms to deploy (D03, D05)
-	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
-	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
-	--bindir=xxx            binary directory
-	--tftproot=xxx          tftp root directory (if not specified, you can select it in runing)
-	--nfsroot=xxx           nfs root directory (if not specified, you can select it in runing)
-	--net=xxx               wich ethernet card that the boards will connect to (if not specified, you can select it in runing)
+    -h, --help              display this help and exit
+    --boardmac=xxx,xxx      target boards mac
+    --platforms=xxx,xxx     which platforms to deploy (D03, D05)
+    --distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
+    --capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
+    --bindir=xxx            binary directory
+    --tftproot=xxx          tftp root directory (if not specified, you can select it in runing)
+    --nfsroot=xxx           nfs root directory (if not specified, you can select it in runing)
+    --net=xxx               wich ethernet card that the boards will connect to (if not specified, you can select it in runing)
 
-  
+
 for example:
-	mkpxe.sh --platforms=D03 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
-	--capacity=50,50 --bindir=./workspace
-	mkpxe.sh --platforms=D03,D05 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
-	--capacity=50,50 --bindir=./workspace --net=eth0
+    mkpxe.sh --platforms=D03 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+    --capacity=50,50 --bindir=./workspace
+    mkpxe.sh --platforms=D03,D05 --distros=Ubuntu,OpenSuse --boardmac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
+    --capacity=50,50 --bindir=./workspace --net=eth0
 
 EOF
 }
@@ -63,60 +63,60 @@ EOF
 ###################################################################################
 while test $# != 0
 do
-	case $1 in
-		--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
-			;;
-		*) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
-			;;
-	esac
-	
-	case $ac_option in
-		-h | --help) Usage ; exit ;;
-		--boardmac) BOARDSMAC=$ac_optarg ;;
-		--platforms) PLATFORMS=$ac_optarg ;;
-		--distros) DISTROS=$ac_optarg ;;
-		--capacity) CAPACITY=$ac_optarg ;;
-		--bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
-		--tftproot) TFTP_ROOT=$ac_optarg ;;
-		--nfsroot) NFS_ROOT=$ac_optarg ;;
-		--net) NETCARD_NAME=$ac_optarg ;;
-		*) echo "Unknow option $ac_option!" >&2 ; Usage ; exit 1 ;;
-	esac
+    case $1 in
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
+            ;;
+        *) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
+            ;;
+    esac
 
-	shift
+    case $ac_option in
+        -h | --help) Usage ; exit ;;
+        --boardmac) BOARDSMAC=$ac_optarg ;;
+        --platforms) PLATFORMS=$ac_optarg ;;
+        --distros) DISTROS=$ac_optarg ;;
+        --capacity) CAPACITY=$ac_optarg ;;
+        --bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
+        --tftproot) TFTP_ROOT=$ac_optarg ;;
+        --nfsroot) NFS_ROOT=$ac_optarg ;;
+        --net) NETCARD_NAME=$ac_optarg ;;
+        *) echo "Unknow option $ac_option!" >&2 ; Usage ; exit 1 ;;
+    esac
+
+    shift
 done
 
 ###################################################################################
 # Check parameters
 ###################################################################################
 if  [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ] || [ x"$BOARDSMAC" = x"" ]; then
-	echo "board mac: $BOARDSMAC, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
-	echo "Error! Please all parameters are right!" >&2
-	Usage ; exit 1
+    echo "board mac: $BOARDSMAC, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
+    echo "Error! Please all parameters are right!" >&2
+    Usage ; exit 1
 fi
 
 distros=($(echo "$DISTROS" | tr ',' ' '))
 capacity=($(echo "$CAPACITY" | tr ',' ' '))
 if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
-	echo "Error! Number of capacity is not eq the distros!" >&2
-	Usage ; exit 1
+    echo "Error! Number of capacity is not eq the distros!" >&2
+    Usage ; exit 1
 fi
 
 ###################################################################################
 # Setup PXE server
 ###################################################################################
 if [ x"$TFTP_ROOT" = x"" ]; then
-	get_pxe_tftproot TFTP_ROOT || exit 1
+    get_pxe_tftproot TFTP_ROOT || exit 1
 fi
 
 if [ x"$NFS_ROOT" = x"" ]; then
-	get_pxe_nfsroot NFS_ROOT || exit 1
+    get_pxe_nfsroot NFS_ROOT || exit 1
 fi
 
 if [ x"$NETCARD_NAME" = x"" ]; then
-	if ! get_pxe_interface NETCARD_NAME; then
-		exit 1
-	fi
+    if ! get_pxe_interface NETCARD_NAME; then
+        exit 1
+    fi
 fi
 SERVER_IP=`ifconfig $NETCARD_NAME 2>/dev/null | grep -Po "(?<=inet addr:)([^ ]*)"`
 
@@ -129,7 +129,7 @@ TFTP_ROOT=`cd $TFTP_ROOT; pwd`
 NFS_ROOT=`cd $NFS_ROOT; pwd`
 
 if ! setup-pxe.sh --tftproot=$TFTP_ROOT --nfsroot=$NFS_ROOT --net=$NETCARD_NAME; then
-	echo "Error! Setup PXE server failed!" >&2 ; exit 1
+    echo "Error! Setup PXE server failed!" >&2 ; exit 1
 fi
 
 NFS_ROOT=`mktemp -d $NFS_ROOT/rootfs.XXXX`
@@ -165,8 +165,8 @@ echo "Copy distros to $NFS_ROOT......"
 
 distros=($(echo $DISTROS | tr ',' ' '))
 for distro in ${distros[*]}; do
-	echo "Copy distro ${distro}_ARM64.tar.gz to $NFS_ROOT......"
-	cp $BINARY_DIR/${distro}_ARM64.tar.gz $NFS_ROOT || exit 1
+    echo "Copy distro ${distro}_ARM64.tar.gz to $NFS_ROOT......"
+    cp $BINARY_DIR/${distro}_ARM64.tar.gz $NFS_ROOT || exit 1
 done
 
 echo "Copy distros to $NFS_ROOT done!"
@@ -188,7 +188,7 @@ tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
 rm -f ../deploy-utils.tar.bz2
 
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
-	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
+    echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
 
 sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ../setup.sh
@@ -225,20 +225,20 @@ set default=${default_plat}_minilinux_vga
 EOF
 
 for plat in ${platforms[*]}; do
-	vga_cmd_line="$(eval echo \$${plat}_VGA_CMDLINE) root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp"
-	console_cmd_line="$(eval echo \$${plat}_CMDLINE) root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp"
-	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
-	cat >> grub.cfg << EOF
+    vga_cmd_line="$(eval echo \$${plat}_VGA_CMDLINE) root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp"
+    console_cmd_line="$(eval echo \$${plat}_CMDLINE) root=/dev/nfs rw nfsroot=${SERVER_IP}:${NFS_ROOT} ip=dhcp"
+    platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
+    cat >> grub.cfg << EOF
 # Booting initrd for $plat (VGA)
 menuentry "Install $plat estuary (VGA)" --id ${platform}_minilinux_vga {
-	linux /$Image $vga_cmd_line
-	initrd /$Initrd
+    linux /$Image $vga_cmd_line
+    initrd /$Initrd
 }
 
 # Booting initrd for $plat (Console)
 menuentry "Install $plat estuary (Console)" --id ${platform}_minilinux_console {
-	linux /$Image $console_cmd_line
-	initrd /$Initrd
+    linux /$Image $console_cmd_line
+    initrd /$Initrd
 }
 
 EOF
@@ -246,7 +246,7 @@ done
 
 boards_mac=($(echo $BOARDSMAC | tr "[:upper:]" "[:lower:]" | tr ',' ' '))
 for board_mac in ${boards_mac[*]}; do
-	cp grub.cfg $TFTP_ROOT/grub.cfg-${board_mac} || exit 1
+    cp grub.cfg $TFTP_ROOT/grub.cfg-${board_mac} || exit 1
 done
 
 

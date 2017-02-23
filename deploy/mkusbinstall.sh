@@ -35,19 +35,19 @@ cat << EOF
 # mkusbinstall.sh usage
 ###################################################################
 Usage: mkusbinstall.sh [OPTION]... [--OPTION=VALUE]...
-	-h, --help              display this help and exit
-	--target=xxx            deploy usb device
-	--platforms=xxx,xxx     which platforms to deploy (D03, D05)
-	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
-	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
-	--bindir=xxx            binary directory
-	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
-  
+    -h, --help              display this help and exit
+    --target=xxx            deploy usb device
+    --platforms=xxx,xxx     which platforms to deploy (D03, D05)
+    --distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
+    --capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
+    --bindir=xxx            binary directory
+    --disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
+
 for example:
-	mkusbinstall.sh --target=/dev/sdb --platforms=D03 --distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace
-	mkusbinstall.sh --target=/dev/sdb --platforms=D03,D05 --distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace --disklabel=Estuary
+    mkusbinstall.sh --target=/dev/sdb --platforms=D03 --distros=Ubuntu,OpenSuse \\
+    --capacity=50,50 --bindir=./workspace
+    mkusbinstall.sh --target=/dev/sdb --platforms=D03,D05 --distros=Ubuntu,OpenSuse \\
+    --capacity=50,50 --bindir=./workspace --disklabel=Estuary
 
 EOF
 }
@@ -57,57 +57,57 @@ EOF
 ###################################################################################
 while test $# != 0
 do
-	case $1 in
-		--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
-			;;
-		*) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
-			;;
-	esac
-	
-	case $ac_option in
-		-h | --help) Usage ; exit ;;
-		--target) TARGET=$ac_optarg ;;
-		--platforms) PLATFORMS=$ac_optarg ;;
-		--distros) DISTROS=$ac_optarg ;;
-		--capacity) CAPACITY=$ac_optarg ;;
-		--bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
-		--disklabel) DISK_LABEL=$ac_optarg ;;
-		*) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
-	esac
+    case $1 in
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
+            ;;
+        *) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
+            ;;
+    esac
 
-	shift
+    case $ac_option in
+        -h | --help) Usage ; exit ;;
+        --target) TARGET=$ac_optarg ;;
+        --platforms) PLATFORMS=$ac_optarg ;;
+        --distros) DISTROS=$ac_optarg ;;
+        --capacity) CAPACITY=$ac_optarg ;;
+        --bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
+        --disklabel) DISK_LABEL=$ac_optarg ;;
+        *) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
+    esac
+
+    shift
 done
 
 ###################################################################################
 # Check parameters
 ###################################################################################
 if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
-	echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
-	echo "Error! Please all parameters are right!" >&2
-	Usage ; exit 1
+    echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
+    echo "Error! Please all parameters are right!" >&2
+    Usage ; exit 1
 fi
 
 if ! check_usb_device $TARGET && ! get_default_usb TARGET; then
-	echo "Error! Can't find available usb device!" >&2 ; exit 1
+    echo "Error! Can't find available usb device!" >&2 ; exit 1
 fi
 
 distros=($(echo "$DISTROS" | tr ',' ' '))
 capacity=($(echo "$CAPACITY" | tr ',' ' '))
 if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
-	echo "Error! Number of capacity is not eq the distros!" >&2
-	Usage ; exit 1
+    echo "Error! Number of capacity is not eq the distros!" >&2
+    Usage ; exit 1
 fi
 
 ###################################################################################
 # Notice the user to continue this operation
 ###################################################################################
 if mount | grep -Po "^($TARGET[^ ]* on / ).*" >/dev/null 2>&1; then
-	echo "Error!!! Target device $TARGET is mounted as root system! Please use another usb device!" >&2 ; exit 1
+    echo "Error!!! Target device $TARGET is mounted as root system! Please use another usb device!" >&2 ; exit 1
 fi
 
 device_info=`sudo fdisk -l 2>/dev/null | grep -Po "^(Disk $TARGET: ).*"`
 if [ x"$device_info" = x"" ]; then
-	echo "Error! Target device $TARGET is not exist!" >&2 ; exit 1
+    echo "Error! Target device $TARGET is not exist!" >&2 ; exit 1
 fi
 
 echo "---------------------------------------------------------------"
@@ -116,7 +116,7 @@ echo "- $device_info"
 echo "---------------------------------------------------------------"
 read -p "Continue to create the usb install disk on $TARGET? (y/n) " choice
 if [ x"$choice" != x"y" ]; then
-	echo "Exit ......" ; exit 1
+    echo "Exit ......" ; exit 1
 fi
 
 ###################################################################################
@@ -125,7 +125,7 @@ fi
 read -a mounted_partition <<< $(mount | grep -Po "(${TARGET}.)")
 for partition in ${mounted_partition[@]}
 do
-	sudo umount $partition
+    sudo umount $partition
 done
 
 yes | sudo mkfs.ext4 $TARGET
@@ -166,8 +166,8 @@ echo "Copy distros to $WORKSPACE......"
 
 distros=($(echo $DISTROS | tr ',' ' '))
 for distro in ${distros[*]}; do
-	echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
-	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
+    echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
+    cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
 done
 
 echo "Copy distros to $WORKSPACE done!"
@@ -189,7 +189,7 @@ tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
 rm -f ../deploy-utils.tar.bz2
 
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
-	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
+    echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
 
 sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ../setup.sh
@@ -226,22 +226,22 @@ set default=${default_plat}_minilinux_vga
 EOF
 
 for plat in ${platforms[*]}; do
-	eval vga_cmd_line=\$${plat}_VGA_CMDLINE
-	eval console_cmd_line=\$${plat}_CMDLINE
-	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
-	cat >> grub.cfg << EOF
+    eval vga_cmd_line=\$${plat}_VGA_CMDLINE
+    eval console_cmd_line=\$${plat}_CMDLINE
+    platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
+    cat >> grub.cfg << EOF
 # Booting initrd for $plat (VGA)
 menuentry "Install $plat estuary (VGA)" --id ${platform}_minilinux_vga {
-	search --no-floppy --label --set=root $DISK_LABEL
-	linux /$Image $vga_cmd_line
-	initrd /$Initrd
+    search --no-floppy --label --set=root $DISK_LABEL
+    linux /$Image $vga_cmd_line
+    initrd /$Initrd
 }
 
 # Booting initrd for $plat (Console)
 menuentry "Install $plat estuary (Console)" --id ${platform}_minilinux_console {
-	search --no-floppy --label --set=root $DISK_LABEL
-	linux /$Image $console_cmd_line
-	initrd /$Initrd
+    search --no-floppy --label --set=root $DISK_LABEL
+    linux /$Image $console_cmd_line
+    initrd /$Initrd
 }
 
 EOF
