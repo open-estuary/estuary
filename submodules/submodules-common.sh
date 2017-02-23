@@ -5,12 +5,12 @@
 ###################################################################################
 get_last_commit()
 {
-	(
-	target_dir=$1
-	pushd $target_dir >/dev/null
-	git log -n 1 2>/dev/null | grep -P "^(commit ).*" | awk '{print $2}'
-	popd >/dev/null
-	)
+    (
+    target_dir=$1
+    pushd $target_dir >/dev/null
+    git log -n 1 2>/dev/null | grep -P "^(commit ).*" | awk '{print $2}'
+    popd >/dev/null
+    )
 }
 
 ###################################################################################
@@ -18,18 +18,18 @@ get_last_commit()
 ###################################################################################
 update_module_check()
 {
-	(
-	module_name=$1
-	output_dir=$2
+    (
+    module_name=$1
+    output_dir=$2
 
-	last_build=`cat $output_dir/.$module_name 2>/dev/null`
-	last_commit=`get_last_commit $module_name`
-	if [ x"$last_build" != x"$last_commit" ]; then
-		return 1
-	fi
+    last_build=`cat $output_dir/.$module_name 2>/dev/null`
+    last_commit=`get_last_commit $module_name`
+    if [ x"$last_build" != x"$last_commit" ]; then
+        return 1
+    fi
 
-	return 0
-	)
+    return 0
+    )
 }
 
 ###################################################################################
@@ -37,12 +37,12 @@ update_module_check()
 ###################################################################################
 gen_module_build_log()
 {
-	(
-	module_name=$1
-	output_dir=$2
-	last_commit=`get_last_commit $module_name`
-	echo $last_commit > $output_dir/.$module_name 2>/dev/null
-	)
+    (
+    module_name=$1
+    output_dir=$2
+    last_commit=`get_last_commit $module_name`
+    echo $last_commit > $output_dir/.$module_name 2>/dev/null
+    )
 }
 
 ###################################################################################
@@ -50,10 +50,10 @@ gen_module_build_log()
 ###################################################################################
 rm_module_build_log()
 {
-	(
-	module_name=$1
-	output_dir=$2
-	rm -f $output_dir/.$module_name 2>/dev/null
-	)
+    (
+    module_name=$1
+    output_dir=$2
+    rm -f $output_dir/.$module_name 2>/dev/null
+    )
 }
 
