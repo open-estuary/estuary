@@ -13,6 +13,7 @@
 	- Added support for more PCIe devices in D03/D05: SSD, RAID(LSI 2308/3008/3108), Intel 82599 NIC
 	- Supported CentOS native build for open-estuary source
 	- Supported NUMA on D05 board officially
+	- Support Perf L3 cache / MN features
 4. Distros
 	- Improved mini-rootfs for better Lmbench stream performance
 	- Upgraded CentOS AltArch to 7.3
@@ -21,11 +22,14 @@
 5. Applications
 	- Upgraded QEMU to v2.8.0
 	- Enabled MySQL/Percona server docker image
+	- Enabled PostgreSQL docker image
 6. Deployment
 	- Supported USB Flash disk script-type installation
 	- Supported BMC load ISO both by web or VGA monitor
+	- Supported multiple distros in USB install Disk method
 7. Website
-	- Added news scroller in open-estuary.org
+	- News Scroller added
+	- New Collaboration Feature added
 8. Document
 	- Added D05 documents and update all project documents
 
