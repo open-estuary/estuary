@@ -34,18 +34,18 @@ cat << EOF
 # mkisoimg.sh usage
 ###################################################################
 Usage: mkisoimg.sh [OPTION]... [--OPTION=VALUE]...
-	-h, --help              display this help and exit
-	--platforms=xxx,xxx     which platforms to deploy (D03, D05)
-	--distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
-	--capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
-	--bindir=xxx            binary directory
-	--disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
-  
+    -h, --help              display this help and exit
+    --platforms=xxx,xxx     which platforms to deploy (D03, D05)
+    --distros=xxx,xxx       which distros to deploy (Ubuntu, Fedora, OpenSuse, Debian, CentOS)
+    --capacity=xxx,xxx      capacity for distros on install disk, unit GB (suggest 50GB)
+    --bindir=xxx            binary directory
+    --disklabel=xxx         rootfs partition label on usb device (Default is Estuary)
+
 for example:
-	mkisoimg.sh --platforms=D03 --distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace
-	mkisoimg.sh --platforms=D03,D05 --distros=Ubuntu,OpenSuse \\
-	--capacity=50,50 --bindir=./workspace --disklabel=Estuary
+    mkisoimg.sh --platforms=D03 --distros=Ubuntu,OpenSuse \\
+    --capacity=50,50 --bindir=./workspace
+    mkisoimg.sh --platforms=D03,D05 --distros=Ubuntu,OpenSuse \\
+    --capacity=50,50 --bindir=./workspace --disklabel=Estuary
 
 EOF
 }
@@ -55,58 +55,58 @@ EOF
 ###################################################################################
 while test $# != 0
 do
-	case $1 in
-		--*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
-			;;
-		*) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
-			;;
-	esac
-	
-	case $ac_option in
-		-h | --help) Usage ; exit ;;
-		--platforms) PLATFORMS=$ac_optarg ;;
-		--distros) DISTROS=$ac_optarg ;;
-		--capacity) CAPACITY=$ac_optarg ;;
-		--bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
-		--disklabel) DISK_LABEL=$ac_optarg ;;
-		*) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
-	esac
+    case $1 in
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ; ac_shift=:
+            ;;
+        *) ac_option=$1 ; ac_optarg=$2 ; ac_shift=shift
+            ;;
+    esac
 
-	shift
+    case $ac_option in
+        -h | --help) Usage ; exit ;;
+        --platforms) PLATFORMS=$ac_optarg ;;
+        --distros) DISTROS=$ac_optarg ;;
+        --capacity) CAPACITY=$ac_optarg ;;
+        --bindir) BINARY_DIR=$(cd $ac_optarg ; pwd) ;;
+        --disklabel) DISK_LABEL=$ac_optarg ;;
+        *) echo "Unknow option $ac_option!" ; Usage ; exit 1 ;;
+    esac
+
+    shift
 done
 
 ###################################################################################
 # Check parameters
 ###################################################################################
 if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
-	echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
-	echo "Error! Please all parameters are right!" >&2
-	Usage ; exit 1
+    echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
+    echo "Error! Please all parameters are right!" >&2
+    Usage ; exit 1
 fi
 
 distros=($(echo "$DISTROS" | tr ',' ' '))
 capacity=($(echo "$CAPACITY" | tr ',' ' '))
 if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
-	echo "Error! Number of capacity is not eq the distros!" >&2
-	Usage ; exit 1
+    echo "Error! Number of capacity is not eq the distros!" >&2
+    Usage ; exit 1
 fi
 
 ###################################################################################
 # Check update
 ###################################################################################
 if [ -f $BINARY_DIR/${DISK_LABEL}.iso ] && [ -f $BINARY_DIR/.${DISK_LABEL}.iso.txt ]; then
-	while true; do
-		platforms=`grep -Po "(?<=PLATFORMS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
-		distros=`grep -Po "(?<=DISTROS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
-		capacity=`grep -Po "(?<=CAPACITY=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
-		if [ x"$platforms" != x"$PLATFORMS" ] || [ x"$distros" != x"$DISTROS" ] || [ x"$capacity" != x"$CAPACITY" ]; then
-			break
-		fi
-		distros=`echo ${DISTROS} | tr ',' ' '`
-		distro_files=($(for f in $distros; do echo $BINARY_DIR/${f}_ARM64.tar.gz; done))
-		check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} && exit 0
-		break
-	done
+    while true; do
+        platforms=`grep -Po "(?<=PLATFORMS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+        distros=`grep -Po "(?<=DISTROS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+        capacity=`grep -Po "(?<=CAPACITY=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+        if [ x"$platforms" != x"$PLATFORMS" ] || [ x"$distros" != x"$DISTROS" ] || [ x"$capacity" != x"$CAPACITY" ]; then
+            break
+        fi
+        distros=`echo ${DISTROS} | tr ',' ' '`
+        distro_files=($(for f in $distros; do echo $BINARY_DIR/${f}_ARM64.tar.gz; done))
+        check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} && exit 0
+        break
+    done
 fi
 
 rm -f $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/.${DISK_LABEL}.iso.txt
@@ -140,8 +140,8 @@ echo "Copy distros to $WORKSPACE......"
 
 distros=($(echo $DISTROS | tr ',' ' '))
 for distro in ${distros[*]}; do
-	echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
-	cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
+    echo "Copy distro ${distro}_ARM64.tar.gz to $WORKSPACE......"
+    cp $BINARY_DIR/${distro}_ARM64.tar.gz ./ || exit 1
 done
 
 echo "Copy distros to $WORKSPACE done!"
@@ -163,7 +163,7 @@ tar jxvf ../deploy-utils.tar.bz2 -C ./ || exit 1
 rm -f ../deploy-utils.tar.bz2
 
 if ! (grep "/usr/bin/setup.sh" etc/init.d/rcS); then
-	echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
+    echo "/usr/bin/setup.sh" >> etc/init.d/rcS || exit 1
 fi
 
 sed -i "s/\(DISK_LABEL=\"\).*\(\"\)/\1$DISK_LABEL\2/g" ../setup.sh
@@ -200,20 +200,20 @@ set default=${default_plat}_minilinux_vga
 EOF
 
 for plat in ${platforms[*]}; do
-	eval vga_cmd_line=\$${plat}_VGA_CMDLINE
-	eval console_cmd_line=\$${plat}_CMDLINE
-	platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
-	cat >> grub.cfg << EOF
+    eval vga_cmd_line=\$${plat}_VGA_CMDLINE
+    eval console_cmd_line=\$${plat}_CMDLINE
+    platform=`echo $plat | tr "[:upper:]" "[:lower:]"`
+    cat >> grub.cfg << EOF
 # Booting initrd for $plat (VGA)
 menuentry "Install $plat estuary (VGA)" --id ${platform}_minilinux_vga {
-	linux /$Image $vga_cmd_line
-	initrd /$Initrd
+    linux /$Image $vga_cmd_line
+    initrd /$Initrd
 }
 
 # Booting initrd for $plat (Console)
 menuentry "Install $plat estuary (Console)" --id ${platform}_minilinux_console {
-	linux /$Image $console_cmd_line
-	initrd /$Initrd
+    linux /$Image $console_cmd_line
+    initrd /$Initrd
 }
 
 EOF
