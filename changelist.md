@@ -4,7 +4,7 @@
 	- Supported D03/D05 boards based on ACPI
 	- Added basic support for AMD Overdrive board
 2. UEFI
-	- Upgraded UEFI components to Linaro ERP 16.12
+	- Upgraded UEFI version to 16.12 Release
 	- Added support for BMC boot device ipmi protocol
 	- Fixed 2TB+ disk support bug
 3. OS
@@ -32,8 +32,9 @@
 7. Website
 	- News Scroller added
 	- New Collaboration Feature added
+	- New Technical support platform added
 8. Document
 	- Added D05 documents and update all project documents
 
 # Remained issues:
-	- Armor utilities are not fully support
+1. Armor utilities are not fully support
