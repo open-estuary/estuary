@@ -21,7 +21,9 @@
 	- Fixed DHCP boot conflict issue when passing ip=dhcp in kernel command line
 5. Applications
 	- Upgraded QEMU to v2.8.0
-	- Enabled MySQL/Percona server docker image
+	- Enabled OpenJDK 1.8
+	- Enabled MySQL(Percona Server) docker image
+	- Enabled Redis docker image
 	- Enabled PostgreSQL docker image
 6. Deployment
 	- Supported USB Flash disk script-type installation
@@ -34,5 +36,4 @@
 	- Added D05 documents and update all project documents
 
 # Remained issues:
-1. OpenStack on CentOS has not been supported yet
-2. CI automation has not been deployed in OpenLab2
+	- Armor utilities are not fully support
