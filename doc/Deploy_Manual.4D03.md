@@ -181,27 +181,11 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
       set default=ubuntu
       # For booting GNU/Linux
 
-      menuentry "ubuntu" --id ubuntu {
+      menuentry "D03 Ubuntu SATA(CONSOLE)" --id d03_ubuntu_sata_console {
         search --no-floppy --fs-uuid --set=root <UUID>
-        linux /Image rdinit=/init acpi=force pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
+        linux /Image pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
       }
       ```
-      grub.cfg file for official V2.2 and previous versions is modified as follow:
-      ```bash
-      # Sample GRUB configuration file
-      #
-      # Boot automatically after 5 secs.
-      set timeout=5
-      # By default, boot the Estuary with Ubuntu filesystem
-      set default=ubuntu
-      # For booting GNU/Linux
-
-      menuentry "ubuntu" --id ubuntu {
-        search --no-floppy --fs-uuid --set=root <UUID>
-        linux /Image rdinit=/init acpi=force pcie_aspm=off root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw console=ttyS1,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 ip=dhcp
-      }
-      ```
-      **Note**:  
       *  The value of console is `ttyS0` for official versions after V2.2. If you use official V2.2 and previous versions, the value of console is `ttyS1`
       *  `<UUID>` means the UUID of that partition which your EFI System is located in.  
          `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in.  

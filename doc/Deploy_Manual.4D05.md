@@ -229,12 +229,12 @@ D05 board supports booting via SAS, USB and SATA by default. The UEFI will direc
     # Boot automatically after 5 secs.
     set timeout=5
     # By default, boot the Estuary with Centos filesystem
-    set default=d05_centos_sata_acpi
+    set default=d05_centos_sata_console
     # For booting GNU/Linux
 
-    menuentry "D05 Centos SATA(ACPI)" --id d05_centos_sata_acpi {
+    menuentry "D05 Centos SATA(CONSOLE)" --id d05_centos_sata_console {
     search --no-floppy --fs-uuid --set=root <UUID>
-    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M root=PARTUUID=<PARTUUID> rootwait rootfstype=ext4 rw
+    linux /Image pcie_aspm=off pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw
     }
    ```
 
