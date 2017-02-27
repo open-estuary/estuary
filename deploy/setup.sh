@@ -6,10 +6,10 @@ trap 'exit 0' INT
 set +m
 echo 0 > /proc/sys/kernel/printk
 
-D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
-D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pci_bus_perf"
-D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
-D05_CMDLINE="pcie_aspm=off pci=pci_bus_perf"
+D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
+D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pcie_bus_perf"
+D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
+D05_CMDLINE="pcie_aspm=off pci=pcie_bus_perf"
 
 ###################################################################################
 # Global variable
@@ -88,27 +88,39 @@ fi
 ###################################################################################
 # Get install platform parameters
 ###################################################################################
-platform=`cat $ESTUARY_CFG | grep -Eo "PLATFORM=[^ ]*"`
-platform=(`expr "X$platform" : 'X[^=]*=\(.*\)' | tr ',' ' '`)
-PLATFORM=${platform[0]}
-
-if [ ${#platform[@]} -gt 1 ]; then
-    echo "Notice! Multiple platforms found."
-    echo ""
-    echo "---------------------------------------------------------------"
-    echo "- platfrom: ${PLATFORMS[*]}"
-    echo "---------------------------------------------------------------"
-    for (( index=0; index<${#platform[@]}; index++ )); do
-        echo "$[index + 1]) ${platform[index]}"
-    done
-    read -n1 -t 5 -p "Please input the index of platfrom to install (default 1): " index
-    echo ""
-
-    if [ x"$index" = x"" ] || ! (expr 1 + $index > /dev/null 2>&1); then
-        index=1
+PLATFORM=""
+firmware_info=$(cat /sys/firmware/dmi/entries/0-0/raw 2>/dev/null)
+if [ x"$(echo $firmware_info | grep -E "D03|Taishan 2180" 2>/dev/null)" != x"" ]; then
+    PLATFORM="D03"
+else
+    if [ x"$(echo $fireware_info | grep -E "D05|Taishan 2280" 2>/dev/null)" != x"" ]; then
+        PLATFORM="D05"
     fi
-    PLATFORM=${platform[index-1]}
-    PLATFORM=${PLATFORM:${platform[0]}}
+fi
+
+if [ x"$PLATFORM" = x"" ]; then
+    platform=`cat $ESTUARY_CFG | grep -Eo "PLATFORM=[^ ]*"`
+    platform=(`expr "X$platform" : 'X[^=]*=\(.*\)' | tr ',' ' '`)
+    PLATFORM=${platform[0]}
+
+    if [ ${#platform[@]} -gt 1 ]; then
+        echo "Notice! Multiple platforms found."
+        echo ""
+        echo "---------------------------------------------------------------"
+        echo "- platfrom: ${PLATFORMS[*]}"
+        echo "---------------------------------------------------------------"
+        for (( index=0; index<${#platform[@]}; index++ )); do
+            echo "$[index + 1]) ${platform[index]}"
+        done
+        read -n1 -t 5 -p "Please input the index of platfrom to install (default 1): " index
+        echo ""
+
+        if [ x"$index" = x"" ] || ! (expr 1 + $index > /dev/null 2>&1); then
+            index=1
+        fi
+        PLATFORM=${platform[index-1]}
+        PLATFORM=${PLATFORM:${platform[0]}}
+    fi
 fi
 
 ###################################################################################
@@ -136,18 +148,30 @@ else
     echo "---------------------------------------------------------------"
     total_distro=${#all_distro[@]}
     for ((index=0; index<total_distro; index++)); do
-        if [ x"" =  x"$(echo ${all_distro[index]} | grep -wi "centos")" ]; then
-            read -n1 -t 5 -p "Install ${all_distro[index]} (default N)? y/N " c
-            if [ x"$c" = x"y" ]; then
-                INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
-                DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
-            fi
-        else
+        read -n1 -t 5 -p "Install ${all_distro[index]} (default N)? y/N " c
+        if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
             INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
             DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
         fi
+
         echo ""
     done
+
+    if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
+        if [ x"$(echo ${all_distro[@]} | grep -w "CentOS")" != x"" ]; then
+            echo "You have not select any distros, will install CentOS default"
+            INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]="CentOS"
+            for ((i=0; i<${#all_distro[@]}; i++)); do
+                if [ x"$all_distro[$i]" = x"CentOS" ]; then
+                    DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[$i]}
+                    break
+                fi
+            done
+        else
+            INSTALL_DISTRO=(${all_distro[@]})
+            DISTRO_CAPACITY=(${all_capacity[@]})
+        fi
+    fi
 fi
 
 ###################################################################################
