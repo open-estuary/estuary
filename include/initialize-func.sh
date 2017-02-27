@@ -5,8 +5,9 @@
 ###################################################################################
 install_jq()
 {
+    jq_version=jq-1.5
     if [ ! -d jq ]; then
-        git clone https://github.com/stedolan/jq.git
+        git clone -b $jq_version https://github.com/stedolan/jq.git
     fi
 
     (cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install)
