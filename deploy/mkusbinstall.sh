@@ -20,10 +20,10 @@ DISK_LABEL="Estuary"
 BOOT_PARTITION_SIZE=4
 WORKSPACE=
 
-D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
-D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pci_bus_perf"
-D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
-D05_CMDLINE="pcie_aspm=off pci=pci_bus_perf"
+D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
+D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pcie_bus_perf"
+D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
+D05_CMDLINE="pcie_aspm=off pci=pcie_bus_perf"
 
 ###################################################################################
 # Usage
