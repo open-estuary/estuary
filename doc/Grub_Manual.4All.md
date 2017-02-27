@@ -25,8 +25,6 @@ You can edit a `grub.cfg` file to support various boot mode or multi boot partit
 
 You should change them acoording to your real local environment.
 
-***Note: D05 only supports booting system via ACPI mode with Centos, Debian, Ubuntu.***
-
 ```bash
 #
 # Sample GRUB configuration file
@@ -39,43 +37,71 @@ set timeout=5
 set default=d05_centos_nfs_acpi
 
 # Booting from PXE with mini rootfs
-menuentry "D05 minilinux PXE(ACPI)" --id d05_minilinux_pxe_acpi {
+menuentry "D05 minilinux PXE(CONSOLE)" --id d05_minilinux_pxe_console {
     set root=(tftp,192.168.1.107)
-    linux /Image acpi=force pcie_aspm=off rootwait rdinit=/init crashkernel=256M@32M 
+    linux /Image pcie_aspm=off pci=pcie_bus_perf
     initrd /mini-rootfs-arm64.cpio.gz
 }
 
-# Booting from Centos NFS
-menuentry "D05 Centos NFS(ACPI)" --id d05_centos_nfs_acpi {
+menuentry "D05 minilinux PXE(VGA)" --id d05_minilinux_pxe_vga {
     set root=(tftp,192.168.1.107)
-    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M  root=/dev/nfs rw nfsroot=192.168.1.107:/home/<user>/tftp/rootfs_ubuntu64 ip=dhcp
+    linux /Image pcie_aspm=off pci=pcie_bus_perf console=tty0
+    initrd /mini-rootfs-arm64.cpio.gz
+}
+# Booting from Centos NFS
+menuentry "D05 Centos NFS(CONSOLE)" --id d05_centos_nfs_console {
+    set root=(tftp,192.168.1.107)
+    linux /Image pcie_aspm=off pci=pcie_bus_perf  rootwait  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/`<user>`/rootfs_ubuntu64,nfsvers=3 ip=dhcp
 }
 
+menuentry "D05 Centos NFS(VGA)" --id d05_centos_nfs_vga {
+    set root=(tftp,192.168.1.107)
+    linux /Image pcie_aspm=off pci=pcie_bus_perf  rootwait  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/`<user>`/rootfs_ubuntu64,nfsvers=3 ip=dhcp console=tty0
+}
 # Booting from Centos SATA
-menuentry "D05 Centos SATA(ACPI)" --id d05_centos_sata_acpi{
+menuentry "D05 Centos SATA(CONSOLE)" --id d05_centos_sata_console{
     search --no-floppy --fs-uuid --set=root <UUID>
-    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait crashkernel=256M@32M root=PARTUUID=<PARTUUID> rootfstype=ext4 rw
+    linux /Image pcie_aspm=off pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw
 }
 
+menuentry "D05 Centos SATA(VGA)" --id d05_centos_sata_vga{
+    search --no-floppy --fs-uuid --set=root <UUID>
+    linux /Image pcie_aspm=off pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw console=tty0
+}
 # Booting from PXE with mini rootfs
-menuentry "D03 minilinux PXE(ACPI)" --id d03_minilinux_pxe_acpi {
+menuentry "D03 minilinux PXE(CONSOLE)" --id d03_minilinux_pxe_console {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off rootwait crashkernel=256M@32M rdinit=/init console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8  acpi=force
+    linux /Image rdinit=/init pci=pcie_bus_perf console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
     initrd /mini-rootfs-arm64.cpio.gz
 }
 
-# Booting from Centos NFS
-menuentry "D03 Ubuntu NFS(ACPI)" --id d03_ubuntu_nfs_acpi {
+menuentry "D03 minilinux PXE(VGA)" --id d03_minilinux_pxe_vga {
     set root=(tftp,192.168.1.107)
-    linux /Image rdinit=/init pcie_aspm=off console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/ftp/<user>/rootfs_ubuntu64 acpi=force ip=dhcp
+    linux /Image pci=pcie_bus_perf console=tty0
+    initrd /mini-rootfs-arm64.cpio.gz
+}
+# Booting from Centos NFS
+menuentry "D03 Ubuntu NFS(CONSOLE)" --id d03_ubuntu_nfs_console {
+    set root=(tftp,192.168.1.107)
+    linux /Image pci=pcie_bus_perf rootwait console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/`<user>`/ubuntu,nfsvers=3 ip=dhcp
+
 }
 
+menuentry "D03 Ubuntu NFS(VGA)" --id d03_ubuntu_nfs_vga {
+    set root=(tftp,192.168.1.107)
+    linux /Image pci=pcie_bus_perf rootwait console=tty0 root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/`<user>`/ubuntu,nfsvers=3 ip=dhcp
+
+}
 # Booting from Centos SATA
-menuentry "D03 Ubuntu SATA(ACPI)" --id d03_ubuntu_sata_acpi {
+menuentry "D03 Ubuntu SATA(CONSOLE)" --id d03_ubuntu_sata_console {
     search --no-floppy --fs-uuid --set=root <UUID>
-    linux /Image acpi=force pcie_aspm=off rdinit=/init rootwait root=PARTUUID=<PARTUUID> rootfstype=ext4 rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
+    linux /Image pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
 }
 
+menuentry "D03 Ubuntu SATA(VGA)" --id d03_ubuntu_sata_vga {
+    search --no-floppy --fs-uuid --set=root <UUID>
+    linux /Image  pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw console=tty0
+}
 # Booting from PXE with mini rootfs
 menuentry "minilinux_overdrive" --id minilinux_overdrive {
     set root=(tftp,192.168.1.107)
