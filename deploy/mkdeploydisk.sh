@@ -8,10 +8,10 @@ SUPPORTED_PLATFORM=(D03 D05)
 ESTUARY_HTTP_ADDR="http://download.open-estuary.org/?dir=AllDownloads/DownloadsEstuary"
 ESTUARY_FTP_ADDR="ftp://117.78.41.188"
 
-D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
-D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pci_bus_perf"
-D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pci_bus_perf"
-D05_CMDLINE="pcie_aspm=off pci=pci_bus_perf"
+D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
+D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pcie_bus_perf"
+D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
+D05_CMDLINE="pcie_aspm=off pci=pcie_bus_perf"
 
 BOOT_PARTITION_SIZE=4
 DISK_LABEL="Estuary"
@@ -575,16 +575,17 @@ if [ x"$DISTRO" = x"" ];then
     echo "---------------------------------------------------------------------------------"
     total_distro=${#distro_list[@]}
     for ((index=0; index<${total_distro}; index++)); do
-        if [ x"" != x"$(echo ${distro_list[index]} | grep -wi "centos")" ];then
+        read -n1 -t 5 -p "Install ${distro_list[index]} (default N)? y/N " c
+        if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
             INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${distro_list[index]}
-        else
-            read -n1 -t 5 -p "Install ${distro_list[index]} (default N)? y/N " c
-            if [ x"$c" = x"y" ]; then
-                INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${distro_list[index]}
-            fi
-            echo  ""
         fi
+        echo  ""
     done
+
+    if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
+        echo "You have not select any distros, will install CentOS default"
+        INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]="CentOS"
+    fi
 fi
 
 ###################################################################################
