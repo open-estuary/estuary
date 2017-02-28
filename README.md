@@ -1,53 +1,64 @@
 * [Introduction](#1)
-* [How to get Estuary and Build](#2)
-* [Deployment](#3)
-* [Released binaries](#4)
-  * [COPYRIGHT](#4.1)
-* [Contact us](#5)
-* [Changelog](#6)
-* [Other info](#7)
+* [The newest released version](#2)
+* [Documentation](#3)
+* [Downloading](#4)
+* [Development](#5)
+* [COPYRIGHT](#6)
+* [Contact us](#7)
 
 <h2 id="1">Introduction</h2>
 
-These are the release notes for the Estuary new version. Please read them carefully, as they tell you what this is all about, explain how to get, build, and run it.
- 
-Estuary is a complete open source project for ARM64 ecosystem. It provides a total solution for general-purpose computer based on aarch64 architecture. Anyone can quickly bring up an ARM64 platform-both software and hardware with Estuary! It is a long term solution and focus on the combination of the high level components. And It is expected to be rebased from the newest version of the community quickly.
- 
+Estuary is a open source solution for ICT application. It provides a total solutions for general-purpose computer based on aarch64 architecture. Anyone can quickly bring up an ARM64 platform both software and hardware with Estuary!
+
+The goal of Estuary project is to support, enable and speed up the maturity of ARM64 ecosystem.
+
 More detail information about Estuary, please refer to http://open-estuary.org/estuary.
 
-<h2 id="2"> How to get Estuary and Build</h2>
+<h2 id="2"> The newest released version</h2>
 
-To obtain and build system, please refer to http://open-estuary.org/estuary-user-manual/.
+Details of the newest version can be found at: http://open-estuary.org/releases-2/
 
-<h2 id="3"> Deployment</h2>
+To get the difference between the newest Estuary version and the previous one, please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/changelist.md).
 
-  More detail information about deployment, please refer to documents in "<project root>/build/<platform>/doc" directory which manual deployment Deploy_Manual.4D01.md, Deploy_Manual.4D02.md, Deploy_Manual.4D03.md etc… are avalible.
-  
-  Detail description about what is in `<project root>/build/<platform>/doc`please refer to https://github.com/open-estuary/estuary/tree/master/doc
+<h2 id="3"> Documentation</h2>
 
-<h2 id="4"> Released binaries</h2>
+We provide technical documents about UEFI, grub, methods to bring up system, armor, app and so on. You can get more detail documentations about it in `<project root>/build/doc/<platform>` directory.
 
-To use prebuilt binaries directly, please refer to http://download.open-estuary.org/.
+Detail description about what is put in `<project root>/build/doc/<platform>`, please refer to https://github.com/open-estuary/estuary/tree/master/doc
 
-NOTE:
-  
- `releases` directory is formal version which all binary files and distributions version located in.
-  
- `pre-releases` directory is nonformal version like Estuary 2.2 rc`<number>` which all binary files and distributions version
- 
- located in. 
- 
- Each folder contains a “ReadMe” file which provides the details of the files in each main folders.
- 
-<h3 id="4.1"> COPYRIGHT</h3>
+<h2 id="4"> Downloading</h2>
 
- COPYRIGHT for released and pre-released binaries of D01, D02, D03, HiKey.
+All released binary files and the corresponding documents are placed in **Download location**, you can browse and fetch the correct files according to the release version and your board type in this site.
 
-**Copyright**: (c) 2016, Open Estuary
+All prebuilt kernel image/uefi/grub and other binaries can be obtained in  **Download location**`/release/<version>/linux/common/<board type>/`.
+
+All validated distributions can be obtained in **Download location**`/release/<version>/linux/<distro name>/common`.
+
+Each folder contains a “ReadMe” file which describes the details of the files in each main folders.
+
+More detail documentations are available in **Download location**`/release/<version>/linux/common/<board type>/`documentation.
+
+**Download Location**
+
+Accessing from China: Download Location is:ftp://117.78.41.188
+
+Accessing from outside-China: Download Location is: http://download.open-estuary.org/
+
+<h2 id="5"> Development</h2>
+
+To get start, please refer to http://open-estuary.org/getting-started/.
+
+To deploy the system, please refer to **Documentation chapter**.
+
+<h2 id="6"> COPYRIGHT</h2>
+
+ COPYRIGHT for released/pre-released binary files of Estuary, mainly include: kernel image/uefi/grub, distributions like CentOS/Ubuntu, app like OpenJDK/MySQL/Redis.
+
+**Copyright**: (c) 2017-, Huawei Technologies Co., Ltd.
 
 **License**: GPLv2
 
-  This program is free software; you can redistribute it and/or modify
+  This program is free software; you can redistribute it or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
@@ -57,21 +68,16 @@ NOTE:
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
- Note: Binary copy right of different distros belongs to respective distro vendors as per specific distro. 
+ <h2 id="7"> Contact us</h2>
 
- <h2 id="5"> Contact us</h2>
+To post or search any information about Estuary, please refer to [Discussion Forum](http://open-estuary.org/forums/)
 
-For technical support: http://open-estuary.org/technical-support-queries/
+To technical support or raise new issues about Estuary, please refer to [Support center](http://open-estuary.org/supportcenter/)
 
-Other general queries/feebback: http://open-estuary.org/contact-us
+To collaborate with Estuary: http://open-estuary.org/estuary-new-collaboration/
 
-<h2 id="6"> Changelog</h2>
+And….if you have any ARM based platform and you want to enable Estuary solution on it?  
+Please contact us! Let’s work together to make the ARM Server Ecosystem Rich and Matured!  
+Yes, together we can make it happen!
 
-Please refer to [changelist.md](https://github.com/open-estuary/estuary/blob/master/README.md) in this project.
-
-<h2 id="7">Other info</h2>
-
-  Further more platforms will be supported in the esturay.
-  More detail information about estuary, please refer to
-  http://open-estuary.org
 
