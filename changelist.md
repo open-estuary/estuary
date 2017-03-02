@@ -38,7 +38,8 @@
 9. Caliper
 	- Support of CentOS
 	- Email feature added
-	- Upgraded several utilities(Iperf, Hibench)
+	- Upgraded several benchmarking tools (Iperf, Hibench)
+	- Several bug fixes and improvements (sysbench, parser, execution options, etc)
 
 # Remained issues:
 1. Armor utilities are not fully support
