@@ -35,6 +35,10 @@
 	- New Technical support platform added
 8. Document
 	- Added D05 documents and update all project documents
+9. Caliper
+	- Support of CentOS
+	- Email feature added
+	- Upgraded several utilities(Iperf, Hibench)
 
 # Remained issues:
 1. Armor utilities are not fully support
