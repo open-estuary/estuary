@@ -92,7 +92,7 @@ firmware_info=$(cat /sys/firmware/dmi/entries/0-0/raw 2>/dev/null)
 if [ x"$(echo $firmware_info | grep -E "D03|Taishan 2180" 2>/dev/null)" != x"" ]; then
     PLATFORM="D03"
 else
-    if [ x"$(echo $fireware_info | grep -E "D05|Taishan 2280" 2>/dev/null)" != x"" ]; then
+    if [ x"$(echo $firmware_info | grep -E "D05|Taishan 2280" 2>/dev/null)" != x"" ]; then
         PLATFORM="D05"
     fi
 fi
