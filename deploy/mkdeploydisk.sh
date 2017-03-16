@@ -571,7 +571,7 @@ echo "The valid distro(s) is/are: ${INSTALL_DISTRO[@]}"
 
 if [ x"$DISTRO" = x"" ];then
     echo "---------------------------------------------------------------------------------"
-    echo "- select distros you want to install, CentOS will be default installed."
+    echo "- select distros you want to install"
     echo "---------------------------------------------------------------------------------"
     total_distro=${#distro_list[@]}
     for ((index=0; index<${total_distro}; index++)); do
