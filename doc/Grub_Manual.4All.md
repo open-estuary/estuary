@@ -51,12 +51,12 @@ menuentry "D05 minilinux PXE(VGA)" --id d05_minilinux_pxe_vga {
 # Booting from Centos NFS
 menuentry "D05 Centos NFS(CONSOLE)" --id d05_centos_nfs_console {
     set root=(tftp,192.168.1.107)
-    linux /Image pcie_aspm=off pci=pcie_bus_perf  rootwait  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/`<user>`/rootfs_ubuntu64,nfsvers=3 ip=dhcp
+    linux /Image pcie_aspm=off pci=pcie_bus_perf  rootwait  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/`<user>`/rootfs_ubuntu64,nfsvers=3 ip=dhcp
 }
 
 menuentry "D05 Centos NFS(VGA)" --id d05_centos_nfs_vga {
     set root=(tftp,192.168.1.107)
-    linux /Image pcie_aspm=off pci=pcie_bus_perf  rootwait  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/`<user>`/rootfs_ubuntu64,nfsvers=3 ip=dhcp console=tty0
+    linux /Image pcie_aspm=off pci=pcie_bus_perf  rootwait  root=/dev/nfs rw nfsroot=192.168.1.107:/home/hisilicon/ftp/`<user>`/rootfs_ubuntu64,nfsvers=3 ip=dhcp console=tty0
 }
 # Booting from Centos SATA
 menuentry "D05 Centos SATA(CONSOLE)" --id d05_centos_sata_console{
