@@ -147,7 +147,7 @@ else
     echo "---------------------------------------------------------------"
     total_distro=${#all_distro[@]}
     for ((index=0; index<total_distro; index++)); do
-        read -n1 -t 5 -p "Install ${all_distro[index]} (default N)? y/N " c
+        read -n1 -p "Install ${all_distro[index]} (default N)? y/N " c
         if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
             INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
             DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
@@ -157,18 +157,20 @@ else
     done
 
     if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
-        if [ x"$(echo ${all_distro[@]} | grep -w "CentOS")" != x"" ]; then
-            echo "You have not select any distros, will install CentOS default"
-            INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]="CentOS"
-            for ((i=0; i<${#all_distro[@]}; i++)); do
-                if [ x"$all_distro[$i]" = x"CentOS" ]; then
-                    DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[$i]}
-                    break
-                fi
-            done
-        else
-            INSTALL_DISTRO=(${all_distro[@]})
-            DISTRO_CAPACITY=(${all_capacity[@]})
+        echo "You have not selected any distro! Please select."
+        for ((index=0; index<total_distro; index++)); do
+            read -n1 -p "Install ${all_distro[index]} (default N)? y/N " c
+            if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
+                INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
+                DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
+            fi
+
+            echo ""
+        done
+
+        if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
+            echo "You have not selected any distro again! Will reboot now."
+            reboot
         fi
     fi
 fi
