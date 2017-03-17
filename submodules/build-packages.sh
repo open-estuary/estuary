@@ -156,16 +156,16 @@ update_system_variables()
     ld_conf=${rootfs}/etc/ld.so.conf.d/estuaryapps.conf
     
     if [ ! -f "${ld_conf}" ] ; then
-        touch ${ld_conf}
-        chmod 755 ${ld_conf}
+        sudo touch ${ld_conf}
+        sudo chmod 777 ${ld_conf}
     fi
 
     if [ -z "$(grep "/usr/estuary/lib" ${ld_conf} 2>/dev/null)" ] ; then
-        echo "/usr/estuary" >> ${ld_conf}
-        echo "/usr/estuary/lib" >> ${ld_conf}
-        echo "/usr/estuary/lib64" >> ${ld_conf}
-        echo "/usr/estuary/usr/lib" >> ${ld_conf}
-        echo "/usr/estuary/usr/lib64" >> ${ld_conf}
+        sudo echo "/usr/estuary" >> ${ld_conf}
+        sudo echo "/usr/estuary/lib" >> ${ld_conf}
+        sudo echo "/usr/estuary/lib64" >> ${ld_conf}
+        sudo echo "/usr/estuary/usr/lib" >> ${ld_conf}
+        sudo echo "/usr/estuary/usr/lib64" >> ${ld_conf}
     fi
 
     if [ -z "$(grep "/usr/estuary/bin" ${etc_file} 2>/dev/null)" ] ; then
@@ -180,6 +180,10 @@ update_system_variables()
             sudo sed -i '$ a export CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
             sudo sed -i '$ a export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
         fi
+    fi
+	
+    if [ -f "${ld_conf}" ] ; then
+        sudo chmod 755 ${ld_conf}
     fi
 }
 
@@ -344,7 +348,7 @@ mark_package_installation()
     
     if [ ! -f ${mark_file} ]; then
         sudo touch ${mark_file}
-        sudo chmod 755 ${mark_file}
+        sudo chmod 777 ${mark_file}
     fi
 
     # check if the re-installed packages have not changed, do nothing
@@ -392,6 +396,10 @@ mark_package_installation()
         fi
         let "index++"
     done
+	
+    if [ -f ${mark_file} ]; then
+        sudo chmod 755 ${mark_file}
+    fi
 }
 
 ###################################################################################
