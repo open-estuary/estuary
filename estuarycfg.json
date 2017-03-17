@@ -34,7 +34,8 @@
         {"name":"odp",      "requires":"", "enabled":"yes" },
         {"name":"openjdk",  "requires":"", "enabled":"yes" }, 
         {"name":"openstack", "requires":"","enabled": "no"},
-        {"name":"docker_apps", "requires":"","enabled": "no"}
+        {"name":"docker_apps", "requires":"","enabled": "no"},
+	{"name":"hhvm",     "requires":"boost,jemalloc,oniguruma,libevent,glog,libmcrypt", "enabled": "yes"}
     ]
 },
 
