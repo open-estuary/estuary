@@ -16,4 +16,6 @@ Currently the following packages are supported on ARM64 platforms:
     - [MariaDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mariadb/MariaDB_Manual.md)
     - [Redis](https://github.com/open-estuary/packages/blob/master/docker_apps/redis/Redis_Manual.md)
     - [PostgreSQL](https://github.com/open-estuary/packages/blob/master/docker_apps/postgresql/PostgreSQL_Manual.md)
+    - [MongoDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mongodb/MongoDB_Manual.md)
+    - [LAMP](https://github.com/open-estuary/packages/blob/master/docker_apps/lamp/LAMP_Manual.md)
 - [OpenStack](https://github.com/open-estuary/packages/blob/master/openstack/OpenStack_Manual.md)
