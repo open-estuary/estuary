@@ -191,8 +191,8 @@ cat > grub.cfg << EOF
 # Sample GRUB configuration file
 #
 
-# Boot automatically after 5 secs.
-set timeout=5
+# Always waiting for the user to choose.
+set timeout=-1
 
 # By default, boot the Linux
 set default=${default_plat}_minilinux_vga

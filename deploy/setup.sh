@@ -195,7 +195,7 @@ echo "/*---------------------------------------------------------------"
 echo "- Find target distk to install. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 install_disk_dev=`echo "${INSTALL_DISK}" | sed 's/[0-9]*$//g'`
-disk_list=(`lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}'`)
+disk_list=(`lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}' | sort -k 1.3`)
 
 if [[ ${#disk_list[@]} = 0 ]]; then
     echo "Error!!! Can't find disk to install distros!" >&2 ; exit 1
@@ -221,7 +221,7 @@ for (( index=0; index<disk_number; index++)); do
     echo ""
 done
 
-read -n1 -t 5 -p "Input disk index to install or q to quit (default 0): " index
+read -n1 -t 20 -p "Input disk index to install or q to quit (default 0): " index
 echo ""
 if [ x"$index" = x"q" ]; then
     exit 0
@@ -448,6 +448,19 @@ echo "---------------------------------------------------------------*/"
 cd ~
 umount /scratch
 echo ""
+
+###################################################################################
+# Create and fromat partition for disk remaining space
+###################################################################################
+
+start_address=$end_address
+let part_index=$distro_number+$PART_BASE_INDEX
+#Create and fromat partition for remaining space.
+echo "Creating and formatting ${TARGET_DISK}${PART_PREFIX}${part_index} for remaining space."
+(parted -s $TARGET_DISK "mkpart REMAIN ext4 $start_address 100%") >/dev/null 2>&1
+(echo -e "t\n$part_index\n13\nw\n" | fdisk $TARGET_DISK) >/dev/null 2>&1
+(yes | mkfs.ext4 ${TARGET_DISK}${PART_PREFIX}${part_index}) >/dev/null 2>&1
+echo "Create and format ${TARGET_DISK}${part_index} for remaining space done."
 
 ###################################################################################
 # Restart the system
