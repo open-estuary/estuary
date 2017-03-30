@@ -292,8 +292,8 @@ cat > $grub_cfg_file << EOF
 # Sample GRUB configuration file
 #
 
-# Boot automatically after 5 secs.
-set timeout=5
+# Boot automatically after 10 secs.
+set timeout=10
 
 # By default, boot the Linux
 set default=xxxx
