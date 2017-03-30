@@ -195,7 +195,7 @@ echo "/*---------------------------------------------------------------"
 echo "- Find target distk to install. Please wait for a moment!"
 echo "---------------------------------------------------------------*/"
 install_disk_dev=`echo "${INSTALL_DISK}" | sed 's/[0-9]*$//g'`
-disk_list=(`lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}' | sort -k 1.3`)
+disk_list=(`lsblk -ln -o NAME,TYPE | grep '\<disk\>' | grep -v $install_disk_dev | awk '{print $1}' | sort`)
 
 if [[ ${#disk_list[@]} = 0 ]]; then
     echo "Error!!! Can't find disk to install distros!" >&2 ; exit 1
@@ -367,8 +367,8 @@ cat > /boot/grub.cfg << EOF
 # Sample GRUB configuration file
 #
 
-# Boot automatically after 3 secs.
-set timeout=3
+# Boot automatically after 10 secs.
+set timeout=10
 
 # By default, boot the Linux
 set default=default_menuentry
