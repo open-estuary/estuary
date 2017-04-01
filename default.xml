@@ -10,7 +10,7 @@
   <remote  name="grub"
            fetch="git://git.savannah.gnu.org/" />
 
-  <default revision="master"
+  <default revision="v3.1-rc0-pretest1"
            remote="open-estuary"
            sync-j="4" />
 
