@@ -12,7 +12,8 @@
 {"name":"Fedora","install":"no","capacity":"50G"},
 {"name":"OpenSuse","install":"no","capacity":"50G"},
 {"name":"CentOS","install":"yes","capacity":"50G"},
-{"name":"Rancher","install":"no","capacity":"50G"}
+{"name":"Rancher","install":"no","capacity":"50G"},
+{"name":"OpenEmbedded","install":"yes","capacity":"50G"}
 ],
 
 "boards":[
