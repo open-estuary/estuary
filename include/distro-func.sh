@@ -83,7 +83,7 @@ create_distros()
 
         if [ -f $distro_dir/${distro}_ARM64.tar.gz ]; then
             echo "Check $distro_dir/${distro}_ARM64.tar.gz update ......"
-            last_modify=`sudo find $distro_dir/$distro 2>/dev/null -exec stat -c %Y {} \; | sort -n -r | head -n1`
+            last_modify=`sudo find $distro_dir/$distro 2>/dev/null -exec stat -c %Y {} \+ | sort -n -r | head -n1`
             distro_last_modify=`stat -c %Y $distro_dir/${distro}_ARM64.tar.gz 2>/dev/null`
             if [[ "$last_modify" -gt "$distro_last_modify" ]]; then
                 rm -f $distro_dir/${distro}_ARM64.tar.gz
