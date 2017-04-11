@@ -16,7 +16,7 @@
 	- Sort hard disk list in alphabetic order
 	- Improved distribution generation speed when building
 6. Document
-	- Updated project documentation (Readme, Grub, 
+	- Updated project documentation (Readme, Grub, etc)
 	- Updated applications user manual (Redis, PostgreSQL, MySQL, MongoDB, etc)
 7. CI/Automation
 	- Supported basic CI/Automation for D03 (Build, NFS/Hard disk Deployment, Some tests)
