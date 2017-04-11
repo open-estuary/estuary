@@ -1,45 +1,26 @@
-# Change list for Estuary v3.0:
-1. Hardware boards support
-	- Supported D05 board(Hi1616) officially
-	- Supported D03/D05 boards based on ACPI
-	- Added basic support for AMD Overdrive board
-2. UEFI
-	- Upgraded UEFI version to 16.12 Release
-	- Added support for BMC boot device ipmi protocol
-	- Fixed 2TB+ disk support bug
-3. OS
-	- Upgraded Linux kernel version to v4.9.0 (based on Linaro ERP 16.12)
-	- Removed DT(Device Tree) support all boards
-	- Added support for more PCIe devices in D03/D05: SSD, RAID(LSI 2308/3008/3108), Intel 82599 NIC
-	- Supported CentOS native build for open-estuary source
-	- Supported NUMA on D05 board officially
-	- Support Perf L3 cache / MN features
-4. Distros
-	- Improved mini-rootfs for better Lmbench stream performance
-	- Upgraded CentOS AltArch to 7.3
-	- Upgraded Ubuntu to 16.04
-	- Fixed DHCP boot conflict issue when passing ip=dhcp in kernel command line
-5. Applications
-	- Upgraded QEMU to v2.8.0
-	- Enabled OpenJDK 1.8
-	- Enabled MySQL(Percona Server) docker image
-	- Enabled Redis docker image
-	- Enabled PostgreSQL docker image
-6. Deployment
-	- Supported USB Flash disk script-type installation
-	- Supported BMC load ISO both by web or VGA monitor
-	- Supported multiple distros in USB install Disk method
-7. Website
-	- News Scroller added
-	- New Collaboration Feature added
-	- New Technical support platform added
-8. Document
-	- Added D05 documents and update all project documents
-9. Caliper
-	- Support of CentOS
-	- Email feature added
-	- Upgraded several benchmarking tools (Iperf, Hibench)
-	- Several bug fixes and improvements (sysbench, parser, execution options, etc)
+# Change list for Estuary v3.1-rc0:
+1. UEFI
+	- Added HiKey support in UEFI
+2. OS
+	- Upgraded Linux kernel version to v4.9.20
+	- Supported HiKey with v4.9.20 kernel
+3. Distros
+	- Fixed minirootfs devramfs confliction with mdev
+	- Added support for OpenEmbedded
+4. Applications
+	- Added OpenStack Neutron initial support
+	- Enabled HHVM for ARM64
+	- Enabled MongoDB docker image
+5. Deployment
+	- Fixed various BMC load ISO bugs (distro selection, waiting time)
+	- Sort hard disk list in alphabetic order
+	- Improved distribution generation speed when building
+6. Document
+	- Updated project documentation (Readme, Grub, 
+	- Updated applications user manual (Redis, PostgreSQL, MySQL, MongoDB, etc)
+7. CI/Automation
+	- Supported basic CI/Automation for D03 (Build, NFS/Hard disk Deployment, Some tests)
+	- Supported basic  CI/Automation for D05 (Build, NFS/Hard disk Deployment, Some tests)
 
 # Remained issues:
 1. Armor utilities are not fully support
