@@ -8,7 +8,7 @@
 	- Fixed minirootfs devramfs confliction with mdev
 	- Added support for OpenEmbedded
 4. Applications
-	- Added OpenStack Neutron initial support
+	- Added OpenStack Newton initial support
 	- Enabled HHVM for ARM64
 	- Enabled MongoDB docker image
 5. Deployment
