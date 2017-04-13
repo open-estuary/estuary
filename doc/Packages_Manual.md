@@ -18,4 +18,5 @@ Currently the following packages are supported on ARM64 platforms:
     - [PostgreSQL](https://github.com/open-estuary/packages/blob/master/docker_apps/postgresql/PostgreSQL_Manual.md)
     - [MongoDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mongodb/MongoDB_Manual.md)
     - [LAMP](https://github.com/open-estuary/packages/blob/master/docker_apps/lamp/LAMP_Manual.md)
+    - [Cassandra](https://github.com/open-estuary/packages/blob/master/docker_apps/cassandra/Cassandra_Manual.md)
 - [OpenStack](https://github.com/open-estuary/packages/blob/master/openstack/OpenStack_Manual.md)
