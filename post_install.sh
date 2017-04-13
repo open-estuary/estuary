@@ -135,6 +135,17 @@ if [ ! -d "${POST_DIR}" ] ; then
     mkdir -p "${POST_DIR}"
 fi
 
+
+#Add /usr/estuary/bin Path into sudo default paths 
+SUDO_CONFIGFILE="/etc/sudoers"
+if [ -f ${SUDO_CONFIGFILE} ] ; then
+    if [ -z "$(grep '/usr/estuary/bin' ${SUDO_CONFIGFILE})" ] ; then
+        chmod 755 ${SUDO_CONFIGFILE}
+        sed -i 's/\(^Defaults.*secure_path\ *=\ *\"\?\/\)\(.*bin.*\)/\1usr\/estuary\/bin\:\/usr\/estuary\/usr\/bin\:\/usr\/estuary\/usr\/sbin\:\/\2/' ${SUDO_CONFIGFILE}
+        chmod 440 ${SUDO_CONFIGFILE}
+    fi
+fi
+
 #Clear "always logs" during every boot stage
 rm -fr ${INSTALL_ALWAYS_DIR}/*
 decompress_tar_files "${POSTINSTALL_PACKAGEFILELIST}" "${PACKAGE_INTEGRATE_DIR}" "${POST_DIR}"
