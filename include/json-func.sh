@@ -76,6 +76,31 @@ get_install_capacity()
 }
 
 ###################################################################################
+# get_install_home <cfgfile>
+###################################################################################
+get_install_home()
+{
+    (
+    index=0
+    cfgfile=$1
+    homes=()
+    install=`jq -r ".distros[$index].install" $cfgfile 2>/dev/null`
+    while [ x"$?" = x"0" ] && [ x"$install" != x"null" ] && [ x"$install" != x"" ]; do
+        if [ x"yes" = x"$install" ]; then
+            home=`jq -r ".distros[$index].home" $cfgfile`
+            idx=${#homes[@]}
+            homes[$idx]=$home
+        fi
+
+        (( index=index+1 ))
+        install=`jq -r ".distros[$index].install" $cfgfile`
+    done
+
+    echo ${homes[@]}
+    )
+}
+
+###################################################################################
 # get_packages_cmd_and_elems <cfgfile>
 # input: estuarycfg json file
 # output: (package_cmd, package1, package2, ..., packagen)
