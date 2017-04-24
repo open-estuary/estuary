@@ -6,6 +6,7 @@
 TOPDIR=$(cd `dirname $0` ; pwd)
 export PATH=$TOPDIR:$PATH
 . usb-func.sh
+. $TOPDIR/../include/json-func.sh
 
 ###################################################################################
 # Global variable
@@ -16,6 +17,10 @@ DISTROS=
 CAPACITY=
 BINARY_DIR=
 DISK_LABEL="Estuary"
+
+CFG_FILE=$TOPDIR/../estuarycfg.json
+HOMES=`get_install_home $CFG_FILE | tr ' ' ','`
+HOMES=`echo $HOMES |sed -e 's/,/\n/g'|awk '{print /T/?$0*1000"G":$0 }'|xargs|tr " " ","`
 
 BOOT_PARTITION_SIZE=4
 WORKSPACE=
@@ -81,6 +86,7 @@ done
 ###################################################################################
 # Check parameters
 ###################################################################################
+PLATFORMS=`echo $PLATFORMS |sed 's/HiKey//g'|sed 's/QEMU//g'`
 if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
     echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
     echo "Error! Please all parameters are right!" >&2
@@ -93,9 +99,15 @@ fi
 
 distros=($(echo "$DISTROS" | tr ',' ' '))
 capacity=($(echo "$CAPACITY" | tr ',' ' '))
+homes=($(echo "$HOMES" | tr ',' ' '))
+
 if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
     echo "Error! Number of capacity is not eq the distros!" >&2
     Usage ; exit 1
+fi
+if [[ ${#distros[@]} != ${#homes[@]} ]]; then
+    echo "Error! Number of homes is not eq the distros! Specify them in estuarycfg.json." >&2
+    exit 1
 fi
 
 ###################################################################################
@@ -148,6 +160,7 @@ cat > estuary.txt << EOF
 PLATFORM=$PLATFORMS
 DISTRO=$DISTROS
 CAPACITY=$CAPACITY
+HOME=$HOMES
 EOF
 
 ###################################################################################
