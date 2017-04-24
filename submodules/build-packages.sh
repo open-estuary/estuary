@@ -171,14 +171,44 @@ update_system_variables()
     if [ -z "$(grep "/usr/estuary/bin" ${etc_file} 2>/dev/null)" ] ; then
         if [ ! -z "$(grep -E '^(exit)' ${etc_file} 2>/dev/null)" ] ; then
             sudo sed -i '/^exit/iexport PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:/usr/estuary/usr/bin:/usr/estuary/usr/sbin:$PATH' ${etc_file}
-            sudo sed -i '/^exit/iexport C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH' ${etc_file}
-            sudo sed -i '/^exit/iexport CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
-            sudo sed -i '/^exit/iexport LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
+ 
+            sudo sed -i '/^exit/iif [ -z "${C_INCLUDE_PATH}" ] ; then' ${etc_file}
+            sudo sed -i '/^exit/i    export C_INCLUDE_PATH=/usr/estuary/include' ${etc_file}
+            sudo sed -i '/^exit/ielif [ -z "$(echo ${C_INCLUDE_PATH} | grep "/usr/estuary/include")" ] ; then' ${etc_file}
+            sudo sed -i '/^exit/i    export C_INCLUDE_PATH=/usr/estuary/include:${C_INCLUE_PATH}' ${etc_file}
+            sudo sed -i '/^exit/ifi' ${etc_file}
+
+            sudo sed -i '/^exit/iif [ -z "${CPLUS_INCLUDE_PATH}" ] ; then' ${etc_file} 
+            sudo sed -i '/^exit/i    export CPLUS_INCLUDE_PATH=/usr/estuary/include' ${etc_file}
+            sudo sed -i '/^exit/ielif [ -z "$(echo ${CPLUS_INCLUDE_PATH} | grep "/usr/estuary/include")" ] ; then' ${etc_file}
+            sudo sed -i '/^exit/i    export CPLUS_INCLUDE_PATH=/usr/estuary/include:${CPLUS_INCLUDE_PATH}' ${etc_file}
+            sudo sed -i '/^exit/ifi' ${etc_file}
+
+            sudo sed -i '/^exit/iif [ -z "${LIBRARY_PATH}" ] ; then' ${etc_file}
+            sudo sed -i '/^exit/i    export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64' ${etc_file} 
+            sudo sed -i '/^exit/ielif [ -z "$(echo ${LIBRARY_PATH} | grep "/usr/estuary/lib64")" ] ; then' ${etc_file}
+            sudo sed -i '/^exit/i    export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:${LIBRARY_PATH}' ${etc_file}
+            sudo sed -i '/^exit/ifi' ${etc_file}
         else
             sudo sed -i '$ a export PATH=/usr/estuary:/usr/estuary/include:/usr/estuary/bin:/usr/estuary/usr/bin:/usr/estuary/usr/sbin:$PATH' ${etc_file}
-            sudo sed -i '$ a export C_INCLUDE_PATH=/usr/estuary/include:$C_INCLUDE_PATH' ${etc_file}
-            sudo sed -i '$ a export CPLUS_INCLUDE_PATH=/usr/estuary/include:$CPLUS_INCLUDE_PATH' ${etc_file}
-            sudo sed -i '$ a export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:$LIBRARY_PATH' ${etc_file}
+           
+            sudo sed -i '$ a if [ -z "${C_INCLUDE_PATH}" ] ; then' ${etc_file} 
+            sudo sed -i '$ a     export C_INCLUDE_PATH=/usr/estuary/include' ${etc_file}
+            sudo sed -i '$ a elif [ -z "$(echo ${C_INCLUDE_PATH} | grep "/usr/estuary/include")" ] ; then' ${etc_file}
+            sudo sed -i '$ a     export C_INCLUDE_PATH=/usr/estuary/include:${C_INCLUE_PATH}' ${etc_file}
+            sudo sed -i '$ a fi' ${etc_file}
+
+            sudo sed -i '$ a if [ -z "${CPLUS_INCLUDE_PATH}" ] ; then' ${etc_file}
+            sudo sed -i '$ a    export CPLUS_INCLUDE_PATH=/usr/estuary/include' ${etc_file}
+            sudo sed -i '$ a elif [ -z "$(echo ${CPLUS_INCLUDE_PATH} | grep "/usr/estuary/include")" ] ; then' ${etc_file}
+            sudo sed -i '$ a    export CPLUS_INCLUDE_PATH=/usr/estuary/include:${CPLUS_INCLUDE_PATH}' ${etc_file}
+            sudo sed -i '$ a fi' ${etc_file}
+
+            sudo sed -i '$ a if [ -z "${LIBRARY_PATH}" ] ; then' ${etc_file}
+            sudo sed -i '$ a    export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64' ${etc_file} 
+            sudo sed -i '$ a elif [ -z "$(echo ${LIBRARY_PATH} | grep "/usr/estuary/lib64")" ] ; then' ${etc_file}
+            sudo sed -i '$ a    export LIBRARY_PATH=/usr/estuary/lib:/usr/estuary/lib64:${LIBRARY_PATH}' ${etc_file}
+            sudo sed -i '$ a fi' ${etc_file}
         fi
     fi
 	
