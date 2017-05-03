@@ -21,8 +21,8 @@ WGET_OPTS="-T 120 -c"
 # Global variables
 ###################################################################################
 TARGET=
-VERSION=3.0
-RC=
+VERSION=3.1
+RC=rc0
 PLATFORM=D05
 DISTRO=
 CAPACITY=50
@@ -557,6 +557,8 @@ if [ x"$DISTRO" != x"" ]; then
                 INSTALL_DISTRO[$index]="OpenSuse"
             elif echo $distro | grep -wi rancher >/dev/null 2>&1; then
                 INSTALL_DISTRO[$index]="Rancher"
+            elif echo $distro | grep -wi openembedded >/dev/null 2>&1; then
+                INSTALL_DISTRO[$index]="OpenEmbedded"
             else
                 if echo $distro | grep -wi fedora >/dev/null 2>&1; then
                     INSTALL_DISTRO[$index]="Fedora"
