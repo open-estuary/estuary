@@ -27,7 +27,7 @@ Accessing from outside-China: <http://download.open-estuary.org/>
       eg: `./estuary/build.sh -f estuary/estuarycfg.json`
 
    **Method 2:**  
-    * Download mkdeploydisk.sh from website:<ftp://117.78.41.188/releases/\<version\>> or <http://download.open-estuary.org/releases/\<version\>>
+    * Download mkdeploydisk.sh from website:<https://github.com/open-estuary/estuary/tree/master/deploy>
     * Execute the following command with sudo permission to make usb installing disk `sudo ./mkdeploydisk.sh`. Please specify your disk with `--target=/dev/sdx` if more than one USB disk connected to your computer. If not specified, the first detected usb device will be used. 
     * According the prompt to make usb install disk.
 2. After you have made usb install disk, please connect the usb to target board.
