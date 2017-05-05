@@ -10,6 +10,10 @@ D03_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
 D03_CMDLINE="console=ttyS0,115200 pcie_aspm=off pci=pcie_bus_perf"
 D05_VGA_CMDLINE="console=tty0 pcie_aspm=off pci=pcie_bus_perf"
 D05_CMDLINE="pcie_aspm=off pci=pcie_bus_perf"
+RANCHER_D03_CMDLINE="init=/init rancher.autologin=ttyS0 rancher.password=rancher"
+RANCHER_D05_CMDLINE="console=ttyAMA0,115200 init=/init rancher.autologin=ttyAMA0 rancher.password=rancher"
+RANCHER_D03_VGA_CMDLINE="init=/init rancher.autologin=tty0 rancher.password=rancher"
+RANCHER_D05_VGA_CMDLINE="init=/init rancher.autologin=tty0 rancher.password=rancher"
 
 ###################################################################################
 # Global variable
@@ -394,9 +398,16 @@ for ((index=0; index<distro_number; index++)); do
     root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
     root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
 
-    linux_arg="/$Image root=$root_dev_info rootwait rw $console_cmd_line"
-    linux_vga_arg="/$Image root=$root_dev_info rootwait rw $vga_cmd_line"
     distro_name=${INSTALL_DISTRO[$index]}
+    if [ x"$distro_name" = x"Rancher" ];then
+        eval rancher_vga_cmd_line=\$RANCHER_${PLATFORM}_VGA_CMDLINE
+        eval rancher_console_cmd_line=\$RANCHER_${PLATFORM}_CMDLINE
+        linux_arg="/$Image root=$root_dev_info rootwait rw $console_cmd_line $rancher_console_cmd_line"
+        linux_vga_arg="/$Image root=$root_dev_info rootwait rw $vga_cmd_line $rancher_vga_cmd_line"
+    else
+        linux_arg="/$Image root=$root_dev_info rootwait rw $console_cmd_line"
+        linux_vga_arg="/$Image root=$root_dev_info rootwait rw $vga_cmd_line"
+    fi
 
 cat >> /boot/grub.cfg << EOF
 # Booting from SATA/SAS with $distro_name rootfs (VGA)
