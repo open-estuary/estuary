@@ -191,6 +191,16 @@ D03 board supports booting via SAS, USB and SATA by default. The UEFI will direc
          `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in.  
          To see the values of UUID and PARTUUID, please use the command:`blkid`.
       *  If you want to use another linux distribution, please refer above steps.
+      
+      For RancherOS,the grub.cfg file must use the follow config:
+      menuentry "D03_RancherOS" --id d03_sata_rancheros {
+         set root=(hd1,gpt1)
+         linux /Image \
+              pcie_aspm=off console=ttyS0,115200 init=/init \
+              rootwait root=/dev/sda2 rw \
+              rancher.autologin=ttyS0 rancher.password=rancher
+      }
+
    b. Reboot and press anykey except "enter" to enter UEFI main menu.
    c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
       *  For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.

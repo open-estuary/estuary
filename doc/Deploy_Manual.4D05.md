@@ -242,6 +242,15 @@ D05 board supports booting via SAS, USB and SATA by default. The UEFI will direc
    `<UUID> `means the UUID of that partition which your EFI System is located in.<br>
    `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in. <br>
     To see the values of UUID and PARTUUID, please use the command: `$blkid`.<br>
+ 
+    *For RancherOS,the grub.cfg file must use the follow config:
+     menuentry "D05_RancherOS" --id d05_sata_rancheros {
+     set root=(hd1,gpt1)
+     linux /Image \
+          pcie_aspm=off pci=pcie_bus_perf init=/init console=ttyAMA0,115200 \
+          rootwait root=/dev/sda2 rw \
+          rancher.autologin=ttyAMA0 rancher.password=rancher
+     }
 
    b. Reboot and press anykey except "enter" to enter UEFI main menu.
 
