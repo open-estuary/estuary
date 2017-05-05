@@ -1,4 +1,4 @@
-# Change list for Estuary v3.1-rc0:
+# Change list for Estuary v3.1:
 1. UEFI
 	- Added HiKey support in UEFI
 2. OS
@@ -7,6 +7,7 @@
 3. Distros
 	- Fixed minirootfs devramfs confliction with mdev
 	- Added support for OpenEmbedded
+	- Added support for RancherOS
 4. Applications
 	- Added OpenStack Newton initial support
 	- Enabled HHVM for ARM64
