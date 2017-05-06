@@ -7,7 +7,7 @@
 <h2 id="1">Introduction</h2>
 
 According to the [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/master/estuarycfg.json) 
-Estuary could integrate packages accordingly. 
+packages could be integrated into Estuary accordingly. 
 
 <h2 id="2">Packages Installation</h2>
 
