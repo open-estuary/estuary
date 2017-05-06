@@ -6,7 +6,7 @@
 <h2 id="1">Introduction</h2>
 According to [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/master/estuarycfg.json), Estuary could integrate packages accordingly. 
 
-<h2 id="1">Packages Installation</h2>
+<h2 id="2">Packages Installation</h2>
 
 Typically packages could be installed via two ways:
 - RPM/Deb Repositories:
@@ -29,6 +29,9 @@ Typically packages could be installed via two ways:
 Currently the following packages are supported on ARM64 platforms:
 
 - [Armor Manual](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md) 
+    - Perf
+    - lscpu
+    - ...
 - [OpenJDK](https://github.com/open-estuary/packages/blob/master/openjdk/OpenJdk_Manual.md) 
 - [Docker](https://github.com/open-estuary/estuary/blob/master/doc/Introduction_for_Docker.md)
 - [Docker App]
