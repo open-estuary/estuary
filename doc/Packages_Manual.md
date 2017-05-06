@@ -3,8 +3,11 @@
 * [Packages Documents](#3)
 * [Others](#4)
 
+
 <h2 id="1">Introduction</h2>
-According to [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/master/estuarycfg.json), Estuary could integrate packages accordingly. 
+
+According to the [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/master/estuarycfg.json) 
+Estuary could integrate packages accordingly. 
 
 <h2 id="2">Packages Installation</h2>
 
