@@ -1,6 +1,7 @@
 * [Introduction](#1)
 * [Packages Installation](#2)
 * [Packages Documents](#3)
+* [Others](#4)
 
 <h2 id="1">Introduction</h2>
 According to [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/master/estuarycfg.json), Estuary could integrate packages accordingly. 
@@ -10,20 +11,21 @@ According to [EstuaryCfg.json](https://github.com/open-estuary/estuary/blob/mast
 Typically packages could be installed via two ways:
 - RPM/Deb Repositories:
   - RPM (CentOS): 
-    Firstly it is necessary to add yum repository as below. Then the corresponding package could be installed `yum install <package-name>`. Especially there might be multiple versions for the same package, it could use `yum install <package-name>-<specific-version>` to install required package. 
+    - Setup yum repository firstly as below:
     ```
     sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/utils/estuary.repo
     sudo chmod +r /etc/yum.repos.d/estuary.repo
     yum clean dbcache
     ```
+    - Use `yum install <package-name>` to install packages. Especially there might be multiple versions for the same package, it could use `yum install <package-name>-<specific-version>` to install required package. 
   - Deb (Ubuntu/Debian):
    ```
    TBD
-   ```
+    ```
 - Docker Images:
-  Use`docker pull openestuary/<app name>` to install the corresponding docker images. For more information, please refer to the corresponding manuals mentioned below. 
+  - Use`docker pull openestuary/<app name>` to install the corresponding docker images. For more information, please refer to the corresponding manuals mentioned below. 
 
-<h2 id="2">Packages Documents</h2>
+<h2 id="3">Packages Documents</h2>
 Currently the following packages are supported on ARM64 platforms:
 
 - [Armor Manual](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md) 
@@ -40,3 +42,12 @@ Currently the following packages are supported on ARM64 platforms:
     - [Cassandra](https://github.com/open-estuary/packages/blob/master/docker_apps/cassandra/Cassandra_Manual.md)
     - [Ceph](https://github.com/open-estuary/packages/blob/master/docker_apps/ceph/Ceph_Manual.md)
     - [OpenStack](https://github.com/open-estuary/packages/blob/master/openstack/doc/OpenStack_Manual.md)
+    
+       
+<h2 id="4">Others</h2>
+
+- The yum/deb repositories will be supported officially from Estuary V500 release
+- If you come across any issue (such as supporting new packages on ARM64 platform, enhancing packages performance on ARM64 platforms, and so on) during using above packages, please feel free to contact with us by using any of following ways:
+  - Visit www.open-estuary.com website, and submit one bug
+  - Report one issue in this github issue page
+  - Email to sjtuhjh@hotmail.com
