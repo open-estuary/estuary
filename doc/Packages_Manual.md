@@ -18,6 +18,7 @@ Typically packages could be installed via two ways:
     ```
     sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/utils/estuary.repo
     sudo chmod +r /etc/yum.repos.d/estuary.repo
+    sudo rpm --import ftp://repoftp:repopushez7411@117.78.41.188/releases/ESTUARY-RPM-GPG-KEY
     yum clean dbcache
     ```
     - Use `yum install <package-name>` to install packages. Especially there might be multiple versions for the same package, it could use `yum install <package-name>-<specific-version>` to install required package. 
