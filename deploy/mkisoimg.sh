@@ -104,7 +104,7 @@ if [ -f $BINARY_DIR/${DISK_LABEL}.iso ] && [ -f $BINARY_DIR/.${DISK_LABEL}.iso.t
         fi
         distros=`echo ${DISTROS} | tr ',' ' '`
         distro_files=($(for f in $distros; do echo $BINARY_DIR/${f}_ARM64.tar.gz; done))
-        check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} && exit 0
+        check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} $TOPDIR/setup.sh && exit 0
         break
     done
 fi
