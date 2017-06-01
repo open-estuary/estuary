@@ -5,6 +5,7 @@
 ###################################################################################
 TOPDIR=$(cd `dirname $0` ; pwd)
 . $TOPDIR/../include/file-check.sh
+. $TOPDIR/../include/json-func.sh
 
 ###################################################################################
 # Global variable
@@ -15,6 +16,10 @@ DISTROS=
 CAPACITY=
 BINARY_DIR=
 DISK_LABEL="Estuary"
+
+CFG_FILE=$TOPDIR/../estuarycfg.json
+HOMES=`get_install_home $CFG_FILE | tr ' ' ','`
+HOMES=`echo $HOMES |sed -e 's/,/\n/g'|awk '{print /T/?$0*1000"G":$0 }'|xargs|tr " " ","`
 
 BOOT_PARTITION_SIZE=200
 WORKSPACE=
@@ -78,6 +83,7 @@ done
 ###################################################################################
 # Check parameters
 ###################################################################################
+PLATFORMS=`echo $PLATFORMS |sed 's/HiKey//g'|sed 's/QEMU//g'`
 if [ x"$PLATFORMS" = x"" ] || [ x"$DISTROS" = x"" ] || [ x"$CAPACITY" = x"" ] || [ x"$BINARY_DIR" = x"" ]; then
     echo "target: $TARGET, platforms: $PLATFORMS, distros: $DISTROS, capacity: $CAPACITY, bindir: $BINARY_DIR"
     echo "Error! Please all parameters are right!" >&2
@@ -86,9 +92,14 @@ fi
 
 distros=($(echo "$DISTROS" | tr ',' ' '))
 capacity=($(echo "$CAPACITY" | tr ',' ' '))
+homes=($(echo "$HOMES" | tr ',' ' '))
 if [[ ${#distros[@]} != ${#capacity[@]} ]]; then
     echo "Error! Number of capacity is not eq the distros!" >&2
     Usage ; exit 1
+fi
+if [[ ${#distros[@]} != ${#homes[@]} ]]; then
+    echo "Error! Number of homes is not eq the distros! Specify them in estuarycfg.json." >&2
+    exit 1
 fi
 
 ###################################################################################
@@ -99,12 +110,13 @@ if [ -f $BINARY_DIR/${DISK_LABEL}.iso ] && [ -f $BINARY_DIR/.${DISK_LABEL}.iso.t
         platforms=`grep -Po "(?<=PLATFORMS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
         distros=`grep -Po "(?<=DISTROS=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
         capacity=`grep -Po "(?<=CAPACITY=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
-        if [ x"$platforms" != x"$PLATFORMS" ] || [ x"$distros" != x"$DISTROS" ] || [ x"$capacity" != x"$CAPACITY" ]; then
+        homes=`grep -Po "(?<=HOMES=)(.*)" 2>/dev/null $BINARY_DIR/.${DISK_LABEL}.iso.txt`
+        if [ x"$platforms" != x"$PLATFORMS" ] || [ x"$distros" != x"$DISTROS" ] || [ x"$capacity" != x"$CAPACITY" ] || [ x"$homes" != x"$HOMES" ]; then
             break
         fi
         distros=`echo ${DISTROS} | tr ',' ' '`
         distro_files=($(for f in $distros; do echo $BINARY_DIR/${f}_ARM64.tar.gz; done))
-        check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} && exit 0
+        check_file_update $BINARY_DIR/${DISK_LABEL}.iso $BINARY_DIR/Image ${distro_files[@]} $TOPDIR/*.sh && exit 0
         break
     done
 fi
@@ -122,6 +134,7 @@ cat > estuary.txt << EOF
 PLATFORM=$PLATFORMS
 DISTRO=$DISTROS
 CAPACITY=$CAPACITY
+HOME=$HOMES
 EOF
 
 ###################################################################################
@@ -249,6 +262,7 @@ cat > $BINARY_DIR/.${DISK_LABEL}.iso.txt << EOF
 PLATFORMS=$PLATFORMS
 DISTROS=$DISTROS
 CAPACITY=$CAPACITY
+HOMES=$HOMES
 EOF
 
 ###################################################################################

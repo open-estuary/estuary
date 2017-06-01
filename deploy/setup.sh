@@ -35,6 +35,7 @@ ESTUARY_CFG="/scratch/estuary.txt"
 PLATFORM=
 INSTALL_DISTRO=()
 DISTRO_CAPACITY=()
+HOME_CAPACITY=()
 
 ###################################################################################
 # Create mountpointer
@@ -133,6 +134,8 @@ all_distro=`cat $ESTUARY_CFG | grep -Eo "DISTRO=[^ ]*"`
 all_distro=($(expr "X$all_distro" : 'X[^=]*=\(.*\)' | tr ',' ' '))
 all_capacity=`cat $ESTUARY_CFG | grep -Eo "CAPACITY=[^ ]*"`
 all_capacity=($(expr "X$all_capacity" : 'X[^=]*=\(.*\)' | tr ',' ' '))
+all_home=`cat $ESTUARY_CFG | grep -Eo "HOME=[^ ]*"`
+all_home=($(expr "X$all_home" : 'X[^=]*=\(.*\)' | tr ',' ' '))
 
 if [[ ${#all_distro[@]} == 0 ]]; then
     echo "Error!!! Distro is not specified" ; exit 1
@@ -142,9 +145,14 @@ if [[ ${#all_capacity[@]} == 0 ]]; then
     echo "Error! Capacity is not specified!" ; exit 1
 fi
 
+if [[ ${#all_home[@]} == 0 ]]; then
+    echo "Error! Home capacity is not specified!" ; exit 1
+fi
+
 if [[ ${#all_distro[@]} == 1 ]]; then
     INSTALL_DISTRO=(${all_distro[@]})
     DISTRO_CAPACITY=(${all_capacity[@]})
+    HOME_CAPACITY=(${all_home[@]})
 else
     echo "---------------------------------------------------------------"
     echo "- distro: ${all_distro[*]}"
@@ -155,28 +163,32 @@ else
         if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
             INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
             DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
+            HOME_CAPACITY[${#HOME_CAPACITY[@]}]=${all_home[index]}
         fi
 
         echo ""
     done
 
-    if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
+    installFlag=1
+    if [ ${#INSTALL_DISTRO[@]} -eq 0 ] && [ $installFlag -lt 3 ]; then
         echo "You have not selected any distro! Please select."
         for ((index=0; index<total_distro; index++)); do
             read -n1 -p "Install ${all_distro[index]} (default N)? y/N " c
             if [ x"$c" = x"y" ] || [ x"$c" = x"Y" ]; then
                 INSTALL_DISTRO[${#INSTALL_DISTRO[@]}]=${all_distro[index]}
                 DISTRO_CAPACITY[${#DISTRO_CAPACITY[@]}]=${all_capacity[index]}
+                HOME_CAPACITY[${#HOME_CAPACITY[@]}]=${all_home[index]}
             fi
 
             echo ""
         done
 
-        if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
-            echo "You have not selected any distro again! Will reboot now."
-            reboot
-        fi
+        let installFlag=installFlag+1
     fi
+fi
+if [ ${#INSTALL_DISTRO[@]} -eq 0 ]; then
+    echo "You have not selected any distro again! Quit now."
+    exit 0
 fi
 
 ###################################################################################
@@ -239,6 +251,23 @@ if [ x"$index" = x"" ] || [[ $index != [0-9]* ]] \
 fi
 
 TARGET_DISK="/dev/${disk_list[$index]}"
+disk_capacity=`lsblk $TARGET_DISK --output SIZE -d -b|sed -e '1d'`
+length=${#disk_capacity}
+disk_capacity=`echo ${disk_capacity:0:$((length - 9))}`
+
+boot_capacity=10
+all_install=`echo "${DISTRO_CAPACITY[*]%G*} ${HOME_CAPACITY[*]%G*}"|awk '{for(i=1;i<=NF;i++){a[NR]+=$i}print a[NR]}'`
+all_install=$((all_install + boot_capacity))
+
+echo ""
+echo "Disk capacity is ${disk_capacity}G,install need ${all_install}G"
+
+if [ "$all_install" -gt "$disk_capacity" ]; then
+    echo ""
+    echo "Error! Disk $TARGET_DISK capacity is not enough!"
+    echo "For more details see /scratch/estuary.txt." >&2 ; exit 1
+fi
+
 
 echo ""
 sleep 1s
@@ -307,10 +336,12 @@ distro_number=${#INSTALL_DISTRO[@]}
 for ((index=0; index<distro_number; index++))
 do
     # Get necessary info for current distro.
-    part_index=$((PART_BASE_INDEX + index))
+    part_index=$((PART_BASE_INDEX + 2*index))
+    home_index=`expr $part_index + 1`
     distro_name=${INSTALL_DISTRO[$index]}
     rootfs_package="${distro_name}""_ARM64.tar.gz"
     distro_capacity=${DISTRO_CAPACITY[$index]%G*}
+    home_capacity=${HOME_CAPACITY[$index]%G*}
 
     start_address=$allocate_address
     end_address=$((start_address + distro_capacity * 1000))
@@ -322,6 +353,17 @@ do
     (echo -e "t\n$part_index\n13\nw\n" | fdisk $TARGET_DISK) >/dev/null 2>&1
     (yes | mkfs.ext4 ${TARGET_DISK}${PART_PREFIX}${part_index}) >/dev/null 2>&1
     echo "Create and format ${TARGET_DISK}${part_index} for $distro_name."
+
+    start_address=$allocate_address
+    end_address=$((start_address + home_capacity * 1000))
+    allocate_address=$end_address
+
+    # Create and fromat partition for home directory.
+    echo "Creating and formatting ${TARGET_DISK}${PART_PREFIX}${home_index} for $distro_name home directory."
+    (parted -s $TARGET_DISK "mkpart HOME ext4 $start_address $end_address") >/dev/null 2>&1
+    (echo -e "t\n$home_index\n13\nw\n" | fdisk $TARGET_DISK) >/dev/null 2>&1
+    (yes | mkfs.ext4 ${TARGET_DISK}${PART_PREFIX}${home_index}) >/dev/null 2>&1
+    echo "Create and format ${TARGET_DISK}${home_index} for $distro_name home directory."
 
     echo "Installing $rootfs_package into ${TARGET_DISK}${PART_PREFIX}${part_index}. Please wait patiently!"
     # Mount root dev to mnt and uncompress rootfs to root dev
@@ -339,8 +381,44 @@ do
     echo -e "\033[?25h"
     echo "Install $rootfs_package into ${TARGET_DISK}${PART_PREFIX}${part_index} done."
 
+    # Mount home dev to mnt home
+    if ! mount ${TARGET_DISK}${PART_PREFIX}${home_index} /mnt/home 2>/dev/null; then
+        echo "Error!!! Unable mount ${TARGET_DISK}${home_index} to /mnt/home!" >&2 ; exit 1
+    fi
+
+    echo -e "\033[?25l"
+    # Add user and give root authority,crypt password is made from mkpasswd
+    sudoFile=/mnt/etc/sudoers
+    if [ -f "$sudoFile" ];then
+        echo "$distro_name supports sudo,add administrator user now."
+        sed -i 'N;/root*/a\admin    ALL=(ALL)       ALL' $sudoFile
+        if ! chroot /mnt groupadd -f -g 115 admin 2>&1 >/dev/null;then
+            echo "Error!!! Unable add admin group" >&2 ; exit 1
+        fi
+        if ! chroot /mnt useradd -p JWS0AxM.hD8qI -d /home/admin -m -s /bin/bash -g admin admin 2>&1 >/dev/null;then
+            echo "Error!!! Unable create administrator user" >&2 ; exit 1
+        fi
+        echo "Add administrator user done."
+    else
+        echo "$distro_name not support sudo,do not need to add administrator user."
+    fi
+
+    # Add home partition information to fstab
+    fstabFile=/mnt/etc/fstab
+    HOME_DEV=${TARGET_DISK}${PART_PREFIX}${home_index}
+    HOME_UUID=`blkid -s UUID $HOME_DEV 2>/dev/null | grep -o "UUID=.*" | sed 's/\"//g'`
+    if [ -f "$fstabFile" ];then
+        echo "$distro_name supports fstab,add home partition information now."
+        echo "# home was on $HOME_DEV during installation" >>$fstabFile
+        echo "$HOME_UUID /home           ext4    defaults        0       2">>$fstabFile
+        echo "Add home partition information done."
+    else
+        echo "$distro_name not support fstab,do not need to add home partition information."
+    fi
+
     echo "Flush data to disk. Please wait a moment!"
     sync
+    umount /mnt/home
     umount /mnt/
 
     echo ""
@@ -393,7 +471,7 @@ popd >/dev/null
 echo "Updating grub.cfg."
 distro_number=${#INSTALL_DISTRO[@]}
 for ((index=0; index<distro_number; index++)); do
-    part_index=$((PART_BASE_INDEX + index))
+    part_index=$((PART_BASE_INDEX + 2*index))
     root_dev="${TARGET_DISK}${PART_PREFIX}${part_index}"
     root_dev_info=`blkid -s PARTUUID $root_dev 2>/dev/null | grep -o "PARTUUID=.*" | sed 's/\"//g'`
     root_partuuid=`expr "${root_dev_info}" : '[^=]*=\(.*\)'`
@@ -465,7 +543,7 @@ echo ""
 ###################################################################################
 
 start_address=$end_address
-let part_index=$distro_number+$PART_BASE_INDEX
+let part_index=2*$distro_number+$PART_BASE_INDEX
 #Create and fromat partition for remaining space.
 echo "Creating and formatting ${TARGET_DISK}${PART_PREFIX}${part_index} for remaining space."
 (parted -s $TARGET_DISK "mkpart REMAIN ext4 $start_address 100%") >/dev/null 2>&1
