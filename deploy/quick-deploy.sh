@@ -86,6 +86,7 @@ fi
 ###################################################################################
 deploy_type=`echo "$TARGET" | awk -F ':' '{print $1}'`
 deploy_device=`echo "$TARGET" | awk -F ':' '{print $2}'`
+PLATFORMS=`echo $PLATFORMS |sed 's/HiKey//g'|sed 's/QEMU//g'`
 
 if [ x"$deploy_type" = x"usb" ]; then
     mkusbinstall.sh --target=$deploy_device --platforms=$PLATFORMS --distros=$DISTROS --capacity=$CAPACITY --bindir=$BIN_DIR || exit 1
