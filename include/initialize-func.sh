@@ -83,6 +83,7 @@ update_acpica_tools()
         git clone https://github.com/acpica/acpica.git
     fi
 
+    corenum=`cat /proc/cpuinfo | grep "processor" | wc -l`
     (cd acpica/generate/unix && make -j${corenum} && sudo make install)
 }
 
