@@ -30,6 +30,7 @@ Currently the following packages are supported on ARM64 platforms:
 |[MariaDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mariadb/MariaDB_Manual.md)|3.0/3.1/5.0|10.1|RPM/Docker Image||
 |[Redis](https://github.com/open-estuary/packages/blob/master/docker_apps/redis/Redis_Manual.md)|3.0/3.1/5.0|3.2.4|RPM/Docker Image||
 |[PostgreSQL](https://github.com/open-estuary/packages/blob/master/docker_apps/postgresql/PostgreSQL_Manual.md)|3.0/3.1/5.0|9.6|RPM/Docker Image||
+|[Kubernetes](https://github.com/open-estuary/packages/blob/master/kubernetes/Kubernetes_Manual.md)|3.0/5.0|1.6.4|RPM||
 |[MongoDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mongodb/MongoDB_Manual.md)|3.0/3.1/5.0|3.4|RPM/Docker Image||
 |[LAMP](https://github.com/open-estuary/packages/blob/master/docker_apps/lamp/LAMP_Manual.md)|3.0/3.1/5.0||Docker Image|Linux+Apache+MySQL+PHP|
 |[Cassandra](https://github.com/open-estuary/packages/blob/master/docker_apps/cassandra/Cassandra_Manual.md)|3.0/3.1/5.0|3.10|RPM/Docker Image||
