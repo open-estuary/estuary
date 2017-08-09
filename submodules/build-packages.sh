@@ -23,6 +23,12 @@ fi
 
 . $TOPDIR/Include.sh
 
+################################################################################
+#Since Estuary V500, it is not necessary to build and integrate packages during 
+#building stage. Instead, packages should be installed via yum/apt-get directly
+################################################################################
+exit 0
+
 PACKAGE_ROOT_DIR=$(cd $TOPDIR/../packages; pwd)
 #################################################################################
 # Define necessary variables
