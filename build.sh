@@ -100,19 +100,19 @@ Options:
     -a: download address, China or Estuary(default Estuary)
 
 Example:
-    ./estuary/build.sh --help
+    sudo ./estuary/build.sh --help
 
-    ./estuary/build.sh -f ./estuary/estuarycfg.json
-    ./estuary/build.sh -f ./estuary/estuarycfg.json -a Estuary
-    ./estuary/build.sh -f ./estuary/estuarycfg.json -a China
+    sudo ./estuary/build.sh -f ./estuary/estuarycfg.json
+    sudo ./estuary/build.sh -f ./estuary/estuarycfg.json -a Estuary
+    sudo ./estuary/build.sh -f ./estuary/estuarycfg.json -a China
 
-    ./estuary/build.sh -p QEMU -d Ubuntu
-    ./estuary/build.sh -f ./estuary/estuarycfg.json --builddir=./workspace
-    ./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
-    ./estuary/build.sh clean --file=./estuary/estuarycfg.json --builddir=./workspace
+    sudo ./estuary/build.sh -p QEMU -d Ubuntu
+    sudo ./estuary/build.sh -f ./estuary/estuarycfg.json --builddir=./workspace
+    sudo ./estuary/build.sh --file=./estuary/estuarycfg.json --builddir=./workspace
+    sudo ./estuary/build.sh clean --file=./estuary/estuarycfg.json --builddir=./workspace
 
-    ./estuary/build.sh --builddir=./workspace --platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse
-    ./estuary/build.sh --builddir=./workspace \\
+    sudo ./estuary/build.sh --builddir=./workspace --platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse
+    sudo ./estuary/build.sh --builddir=./workspace \\
         --platform=D03,D05,HiKey --distro=Ubuntu,OpenSuse --pkg=armor,docker \\
         --deploy=pxe --mac=01-00-18-82-05-00-7f,01-00-18-82-05-00-68 \\
         --deploy=usb:/dev/sdb --deploy=iso --capacity=50,50
