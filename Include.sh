@@ -19,6 +19,7 @@
 . toolchain-func.sh
 . binary-func.sh
 . distro-func.sh
+. docker-func.sh
 
 
 
