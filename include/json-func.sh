@@ -178,4 +178,16 @@ get_deploy_info()
     )
 }
 
+get_envlist()
+{
+    cfg_file=$1
+    env_list=
+    entry_list=$(jq -r -c ".env[]|to_entries" ${cfg_file})
+    for entry in ${entry_list}; do
+	    key=$(echo $entry|jq -r ".[].key")
+	    value=$(echo $entry|jq -r ".[].value")
+	    env_list="$key=$value $env_list"
+    done
 
+    echo $env_list
+}

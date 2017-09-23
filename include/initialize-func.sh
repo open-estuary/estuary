@@ -1,77 +1,79 @@
 #!/bin/bash
 
+check_docker_running_permission()
+{
+	if [ "$USER" != "root" ] && [ -z "$(groups|grep docker)" ]; then
+		sudo groupadd docker || true
+		sudo usermod -aG docker $USER
+		sudo systemctl start docker
+		echo -e "\033[31m warning: user just add into docker group, please re-login!!!\033[0m"
+		exit 1
+	fi
+
+}
+
 ###################################################################################
 # int install_jq
 ###################################################################################
 install_jq()
 {
+    tools_dir=${top_dir}/build/tmp/tools
+    cd ${tools_dir}
     jq_version=jq-1.5
     if [ ! -d jq ]; then
-        git clone -b $jq_version https://github.com/stedolan/jq.git
+        git clone --depth 1 -b $jq_version https://github.com/stedolan/jq.git 
     fi
 
     (cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install)
 }
 
-###################################################################################
-# int install_dev_tools_ubuntu <arch>
-###################################################################################
+install_dev_tools_debian()
+{
+	sudo apt-get install git jq docker.io -y
+	check_docker_running_permission
+}
+
 install_dev_tools_ubuntu()
 {
-    local arch=$1
-    if [ x"$arch" = x"x86_64" ]; then
-        local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 bison flex uuid-dev build-essential iasl jq genisoimage libssl-dev gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev"
-    else
-        local dev_tools="wget automake1.11 make bc libncurses5-dev libtool libc6 libncurses5 libstdc++6 bison flex uuid-dev build-essential iasl acpica-tools jq genisoimage libssl-dev gcc-arm-linux-gnueabihf gcc zlib1g-dev libperl-dev libgtk2.0-dev libfdt-dev"
-    fi
-
-    if ! (automake --version 2>/dev/null | grep 'automake (GNU automake) 1.11' >/dev/null); then
-        sudo apt-get remove -y --purge automake*
-    fi
-
-    if ! (dpkg-query -l $dev_tools >/dev/null 2>&1); then
-        sudo apt-get update
-        if ! (sudo apt-get install -y --force-yes $dev_tools); then
-            return 1
-        fi
-    fi
-
-    return 0
+	sudo apt-get install git jq docker.io -y
+	check_docker_running_permission
 }
 
 ###################################################################################
-# int install_dev_tools_centos_linux <arch>
+# int install_dev_tools_centos
 ###################################################################################
-install_dev_tools_centos_linux()
+install_dev_tools_centos()
 {
-    local arch=$1
-    local dev_tools="automake bc ncurses-devel libtool ncurses bison flex libuuid-devel uuid-devel iasl genisoimage openssl-devel bzip2 lshw dosfstools glib2-devel pixman-devel libfdt-devel"
 
-    if ! yum install -y $dev_tools; then
-        if ! (yum makecache && yum install -y $dev_tools); then
-            return 1
-        fi
-    fi
+   sudo yum groupinstall "Development Tools" -y 
+   sudo yum install autoconf automake libtool python git docker -y
 
     if !(which jq >/dev/null 2>&1 || install_jq); then
         return 1
     fi
 
+    check_docker_running_permission
+
     return 0
 }
 
 ###################################################################################
-# install_dev_tools <arch>
+# install_dev_tools
 ###################################################################################
 install_dev_tools()
 {
-    local arch=$1
-    local host_distro=`cat /etc/os-release | grep -Po "(?<=^NAME=\")([^\"]*)(?=\")" | tr "[:upper:]" "[:lower:]" | tr ' ' '_'`
+    local host_distro=$(cat /etc/os-release |grep ^ID=|awk -F '=' '{print $2}')
+
+    # remove "centos"'s ""
+    if [ -n "$(echo ${host_distro}|grep \")" ]; then
+	host_distro=$(echo ${host_distro}|awk -F \" '{print $2}')
+    fi	
+
     if ! declare -F install_dev_tools_${host_distro} >/dev/null; then
         echo "Unspported distro!" >&2; return 1
     fi
 
-    install_dev_tools_${host_distro} $arch
+    install_dev_tools_${host_distro}
 }
 
 ###################################################################################
@@ -85,5 +87,13 @@ update_acpica_tools()
 
     corenum=`cat /proc/cpuinfo | grep "processor" | wc -l`
     (cd acpica/generate/unix && make -j${corenum} && sudo make install)
+}
+
+check_arch()
+{
+	if [ "$(uname -m)" != "aarch64" ]; then
+		echo -e "\033[31mError: build.sh script only run on arm64 server!!\033[0m" 
+		exit 1
+	fi
 }
 
