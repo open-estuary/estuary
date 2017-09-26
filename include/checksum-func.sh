@@ -30,3 +30,14 @@ check_sum()
     )
 }
 
+cal_md5sum()
+{
+	root_dir=$1
+	cd ${root_dir}
+	file_list=$(find . -type f)
+	for file in ${file_list}; do
+		dir=$(dirname ${file})
+		name=$(basename ${file})
+		(cd $dir && md5sum $name > ${name}.MD5SUM)
+	done
+}

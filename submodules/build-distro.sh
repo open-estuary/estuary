@@ -66,3 +66,5 @@ docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-iso.sh \
 # 4) build rootfs tar 
 
 # 5) calculate md5sum
+docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-calculate-md5sum.sh \
+	${version} ${build_dir}
