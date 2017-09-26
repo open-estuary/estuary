@@ -3,22 +3,23 @@
 ###################################################################################
 # Include files
 ###################################################################################
-. file-check.sh
-. git-func.sh
-. estuary-func.sh
-. xml-func.sh
-. ftp-func.sh
-. initialize-func.sh
-. json-func.sh
-. doc-func.sh
-. deploy-func.sh
-. compile-func.sh
-. fileop-func.sh
-. checksum-func.sh
-. download-func.sh
-. toolchain-func.sh
-. binary-func.sh
-. distro-func.sh
+. include/file-check.sh
+. include/git-func.sh
+. include/estuary-func.sh
+. include/xml-func.sh
+. include/ftp-func.sh
+. include/initialize-func.sh
+. include/json-func.sh
+. include/doc-func.sh
+. include/deploy-func.sh
+. include/compile-func.sh
+. include/fileop-func.sh
+. include/checksum-func.sh
+. include/download-func.sh
+. include/toolchain-func.sh
+. include/binary-func.sh
+. include/distro-func.sh
+. include/docker-func.sh
 
 
 

@@ -1,49 +1,18 @@
 {
 "system":[
 {"platform":"D03","install":"yes"},
-{"platform":"D05","install":"yes"},
-{"platform":"HiKey","install":"no"},
-{"platform":"QEMU","install":"no"}
+{"platform":"D05","install":"yes"}
 ],
 
 "distros":[
-{"name":"Ubuntu","install":"yes","capacity":"50G"},
-{"name":"Debian","install":"yes","capacity":"50G"},
-{"name":"Fedora","install":"no","capacity":"50G"},
-{"name":"OpenSuse","install":"no","capacity":"50G"},
-{"name":"CentOS","install":"yes","capacity":"50G"},
-{"name":"Rancher","install":"no","capacity":"50G"},
-{"name":"OpenEmbedded","install":"yes","capacity":"50G"}
+{"name":"ubuntu","install":"no"},
+{"name":"debian","install":"yes"},
+{"name":"centOS","install":"no"}
 ],
 
-"boards":[
-{"mac":"01-00-18-82-05-00-7f"},
-{"mac":"01-00-18-82-05-00-68"}
-],
-
-"packages":{
-    "cmd": "install",
-    "cmd_comment": "it has three options:none, build_tar, build_rpm, build_deb, build_all, integrate, install",
-    "cmd_none_comment" : "do nothing",
-    "cmd_build_comment" : "build packages such as RPM/Deb or tar files, but donnot integrate them into <distro>_ARM64.tar.gz",
-    "cmd_integrate_comment" : "build packages and integrate them into <distro>_ARM64.tar.gz, but donot install them automatically",
-    "cmd_install_comment" : "build packages, integrate them into <distro>_ARM64.tar.gz, and install them automatically",
-
-    "elems": [
-        {"name":"armor",    "requires":"", "enabled":"yes" },
-        {"name":"docker",   "requires":"", "enabled":"yes" },
-        {"name":"odp",      "requires":"", "enabled":"yes" },
-        {"name":"openjdk",  "requires":"", "enabled":"yes" }, 
-        {"name":"openstack", "requires":"","enabled": "no"},
-        {"name":"docker_apps", "requires":"","enabled": "no"},
-	{"name":"hhvm",     "requires":"boost,jemalloc,oniguruma,libevent,glog,libmcrypt", "enabled": "yes"}
-    ]
-},
-
-"setup":[
-{"type":"iso","install":"yes"},
-{"type":"usb","device":"/dev/sdx","install":"no"},
-{"type":"pxe","install":"no"}
+"env": [
+{"DEBIAN_MIRROR": "http://repo.estuary.cloud/debian"},
+{"DEBIAN_SECURITY_MIRROR": "http://repo.estuary.cloud/debian/security"}
 ]
 
 }
