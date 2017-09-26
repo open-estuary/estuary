@@ -1,12 +1,14 @@
 #!/bin/bash -xe
 
-version=$1 # branch or tag
-version=${version:-master}
+#set -xe
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
-out=${top_dir}/build/out/release/${version}/debian/netboot
-kernel_deb_dir=${top_dir}/build/out/kernel-pkg/${version}/debian
-distro_dir=${top_dir}/build/tmp/debian
+version=$1 # branch or tag
+build_dir=$(cd /root/$2 && pwd)
+
+out=${build_dir}/out/release/${version}/debian/netboot
+kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/debian
+distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 

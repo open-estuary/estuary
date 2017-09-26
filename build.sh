@@ -37,12 +37,13 @@ cat << EOF
 Usage: ./build.sh [options]
 Options:
     -h, --help: Display this information
+    --builddir: Build output directory, default is ./build
     clean: Clean all distros.
 
 Example:
     ./build.sh --help
-    ./build.sh 		# build distros
-    ./build.sh clean 	# clean distros
+    ./build.sh --build_dir=./workspace # build distros
+    ./build.sh --build_dir=./workspace clean 	# clean distros
 EOF
 }
 
@@ -59,6 +60,7 @@ do
 
     case ${ac_option} in
         clean) action=clean ;;
+	--build_dir) eval build_dir=$ac_optarg ;;
         -h | --help) Usage ; exit 0 ;;
         *) Usage ; echo "Unknown option $1" ; exit 1 ;;
     esac
@@ -77,6 +79,8 @@ install_dev_tools
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
 version=${tag:-${version}}
 
+# get absolute path
+build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
 
 ###################################################################################
 # Parse configuration file
@@ -113,7 +117,8 @@ for dist in ${distros}; do
 	echo "- ${action}  $dist"
 	echo "---------------------------------------------------------------*/"
 	./submodules/${action}-distro.sh --distro=${dist} \
-		--version=${version} --envlist="${envlist}"
+		--version=${version} --envlist="${envlist}" \
+		--build_dir=${build_dir}
 	if [ $? -ne 0 ]; then
 	    exit 1
 	fi

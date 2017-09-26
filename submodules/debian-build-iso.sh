@@ -1,18 +1,21 @@
 #!/bin/bash -ex
 
-version=$1 # branch or tag
-version=${version:-master}
+#set -xe
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
-out=${top_dir}/build/out/release/${version}/debian
-distro_dir=${top_dir}/build/tmp/debian
+version=$1 # branch or tag
+build_dir=$(cd /root/$2 && pwd)
+
+out=${build_dir}/out/release/${version}/debian
+distro_dir=${build_dir}/tmp/debian
 cdrom_installer_dir=${distro_dir}/installer/out/images
-kernel_deb_dir=${top_dir}/build/out/kernel-pkg/${version}/debian
+kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/debian
 workspace=${distro_dir}/simple-cdd
 
 # set mirror
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
+
 
 mirror=${DEBIAN_MIRROR:-http://ftp.cn.debian.org/debian}
 securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org}

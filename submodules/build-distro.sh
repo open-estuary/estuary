@@ -1,18 +1,16 @@
 #!/bin/bash -xe
 
 top_dir=$(cd `dirname $0`; cd .. ; pwd)
-envlist_dir=${top_dir}/build/tmp
-envlist_file=${envlist_dir}/env.list
-workspace=${top_dir}/submodules
+sh_dir=${top_dir}/submodules
 . ${top_dir}/Include.sh
 
 
 usage()
 {
-	echo "Usage: ./build_distro.sh --distro=DISTRO --version=VERSION --envlist=ENVLIST"
+	echo "Usage: ./build_distro.sh --distro=DISTRO --version=VERSION --envlist=ENVLIST --build_dir=BUILD_DIR"
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
 	usage
 	exit 1
 fi
@@ -31,6 +29,7 @@ do
     --distro) distro=$ac_optarg ;;
     --version) version=$ac_optarg ;;
     --envlist) envlist=$ac_optarg ;;
+    --build_dir) build_dir=$ac_optarg ;;
     *) echo "Unknown option $ac_option!"
         build_platform_usage ; exit 1 ;;
     esac
@@ -39,7 +38,12 @@ do
 done
 
 
-sh_dir=$(echo $workspace| sed "s#$HOME/##")
+envlist_dir=${build_dir}/tmp
+envlist_file=${envlist_dir}/env.list
+
+# get relative path
+sh_dir=$(echo $sh_dir| sed "s#$HOME/##")
+build_dir=$(echo $build_dir| sed "s#$HOME/##")
 
 # genrate env.list
 mkdir -p ${envlist_dir}
@@ -48,13 +52,16 @@ for var in ${envlist}; do
 done
 
 # 1) build kernel
-docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-kernel.sh ${version} 
+docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-kernel.sh \
+	${version} ${build_dir}
 
 # 2) build installer
-docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-installer.sh ${version} 
+#docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-installer.sh \
+	${version} ${build_dir}
 
 # 3) build iso
-docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-iso.sh ${version} 
+docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-build-iso.sh \
+	${version} ${build_dir}
 
 # 4) build rootfs tar 
 

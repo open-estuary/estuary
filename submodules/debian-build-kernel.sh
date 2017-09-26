@@ -1,11 +1,14 @@
 #!/bin/bash -xe
 
+#set -ex
+
+build_dir=$(cd /root/$2 && pwd)
 version=$1 # branch or tag
 version=${version:-master}
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
-out_deb=${top_dir}/build/out/kernel-pkg/${version}/debian
-distro_dir=${top_dir}/build/tmp/debian
+out_deb=${build_dir}/out/kernel-pkg/${version}/debian
+distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/kernel
 
 # set mirror
