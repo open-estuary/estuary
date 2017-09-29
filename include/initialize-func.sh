@@ -48,10 +48,7 @@ install_dev_tools_centos()
    sudo yum groupinstall "Development Tools" -y 
    sudo yum install autoconf automake libtool python git docker -y
 
-    if !(which jq >/dev/null 2>&1 || install_jq); then
-        return 1
-    fi
-
+    install_jq
     check_docker_running_permission
 
     return 0
@@ -73,7 +70,11 @@ install_dev_tools()
         echo "Unspported distro!" >&2; return 1
     fi
 
-    install_dev_tools_${host_distro}
+    if [ -z "$(which jq)" ] || [ -z "$(which git)" ] \
+	    || [ -z "$(which docker)" ]; then
+	install_dev_tools_${host_distro}
+    fi
+
 }
 
 ###################################################################################

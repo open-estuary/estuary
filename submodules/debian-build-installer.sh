@@ -1,13 +1,12 @@
-#!/bin/bash -xe
+#!/bin/bash
 
-#set -xe
+set -e
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-out=${build_dir}/out/release/${version}/debian/netboot
-kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/debian
+out=${build_dir}/out/release/${version}/debian/
 distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
@@ -17,6 +16,8 @@ out_installer=${workspace}/out/images
 set_debian_mirror
 
 mirror=${DEBIAN_MIRROR:-http://ftp.cn.debian.org/debian}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
 installer_src_version="20150422+deb8u4"
 
 sudo apt-get update -q=2
@@ -24,7 +25,8 @@ sudo apt-get install -y debian-archive-keyring gnupg dctrl-tools bc debiandoc-sg
 sudo apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests
 
 # Find kernel abi
-kernel_abi=$(basename ${kernel_deb_dir}/linux-image-*arm64_*estuary*|sed -e "s/.*linux-image-//g" -e "s/-arm64.*//g")
+kernel_abi=$(apt-cache depends linux-image-estuary-arm64 | grep -m 1 Depends \
+| sed -e "s/.*linux-image-//g" -e "s/-arm64//g")
 
 # Build the installer
 mkdir -p ${workspace}
@@ -57,7 +59,7 @@ EOF
 
 # Set up local repo
 cat <<EOF > sources.list.udeb
-deb [trusted=yes] copy:${kernel_deb_dir} ./
+deb [trusted=yes] ${estuary_repo} ${estuary_dist} main
 deb ${mirror} jessie main/debian-installer
 EOF
 
@@ -72,7 +74,7 @@ d-i base-installer/kernel/no-kernels-found boolean true
 
 # repo setting
 d-i apt-setup/services-select multiselect security, updates, backports
-d-i apt-setup/local0/repository string http://repo.estuarydev.org/releases/5.0/debian/ estuary-5.0 main
+d-i apt-setup/local0/repository string ${estuary_repo} ${estuary_dist} main
 d-i apt-setup/local0/comment string Open estuary Overlay Repo
 d-i apt-setup/local0/source boolean true
 d-i apt-setup/local0/key string http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
@@ -99,7 +101,7 @@ d-i base-installer/kernel/image string linux-image-estuary-arm64
 
 # repo setting
 d-i apt-setup/services-select multiselect security, updates, backports
-d-i apt-setup/local0/repository string http://repo.estuarydev.org/releases/5.0/debian/ estuary-5.0 main
+d-i apt-setup/local0/repository string ${estuary_repo} ${estuary_dist} main
 d-i apt-setup/local0/comment string Open estuary Overlay Repo
 d-i apt-setup/local0/source boolean true
 d-i apt-setup/local0/key string http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
