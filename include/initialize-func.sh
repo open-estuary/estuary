@@ -17,7 +17,8 @@ check_docker_running_permission()
 ###################################################################################
 install_jq()
 {
-    tools_dir=${top_dir}/build/tmp/tools
+    tools_dir=${top_dir}/tools
+    mkdir -p ${tools_dir}
     cd ${tools_dir}
     jq_version=jq-1.5
     if [ ! -d jq ]; then
@@ -98,3 +99,10 @@ check_arch()
 	fi
 }
 
+check_running_not_in_container()
+{
+	if [ -f /.dockerenv ]; then
+		echo -e "\033[31mError: build.sh script can't run inside container!!\033[0m"
+		exit 1
+	fi
+}
