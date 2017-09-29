@@ -1,15 +1,19 @@
-#!/bin/bash -xe
+#!/bin/bash
 
-#set -ex
-
-build_dir=$(cd /root/$2 && pwd)
-version=$1 # branch or tag
-version=${version:-master}
+set -e
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
+version=$1 # branch or tag
+build_dir=$(cd /root/$2 && pwd)
+
 out_deb=${build_dir}/out/kernel-pkg/${version}/debian
 distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/kernel
+
+kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
+kernel_pkg_url=${KERNEL_PKG_URL:-https://github.com/open-estuary/distro-repo.git}
+
+export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
 . ${top_dir}/include/mirror-func.sh
@@ -23,14 +27,17 @@ sudo apt-get install -y git graphviz
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
 cd ${workspace}
-git clone --depth 1 -b ${version} https://github.com/xin3liang/debian-kernel-packaging.git debian-pkg
-git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git linux
+git clone --depth 1 -b ${version} ${kernel_pkg_url}
+
+workspace=${workspace}/distro-repo/deb/kernel
+cd ${workspace}
+git clone --depth 1 -b ${version} ${kernel_url} linux
 
 # Export the kernel packaging version
 cd ${workspace}/linux
 
 #find build_num
-if [ ! -z $(apt-cache show linux-image-estuary-arm64) ]; then
+if [ ! -z "$(apt-cache show linux-image-estuary-arm64)" ]; then
 	build_num=$(apt-cache depends linux-image-estuary-arm64|grep Depends:|awk -F '-' '{print $4}')
 	build_num=$((build_num + 1))
 else
@@ -51,7 +58,7 @@ export KDEB_PKGVERSION="${kernel_deb_pkg_version}.estuary.${build_num}-1"
 git tag -f v${kernel_deb_pkg_version//\~/-}
 
 # Build the debian package
-cd ${workspace}/debian-pkg
+cd ${workspace}/debian-package
 
 # Use build_num as ABI
 sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
@@ -60,7 +67,7 @@ cat << EOF > debian/changelog
 linux ($KDEB_PKGVERSION) unstable; urgency=medium
 
   * Auto build:
-    - URL: ${GIT_URL}
+    - URL: ${kernel_url}
     - version: ${pkg_partial_verion}
 
  -- OpenEstuary <xinliang.liu@linaro.org>  $(date -R)
@@ -78,25 +85,19 @@ dpkg-buildpackage -rfakeroot -sa
 kernel_abi_version=${kernel_deb_pkg_version}-${build_num}
 package_version=${build_num}
 
-cd $workspace
-git clone --depth=1 -b ${version} https://github.com/xin3liang/debian-linux-estuary-meta-package.git meta-kernel
 dpkg -i ${workspace}/linux-support*
 dpkg -i ${workspace}/linux-kbuild*
 dpkg -i ${workspace}/linux-headers*
 
 
-cd ${workspace}/meta-kernel
+cd ${workspace}/debian-meta-package
 sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rules.defs
 ./debian/rules debian/control || true
 NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D jessie --force-distribution "bump ABI to ${kernel_abi_version}"
 ./debian/rules debian/control || true
 dpkg-buildpackage -rfakeroot -sa
 
-# 3) rebuilid linux-base 4.3
-# linux-image package depend on linux-base 4.3
-cd $workspace
-apt-get source -b linux-base 
-
-# 4) publish
+# 3) publish
+ cd ${workspace}
 (mkdir -p ${out_deb} && cp -f *deb *.dsc *.tar.xz *.changes ${out_deb})
-(cd ${out_deb} && dpkg-scanpackages -t udeb . > Packages)
+#(cd ${out_deb} && dpkg-scanpackages -t udeb . > Packages)

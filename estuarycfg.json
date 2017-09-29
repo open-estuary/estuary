@@ -12,7 +12,8 @@
 
 "env": [
 {"DEBIAN_MIRROR": "http://repo.estuary.cloud/debian"},
-{"DEBIAN_SECURITY_MIRROR": "http://repo.estuary.cloud/debian/security"}
+{"DEBIAN_SECURITY_MIRROR": "http://repo.estuary.cloud/debian/security"},
+{"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/debian"}
 ]
 
 }
