@@ -17,6 +17,7 @@ cd ${top_dir}
 
 # check host arch, docker running permission
 check_arch
+check_running_not_in_container
 
 ###################################################################################
 # Variables
