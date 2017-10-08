@@ -26,8 +26,14 @@ docker_run_sh() {
 		echo -e "\033[31mError: docker is not running!\033[0m" ; exit 1   
 	fi
 
+        echo "Start container to build."
+        if [  x"$(docker ps -a|grep ${name})" != x"" ]; then
+                docker stop ${name}
+                docker rm ${name}
+        fi
+
 	echo "Start container to build."
-	docker run -it --rm --env-file ${envlist_file} -v ~/:/root/ \
+	docker run  --privileged=true -it --rm --env-file ${envlist_file} -v ~/:/root/ \
 		--name ${name} ${image} \
 		bash /root/${sh_dir}/${script} ${scipt_options}
 
