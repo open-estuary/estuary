@@ -74,7 +74,9 @@ done
 ###################################################################################
 # Install development tools
 ###################################################################################
-install_dev_tools
+if [ x"$action" != x"clean" ]; then
+    install_dev_tools
+fi
 
 # get estuary repo version
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
