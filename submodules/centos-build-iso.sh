@@ -22,12 +22,12 @@ ISO=CentOS-7-aarch64-Everything.iso
 http_addr=http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/CentOS
 rm -rf ${source_dir} ${dest_dir}
 if [ ! -f ${ISO}.sum ]; then
-    wget ${http_addr}/${ISO}.sum || return 1
+    wget ${http_addr}/${ISO}.sum || exit 1
 fi
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     rm -f $ISO 2>/dev/null
-    wget -T 120 -c ${http_addr}/${ISO} || return 1
-    check_sum . ${ISO}.sum || return 1
+    wget -T 120 -c ${http_addr}/${ISO} || exit 1
+    check_sum . ${ISO}.sum || exit 1
 fi
 
 # Create a directory to mount your source.
