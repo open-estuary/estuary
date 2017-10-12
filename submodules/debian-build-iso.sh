@@ -47,6 +47,8 @@ EOF
 
 cat > profiles/debian.packages << EOF
 linux-image-estuary-arm64
+grub-efi-arm64
+sudo
 EOF
 
 # add prefix name 
