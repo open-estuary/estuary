@@ -88,7 +88,7 @@ build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
 ###################################################################################
 # Parse configuration file
 ###################################################################################
-platforms=$(get_install_platforms ${cfg_file})
+platforms=$(get_install_platforms ${cfg_file} | tr ' ' ',')
 distros=$(get_install_distros ${cfg_file})
 envlist=$(get_envlist ${cfg_file})
 
@@ -110,7 +110,63 @@ EOF
 ###################################################################################
 # Update Estuary FTP configuration file
 ###################################################################################
+DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $top_dir/estuary.txt`
+ESTUARY_FTP_CFGFILE="${version}.xml"
+if ! check_ftp_update $version . ; then
+    echo "##############################################################################"
+    echo "# Update estuary configuration file"
+    echo "##############################################################################"
+    if ! update_ftp_cfgfile $version $DOWNLOAD_FTP_ADDR . ; then
+        echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
+    fi
+    rm -f prebuild/.*.sum prebuild/*.sum 2>/dev/null
+fi
 
+###################################################################################
+# Download binaries
+###################################################################################
+if [ x"$platforms" != x"" ]; then
+    echo "##############################################################################"
+    echo "# Download binaries"
+    echo "##############################################################################"
+    mkdir -p prebuild
+    download_binaries $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR prebuild
+    if [[ $? != 0 ]]; then
+        echo -e "\033[31mError! Download binaries failed!\033[0m" ; exit 1
+    fi
+fi
+echo ""
+
+###################################################################################
+# Download UEFI 
+###################################################################################
+binary_dir=${build_dir}/out/release/${version}/binary
+(cd ${build_dir} && rm -rf ${binary_dir})
+(mkdir -p ${binary_dir} && cd ${binary_dir})
+git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git .
+cd ${top_dir}
+
+echo "Download UEFI binary done!"
+
+###################################################################################
+# Copy binaries/docs ...
+###################################################################################
+if [ x"$platforms" != x"" ]; then
+    echo "##############################################################################"
+    echo "# Copy binaries/docs"
+    echo "##############################################################################"
+    binary_src_dir="./prebuild"
+    doc_src_dir="./doc"
+    doc_dir=${build_dir}/out/release/${version}/doc
+
+    if ! copy_all_binaries $platforms $binary_src_dir $binary_dir; then
+        echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
+    fi
+
+    if ! copy_all_docs $platforms $doc_src_dir $doc_dir; then
+        echo -e "\033[31mError! Copy docs failed!\033[0m" ; exit 1
+    fi
+fi
 
 ###################################################################################
 # Build/clean distros
@@ -128,3 +184,5 @@ for dist in ${distros}; do
 done
 
 echo "${action} distros done!"
+
+
