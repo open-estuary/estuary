@@ -7,7 +7,7 @@
 "distros":[
 {"name":"ubuntu","install":"no"},
 {"name":"debian","install":"yes"},
-{"name":"centOS","install":"yes"}
+{"name":"centos","install":"yes"}
 ],
 
 "env": [
