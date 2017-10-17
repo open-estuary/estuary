@@ -55,11 +55,12 @@ xfs-modules-\${kernel:Version}
 ata-modules-\${kernel:Version}
 sata-modules-\${kernel:Version}
 usb-storage-modules-\${kernel:Version}
+estuary-netboot-udeb
 EOF
 
 # Set up local repo
 cat <<EOF > sources.list.udeb
-deb [trusted=yes] ${estuary_repo} ${estuary_dist} main
+deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer
 deb ${mirror} jessie main/debian-installer
 EOF
 
@@ -68,19 +69,9 @@ cat <<EOF > default-preseed
 # Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
 
-# Continue install on "no installable kernels found"
-d-i base-installer/kernel/skip-install boolean true
-d-i base-installer/kernel/no-kernels-found boolean true
+# Skip linux-image-arm64 installation
+d-i base-installer/kernel/image string none
 
-# repo setting
-d-i apt-setup/services-select multiselect security, updates, backports
-d-i apt-setup/local0/repository string ${estuary_repo} ${estuary_dist} main
-d-i apt-setup/local0/comment string Open estuary Overlay Repo
-d-i apt-setup/local0/source boolean true
-d-i apt-setup/local0/key string http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
-
-d-i pkgsel/upgrade select full-upgrade
-d-i preseed/late_command string in-target apt-get update;in-target apt-get install -y linux-image-estuary-arm64
 EOF
 
 # 1) build netboot installer
@@ -99,13 +90,9 @@ d-i anna/no_kernel_modules boolean true
 # The kernel image (meta) package to be installed.
 d-i base-installer/kernel/image string linux-image-estuary-arm64
 
-# repo setting
-d-i apt-setup/services-select multiselect security, updates, backports
-d-i apt-setup/local0/repository string ${estuary_repo} ${estuary_dist} main
-d-i apt-setup/local0/comment string Open estuary Overlay Repo
-d-i apt-setup/local0/source boolean true
-d-i apt-setup/local0/key string http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 EOF
+
+sed -i 's/estuary-netboot-udeb/estuary-cdrom-udeb/' pkg-lists/local
 fakeroot make build_cdrom_grub
 
 # publish cdrom 
