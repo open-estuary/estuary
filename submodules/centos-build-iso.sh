@@ -16,11 +16,13 @@ kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
 source_dir=/root/bootiso
 dest_dir=/root/bootisoks
 . ${top_dir}/include/checksum-func.sh
+rm -rf ${source_dir} ${dest_dir}
 
 # download ISO
 ISO=CentOS-7-aarch64-Everything.iso
 http_addr=http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/CentOS
-rm -rf ${source_dir} ${dest_dir}
+iso_dir=/root/iso
+mkdir -p ${iso_dir} && cd ${iso_dir}
 if [ ! -f ${ISO}.sum ]; then
     wget ${http_addr}/${ISO}.sum || exit 1
 fi
@@ -41,7 +43,6 @@ mkdir -p ${dest_dir}
 cp -r ${source_dir}/* ${dest_dir}
 
 # Unmount the source ISO and remove the directory.
-rm -f ${ISO}
 umount ${source_dir} && rmdir ${source_dir}
 
 # Replace estuary binary for customized media.
@@ -75,10 +76,9 @@ createrepo -g repodata/comps.xml .
 
 
 # Create the new ISO file.
-cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -hide efiboot.img -V "CentOS 7 aarch64" -o /root/${ISO} .
+cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -hide efiboot.img -V "CentOS 7 aarch64" -o ${out}/${ISO} .
 
 # Publish
-mv /root/${ISO} ${out}
 cd ${out}
 mv netboot/images/boot.iso .
 tar -czvf netboot.tar.gz netboot/

@@ -33,8 +33,13 @@ docker_run_sh() {
         fi
 
 	echo "Start container to build."
-	docker run  --privileged=true -it --rm --env-file ${envlist_file} -v ~/:/root/ \
+	docker run  --privileged=true -it --env-file ${envlist_file} -v ~/:/root/ \
 		--name ${name} ${image} \
 		bash /root/${sh_dir}/${script} ${scipt_options}
+        echo "Collect log and clean container"
+        mkdir -p log/${distro}
+        docker logs ${name} > log/${distro}/${name}
+        docker stop ${name}
+        docker rm ${name}
 
 }
