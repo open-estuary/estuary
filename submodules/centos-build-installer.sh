@@ -10,6 +10,7 @@ out=${build_dir}/out/release/${version}/centos/netboot
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
+source_url=http://repo.estuarydev.org/releases/5.0/centos/
 
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
@@ -26,7 +27,7 @@ cd centos-installer
 sudo rm -rf netinstall
 sudo lorax '--product=CentOS Linux' --version=7 --release=7.4.1708 \
   --source=http://mirror.centos.org/altarch/7/os/aarch64/ \
-  --source=ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/centos/ \
+  --source=${source_url}  \
   --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=CentOS 7 aarch64' netinstall/
 
 # Modify initrd to include a default kickstart (that includes the external repository)
@@ -34,11 +35,22 @@ cd netinstall/images/pxeboot/
 sudo mkdir initrd; cd initrd
 sudo sh -c 'xzcat ../initrd.img | cpio -d -i -m'
 cat > /tmp/ks.cfg << EOF
-repo --name="estuary" --baseurl=ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/centos/
+repo --name="estuary" --baseurl=${source_url}
 EOF
 sudo cp /tmp/ks.cfg ks.cfg
 sudo sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
 cd ..; sudo rm -rf initrd
+
+# Rebuild boot.iso
+netinstall_dir=${workspace}/centos-installer/netinstall
+mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
+  -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T \
+  -graft-points \
+  images/pxeboot=${netinstall_dir}/images/pxeboot \
+  LiveOS=${netinstall_dir}/LiveOS \
+  EFI/BOOT=${netinstall_dir}/EFI/BOOT \
+  images/efiboot.img=${netinstall_dir}/images/efiboot.img
+
 
 # Final preparation for publishing
 mkdir -p ${out_installer} && mkdir -p ${out}

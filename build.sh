@@ -77,14 +77,6 @@ done
 if [ x"$action" != x"clean" ]; then
     install_dev_tools
 fi
-host_distro=$(cat /etc/os-release |grep ^ID=|awk -F '=' '{print $2}')
-if [ x"$host_distro" = x"ubuntu" ]; then
-    sudo apt install docker.io -y
-elif [ x"$host_distro" = x"\"centos\"" ]; then
-    sudo yum install docker -y
-else
-    echo "Only support ubuntu and centos now !"; exit 1
-fi
 
 docker_status=`sudo service docker status|grep "running"`
 if [ x"$docker_status" = x"" ]; then
