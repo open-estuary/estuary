@@ -12,3 +12,24 @@ set_debian_mirror()
 			/etc/apt/sources.list.d/estuary.list
 	fi
 }
+
+set_ubuntu_mirror()
+{
+rm -rf /etc/apt/sources.list.d/estuary.list
+
+local mirror=${UBUNTU_MIRROR:-ports.ubuntu.com/ubuntu-ports}
+cat <<EOF > /etc/apt/sources.list
+deb http://${mirror}/ xenial main restricted universe multiverse
+deb-src http://${mirror}/ xenial main restricted universe multiverse
+
+deb http://${mirror}/ xenial-updates main restricted universe multiverse
+deb-src  http://${mirror}/ xenial-updates main restricted universe multiverse
+
+deb http://${mirror}/ xenial-security main restricted universe multiverse
+deb-src  http://${mirror}/ xenial-security main restricted universe multiverse
+
+deb http://${mirror}/ xenial-backports main restricted universe multiverse
+deb-src http://${mirror}/ xenial-backports main restricted universe multiverse
+EOF
+}
+
