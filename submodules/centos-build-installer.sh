@@ -35,6 +35,8 @@ cd netinstall/images/pxeboot/
 sudo mkdir initrd; cd initrd
 sudo sh -c 'xzcat ../initrd.img | cpio -d -i -m'
 cat > /tmp/ks.cfg << EOF
+text
+url --url="http://mirror.centos.org/altarch/7/os/aarch64/"
 repo --name="estuary" --baseurl=${source_url}
 EOF
 sudo cp /tmp/ks.cfg ks.cfg
@@ -43,6 +45,8 @@ cd ..; sudo rm -rf initrd
 
 # Rebuild boot.iso
 netinstall_dir=${workspace}/centos-installer/netinstall
+sed -i 's/vmlinuz.*/& inst.ks=file:\/ks.cfg ip=dhcp/' ${netinstall_dir}/EFI/BOOT/grub.cfg
+rm -rf ${netinstall_dir}/images/boot.iso
 mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
   -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T \
   -graft-points \
