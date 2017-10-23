@@ -65,7 +65,7 @@ yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --ena
 
 cp ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages
 cd ${dest_dir}
-xmlfile=`basename repodata/*aarch64-comps.xml`
+xmlfile=`basename repodata/*comps.xml`
 cd repodata
 mv $xmlfile comps.xml
 shopt -s extglob
