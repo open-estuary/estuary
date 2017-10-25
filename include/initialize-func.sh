@@ -25,7 +25,7 @@ install_jq()
         git clone --depth 1 -b $jq_version https://github.com/stedolan/jq.git 
     fi
 
-    (cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install)
+    cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install
 }
 
 install_dev_tools_debian()

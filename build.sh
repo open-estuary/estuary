@@ -131,7 +131,7 @@ fi
 ###################################################################################
 # Download binaries
 ###################################################################################
-if [ x"$platforms" != x"" ]; then
+if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "##############################################################################"
     echo "# Download binaries"
     echo "##############################################################################"
@@ -146,18 +146,20 @@ echo ""
 ###################################################################################
 # Download UEFI 
 ###################################################################################
-binary_dir=${build_dir}/out/release/${version}/binary
-cd ${build_dir} && rm -rf ${binary_dir}
-mkdir -p ${binary_dir} && cd ${binary_dir}
-git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git .
-cd ${top_dir}
+if [ x"$action" != x"clean" ]; then
+    binary_dir=${build_dir}/out/release/${version}/binary
+    cd ${build_dir} && rm -rf ${binary_dir}
+    mkdir -p ${binary_dir} && cd ${binary_dir}
+    git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git .
+    cd ${top_dir}
 
-echo "Download UEFI binary done!"
+    echo "Download UEFI binary done!"
+fi
 
 ###################################################################################
 # Copy binaries/docs ...
 ###################################################################################
-if [ x"$platforms" != x"" ]; then
+if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "##############################################################################"
     echo "# Copy binaries/docs"
     echo "##############################################################################"
