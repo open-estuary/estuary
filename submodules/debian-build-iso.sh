@@ -16,7 +16,7 @@ workspace=${distro_dir}/simple-cdd
 set_debian_mirror
 
 
-mirror=${DEBIAN_MIRROR:-http://ftp.cn.debian.org/debian}
+mirror=${DEBIAN_MIRROR:-http://ftp.hk.debian.org/debian}
 securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org}
 estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian"}
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
