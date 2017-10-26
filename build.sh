@@ -4,6 +4,7 @@
 # Const Variables, PATH
 ###################################################################################
 top_dir=$(cd `dirname $0` ; pwd)
+dname=$(dirname "$PWD")
 
 export WGET_OPTS="-T 120 -c"
 export LC_ALL=C

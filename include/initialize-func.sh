@@ -1,5 +1,13 @@
 #!/bin/bash
 
+check_build_permission()
+{
+    if [ "$dname" != "/root" ] && [ "$dname" != "/home" ]; then
+        echo -e "\033[31mERROR: please move estuary to user's HOME directory!!!\033[0m"
+        exit 1
+    fi
+}
+
 check_docker_running_permission()
 {
 	if [ "$USER" != "root" ] && [ -z "$(groups|grep docker)" ]; then
