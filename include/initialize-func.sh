@@ -1,5 +1,13 @@
 #!/bin/bash
 
+check_build_permission()
+{
+    if [ "$dname" != "/root" ] && [ "$dname" != "/home" ]; then
+        echo -e "\033[31mERROR: please move estuary to user's HOME directory!!!\033[0m"
+        exit 1
+    fi
+}
+
 check_docker_running_permission()
 {
 	if [ "$USER" != "root" ] && [ -z "$(groups|grep docker)" ]; then
@@ -25,7 +33,7 @@ install_jq()
         git clone --depth 1 -b $jq_version https://github.com/stedolan/jq.git 
     fi
 
-    (cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install)
+    cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install
 }
 
 install_dev_tools_debian()
