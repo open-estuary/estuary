@@ -6,8 +6,6 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-kernel_deb_from=${build_dir}/out/kernel-pkg/${version}/ubuntu/not_meta
-
 out=${build_dir}/out/release/${version}/ubuntu
 distro_dir=${build_dir}/tmp/ubuntu
 cdrom_installer_dir=${distro_dir}/installer/out/images
@@ -18,19 +16,32 @@ export UBUNTU_CD=${workspace}
 cdimage=${workspace}/cd-image
 mnt=${workspace}/mnt
 grubfiles=${workspace}/grubfiles
+download=${workspace}/download
+
 # set mirror
 . ${top_dir}/include/mirror-func.sh
 set_ubuntu_mirror
 
 apt-get install -y apt-utils
 apt-get install -y xorriso
+apt-get install -y expect
 
 mkdir -p ${workspace}
 mkdir -p ${cdimage}
+rm -rf ${cdimage}/* || true
 mkdir -p ${mnt}
+umount ${mnt} || true
+mkdir -p ${download}
+rm -rf ${download}/* || true
+
+# download debs and filesystem
+cd ${download}
+wget ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu/pool/main/linux-*4.12.0*.deb
+
+wget http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.squashfs
+wget http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.size
 
 cd ${workspace}
-
 # download iso and decompress
 wget http://cdimage.ubuntu.com/ubuntu/releases/16.04/release/ubuntu-16.04.3-server-arm64.iso
 
@@ -39,7 +50,7 @@ rsync -av ${mnt}/ ${cdimage}/
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras
-cp ${kernel_deb_from}/*.deb ${cdimage}/pool/extras
+cp ${download}/*.deb ${cdimage}/pool/extras
 
 # copy vmlinuz and initrd.gz from installer
 cp ${cdrom_installer_dir}/cdrom/vmlinuz ${cdimage}/install/vmlinuz
@@ -51,10 +62,14 @@ cp ${cdrom_installer_dir}/cdrom/debian-cd_info.tar.gz ${grubfiles}
 cd ${grubfiles}
 tar -xzvf debian-cd_info.tar.gz
 
-rm -rf ${cdimage}/boot/grub/arm64-efi
 cp -r ${grubfiles}/grub/arm64-efi ${cdimage}/boot/grub/
 cp -r ${grubfiles}/grub/efi.img ${cdimage}/boot/grub/
 cp -r ${grubfiles}/grub/font.pf2 ${cdimage}/boot/grub/
+
+# copy filesystem to install
+cp ${download}/filesystem.size ${cdimage}/install/
+cp ${download}/filesystem.squashfs ${cdimage}/install/
+
 cd ..
 
 # make cd
@@ -177,6 +192,20 @@ apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/
 apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/apt-ftparchive-extras.conf
 apt-ftparchive -c \$APTCONF release \$BUILD/dists/\$DISTNAME > \$BUILD/dists/\$DISTNAME/Release
 
+expect <<-END
+        set timeout -1
+        spawn gpg --default-key "3108CDA4" --output \$BUILD/dists/\$DISTNAME/Release.gpg -ba \$BUILD/dists/\$DISTNAME/Release
+        expect {
+                "Enter passphrase:" {send "OPENESTUARY@123\r"}
+                timeout {send_user "Enter pass phrase timeout\n"}
+        }
+        expect {
+                "Overwrite" {send "y\r"}
+                timeout {send_user "Enter pass phrase timeout\n"}
+        }
+        expect eof
+END
+
 find . -type f -print0 | xargs -0 md5sum > md5sum.txt
 popd
 
@@ -198,5 +227,5 @@ export CDNAME=estuary-${version}-ubuntu
 mkdir -p ${out}
 cp output/*.iso ${out}/${CDNAME}.iso
 
-scp ${out}/${CDNAME}.iso wangxiaochun@192.168.1.107:/home/wangxiaochun
+#scp ${out}/${CDNAME}.iso wangxiaochun@192.168.1.107:/home/wangxiaochun
 

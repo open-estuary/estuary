@@ -118,7 +118,7 @@ d-i base-installer/kernel/skip-install boolean true
 d-i base-installer/kernel/no-kernels-found boolean true
 
 d-i pkgsel/include string wget
-d-i preseed/late_command string in-target apt-get update;in-target apt-get install -y linux-image-4.12.0-500-generic
+d-i base-installer/kernel/image string linux-image-estuary
 EOF
 fakeroot make build_cdrom_grub
 
