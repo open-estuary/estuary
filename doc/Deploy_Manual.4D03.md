@@ -5,8 +5,7 @@
    * [Upgrade UEFI and trust firmware](#2.3)
 * [Bring up System via ACPI mode](#3)
    * [Boot via PXE(ACPI)](#3.1)
-   * [Boot via NFS(ACPI)](#3.2)
-   * [Boot via DISK(SAS/USB/SATA)(ACPI)](#3.3)
+   * [Boot via DISK(SAS/USB/SATA)(ACPI)](#3.2)
 
 ## <a name="1">Introduction</a>
 
@@ -37,173 +36,40 @@ Hardware board should be ready and checked carefully to make sure it is availabl
 
 You can upgrade UEFI and trust firmare yourself based on FTP service, but this is not necessary. If you really want to do it, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D03.md).
 
-## <a name="3">Bring up System via ACPI mode</a>
+<h3 id="3">Booting The Installer</h3>
 
-There are several methods to bring up system, you can select following anyone fitting you to boot up.
+<h3 id="3.1">Installer via PXE</h3>
 
-### <a name="3.1">Boot via PXE</a>
+If you are booting the installer from the network, simply select PXE boot when presented by UEFI.
+For the PXE,please refer to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
-In this boot mode, the UEFI will get grub from PXE server.The grub will get the configuration file from TFTP service configured by PXE server.
-
-1. Setup PXE environment on host  
-   Enable both DHCP and TFTP services on one of your host machines according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
-2. Reboot and press anykey except "enter" to enter UEFI Boot Menu
-3. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option and press "Enter".  
-   **Note**:  
-   If you are connecting the D03 board of openlab, please select "EFI Network 2".  
-   The value of `<No>` is depended on which D03 GE port is connected. D03 board support 4 on-board network ports at maximun.To enable any one of them by connecting to network cable or optical fiber. From left to right, followed by two GE ports, two 10GE ports which corresponding to UEFI startup interface are EFI Network 2, EFI Network 3, EFI Network 0, EFI Network 1.
-4. After several seconds, D03 will boot by PXE automatically.
-
-To config the `grub.cfg` to support PXE boot, please refer to  [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
-
-<h3 id="3.2">Boot via NFS</h3>
-
-In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `showmount -e <server ip address>` to list the exported NFS directories on the NFS server.
-
-D03 supports booting via NFS, you can try it as following steps:
-
-1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
-2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
-3. Reboot D03 and press anykey except "enter" to enter UEFI Boot Menu
-4. Select boot option "Boot Manager"->"EFI Network `<No>`" boot option to enter.  
-  **Note**: If you are connecting the D03 board of openlab, please select "EFI Network 2". The value of `<No>` is depended on which D03 GE port is connected.
-
-### <a name="3.3">Boot via DISK(SAS/USB/SATA)</a>
-
-D03 board supports booting via SAS, USB and SATA by default. The UEFI will directly get the grub from the EFI system partition on the hard disk. The grub will load the grub configuration file from the EFI system partition. So `grubaa64.efi`, `grub.cfg`, `Image` and different estuary release distributions are stored on disk.
-
-1. Boot by PXE (please refer to "Boot via PXE") to part and format hardware disk before booting D03 board  
-   Format hardware disk, e.g.
-   ```bash
-   sudo mkfs.vfat /dev/sda1
-   sudo mkfs.ext4 /dev/sda2
-   ```
-   **For the disk capacity is less than 2T**, part hardware disk with `sudo fdisk /dev/sda` as follow, EFI partition is set to 200M, distribution partition is set to 100G by default.  
-   add a gpt to this disk:
-   ```bash
-   fdisk /dev/sda
-   ```
-   `g`-------add a gpt partition
-
-   add some EFI partition:  
-   `n`-------add a partition  
-   `1`-------the number of partition
-
-   type "Enter" key ------ First sector  
-   `+200M`---------Last sector, size of partition  
-   `t`-------change the type of partition to EFI system
-
-   add the second partition for distribution `mkpart`  
-
-   `n`-------add a partition  
-   `2`-------the number of partition
-
-   type "Enter" key ------ First sector  
-   `+100G`---------Last sector, size of partition  
-
-   add some another partition `...`  
-   save the change: `w`  
-
-   **For the disk capacity is more than 2T**, part hardware disk with `sudo parted /dev/sda` as follow , EFI partition is set to 200M, distribution partition is set to 100G by default.  
-   add a gpt to this disk:
-
-   (parted):--------`mklabel`  
-   New disk label type:-------`gpt`  
-
-   add EFI partition:  
-
-   (parted):------------`mkpart`  
-   Partition name?------`p1`  
-   File system type?----`fat32`  
-   Start?----------------`1`  
-   End?------------------`201`  
-
-   add the second partition for distribution `mkpart`  
-
-   (parted):------------`mkpart`  
-   Partition name?------`p2`  
-   File system type?----`ext4`  
-   Start?----------------`202`  
-   End?------------------`100000`  
-
-   add other partition for distribution `mkpart`  
-   `...`  
-
-   remove the partition by `rm <NO>`  
-   check out how many partitions by `p`  
-   exit the partition by `q`  
-
-   check the partitions with details by `parted -s /dev/sda print`
-
-   **format EFI partition:** `sudo mkfs.vfat /dev/sda1`  
-   **format ext4 partition:** `sudo mkfs.ext4 /dev/sda2`  
-   ```
-   +---------+------------+--------------+------------------+
-   | Name    |   Size     |    Type      |   USB/SAS/SATA   |
-   +---------+------------+--------------+------------------+
-   | sda1    |   200M     |  EFI system  |   EFI            |
-   +---------+------------+--------------+------------------+
-   | sda2    |   100G     |    ext4      | linux filesystem |
-   +---------+------------+--------------+------------------+
-   | sda3    |   100G     |    ext4      | linux filesystem |
-   +---------+------------+--------------+------------------+
-   | sda4    |   100G     |    ext4      | linux filesystem |
-   +---------+------------+--------------+------------------+
-   ```
-   Note: EFI partition must be a fat filesystem, so you should format sda1 with `sudo mkfs.vfat /dev/sda1`.
-2. Download files and store them into hardware disk as below.  
-   (SAS/USB/SATA) Related files are placed as follow:
-   ```
-   sda1: -------EFI
-          |       |
-          |       GRUB2------grubaa64.efi  // grub binary file
-          |
-          |-------------grub.cfg           // grub config file
-          |
-          |-------------Image              // kernel binary Image
-   sda2: Ubuntu distribution
-   sda3: Fedora distribution
-   ```
-   NOTE: The `grubaa64.efi` file must be put in `/EFI/GRUB2` directory of `/dev/sda1`(gpt partition), the distributions could be uncompressed in `/dev/sdaX`(X can be 2,3,4,etc. exclude 1).
-
-    To get kernel image and dtb file, please refer to [Readme.md](https://github.com/open-estuary/estuary/blob/master/doc/Readme.4D03.md).  
-    To get and config grub and grub.cfg, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).  
-    To get different distributions, please refer to [Distributions_Guider](https://github.com/open-estuary/estuary/blob/master/doc/Distributions_Guide.4All.md).
-3. Boot the board via SAS/USB/SATA  
-   a. Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))  
-      e.g. grub.cfg file for official versions after V2.2 is modified as follow:
+Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
+      e.g. grub.cfg file for official versions is modified as follow:
       ```bash
       # Sample GRUB configuration file
-      #
-      # Boot automatically after 5 secs.
-      set timeout=5
-      # By default, boot the Estuary with Ubuntu filesystem
-      set default=ubuntu
       # For booting GNU/Linux
+        menuentry 'D03 Install' {
+           set background_color=black
+           linux    /debian-installer/arm64/linux --- quiet
+           initrd   /debian-installer/arm64/initrd.gz
+        }
 
-      menuentry "D03 Ubuntu SATA(CONSOLE)" --id d03_ubuntu_sata_console {
-        search --no-floppy --fs-uuid --set=root <UUID>
-        linux /Image pci=pcie_bus_perf rootwait root=PARTUUID=<PARTUUID> rw console=ttyS0,115200 earlycon=hisilpcuart,mmio,0xa01b0000,0,0x2f8
-      }
+<h3 id="3.2">Installer via ISO</h3>
+In case you are booting with the minimal ISO via SATA / SAS / SSD, simply select the right boot option in UEFI.
+At this stage you should be able to see the grub menu, Debian's installer like:
       ```
-      *  The value of console is `ttyS0` for official versions after V2.2. If you use official V2.2 and previous versions, the value of console is `ttyS1`
-      *  `<UUID>` means the UUID of that partition which your EFI System is located in.  
-         `<PARTUUID>` means the PARTUUID of that partition which your linux distribution is located in.  
-         To see the values of UUID and PARTUUID, please use the command:`blkid`.
-      *  If you want to use another linux distribution, please refer above steps.
-      
-      For RancherOS,the grub.cfg file must use the follow config:
-      menuentry "D03_RancherOS" --id d03_sata_rancheros {
-         set root=(hd1,gpt1)
-         linux /Image \
-              pcie_aspm=off console=ttyS0,115200 init=/init \
-              rootwait root=/dev/sda2 rw \
-              rancher.autologin=ttyS0 rancher.password=rancher
-      }
+      Install
+      Advanced options ...
+      Install with speech synthesis
+      .
+      Use the down and up keys to change the selection.
+      Press 'e' to edit the selected item, or 'c' for a command prompt.
+      ```
+Now just hit enter and wait for the kernel and initrd to load, which automatically loads the installer and provides you the installer console menu, so you can finally install.
 
-   b. Reboot and press anykey except "enter" to enter UEFI main menu.
-   c. For USB: Select "Boot Manager"-> "EFI USB Device"-> to enter grub selection menu.
-      *  For SAS: Select "Boot Manager"-> "EFI Misc Device 1" to enter grub selection menu.
-      *  For SATA: Select "Boot Manager"-> "EFI Hard Drive" to enter grub selection menu.
-   d. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+After finished the installation:
+a. Reboot and press anykey except "enter" to enter UEFI main menu.
+b. Select "Boot Manager"-> "EFI Misc Device 1"-> to enter grub selection menu.
+c. Press arrow key up or down to select grub boot option to decide which distribution should boot.
+
 
