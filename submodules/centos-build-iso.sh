@@ -28,9 +28,8 @@ else
 fi
 iso_dir=/root/iso
 mkdir -p ${iso_dir} && cd ${iso_dir}
-if [ ! -f ${ISO}.sum ]; then
-    wget ${http_addr}/${ISO}.sum || exit 1
-fi
+rm -f ${ISO}.sum
+wget ${http_addr}/${ISO}.sum || exit 1
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     rm -f $ISO 2>/dev/null
     wget -T 120 -c ${http_addr}/${ISO} || exit 1
