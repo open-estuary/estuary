@@ -94,7 +94,7 @@ rpmbuild --nodeps --define "%_topdir `pwd`" -bs SPECS/kernel-aarch64.spec
 
 # Copy back the resulted artifacts
 mkdir -p $out_rpm
-cp -p $workspace/kernel-aarch64/SRPMS/*.src.rpm $out_rpm
+cp -p $workspace/SRPMS/*.src.rpm $out_rpm
 echo "Source packages available at $out_rpm"
 
 cd $out_rpm

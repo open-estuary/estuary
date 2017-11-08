@@ -11,6 +11,12 @@ distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
 source_url=http://repo.estuarydev.org/releases/5.0/centos/
+curl -m 10 -s -o /dev/null http://repo.estuary.cloud
+if [ $? -eq 0 ];then
+   base_url=http://repo.estuary.cloud/centos/7/os/aarch64/
+else
+   base_url=http://mirror.centos.org/altarch/7/os/aarch64/
+fi
 
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
@@ -26,7 +32,7 @@ sudo yum install -y cpio lorax python-requests wget xz createrepo
 cd centos-installer
 sudo rm -rf netinstall
 sudo lorax '--product=CentOS Linux' --version=7 --release=7.4.1708 \
-  --source=http://mirror.centos.org/altarch/7/os/aarch64/ \
+  --source=${base_url} \
   --source=${source_url}  \
   --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=CentOS 7 aarch64' netinstall/
 

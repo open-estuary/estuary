@@ -90,6 +90,7 @@ tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
 version=${tag:-${version}}
 
 # get absolute path
+cd ${top_dir}
 build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
 
 ###################################################################################

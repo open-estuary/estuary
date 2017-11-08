@@ -20,12 +20,16 @@ rm -rf ${source_dir} ${dest_dir}
 
 # download ISO
 ISO=CentOS-7-aarch64-Everything.iso
-http_addr=http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/CentOS
+curl -m 10 -s -o /dev/null http://repo.estuary.cloud
+if [ $? -eq 0 ];then
+   http_addr=http://repo.estuary.cloud/centos/7/isos/aarch64/
+else
+   http_addr=http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/CentOS
+fi
 iso_dir=/root/iso
 mkdir -p ${iso_dir} && cd ${iso_dir}
-if [ ! -f ${ISO}.sum ]; then
-    wget ${http_addr}/${ISO}.sum || exit 1
-fi
+rm -f ${ISO}.sum
+wget ${http_addr}/${ISO}.sum || exit 1
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     rm -f $ISO 2>/dev/null
     wget -T 120 -c ${http_addr}/${ISO} || exit 1
