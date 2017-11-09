@@ -28,14 +28,12 @@ sudo apt-get install -y u-boot-tools
 # Find kernel abi
 kernel_version=$(apt-cache depends linux-image-estuary | grep -m 1 Depends \
 | sed -e "s/.*linux-image-//g")
-kernel_major=$(echo ${kernel_version}|awk -F '.' '{print $1FS$2}')
 
 echo "mirror is ${mirror}"
 echo "estuary_repo is ${estuary_repo}"
 echo "estuary_dist is ${estuary_dist}"
 echo "installer_src_version is ${installer_src_version}"
 echo "kernel_version is ${kernel_version}"
-echo "kernel major is ${kernel_major}"
 
 # Build the installer
 mkdir -p ${workspace}
@@ -49,7 +47,6 @@ cd debian-installer-*
 cd build
 sed -i "s/PRESEED.*/PRESEED = default-preseed/g" config/common
 sed -i "s/KERNELVERSION =.*/KERNELVERSION = ${kernel_version}/g" config/arm64.cfg
-sed -i "s/KERNELMAJOR =.*/KERNELMAJOR = ${kernel_major}/g" config/arm64.cfg
 
 # Local pkg-list (to include all udebs)
 cat <<EOF > pkg-lists/local
@@ -85,6 +82,7 @@ EOF
 cat <<EOF > sources.list.udeb
 deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer
 deb ${mirror} xenial main/debian-installer
+deb ${mirror} xenial-updates main/debian-installer
 EOF
 
 # Default preseed to add the overlay and kernel
