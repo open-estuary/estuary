@@ -21,39 +21,35 @@ estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.0}
 installer_src_version="20101020ubuntu451.15"
 
 sudo apt-get update -q=2
-sudo apt-get install -y debian-archive-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools
+sudo apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools
 sudo apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests
 sudo apt-get install -y u-boot-tools
 
 # Find kernel abi
-kernel_abi=$(apt-cache depends linux-image-estuary-arm64 | grep -m 1 Depends \
-| sed -e "s/.*linux-image-//g" -e "s/-arm64//g")
+kernel_version=$(apt-cache depends linux-image-estuary | grep -m 1 Depends \
+| sed -e "s/.*linux-image-//g")
+kernel_major=$(echo ${kernel_version}|awk -F '.' '{print $1FS$2}')
 
 echo "mirror is ${mirror}"
 echo "estuary_repo is ${estuary_repo}"
 echo "estuary_dist is ${estuary_dist}"
 echo "installer_src_version is ${installer_src_version}"
-echo "kernel_abi is ${kernel_abi}"
+echo "kernel_version is ${kernel_version}"
+echo "kernel major is ${kernel_major}"
 
 # Build the installer
 mkdir -p ${workspace}
 cd ${workspace}
 rm -rf ./*
-(dget ${mirror}/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc) || true
+(dget ${mirror}/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc)
 
-xz -d debian-installer_*.xz
-tar xvf debian-installer_*.tar
 cd debian-installer-*
-
-#sed -i 's/fshelp|//g' build/util/grub-cpmodules
 
 ## Config changes
 cd build
-sed -i "s/LINUX_KERNEL_ABI.*/LINUX_KERNEL_ABI = $kernel_abi/g" config/common
 sed -i "s/PRESEED.*/PRESEED = default-preseed/g" config/common
-sed -i "s/USE_UDEBS_FROM.*/USE_UDEBS_FROM = xenial/g" config/common
-sed -i "s/KERNELVERSION =.*/KERNELVERSION = 4.12.0-500-generic/g" config/arm64.cfg
-sed -i "s/KERNELMAJOR =.*/KERNELMAJOR = 4.12/g" config/arm64.cfg
+sed -i "s/KERNELVERSION =.*/KERNELVERSION = ${kernel_version}/g" config/arm64.cfg
+sed -i "s/KERNELMAJOR =.*/KERNELMAJOR = ${kernel_major}/g" config/arm64.cfg
 
 # Local pkg-list (to include all udebs)
 cat <<EOF > pkg-lists/local
@@ -96,14 +92,26 @@ cat <<EOF > default-preseed
 # Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
 
-# Skip linux-image-arm64 installation
+# Skip linux-image-generic installation
 d-i base-installer/kernel/image string none
+
+# repo setting
+d-i apt-setup/local0/repository string ${estuary_repo} ${estuary_dist}  main
+d-i apt-setup/local0/comment string Open Estuary Overlay Repo
+d-i apt-setup/local0/source boolean true
+d-i apt-setup/local0/key string http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+
+d-i preseed/late_command string in-target apt-get update;in-target apt-get install -y linux-image-estuary
+
+# Package selection
+tasksel tasksel/first multiselect standard
+d-i pkgsel/include string openssh-server vim
 EOF
 
 # 1) build netboot installer
 fakeroot make build_netboot
 
-# publish netboot 
+# publish netboot
 mkdir -p ${out}
 (cp -f default-preseed ${out}/default-preseed.cfg)
 (cd dest/netboot/ && cp -f mini.iso netboot.tar.gz ${out})
@@ -113,15 +121,10 @@ cat <<EOF > default-preseed
 # Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
 
-# Continue install on "no installable kernels found"
-d-i base-installer/kernel/skip-install boolean true
-d-i base-installer/kernel/no-kernels-found boolean true
-
-d-i pkgsel/include string wget
 d-i base-installer/kernel/image string linux-image-estuary
 EOF
 fakeroot make build_cdrom_grub
 
-# publish cdrom 
+# publish cdrom
 mkdir -p ${out_installer}
 (cp -rf dest/* ${out_installer}/)
