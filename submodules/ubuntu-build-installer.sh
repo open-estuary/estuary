@@ -75,6 +75,7 @@ parport-modules-\${kernel:Version}
 plip-modules-\${kernel:Version}
 ppp-modules-\${kernel:Version}
 vlan-modules-\${kernel:Version}
+estuary-netboot-udeb
 EOF
 
 
@@ -92,14 +93,6 @@ d-i anna/no_kernel_modules boolean true
 
 # Skip linux-image-generic installation
 d-i base-installer/kernel/image string none
-
-# repo setting
-d-i apt-setup/local0/repository string ${estuary_repo} ${estuary_dist}  main
-d-i apt-setup/local0/comment string Open Estuary Overlay Repo
-d-i apt-setup/local0/source boolean true
-d-i apt-setup/local0/key string http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
-
-d-i preseed/late_command string in-target apt-get update;in-target apt-get install -y linux-image-estuary
 
 # Package selection
 tasksel tasksel/first multiselect standard
@@ -121,6 +114,8 @@ d-i anna/no_kernel_modules boolean true
 
 d-i base-installer/kernel/image string linux-image-estuary
 EOF
+
+sed -i 's/estuary-netboot-udeb/estuary-cdrom-udeb/' pkg-lists/local
 fakeroot make build_cdrom_grub
 
 # publish cdrom
