@@ -15,7 +15,7 @@ out_installer=${workspace}/out/images
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
 
-mirror=${DEBIAN_MIRROR:-http://ftp.hk.debian.org/debian}
+mirror=${DEBIAN_MIRROR:-http://ftp.jp.debian.org/debian}
 estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian"}
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
 installer_src_version="20150422+deb8u4"

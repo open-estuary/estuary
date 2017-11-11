@@ -18,6 +18,9 @@ sudo yum install -y wget git rpm-build yum-utils make openssl-devel
 sudo yum install -y net-tools bc xmlto asciidoc openssl-devel audit-libs-devel 'perl(ExtUtils::Embed)'
 sudo wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo
 sudo yum groupinstall -y "Development tools"
+yum install -y rpm-build redhat-rpm-config asciidoc hmaccalc perl-ExtUtils-Embed pesign xmlto
+yum install -y audit-libs-devel binutils-devel elfutils-devel elfutils-libelf-devel
+yum install -y ncurses-devel newt-devel numactl-devel pciutils-devel python-devel zlib-devel
 
 # Install estuary latest kernel
 sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
@@ -73,21 +76,15 @@ debian/rules orig
 # Build rpm source package
 rpmversion=${kernel_version//-*/}
 cd ${workspace} 
-rm -rf kernel-aarch64
-(mkdir -p kernel-aarch64 && cd kernel-aarch64)
 cp -rf ${workspace}/distro-repo/rpm/kernel/centos-package/* .
 
 sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define pkgrelease.*/\%define pkgrelease estuary.${build_num}/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define signmodules 1/\%define signmodules 0/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%{gitrelease}/\%{pkgrelease}/g" SPECS/kernel-aarch64.spec
-sed -i "/_without_debug:/a%define with_debug 0" SPECS/kernel-aarch64.spec
-sed -i "/_without_debuginfo:/a%define with_debuginfo 0" SPECS/kernel-aarch64.spec
 sed -i "s/mv linux-\%{rheltarball}/mv linux-\*/g" SPECS/kernel-aarch64.spec
-sed -i '/\%{_libexecdir}\/perf-core\/\*/a\%{_datadir}\/perf-core\/\*' SPECS/kernel-aarch64.spec
 sed -i "s/^BuildRequires: openssl$/BuildRequires: openssl-devel/g" SPECS/kernel-aarch64.spec
 sed -i "s/0.0.0/0.0.1/g" SPECS/kernel-aarch64.spec
-sed -i "/%define pkgrelease.*/a\%define _unpackaged_files_terminate_build 0" SPECS/kernel-aarch64.spec
 
 cp ${workspace}/orig/*.orig.tar.xz SOURCES/linux-${rpmversion}-estuary.${build_num}.tar.xz
 rpmbuild --nodeps --define "%_topdir `pwd`" -bs SPECS/kernel-aarch64.spec
