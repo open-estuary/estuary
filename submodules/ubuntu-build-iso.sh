@@ -44,12 +44,14 @@ wget http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/Est
 cd ${workspace}
 # download iso and decompress
 ISO=ubuntu-16.04.3-server-arm64.iso
+set +e
 curl -m 10 -s -o /dev/null http://repo.estuary.cloud
 if [ $? -eq 0 ];then
    http_addr=http://repo.estuary.cloud/ubuntu/releases/16.04/release/
 else
    http_addr=http://cdimage.ubuntu.com/ubuntu/releases/16.04/release/
 fi
+set -e
 
 wget -T 120 -c ${http_addr}/${ISO}
 
