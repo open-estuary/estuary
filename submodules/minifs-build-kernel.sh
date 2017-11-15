@@ -18,11 +18,16 @@ workspace=${distro_dir}/kernel
 # build arguments
 ###################################################################################
 OUTPUT_DIR=${build_dir}/out/release/${version}
+KERNEL_DIR=${workspace}/kernel
 
 # Checkout source code
 mkdir -p ${workspace} && cd ${workspace}
+
+if [ ! -d "kernel" ]; then
+    rm -rf $KERNEL_DIR
+fi
+
 git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
-KERNEL_DIR=${workspace}/kernel
 
 ###################################################################################
 # build_kernel <output_dir>
