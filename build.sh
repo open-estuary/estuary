@@ -99,6 +99,7 @@ build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
 platforms=$(get_install_platforms ${cfg_file} | tr ' ' ',')
 distros=$(get_install_distros ${cfg_file})
 envlist=$(get_envlist ${cfg_file})
+DISTROS=$(get_install_distros ${cfg_file} | tr ' ' ',')
 
 cat << EOF
 ##############################################################################
@@ -194,5 +195,59 @@ for dist in ${distros}; do
 done
 
 echo "${action} distros done!"
+
+###################################################################################
+# Build/clean minirootfs
+###################################################################################
+if [ x"$DISTROS" != x"" ]; then
+        ./submodules/${action}-distro.sh --distro=minifs \
+                --version=${version} --envlist="${envlist}" \
+                --build_dir=${build_dir}
+        if [ $? -ne 0 ]; then
+            exit 1
+        fi
+fi
+
+echo "${action} minirootfs done!"
+
+###################################################################################
+# Download/uncompress distros tar
+###################################################################################
+if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
+    echo "##############################################################################"
+    echo "# Download distros (distros: $DISTROS)"
+    echo "##############################################################################"
+    mkdir -p distro
+    download_distros $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR distro $DISTROS
+    if [[ $? != 0 ]]; then
+        echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
+    fi
+    echo ""
+
+    echo "##############################################################################"
+    echo "# Uncompress distros (distros: $DISTROS)"
+    echo "##############################################################################"
+
+    if ! uncompress_distros $DISTROS distro $build_dir/out/release/${version}/rootfs; then
+        echo -e "\033[31mError! Uncompress distro files failed!\033[0m" ; exit 1
+    fi
+    echo ""
+fi
+
+###################################################################################
+# Build distros tar
+###################################################################################
+if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
+
+    echo "/*---------------------------------------------------------------"
+    echo "- create distros (distros: $DISTROS, distro dir: $build_dir/rootfs)"
+    echo "---------------------------------------------------------------*/"
+    if ! create_distros $DISTROS $build_dir/out/release/${version}/rootfs; then
+        echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
+    fi
+
+    echo "Build distros done!"
+    echo ""
+fi
 
 

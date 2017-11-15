@@ -41,26 +41,16 @@ cd netinstall/images/pxeboot/
 sudo mkdir initrd; cd initrd
 sudo sh -c 'xzcat ../initrd.img | cpio -d -i -m'
 cat > /tmp/ks.cfg << EOF
-text
 url --url="http://mirror.centos.org/altarch/7/os/aarch64/"
 repo --name="estuary" --baseurl=${source_url}
+repo --name="extras" --baseurl="http://mirror.centos.org/altarch/7/extras/aarch64/"
 network  --bootproto=dhcp --device=eth0 --ipv6=auto --no-activate
-
-%post --interpreter=/bin/bash
-yum install -y wget
-wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryhttp.repo
-chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
-yum clean dbcache
-%end
-EOF
-sudo cp /tmp/ks.cfg ks.cfg
-
-cat > /tmp/ks-iso.cfg << EOF
 text
-network  --bootproto=dhcp --device=eth0 --ipv6=auto --no-activate
 
 %packages
+yum-plugin-priorities
+bash-completion
+epel-release
 wget
 %end
 
@@ -68,10 +58,16 @@ wget
 wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryhttp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo
+find /etc/yum.repos.d/ -name  "CentOS-Base*"|xargs sed -i '/gpgcheck=*/a\priority=1'
+find /etc/yum.repos.d/ -name  "estuary*"|xargs sed -i '/gpgcheck=*/a\priority=3'
+find /etc/yum.repos.d/ -name  "epel*"|xargs sed -i '/gpgcheck=*/a\priority=5'
+find /etc/yum.repos.d/ -name  "linaro*"|xargs sed -i '/gpgcheck=*/a\priority=15'
 yum clean dbcache
 %end
 EOF
-sudo cp /tmp/ks-iso.cfg ks-iso.cfg
+sudo cp /tmp/ks.cfg ks.cfg
+sed '1,3d' ks.cfg > ks-iso.cfg
 
 sudo sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
 cd ..; sudo rm -rf initrd

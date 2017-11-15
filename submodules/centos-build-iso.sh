@@ -67,6 +67,7 @@ sudo rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 yum clean dbcache
 package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
 yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
+yum install --downloadonly --downloaddir=${kernel_rpm_dir} epel-release
 
 cp ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages
 cd ${dest_dir}
