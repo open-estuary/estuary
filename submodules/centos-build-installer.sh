@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -x
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag

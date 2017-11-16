@@ -23,7 +23,7 @@ KERNEL_DIR=${workspace}/kernel
 # Checkout source code
 mkdir -p ${workspace} && cd ${workspace}
 
-if [ ! -d "kernel" ]; then
+if [ -d "kernel" ]; then
     rm -rf $KERNEL_DIR
 fi
 

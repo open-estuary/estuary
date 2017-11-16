@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -x
 
 yum install genisoimage -y
 

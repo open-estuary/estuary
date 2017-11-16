@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -x
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -12,6 +12,7 @@ cdrom_installer_dir=${distro_dir}/installer/out/images
 workspace=${distro_dir}/ubuntu-cd
 
 export UBUNTU_CD=${workspace}
+WGET_OPTS="-T 120 -c"
 
 cdimage=${workspace}/cd-image
 mnt=${workspace}/mnt
@@ -36,22 +37,20 @@ rm -rf ${download}/* || true
 
 # download debs and filesystem
 cd ${download}
-wget ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu/pool/main/linux-*4.12.0*.deb
+wget ${WGET_OPTS} ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu/pool/main/linux-*4.12.0*.deb
 
-wget http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.squashfs
-wget http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.size
+wget ${WGET_OPTS} http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.squashfs
+wget ${WGET_OPTS} http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.size
 
 cd ${workspace}
 # download iso and decompress
 ISO=ubuntu-16.04.3-server-arm64.iso
-set +e
 curl -m 10 -s -o /dev/null http://repo.estuary.cloud
 if [ $? -eq 0 ];then
    http_addr=http://repo.estuary.cloud/ubuntu/releases/16.04/release/
 else
    http_addr=http://cdimage.ubuntu.com/ubuntu/releases/16.04/release/
 fi
-set -e
 
 wget -T 120 -c ${http_addr}/${ISO}
 
@@ -183,7 +182,7 @@ cat > ./ubuntu-cd-make/script_for_ubuntu_cd/indices.sh << EOF
 cd ${workspace}/ubuntu-cd-make/indices/
 DIST=xenial
 for SUFFIX in extra.main main main.debian-installer restricted restricted.debian-installer; do
-  wget http://archive.ubuntu.com/ubuntu/indices/override.\$DIST.\$SUFFIX
+  wget -T 120 -c http://archive.ubuntu.com/ubuntu/indices/override.\$DIST.\$SUFFIX
 done
 EOF
 
