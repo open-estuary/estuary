@@ -51,6 +51,15 @@ for var in ${envlist}; do
 	echo ${var} >> ${envlist_file}
 done
 
+if [ "${distro}" == "minifs" ];then
+    ./submodules/${distro}-clean.sh ${version} ${build_dir}
+    if [ $? -ne 0 ]; then
+        exit 1
+    else
+        exit 0
+    fi
+fi
+
 # 1) clean
 docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-clean.sh \
 	${version}  ${build_dir}

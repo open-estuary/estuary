@@ -62,6 +62,14 @@ done
 #    https://github.com/open-estuary/distro-repo in the fucture.
 # 2) build installer and iso, in which stage fetch kernel packages from
 #    estuary repo.
+if [ "${distro}" == "minifs" ];then
+    ./submodules/${distro}-build-kernel.sh ${version} ${build_dir}
+    if [ $? -ne 0 ]; then
+        exit 1
+    else
+        exit 0
+    fi
+fi
 if [ "${build_kernel_pkg_only}" == "true" ]; then
 	# 1) build kernel
 	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
