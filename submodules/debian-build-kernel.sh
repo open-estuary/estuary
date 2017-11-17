@@ -11,7 +11,6 @@ distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/kernel
 
 kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
-kernel_pkg_url=${KERNEL_PKG_URL:-https://github.com/open-estuary/distro-repo.git}
 
 export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
@@ -27,11 +26,11 @@ sudo apt-get install -y git graphviz
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
 cd ${workspace}
-git clone --depth 1 -b ${version} ${kernel_pkg_url}
+rsync -avq $build_dir/../distro-repo/ distro-repo
 
 workspace=${workspace}/distro-repo/deb/kernel
 cd ${workspace}
-git clone --depth 1 -b ${version} ${kernel_url} linux
+rsync -avq $build_dir/../kernel/ linux
 
 # Export the kernel packaging version
 cd ${workspace}/linux

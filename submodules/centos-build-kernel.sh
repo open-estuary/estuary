@@ -45,14 +45,15 @@ repo_dir=${workspace}/distro-repo
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf $orig_dir $repo_dir $kernel_dir
+rm -rf $orig_dir $repo_dir
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p ${out_rpm} && mkdir -p debian-pkg
-git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
-git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git linux
+
+rsync -avq $build_dir/../distro-repo/ distro-repo
+rsync -avq $build_dir/../kernel/ ${kernel_dir}
 
 # Export the kernel packaging version
-cd ${workspace}/linux
+cd ${kernel_dir}
 kernel_version=$(make kernelversion)
 export KDEB_PKGVERSION="${kernel_version}.estuary.${build_num}-1"
 git tag -f v${kernel_version}

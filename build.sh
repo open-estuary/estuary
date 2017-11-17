@@ -88,6 +88,7 @@ fi
 # get estuary repo version
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
 version=${tag:-${version}}
+build_kernel_pkg_only=${BUILD_KERNEL_PKG_ONLY:-false}
 
 # get absolute path
 cd ${top_dir}
@@ -147,7 +148,7 @@ fi
 echo ""
 
 ###################################################################################
-# Download UEFI 
+# Download UEFI and kernel depository
 ###################################################################################
 if [ x"$action" != x"clean" ]; then
     binary_dir=${build_dir}/out/release/${version}/binary
@@ -155,8 +156,13 @@ if [ x"$action" != x"clean" ]; then
     mkdir -p ${binary_dir} && cd ${binary_dir}
     git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git .
     cd ${top_dir}
+    rm -rf kernel distro-repo
+    git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+    if [ x"$build_kernel_pkg_only" = x"true" ]; then
+        git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
+    fi
 
-    echo "Download UEFI binary done!"
+    echo "Download UEFI and kernel depository done!"
 fi
 
 ###################################################################################
@@ -188,7 +194,7 @@ for dist in ${distros}; do
 	echo "---------------------------------------------------------------*/"
 	./submodules/${action}-distro.sh --distro=${dist} \
 		--version=${version} --envlist="${envlist}" \
-		--build_dir=${build_dir}
+		--build_dir=${build_dir} --build_kernel=${build_kernel_pkg_only}
 	if [ $? -ne 0 ]; then
 	    exit 1
 	fi
