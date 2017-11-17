@@ -7,10 +7,10 @@ sh_dir=${top_dir}/submodules
 
 usage()
 {
-	echo "Usage: ./clean_distro.sh --distro=DISTRO --version=VERSION --envlist=ENVLIST --build_dir=BUILD_DIR"
+	echo "Usage: ./clean_distro.sh --distro=DISTRO --version=VERSION --envlist=ENVLIST --build_dir=BUILD_DIR --build_kernel=FALSE"
 }
 
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
 	usage
 	exit 1
 fi
@@ -30,6 +30,7 @@ do
     --version) version=$ac_optarg ;;
     --envlist) envlist=$ac_optarg ;;
     --build_dir) build_dir=$ac_optarg ;;
+    --build_kernel) build_kernel_pkg_only=$ac_optarg ;;
     *) echo "Unknown option $ac_option!"
         build_platform_usage ; exit 1 ;;
     esac

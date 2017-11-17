@@ -6,7 +6,7 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-out=${build_dir}/out/release/${version}/centos/netboot
+out=${build_dir}/out/release/${version}/CentOS/netboot
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out

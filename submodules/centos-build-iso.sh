@@ -8,7 +8,7 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-out=${build_dir}/out/release/${version}/centos
+out=${build_dir}/out/release/${version}/CentOS
 distro_dir=${build_dir}/tmp/centos
 cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
 live_os_dir=${distro_dir}/installer/out/LiveOS

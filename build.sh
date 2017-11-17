@@ -173,16 +173,14 @@ if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "# Copy binaries/docs"
     echo "##############################################################################"
     binary_src_dir="./prebuild"
-    doc_src_dir="./doc"
-    doc_dir=${build_dir}/out/release/${version}/doc
+    doc_src_dir=${top_dir}/doc/release-files
+    doc_dir=${build_dir}/out/release/${version}
 
     if ! copy_all_binaries $platforms $binary_src_dir $binary_dir; then
         echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
     fi
 
-    if ! copy_all_docs $platforms $doc_src_dir $doc_dir; then
-        echo -e "\033[31mError! Copy docs failed!\033[0m" ; exit 1
-    fi
+    cp -rf ${doc_src_dir}/* ${doc_dir}
 fi
 
 ###################################################################################
@@ -208,13 +206,22 @@ echo "${action} distros done!"
 if [ x"$DISTROS" != x"" ]; then
         ./submodules/${action}-distro.sh --distro=minifs \
                 --version=${version} --envlist="${envlist}" \
-                --build_dir=${build_dir}
+                --build_dir=${build_dir} --build_kernel=${build_kernel_pkg_only}
         if [ $? -ne 0 ]; then
             exit 1
         fi
 fi
 
 echo "${action} minirootfs done!"
+
+###################################################################################
+# Build/clean kernel packages finish here
+###################################################################################
+
+if [ x"$build_kernel_pkg_only" = x"true" ]; then
+    exit 0
+    echo "${action} kernel packages done!"
+fi
 
 ###################################################################################
 # Download/uncompress distros tar
