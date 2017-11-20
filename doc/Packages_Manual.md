@@ -18,8 +18,11 @@ Typically packages could be installed via two ways:
   - Use`docker pull openestuary/<app name>` to install the corresponding docker images. For more information, please refer to the corresponding manuals mentioned below. 
 
 <h2 id="3">Application Integration and Optimization</h2>
-For details, please refer to [Estuary Application Integration and Optimization based on ARM64 Server](https://github.com/open-estuary/packages)
-       
+
+
+For details, please refer to [Estuary Application Integration and Optimization](https://github.com/open-estuary/packages).
+ 
+ 
 <h2 id="4">Others</h2>
 
 - The yum/deb repositories will be supported officially from Estuary V500 release
