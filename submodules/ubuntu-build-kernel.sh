@@ -49,8 +49,8 @@ rsync -avq $build_dir/../kernel/ linux
 cd ${workspace}/linux
 
 #find build_num
-if [ ! -z "$(apt-cache show linux-image-estuary-arm64)" ]; then
-	build_num=$(apt-cache depends linux-image-estuary-arm64|grep Depends:|awk -F '-' '{print $4}')
+if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
+	build_num=$(apt-cache depends linux-image-estuary|grep -m 1 Depends:|awk -F '-' '{print $4}')
 	build_num=$((build_num + 1))
 else
 	build_num=500
@@ -110,12 +110,8 @@ echo ${out_deb_not_meta}
 (mkdir -p ${out_deb_not_meta} && mv *.deb *.udeb *.tar.gz *.dsc *.changes ${out_deb_not_meta}) || true
 
 # 2) Build the meta kernel package 
-rm -rf linux/debian/
-rm -rf linux/debian.master/
 
-cp -r ubuntu-meta-package/debian/ linux
-
-cd ${workspace}/linux
+cd ${workspace}/ubuntu-meta-package
 
 kernel_abi_version=${kernel_deb_pkg_version}.${build_num}.2
 package_version=${build_num}
