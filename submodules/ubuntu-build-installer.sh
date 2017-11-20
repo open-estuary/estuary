@@ -20,10 +20,10 @@ estuary_repo=${UBUNTU_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/
 estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.0}
 installer_src_version="20101020ubuntu451.15"
 
-sudo apt-get update -q=2
-sudo apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools
-sudo apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests
-sudo apt-get install -y u-boot-tools
+apt-get update -q=2
+apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools --no-install-recommends
+apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests --no-install-recommends
+apt-get install -y u-boot-tools --no-install-recommends
 
 # Find kernel abi
 kernel_version=$(apt-cache depends linux-image-estuary | grep -m 1 Depends \

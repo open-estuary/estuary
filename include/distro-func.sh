@@ -102,7 +102,8 @@ create_distros()
         cd ..
         md5sum ${distro}_ARM64.tar.gz > ${distro}_ARM64.tar.gz.sum
         mkdir -p ../binary/arm64
-        ln -s ../../distro/${distro}_ARM64.tar.gz ../binary/arm64/
+        cp -f ${distro}_ARM64.tar.gz ../binary/arm64/${distro}_arm64.tar.gz
+        cp -f ${distro}_ARM64.tar.gz.sum ../binary/arm64/${distro}_arm64.tar.gz.sum
 
         popd
     done

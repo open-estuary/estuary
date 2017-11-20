@@ -20,9 +20,9 @@ estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/deb
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
 installer_src_version="20150422+deb8u4"
 
-sudo apt-get update -q=2
-sudo apt-get install -y debian-archive-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools
-sudo apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests
+apt-get update -q=2
+apt-get install -y debian-archive-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools --no-install-recommends
+apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests --no-install-recommends
 
 # Find kernel abi
 kernel_abi=$(apt-cache depends linux-image-estuary-arm64 | grep -m 1 Depends \

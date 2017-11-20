@@ -241,7 +241,8 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "# Uncompress distros (distros: $DISTROS)"
     echo "##############################################################################"
 
-    if ! uncompress_distros $DISTROS distro $build_dir/out/release/${version}/rootfs; then
+    rootfs_dir=$build_dir/out/release/${version}/rootfs
+    if ! uncompress_distros $DISTROS distro $rootfs_dir; then
         echo -e "\033[31mError! Uncompress distro files failed!\033[0m" ; exit 1
     fi
     echo ""
@@ -255,9 +256,10 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "/*---------------------------------------------------------------"
     echo "- create distros (distros: $DISTROS, distro dir: $build_dir/rootfs)"
     echo "---------------------------------------------------------------*/"
-    if ! create_distros $DISTROS $build_dir/out/release/${version}/rootfs; then
+    if ! create_distros $DISTROS $rootfs_dir; then
         echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
     fi
+    rm -rf $rootfs_dir
 
     echo "Build distros done!"
     echo ""

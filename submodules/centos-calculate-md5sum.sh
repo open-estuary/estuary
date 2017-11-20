@@ -10,4 +10,5 @@ workspace=${build_dir}/out/release/${version}/CentOS
 
 . ${top_dir}/include/checksum-func.sh
 
+rm -f $workspace/*.MD5SUM
 cal_md5sum ${workspace}
