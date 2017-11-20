@@ -58,6 +58,7 @@ git tag -f v${kernel_deb_pkg_version//\~/-}
 
 # Build the debian package
 cd ${workspace}/debian-package
+rm -rf orig
 
 # Use build_num as ABI
 sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
@@ -77,7 +78,7 @@ debian/rules clean || true
 debian/bin/genorig.py ../linux
 debian/rules orig
 fakeroot debian/rules source
-dpkg-buildpackage -rfakeroot -sa
+dpkg-buildpackage -rfakeroot -sa -uc -us
 
 
 # 2) Build the kernel package 
@@ -94,7 +95,7 @@ sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rul
 ./debian/rules debian/control || true
 NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D jessie --force-distribution "bump ABI to ${kernel_abi_version}"
 ./debian/rules debian/control || true
-dpkg-buildpackage -rfakeroot -sa
+dpkg-buildpackage -rfakeroot -sa -uc -us
 
 # 3) publish
  cd ${workspace}

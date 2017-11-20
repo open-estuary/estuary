@@ -186,6 +186,18 @@ fi
 ###################################################################################
 # Build/clean distros
 ###################################################################################
+for dist in ${distros};do
+        tag=3.1-full
+        image=openestuary/${dist}:${tag}
+        docker pull ${image}
+        status=$?
+        while [ $status != 0 ];
+        do
+            docker pull ${image}
+            status=$?
+        done;
+done
+
 for dist in ${distros}; do
 	echo "/*---------------------------------------------------------------"
 	echo "- ${action}  $dist"
