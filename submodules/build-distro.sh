@@ -41,6 +41,7 @@ done
 
 envlist_dir=${build_dir}/tmp
 envlist_file=${envlist_dir}/env.list
+build_absolute_dir=${build_dir}
 
 # get relative path
 sh_dir=$(echo $sh_dir| sed "s#$HOME/##")
@@ -63,7 +64,7 @@ done
 # 2) build installer and iso, in which stage fetch kernel packages from
 #    estuary repo.
 if [ "${distro}" == "minifs" ];then
-    ./submodules/${distro}-build-kernel.sh ${version} ${build_dir}
+    ./submodules/${distro}-build-kernel.sh ${version} ${build_absolute_dir}
     if [ $? -ne 0 ]; then
         exit 1
     else

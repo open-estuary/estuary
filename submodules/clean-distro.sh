@@ -41,6 +41,7 @@ done
 
 envlist_dir=${build_dir}/tmp
 envlist_file=${envlist_dir}/env.list
+build_absolute_dir=${build_dir}
 
 # get relative path
 sh_dir=$(echo $sh_dir| sed "s#$HOME/##")
@@ -53,7 +54,7 @@ for var in ${envlist}; do
 done
 
 if [ "${distro}" == "minifs" ];then
-    ./submodules/${distro}-clean.sh ${version} ${build_dir}
+    ./submodules/${distro}-clean.sh ${version} ${build_absolute_dir}
     if [ $? -ne 0 ]; then
         exit 1
     else

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-build_dir=$(cd /root/$2 && pwd) # build workspace
+build_dir=$(cd $2 && pwd) # build workspace
 version=$1 # branch or tag
 version=${version:-master}
 
