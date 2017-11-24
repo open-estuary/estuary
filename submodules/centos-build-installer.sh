@@ -10,13 +10,8 @@ out=${build_dir}/out/release/${version}/CentOS/netboot
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
-source_url=http://repo.estuarydev.org/releases/5.0/centos/
-curl -m 10 -s -o /dev/null http://repo.estuary.cloud
-if [ $? -eq 0 ];then
-   base_url=http://repo.estuary.cloud/centos/7/os/aarch64/
-else
-   base_url=http://mirror.centos.org/altarch/7/os/aarch64/
-fi
+source_url=${CENTOS_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/centos"}
+base_url=${CENTOS_MIRROR:-"http://mirror.centos.org/altarch/7/os/aarch64/"}
 
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}

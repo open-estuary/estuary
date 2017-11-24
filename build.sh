@@ -115,6 +115,14 @@ EOF
 ###################################################################################
 # Check args
 ###################################################################################
+for var in ${envlist}; do
+	repo_url=`echo ${var} |sed 's/.*=//g'`
+	wget -q --spider  $repo_url/
+	if [ $? -eq 0 ];then
+	    new="$new $var"
+	fi
+done
+envlist=${new}
 
 
 ###################################################################################
@@ -156,10 +164,15 @@ if [ x"$action" != x"clean" ]; then
     mkdir -p ${binary_dir} && cd ${binary_dir}
     git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git .
     cd ${top_dir}
-    rm -rf kernel distro-repo
-    git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
-    if [ x"$build_kernel_pkg_only" = x"true" ]; then
+    if [ ! -d "kernel" ]; then
+        git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+    else
+        git pull || true
+    fi
+    if [ x"$build_kernel_pkg_only" = x"true" ] && [ ! -d "distro-repo" ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
+    else
+        git pull || true
     fi
 
     echo "Download UEFI and kernel depository done!"
@@ -271,7 +284,7 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     if ! create_distros $DISTROS $rootfs_dir; then
         echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
     fi
-    rm -rf $rootfs_dir
+    sudo rm -rf $rootfs_dir
 
     echo "Build distros done!"
     echo ""

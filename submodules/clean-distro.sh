@@ -49,9 +49,13 @@ build_dir=$(echo $build_dir| sed "s#$HOME/##")
 
 # genrate env.list
 mkdir -p ${envlist_dir}
+rm -f ${envlist_file}
 for var in ${envlist}; do
 	echo ${var} >> ${envlist_file}
 done
+sort -n ${envlist_file} | uniq > test.txt
+cat test.txt > ${envlist_file}
+rm -f test.txt
 
 if [ "${distro}" == "minifs" ];then
     ./submodules/${distro}-clean.sh ${version} ${build_absolute_dir}

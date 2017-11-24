@@ -83,7 +83,7 @@ fi
 # build kernel and check result
 rm_module_build_log kernel $OUTPUT_DIR
 if build_kernel  $OUTPUT_DIR && build_check $OUTPUT_DIR; then
-    gen_module_build_log kernel $OUTPUT_DIR ; rm -rf $OUTPUT_DIR/kernel ; exit 0
+    gen_module_build_log kernel $OUTPUT_DIR ; sudo rm -rf $OUTPUT_DIR/kernel ; exit 0
 else
     exit 1
 fi
