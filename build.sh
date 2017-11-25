@@ -123,12 +123,14 @@ for var in ${envlist}; do
 	fi
 done
 envlist=${new}
+export ${envlist}
 
 
 ###################################################################################
 # Update Estuary FTP configuration file
 ###################################################################################
 DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $top_dir/estuary.txt`
+DOWNLOAD_FTP_ADDR=${ESTUARY_FTP:-"$DOWNLOAD_FTP_ADDR"}
 ESTUARY_FTP_CFGFILE="${version}.xml"
 if ! check_ftp_update $version . ; then
     echo "##############################################################################"
@@ -167,12 +169,12 @@ if [ x"$action" != x"clean" ]; then
     if [ ! -d "kernel" ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
     else
-        git pull || true
+        (cd kernel ; git pull || true)
     fi
     if [ x"$build_kernel_pkg_only" = x"true" ] && [ ! -d "distro-repo" ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
-    else
-        git pull || true
+    elif [ -d "distro-repo" ];then
+        (cd distro-repo ; git pull || true)
     fi
 
     echo "Download UEFI and kernel depository done!"
