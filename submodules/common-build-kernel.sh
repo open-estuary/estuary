@@ -6,7 +6,7 @@ version=$1 # branch or tag
 version=${version:-master}
 
 TOPDIR=$(cd `dirname $0` ; pwd)
-distro_dir=${build_dir}/tmp/minifs
+distro_dir=${build_dir}/tmp/common
 workspace=${distro_dir}/kernel
 
 ###################################################################################

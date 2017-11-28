@@ -57,7 +57,7 @@ sort -n ${envlist_file} | uniq > test.txt
 cat test.txt > ${envlist_file}
 rm -f test.txt
 
-if [ "${distro}" == "minifs" ];then
+if [ "${distro}" == "common" ];then
     ./submodules/${distro}-clean.sh ${version} ${build_absolute_dir}
     if [ $? -ne 0 ]; then
         exit 1

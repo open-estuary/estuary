@@ -6,6 +6,12 @@ set_debian_mirror()
 			/etc/apt/sources.list
 	fi
 
+        if [ -n "${DEBIAN_SECURITY_MIRROR}" ]; then
+                local default_security_mirror="http://security.debian.org/"
+                sed -i "s#${default_security_mirror}#${DEBIAN_SECURITY_MIRROR}#" \
+                        /etc/apt/sources.list
+        fi
+
 	if [ -n "${DEBIAN_ESTUARY_REPO}" ]; then
 		local default_repo="http://repo.estuarydev.org/releases/5.0/debian"
 		sed -i "s#${default_repo}#${DEBIAN_ESTUARY_REPO}#" \
