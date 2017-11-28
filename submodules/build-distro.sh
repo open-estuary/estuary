@@ -65,7 +65,7 @@ rm -f test.txt
 #    https://github.com/open-estuary/distro-repo in the fucture.
 # 2) build installer and iso, in which stage fetch kernel packages from
 #    estuary repo.
-if [ "${distro}" == "minifs" ];then
+if [ "${distro}" == "common" ];then
     ./submodules/${distro}-build-kernel.sh ${version} ${build_absolute_dir}
     if [ $? -ne 0 ]; then
         exit 1

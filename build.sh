@@ -3,6 +3,9 @@
 ###################################################################################
 # Const Variables, PATH
 ###################################################################################
+DEFAULT_ESTUARYCFG="./estuarycfg.json"
+SUPPORT_DISTROS=(`sed -n '/^\"distros\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=name:)(.*?)(?=,)" | sort`)
+
 top_dir=$(cd `dirname $0` ; pwd)
 dname=$(dirname "$PWD")
 
@@ -23,6 +26,7 @@ check_running_not_in_container
 ###################################################################################
 # Variables
 ###################################################################################
+declare -l distros DISTROS
 action=build			# build or clean, default to build
 build_dir=${top_dir}/build	# Build output directory
 platforms=			# Platforms to build, support platforms: d03, d05
@@ -35,16 +39,21 @@ cfg_file=estuarycfg.json	# config file
 ###################################################################################
 Usage()
 {
+    local distros=`echo ${SUPPORT_DISTROS[*]} | sed 's/ /, /g'`
+
 cat << EOF
 Usage: ./build.sh [options]
 Options:
     -h, --help: Display this information
+    -d, --distro: the distribuations
+        * support distros: $distros
     --builddir: Build output directory, default is ./build
     clean: Clean all distros.
 
 Example:
     ./build.sh --help
     ./build.sh --build_dir=./workspace # build distros
+    ./build.sh --build_dir=./workspace -d ubuntu,centos # build specified distros
     ./build.sh --build_dir=./workspace clean 	# clean distros
 EOF
 }
@@ -63,6 +72,7 @@ do
     case ${ac_option} in
         clean) action=clean ;;
 	--build_dir) eval build_dir=$ac_optarg ;;
+        -d | --distro) DISTROS=$ac_optarg ;;
         -h | --help) Usage ; exit 0 ;;
         *) Usage ; echo "Unknown option $1" ; exit 1 ;;
     esac
@@ -98,14 +108,39 @@ build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
 # Parse configuration file
 ###################################################################################
 platforms=$(get_install_platforms ${cfg_file} | tr ' ' ',')
-distros=$(get_install_distros ${cfg_file})
 envlist=$(get_envlist ${cfg_file})
-DISTROS=$(get_install_distros ${cfg_file} | tr ' ' ',')
+build_common=${BUILD_COMMON:-false}
+
+if [ x"$DISTROS" != x"" ]; then
+    get_common=`echo $DISTROS |grep -w common`
+    distros=$(echo $DISTROS |sed 's/common//g' |tr ',' ' ')
+else
+    get_common=`echo $(get_install_distros ${cfg_file}) |grep -w common`
+    distros=$(get_install_distros ${cfg_file} |sed 's/common//g')
+fi
+
+DISTROS=$(echo $distros | tr ' ' ',')
+if [ x"$get_common" != x"" ]; then
+    build_common=true
+    all_distros="$distros common"
+else
+    all_distros=$distros
+fi
+
+
+for dist in ${distros};do
+    check_distro=`echo ${SUPPORT_DISTROS[*]} |grep -w $dist`
+    if [ x"$check_distro" = x"" ]; then
+        echo -e "\033[31mError! $dist is not supported!\033[0m"
+        echo -e "\033[31mSupport distros: ${SUPPORT_DISTROS[*]}\033[0m" ; exit 1
+    fi
+done
+
 
 cat << EOF
 ##############################################################################
 # platform:	${platforms}
-# distro:	${distros}
+# distro:	${all_distros}
 # version:	${version}
 # build_dir:	${build_dir}
 # envlist:	${envlist}
@@ -132,20 +167,22 @@ export ${envlist}
 DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $top_dir/estuary.txt`
 DOWNLOAD_FTP_ADDR=${ESTUARY_FTP:-"$DOWNLOAD_FTP_ADDR"}
 ESTUARY_FTP_CFGFILE="${version}.xml"
-if ! check_ftp_update $version . ; then
-    echo "##############################################################################"
-    echo "# Update estuary configuration file"
-    echo "##############################################################################"
-    if ! update_ftp_cfgfile $version $DOWNLOAD_FTP_ADDR . ; then
-        echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
+if [ x"$build_common" = x"true" ]; then
+    if ! check_ftp_update $version . ; then
+        echo "##############################################################################"
+        echo "# Update estuary configuration file"
+        echo "##############################################################################"
+        if ! update_ftp_cfgfile $version $DOWNLOAD_FTP_ADDR . ; then
+            echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
+        fi
+        rm -f prebuild/.*.sum prebuild/*.sum 2>/dev/null
     fi
-    rm -f prebuild/.*.sum prebuild/*.sum 2>/dev/null
 fi
 
 ###################################################################################
 # Download binaries
 ###################################################################################
-if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ]; then
+if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     echo "##############################################################################"
     echo "# Download binaries"
     echo "##############################################################################"
@@ -160,11 +197,11 @@ echo ""
 ###################################################################################
 # Download UEFI and kernel depository
 ###################################################################################
-if [ x"$action" != x"clean" ]; then
+if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     binary_dir=${build_dir}/out/release/${version}/binary
-    cd ${build_dir} && rm -rf ${binary_dir}
     mkdir -p ${binary_dir} && cd ${binary_dir}
-    git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git .
+    wget ${WGET_OPTS} https://github.com/open-estuary/estuary-uefi/archive/${version}.zip
+    unzip ${version}.zip ; cp -rf estuary-uefi-*/* . ; rm -rf estuary-uefi-* ${version}.zip
     cd ${top_dir}
     if [ ! -d "kernel" ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
@@ -183,7 +220,7 @@ fi
 ###################################################################################
 # Copy binaries/docs ...
 ###################################################################################
-if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ]; then
+if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ] && [ x"$build_common" = x"true" ]; then
     echo "##############################################################################"
     echo "# Copy binaries/docs"
     echo "##############################################################################"
@@ -195,7 +232,7 @@ if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ]; then
         echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
     fi
 
-    cp -rf ${doc_src_dir}/* ${doc_dir}
+    sudo cp -rf ${doc_src_dir}/* ${doc_dir}
 fi
 
 ###################################################################################
@@ -223,31 +260,31 @@ for dist in ${distros}; do
 	if [ $? -ne 0 ]; then
 	    exit 1
 	fi
+	echo "${action} ${dist} done!"
 done
 
-echo "${action} distros done!"
 
 ###################################################################################
-# Build/clean minirootfs
+# Build/clean common rootfs
 ###################################################################################
-if [ x"$DISTROS" != x"" ]; then
-        ./submodules/${action}-distro.sh --distro=minifs \
+if [ x"$build_common" = x"true" ]; then
+        ./submodules/${action}-distro.sh --distro=common \
                 --version=${version} --envlist="${envlist}" \
                 --build_dir=${build_dir} --build_kernel=${build_kernel_pkg_only}
         if [ $? -ne 0 ]; then
             exit 1
         fi
+	echo "${action} common rootfs done!"
 fi
 
-echo "${action} minirootfs done!"
 
 ###################################################################################
 # Build/clean kernel packages finish here
 ###################################################################################
 
 if [ x"$build_kernel_pkg_only" = x"true" ]; then
-    exit 0
     echo "${action} kernel packages done!"
+    exit 0
 fi
 
 ###################################################################################
