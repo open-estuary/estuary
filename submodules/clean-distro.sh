@@ -3,6 +3,7 @@
 top_dir=$(cd `dirname $0`; cd .. ; pwd)
 sh_dir=${top_dir}/submodules
 . ${top_dir}/Include.sh
+home_dir=$(cd ${top_dir}/.. ; pwd)
 
 
 usage()
@@ -43,9 +44,9 @@ envlist_dir=${build_dir}/tmp
 envlist_file=${envlist_dir}/env.list
 build_absolute_dir=${build_dir}
 
-# get relative path
-sh_dir=$(echo $sh_dir| sed "s#$HOME/##")
-build_dir=$(echo $build_dir| sed "s#$HOME/##")
+# get relative path used in docker
+sh_dir=$(echo $sh_dir| sed "s#$home_dir/##")
+build_dir=$(echo $build_dir| sed "s#$home_dir/##")
 
 # genrate env.list
 mkdir -p ${envlist_dir}
@@ -67,5 +68,5 @@ if [ "${distro}" == "common" ];then
 fi
 
 # 1) clean
-docker_run_sh ${distro} ${sh_dir} ${envlist_file} ${distro}-clean.sh \
+docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} ${distro}-clean.sh \
 	${version}  ${build_dir}

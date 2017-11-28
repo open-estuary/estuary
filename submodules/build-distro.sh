@@ -3,6 +3,7 @@
 top_dir=$(cd `dirname $0`; cd .. ; pwd)
 sh_dir=${top_dir}/submodules
 . ${top_dir}/Include.sh
+home_dir=$(cd ${top_dir}/.. ; pwd)
 
 
 usage()
@@ -44,8 +45,8 @@ envlist_file=${envlist_dir}/env.list
 build_absolute_dir=${build_dir}
 
 # get relative path
-sh_dir=$(echo $sh_dir| sed "s#$HOME/##")
-build_dir=$(echo $build_dir| sed "s#$HOME/##")
+sh_dir=$(echo $sh_dir| sed "s#$home_dir/##")
+build_dir=$(echo $build_dir| sed "s#$home_dir/##")
 
 # genrate env.list
 mkdir -p ${envlist_dir}
@@ -75,20 +76,20 @@ if [ "${distro}" == "common" ];then
 fi
 if [ "${build_kernel_pkg_only}" == "true" ]; then
 	# 1) build kernel
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-kernel.sh ${version} ${build_dir}
 else
 	# 2) build installer
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-installer.sh ${version} ${build_dir}
 
 	# 3) build iso
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-iso.sh 	${version} ${build_dir}
 
 	# 4) build rootfs tar
 
 	# 5) calculate md5sum
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-calculate-md5sum.sh ${version} ${build_dir}
 fi
