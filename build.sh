@@ -127,6 +127,14 @@ else
     all_distros=$distros
 fi
 
+if [ x"$build_kernel_pkg_only" = x"true" ]; then
+    if [ x"$distros" = x"" ]; then
+        echo -e "\033[31mcommon no need to build package!\033[0m"
+        exit 0
+    else
+        build_common=false
+    fi
+fi
 
 for dist in ${distros};do
     check_distro=`echo ${SUPPORT_DISTROS[*]} |grep -w $dist`
@@ -200,21 +208,27 @@ echo ""
 if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     binary_dir=${build_dir}/out/release/${version}/binary
     mkdir -p ${binary_dir} && cd ${binary_dir}
+    rm -rf estuary-uefi-* ${version}.zip
     wget ${WGET_OPTS} https://github.com/open-estuary/estuary-uefi/archive/${version}.zip
     unzip ${version}.zip ; cp -rf estuary-uefi-*/* . ; rm -rf estuary-uefi-* ${version}.zip
+fi
+if [ x"$action" != x"clean" ]; then
     cd ${top_dir}
-    if [ ! -d "kernel" ]; then
-        git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
-    else
-        (cd kernel ; git pull || true)
+    if [ x"$build_common" = x"true" ] || [ x"$build_kernel_pkg_only" = x"true" ];then
+        if [ ! -d "kernel" ]; then
+            git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+        else
+            (cd kernel ; git pull || true)
+        fi
     fi
-    if [ x"$build_kernel_pkg_only" = x"true" ] && [ ! -d "distro-repo" ]; then
-        git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
-    elif [ -d "distro-repo" ];then
-        (cd distro-repo ; git pull || true)
+    if [ x"$build_kernel_pkg_only" = x"true" ];then
+        if [ ! -d "distro-repo" ]; then
+            git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
+        else
+            (cd distro-repo ; git pull || true)
+        fi
     fi
 
-    echo "Download UEFI and kernel depository done!"
 fi
 
 ###################################################################################
