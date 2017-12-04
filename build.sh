@@ -52,9 +52,10 @@ Options:
 
 Example:
     ./build.sh --help
-    ./build.sh --build_dir=./workspace # build distros
-    ./build.sh --build_dir=./workspace -d ubuntu,centos # build specified distros
+    ./build.sh --build_dir=./workspace # build distros from json configuration
+    ./build.sh --build_dir=./workspace -d ubuntu,centos # build specified distros,separated with ","
     ./build.sh --build_dir=./workspace clean 	# clean distros
+    sudo ./build.sh --build_dir=./workspace -d ubuntu # when user is not root, you should add sudo !!!
 EOF
 }
 
@@ -94,6 +95,12 @@ if [ x"$docker_status" = x"" ]; then
     sudo service docker start
 fi
 
+gnupg_dir=${top_dir}/..
+if [ -d "/root/.gnupg" ]; then
+    cp -rf /root/.gnupg ${gnupg_dir}
+else
+    echo -e "\033[31mPlease import estuary secure key first!\033[0m";exit 1
+fi
 
 # get estuary repo version
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
@@ -175,7 +182,7 @@ export ${envlist}
 DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $top_dir/estuary.txt`
 DOWNLOAD_FTP_ADDR=${ESTUARY_FTP:-"$DOWNLOAD_FTP_ADDR"}
 ESTUARY_FTP_CFGFILE="${version}.xml"
-if [ x"$build_common" = x"true" ]; then
+if [ x"$build_common" = x"true" ] || [ x"$build_kernel_pkg_only" = x"false" ]; then
     if ! check_ftp_update $version . ; then
         echo "##############################################################################"
         echo "# Update estuary configuration file"
