@@ -113,6 +113,7 @@ cat <<EOF > default-preseed
 d-i anna/no_kernel_modules boolean true
 
 d-i base-installer/kernel/image string linux-image-estuary
+d-i pkgsel/include string openssh-server vim
 d-i preseed/late_command string in-target apt-get update || true
 EOF
 
