@@ -96,8 +96,8 @@ if [ x"$docker_status" = x"" ]; then
 fi
 
 gnupg_dir=${top_dir}/..
-if [ -d "/root/.gnupg" ]; then
-    cp -rf /root/.gnupg ${gnupg_dir}
+if [ -d "$HOME/.gnupg" ]; then
+    cp -rf $HOME/.gnupg ${gnupg_dir}
 else
     echo -e "\033[31mPlease import estuary secure key first!\033[0m";exit 1
 fi

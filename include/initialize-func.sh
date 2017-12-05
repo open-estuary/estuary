@@ -38,13 +38,13 @@ install_jq()
 
 install_dev_tools_debian()
 {
-	sudo apt-get install git jq docker.io bc libssl-dev -y
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential
 	check_docker_running_permission
 }
 
 install_dev_tools_ubuntu()
 {
-	sudo apt-get install git jq docker.io bc libssl-dev -y
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential
 	check_docker_running_permission
 }
 
@@ -55,7 +55,7 @@ install_dev_tools_centos()
 {
 
    sudo yum groupinstall "Development Tools" -y 
-   sudo yum install autoconf automake libtool python git docker bc openssl-devel -y
+   sudo yum install autoconf automake libtool python git docker bc openssl-devel unzip -y
 
     install_jq
     check_docker_running_permission
