@@ -29,8 +29,6 @@ apt-get install -y apt-utils xorriso expect
 mkdir -p ${workspace}
 mkdir -p ${cdimage}
 rm -rf ${cdimage}/* || true
-mkdir -p ${mnt}
-umount ${mnt} || true
 mkdir -p ${download}
 rm -rf ${download}/* || true
 
@@ -55,8 +53,7 @@ http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/16.04/
 
 wget -T 120 -c ${http_addr}/${ISO}
 
-mount -o loop ubuntu-16.04.3-server-arm64.iso ${mnt}
-rsync -av ${mnt}/ ${cdimage}/
+xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras
