@@ -1,8 +1,9 @@
 #!/bin/bash
 
-set -x
+set -ex
 
-yum install genisoimage -y
+yum install epel-release -y
+yum install genisoimage xorriso -y
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -31,18 +32,14 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     check_sum . ${ISO}.sum || exit 1
 fi
 
-# Create a directory to mount your source.
-mkdir -p ${source_dir}
-mount -o loop ${ISO} ${source_dir}
 
 # Create a working directory for your customized media.
 mkdir -p ${dest_dir}
 
 # Copy the source media to the working directory.
-cp -r ${source_dir}/* ${dest_dir}
+xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
 
 # Unmount the source ISO and remove the directory.
-umount ${source_dir} && rmdir ${source_dir}
 
 # Replace estuary binary for customized media.
 cd ${cdrom_installer_dir}
