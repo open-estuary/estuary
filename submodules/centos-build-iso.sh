@@ -44,7 +44,7 @@ cat ${top_dir}/pkglist | while read line
 do
     cp -f ${dest_dir}/temp/${line}-[0-9]* ${dest_dir}/Packages
 done
-cp -f ${dest_dir}/temp/TRANS.TBL  ${dest_dir}/Packages
+cp -rf ${dest_dir}/temp/TRANS.TBL ${dest_dir}/temp/repodata  ${dest_dir}/Packages
 rm -rf ${dest_dir}/temp
 
 # Unmount the source ISO and remove the directory.
@@ -82,7 +82,7 @@ createrepo -g repodata/comps.xml .
 
 
 # Create the new ISO file.
-cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -hide efiboot.img -V "CentOS 7 aarch64" -o ${out}/${ISO} .
+cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "CentOS 7 aarch64" -o ${out}/${ISO} .
 
 # Publish
 cd ${out}
