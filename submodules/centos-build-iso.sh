@@ -4,6 +4,7 @@ set -ex
 
 yum install epel-release -y
 yum install genisoimage xorriso -y
+yum remove epel-release -y
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -34,10 +35,17 @@ fi
 
 
 # Create a working directory for your customized media.
-mkdir -p ${dest_dir}
+mkdir -p ${dest_dir}/temp
 
 # Copy the source media to the working directory.
 xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
+mv ${dest_dir}/Packages/* ${dest_dir}/temp
+cat ${top_dir}/pkglist | while read line
+do
+    cp -f ${dest_dir}/temp/${line}-[0-9]* ${dest_dir}/Packages
+done
+cp -f ${dest_dir}/temp/TRANS.TBL  ${dest_dir}/Packages
+rm -rf ${dest_dir}/temp
 
 # Unmount the source ISO and remove the directory.
 
