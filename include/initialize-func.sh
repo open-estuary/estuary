@@ -80,7 +80,7 @@ install_dev_tools()
     fi
 
     if [ -z "$(which jq)" ] || [ -z "$(which git)" ] \
-	    || [ -z "$(which docker)" ]; then
+	    || [ -z "$(which docker)" ] || [ -z "$(which unzip)" ]; then
 	install_dev_tools_${host_distro}
     fi
 
