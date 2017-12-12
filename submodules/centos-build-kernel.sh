@@ -45,7 +45,7 @@ repo_dir=${workspace}/distro-repo
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf $orig_dir $repo_dir
+rm -rf $orig_dir $repo_dir ~/rpmbuild
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p ${out_rpm} && mkdir -p debian-pkg
 
