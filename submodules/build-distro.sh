@@ -51,6 +51,7 @@ build_dir=$(echo $build_dir| sed "s#$home_dir/##")
 # genrate env.list
 mkdir -p ${envlist_dir}
 rm -f ${envlist_file}
+touch ${envlist_file}
 for var in ${envlist}; do
 	echo ${var} >> ${envlist_file}
 done
