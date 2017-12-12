@@ -1,5 +1,5 @@
 # Introduction
-This folder contains the binary of iso and pxe whitch used to build the [Ubuntu](ftp://117.78.41.188/releases/5.0/linux/Ubuntu/).
+This folder contains the binary of iso and pxe whitch used to build the Ubuntu.How to deploy D03&D05,please refer to [Deploy_manual.md](https://github.com/open-estuary/estuary/tree/master/doc/Deploy_Manual.4All.md)
 ``` 
 estuary-v5.0-ubuntu.iso        : the iso file to auto-deploy ubuntu
 estuary-v5.0-ubuntu.iso.MD5SUM : the md5sum of estuary-v5.0-ubuntu.iso

@@ -1,5 +1,5 @@
 # Introduction
-This folder contains the binary of iso and pxe whitch used to build the [Debian](ftp://117.78.41.188/releases/5.0/linux/Debian/).
+This folder contains the binary of iso and pxe whitch used to build the debian.How to deploy D03&D05,please refer to [Deploy_manual.fd](https://github.com/open-estuary/estuary/tree/master/doc/Deploy_Manual.4All.md).
 ``` 
 estuary-v5.0-debian-8.7-arm64-CD-1.iso        : the iso file to auto-deploy debian
 estuary-v5.0-debian-8.7-arm64-CD-1.iso.MD5SUM : the md5sum of estuary-v5.0-debian-8.7-arm64-CD-1.iso
