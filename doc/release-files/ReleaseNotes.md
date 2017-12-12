@@ -2,13 +2,13 @@
 [Please click here to go to the download page of this release](http://open-estuary.org/estuary-download/)
 
 ```
-Release Version         : v5.0
-Release Date            : 16-Nov-2017
+Release Version         : 5.0
+Release Date            : 12-Dec-2017
 Openstack               : Support Openstack Newton version which based on Linaro ERP1612
-   QEMU                 : v2.8.0
+   QEMU                 : v2.7.0
    OpenJDK              : v1.8
-   Docker               : v1.6.2
-   MySQL                : percona-5.6.22-72.0
+   Docker               : v1.12.6
+   MySQL                : percona-5.7.18
    CI                   : Support NFS/SAS boot testing on D03/D05 board（OS is Ubuntu or CentOS）
    Armor tools          : include perf, gdb, strace... (totally more than 40 tools for system debug\analyses\diagnosis）
 Distributions Supported : Ubuntu 16.04,CentOS 7.4.1708,Debian 8.9,mini-rootfs 1.1
@@ -16,7 +16,7 @@ Kernel Version          : 4.12.0
 Bootloader Info         : UEFI 3.0 + Grub 2.02-beta3
    Boot mode            : PXE, NFS, iBMC Load ISO,IPMI
 Boards Supported        : D03(ARM64), D05(ARM64)
-Deployment Methods      : Auto ISO file both by web or VGA monitor, Auto PXE
+Deployment Methods      : Auto ISO file, PXE
 ```
 
 # Introduction:
@@ -27,7 +27,9 @@ Estuary is a development version of the whole software solution which target is 
 
 ```
 1. UEFI
-	- Added HiKey support in UEFI
+	- D05 setup menu update(press F2 to enter menu)
+        - Support Perf: ddrc,l3c,nm,pmu
+        - Add PXM: PCIE,HNS,SAS
 2. OS
 	- Upgraded Linux kernel version to v4.12.0
 3. Distros
@@ -35,9 +37,10 @@ Estuary is a development version of the whole software solution which target is 
 	- Added support for Debian
 	- Added support for Ubuntu
 4. Applications
-	- Added OpenStack Newton initial support
-	- Enabled HHVM for ARM64
-	- Enabled MongoDB docker image
+	- Supported standard respository to install packages on CentOS and Ubuntu platform
+	- Integrated E-Commerce solution based on Spring Cloud Micro-Service
+        - Integrated new application packages
+	- Enhance performance tools including perf,bcc,and so on
 5. Deployment
 	- Fixed various BMC load ISO bugs (distro selection, waiting time)
 	- Sort hard disk list in alphabetic order
@@ -52,5 +55,6 @@ Estuary is a development version of the whole software solution which target is 
 # Known issues:
 
 ```
-Armor utilities are not fully support
+1. Estuary Debian system failed to config&check TSO
+2. lscpu display inaccurate information on ARM platform
 ```
