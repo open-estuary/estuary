@@ -22,6 +22,8 @@ sudo sed -i 's/\$releasever/7.4.1708/g' /etc/yum.repos.d/CentOS-Base.repo
 
 sudo yum makecache -y
 sudo yum install -y cpio lorax python-requests wget xz createrepo
+seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
+chgrp disk /dev/loop[0-7]
 
 # Call lorax to create the netinstall image
 cd centos-installer
