@@ -95,17 +95,17 @@ Refer to https://help.ubuntu.com/community/isc-dhcp-server . For a simplified di
 
 ### <a name="4">Put files in the TFTP root path</a>
 
-Put the corresponding files into TFTP root directory, they are: grub binary file, grub configure file, kernel Image and dtb file.  
-In my case, they are grubaa64.efi, Image_D02 and grub.cfg-01-xx-xx-xx-xx-xx-xx, hip05-d02.dtb.
+Put the corresponding files into TFTP root directory, they are: grub binary file, grub configure file and kernel Image.  
+In my case, they are grubaa64.efi, grub.cfg-01-xx-xx-xx-xx-xx-xx and Image. 
 
 Note:  
    1. The name of grub binary "grubaa64.efi" or "grubarm32.efi" must be as same as the DHCP configure file in `/etc/dhcp/dhcpd.conf`.  
    2. The grub configure file’s name must comply with a special format, e.g. grub.cfg-01-xx-xx-xx-xx-xx-xx, it starts with "grub.cfg-01-" and ends with board’s MAC address.  
    3. The grub binary and grub.cfg-01-xx-xx-xx-xx-xx-xx files must be placed in the TFTP root directory.  
-   4. The names and positions of kernel image and dtb must be consistent with the corresponding grub config file.  
+   4. The names and positions of kernel image must be consistent with the corresponding grub config file.  
 
 To get and config grub and grub config files, please refer to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).  
-To get kernel and dtb file, please refer to Readme.md.
+To get kernel, please refer to Readme.md.
 
 ### <a name="5">Setup NFS server on Ubuntu</a>
 
