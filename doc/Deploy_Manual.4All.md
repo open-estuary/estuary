@@ -3,9 +3,10 @@
    * [Prerequisite](#2.1)
    * [Check the hardware board](#2.2)
    * [Upgrade UEFI and trust firmware](#2.3)
-* [Booting the installer](#3)
-   * [Installer via PXE](#3.1)
-   * [Installer via ISO](#3.2)
+* [Bring up System](#3)
+   * [Boot via PXE](#3.1)
+   * [Boot via NFS](#3.2)
+   * [Boot via ISO](#3.3)
 
 <h2 id="1">Introduction</h2>
 
@@ -46,14 +47,15 @@ You can upgrade UEFI and trust firmware yourself based on FTP service, but this 
 
 <h3 id="3">Booting The Installer</h3>
 
-<h3 id="3.1">Installer via PXE</h3>
+<h3 id="3.1">Boot via PXE</h3>
 
 If you are booting the installer from the network, simply select PXE boot when presented by UEFI.
 For the PXE,please refer to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
 Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
+
       e.g. grub.cfg file for official versions is modified as follow:
-      ```bash
+      ```
       # Sample GRUB configuration file
       # For booting GNU/Linux
         menuentry 'D05 Install' {
@@ -61,23 +63,46 @@ Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com
            linux    /debian-installer/arm64/linux --- quiet
            initrd   /debian-installer/arm64/initrd.gz
         }
+      ```
 
-<h3 id="3.2">Installer via ISO</h3>
+<h3 id="3.2">Boot via NFS</h3>
+
+In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `"showmount -e <server ip address>" `to list the exported NFS directories on the NFS server.
+
+D05 supports booting via NFS, you can try it as following steps:
+
+1. Enable DHCP, TFTP and NFS service according to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
+
+2. Get and config grub file to support NFS boot according to [Grub_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md).
+
+   Note: D05 only supports booting via ACPI mode with Centos distribution, so please refer to Grub_Manual.md to get correct configuration.
+
+3. Reboot D05 and press "F2" or "Esc" to enter UEFI Boot Menu
+
+4. Select boot option "Boot Manager"->"UEFI PXEv4 `<No>`" boot option to enter.
+
+  Note:
+If you are connecting the D05 board of openlab, please select "UEFI PXEv4 (MAC:000108001540)". The value of `<No>` is depended on which D05 GE port is connected.
+
+<h3 id="3.3">Boot via ISO</h3>
 In case you are booting with the minimal ISO via SATA / SAS / SSD, simply select the right boot option in UEFI.
+
 At this stage you should be able to see the grub menu, Debian's installer like:
+
       ```
       Install
       Advanced options ...
       Install with speech synthesis
       .
+
       Use the down and up keys to change the selection.
       Press 'e' to edit the selected item, or 'c' for a command prompt.
       ```
 Now just hit enter and wait for the kernel and initrd to load, which automatically loads the installer and provides you the installer console menu, so you can finally install.
 
 After finished the installation:
-a. Reboot and press anykey except "enter" to enter UEFI main menu.
-b. Select "Boot Manager"-> "EFI Misc Device 1"-> to enter grub selection menu.
+a. Reboot and press "F2" or "Esc" to enter UEFI main menu.
+b. Select "Boot Manager"-> "UEFI Misc Device 1"-> to enter grub selection menu.
 c. Press arrow key up or down to select grub boot option to decide which distribution should boot.
 
 

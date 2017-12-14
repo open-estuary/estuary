@@ -41,9 +41,10 @@ Estuary is a development version of the whole software solution which target is 
        - Integrated new application packages
        - Enhance performance tools including perf,bcc,and so on
 5. Deployment
-       - Fixed various BMC load ISO bugs (distro selection, waiting time)
-       - Sort hard disk list in alphabetic order
-       - Improved distribution generation speed when building
+       - Support standard network installation, ISO installation, and compatible with the original NFS deployment
+       - Build scripts support parallel compiling of CentOS, Ubuntu, Debian, and common modules
+       - The build script supports parallel compiling of the various distribution kernel packages
+       - Fixed some bug
 6. Document
        - Updated project documentation (Readme, Grub, etc)
        - Updated applications user manual (Redis, PostgreSQL, MySQL, MongoDB, etc)
