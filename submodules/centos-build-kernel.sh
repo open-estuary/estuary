@@ -12,6 +12,7 @@ distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/kernel
 
 # Install build tools,do not change first line!
+yum install -y yum-plugin-ovl
 yum install -y epel-release
 yum install -y python34 dpkg-dev quilt wget git rpm-build yum-utils make openssl-devel
 yum install -y net-tools bc xmlto asciidoc openssl-devel audit-libs-devel 'perl(ExtUtils::Embed)'

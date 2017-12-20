@@ -22,7 +22,7 @@ fi
 while test $# != 0
 do
     case $1 in
-        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ;;
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)' || true` ;;
         *) ac_option=$1 ;;
     esac
 
