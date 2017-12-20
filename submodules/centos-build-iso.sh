@@ -2,8 +2,8 @@
 
 set -ex
 
-yum install -y yum-plugin-ovl
 yum install epel-release -y
+yum install -y yum-plugin-ovl
 yum install genisoimage xorriso -y
 yum remove epel-release -y
 
