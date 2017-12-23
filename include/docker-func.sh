@@ -20,8 +20,10 @@ docker_run_sh() {
 	shift 5
 	scipt_options=$@
 	name=$(echo $script| awk -F '.' '{print $1}')
-	tag=3.1-full
-	image=openestuary/${distro}:${tag}
+        debian_image="linaro/ci-arm64-debian:stretch"
+        centos_image="openestuary/centos:3.1-full"
+        ubuntu_image="openestuary/ubuntu:3.1-full"
+        eval image="$"${distro}"_image"
 
 	if [ -z "$(docker info)" ]; then
 		echo -e "\033[31mError: docker is not running!\033[0m" ; exit 1   

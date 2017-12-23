@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -16,11 +16,14 @@ export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
 . ${top_dir}/include/mirror-func.sh
-set_debian_mirror
+echo "deb-src http://deb.debian.org/debian stretch main" >> /etc/apt/sources.list
 
 sudo apt-get update -q=2
 sudo apt-get build-dep -q --no-install-recommends -y linux
 sudo apt-get install -y git graphviz
+sudo apt-get install -y ccache python-requests quilt cpio rsync dh-exec
+set_debian_mirror
+sudo apt-get update -q=2
 
 
 # 1) build kernel packages debs, udebs
@@ -78,7 +81,7 @@ debian/rules clean || true
 debian/bin/genorig.py ../linux
 debian/rules orig
 fakeroot debian/rules source
-dpkg-buildpackage -rfakeroot -sa -uc -us
+dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
 
 # 2) Build the kernel package 
@@ -93,9 +96,9 @@ dpkg -i ${workspace}/linux-headers*
 cd ${workspace}/debian-meta-package
 sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rules.defs
 ./debian/rules debian/control || true
-NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D jessie --force-distribution "bump ABI to ${kernel_abi_version}"
+NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D stretch --force-distribution "bump ABI to ${kernel_abi_version}"
 ./debian/rules debian/control || true
-dpkg-buildpackage -rfakeroot -sa -uc -us
+dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
 # 3) publish
  cd ${workspace}
