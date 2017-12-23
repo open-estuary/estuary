@@ -20,6 +20,8 @@ estuary_repo=${UBUNTU_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/
 estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.0}
 installer_src_version="20101020ubuntu451.18"
 
+gpg --keyserver keyserver.ubuntu.com --recv-keys 4C9EBDA7
+gpg --no-default-keyring -a --export 4C9EBDA7 | gpg --no-default-keyring --keyring ~/.gnupg/trustedkeys.gpg --import -
 apt-get update -q=2
 apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools --no-install-recommends
 apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests --no-install-recommends
