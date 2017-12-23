@@ -260,8 +260,10 @@ fi
 # Build/clean distros
 ###################################################################################
 for dist in ${distros};do
-        tag=3.1-full
-        image=openestuary/${dist}:${tag}
+        debian_image="linaro/ci-arm64-debian:stretch"
+        centos_image="openestuary/centos:3.1-full"
+        ubuntu_image="openestuary/ubuntu:3.1-full"
+        eval image="$"${dist}"_image"
         docker pull ${image}
         status=$?
         while [ $status != 0 ];

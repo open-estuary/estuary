@@ -60,7 +60,7 @@ wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /
 find /etc/yum.repos.d/ -name  "CentOS-Base*"|xargs sed -i '/gpgcheck=*/a\priority=3'
 find /etc/yum.repos.d/ -name  "estuary*"|xargs sed -i '/gpgcheck=*/a\priority=1'
 find /etc/yum.repos.d/ -name  "epel*"|xargs sed -i '/gpgcheck=*/a\priority=5'
-find /etc/yum.repos.d/ -name  "linaro*"|xargs sed -i '/gpgcheck=*/a\priority=15'
+find /etc/yum.repos.d/ -name  "linaro*"|xargs sed -i '/gpgcheck=*/a\priority=1'
 yum clean dbcache
 %end
 EOF

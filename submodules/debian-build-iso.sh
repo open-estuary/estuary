@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -16,9 +16,9 @@ workspace=${distro_dir}/simple-cdd
 set_debian_mirror
 
 
-mirror=${DEBIAN_MIRROR:-http://ftp.jp.debian.org/debian}
-securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian"}
+mirror=${DEBIAN_MIRROR:-http://ftp.jp.debian.org/debian/}
+securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org/}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian/"}
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
 
 apt-get update -q=2
@@ -56,7 +56,7 @@ export CDNAME=estuary-${version}-debian
 
 # build 
 build-simple-cdd --force-root \
-	--dist jessie -p debian
+	--dist stretch -p debian
 
 # publish
 mkdir -p ${out}
