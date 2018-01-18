@@ -6,6 +6,7 @@ version=$1 # branch or tag
 version=${version:-master}
 
 TOPDIR=$(cd `dirname $0` ; pwd)
+LOCALARCH=`uname -m`
 distro_dir=${build_dir}/tmp/common
 workspace=${distro_dir}/kernel
 
@@ -23,6 +24,19 @@ KERNEL_DIR=${workspace}/kernel
 # Checkout source code
 mkdir -p ${workspace} && cd ${workspace}
 rsync -avq $build_dir/../kernel/ ${KERNEL_DIR}
+
+###################################################################################
+# Check args
+###################################################################################
+if [ x"$LOCALARCH" = x"x86_64" ]; then
+    CROSS_COMPILE="aarch64-linux-gnu-"
+    if [ x"$CROSS_COMPILE" != x"" ]; then
+        export CROSS_COMPILE=$CROSS_COMPILE
+    else
+        echo -e "\033[31mError! --cross must be specified!\033[0m"
+        exit 1
+    fi
+fi
 
 ###################################################################################
 # build_kernel <output_dir>

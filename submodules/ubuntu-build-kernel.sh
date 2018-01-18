@@ -21,7 +21,7 @@ kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 . ${top_dir}/include/mirror-func.sh
 set_ubuntu_mirror
 
-sudo apt-get update -q=2
+apt-get update -q=2
 
 expect <<-END
         set timeout -1
@@ -33,8 +33,8 @@ expect <<-END
         expect eof
 END
 
-sudo apt-get install -y libnuma-dev
-sudo apt-get install -y git graphviz
+apt-get install -y libnuma-dev
+apt-get install -y git graphviz
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}

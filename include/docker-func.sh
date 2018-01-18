@@ -24,6 +24,10 @@ docker_run_sh() {
         centos_image="openestuary/centos:3.1-full"
         ubuntu_image="openestuary/ubuntu:3.1-full"
         eval image="$"${distro}"_image"
+        localarch=`uname -m`
+        if [ x"$localarch" = x"x86_64" ]; then
+             qemu_cmd="-v /usr/bin/qemu-aarch64-static:/usr/bin/qemu-aarch64-static"
+        fi
 
 	if [ -z "$(docker info)" ]; then
 		echo -e "\033[31mError: docker is not running!\033[0m" ; exit 1   
@@ -37,7 +41,7 @@ docker_run_sh() {
 
 	echo "Start container to build."
 	docker run  --privileged=true -i --env-file ${envlist_file} -v ${home_dir}:/root/ \
-		--name ${name} ${image} \
+		${qemu_cmd} --name ${name} ${image} \
 		bash /root/${sh_dir}/${script} ${scipt_options}
         echo "Collect log and clean container"
         mkdir -p log/${distro}
