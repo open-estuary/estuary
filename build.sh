@@ -3,7 +3,12 @@
 ###################################################################################
 # Const Variables, PATH
 ###################################################################################
-DEFAULT_ESTUARYCFG="./estuarycfg.json"
+LOCALARCH=`uname -m`
+if [ x"$LOCALARCH" = x"x86_64" ]; then
+    DEFAULT_ESTUARYCFG="./estuarycfg_x86_64.json"
+else
+    DEFAULT_ESTUARYCFG="./estuarycfg.json"
+fi
 SUPPORT_DISTROS=(`sed -n '/^\"distros\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=name:)(.*?)(?=,)" | sort`)
 
 top_dir=$(cd `dirname $0` ; pwd)
@@ -20,7 +25,6 @@ cd ${top_dir}
 . Include.sh
 
 # check host arch, docker running permission
-check_arch
 check_running_not_in_container
 
 ###################################################################################
@@ -32,7 +36,7 @@ build_dir=${top_dir}/build	# Build output directory
 platforms=			# Platforms to build, support platforms: d03, d05
 distros=			# Distros to build, support distro: debian, centos, ubuntu
 version=master			# estuary repo's tag or branch
-cfg_file=estuarycfg.json	# config file
+cfg_file=${DEFAULT_ESTUARYCFG}	# config file
 
 ###################################################################################
 # Usage
@@ -90,9 +94,9 @@ if [ x"$action" != x"clean" ]; then
     install_dev_tools
 fi
 
-docker_status=`sudo service docker status|grep "running"`
+docker_status=`service docker status|grep "running"`
 if [ x"$docker_status" = x"" ]; then
-    sudo service docker start
+    service docker start
 fi
 
 gnupg_dir=${top_dir}/..
@@ -191,7 +195,38 @@ if [ x"$build_common" = x"true" ] || [ x"$build_kernel_pkg_only" = x"false" ]; t
             echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
         fi
         rm -f prebuild/.*.sum prebuild/*.sum 2>/dev/null
+        rm -f toolchain/.*.sum toolchain/*.sum 2>/dev/null
     fi
+fi
+
+###################################################################################
+# Download/uncompress toolchains
+###################################################################################
+if [ x"$LOCALARCH" = x"x86_64" ]; then
+    echo "##############################################################################"
+    echo "# Download/Uncompress toolchain"
+    echo "##############################################################################"
+    mkdir -p toolchain
+    download_toolchains $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR toolchain
+    if [[ $? != 0 ]]; then
+        echo -e "\033[31mError! Download toolchains failed!\033[0m" >&2 ; exit 1
+    fi
+
+    if ! uncompress_toolchains $ESTUARY_FTP_CFGFILE toolchain; then
+        echo -e "\033[31mError! Uncompress toolchains failed!\033[0m" >&2 ; exit 1
+    fi
+
+    toolchain=`get_toolchain $ESTUARY_FTP_CFGFILE arm`
+    toolchain_dir=`get_compress_file_prefix $toolchain`
+    export PATH=`pwd`/toolchain/$toolchain_dir/bin:$PATH
+
+    toolchain=`get_toolchain $ESTUARY_FTP_CFGFILE aarch64`
+    toolchain_dir=`get_compress_file_prefix $toolchain`
+
+    TOOLCHAIN=$toolchain
+    TOOLCHAIN_DIR=`cd toolchain/$toolchain_dir; pwd`
+    CROSS_COMPILE=`get_cross_compile $LOCALARCH $TOOLCHAIN_DIR`
+    export PATH=$TOOLCHAIN_DIR/bin:$PATH
 fi
 
 ###################################################################################
@@ -208,6 +243,19 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     fi
 fi
 echo ""
+
+###################################################################################
+# Copy toolchains
+###################################################################################
+if [ x"$LOCALARCH" = x"x86_64" ]; then
+    echo "##############################################################################"
+    echo "# Copy toolchains"
+    echo "##############################################################################"
+    mkdir -p $BUILD_DIR/binary/arm64 2>/dev/null
+    if ! copy_toolchains $ESTUARY_FTP_CFGFILE toolchain $BUILD_DIR/binary/arm64; then
+        echo -e "\033[31mError! Copy toolchains failed!\033[0m" ; exit 1
+    fi
+fi
 
 ###################################################################################
 # Download UEFI and kernel depository
@@ -253,12 +301,13 @@ if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ] && [ x"$build_common" 
         echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
     fi
 
-    sudo cp -rf ${doc_src_dir}/* ${doc_dir}
+    cp -rf ${doc_src_dir}/* ${doc_dir}
 fi
 
 ###################################################################################
 # Build/clean distros
 ###################################################################################
+#    docker run --rm --privileged ${qemu_image} bash
 for dist in ${distros};do
         debian_image="linaro/ci-arm64-debian:stretch"
         centos_image="openestuary/centos:3.1-full"
@@ -346,7 +395,7 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     if ! create_distros $DISTROS $rootfs_dir; then
         echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
     fi
-    sudo rm -rf $rootfs_dir
+    rm -rf $rootfs_dir
 
     echo "Build distros done!"
     echo ""
