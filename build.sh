@@ -269,12 +269,10 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
 fi
 if [ x"$action" != x"clean" ]; then
     cd ${top_dir}
-    if [ x"$build_common" = x"true" ] || [ x"$build_kernel_pkg_only" = x"true" ];then
-        if [ ! -d "kernel" ]; then
-            git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
-        else
-            (cd kernel ; git pull || true)
-        fi
+    if [ ! -d "kernel" ]; then
+        git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+    else
+        (cd kernel ; git pull || true)
     fi
     if [ x"$build_kernel_pkg_only" = x"true" ];then
         if [ ! -d "distro-repo" ]; then
@@ -377,11 +375,27 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "# Uncompress distros (distros: $DISTROS)"
     echo "##############################################################################"
 
-    rootfs_dir=$build_dir/out/release/${version}/rootfs
+    rootfs_dir=$build_dir/out/release/${version}/.rootfs
     if ! uncompress_distros $DISTROS distro $rootfs_dir; then
         echo -e "\033[31mError! Uncompress distro files failed!\033[0m" ; exit 1
     fi
     echo ""
+fi
+
+###################################################################################
+# Install modules
+###################################################################################
+if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
+    cp -rf kernel $build_dir/kernel
+    for distro in ${distros[*]}; do
+        echo "---------------------------------------------------------------"
+        echo "- Build modules (kerneldir: $build_dir, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
+        echo "---------------------------------------------------------------"
+        ./submodules/build-modules.sh --kerneldir=$build_dir --rootfs=$rootfs_dir/$distro --cross=$CROSS_COMPILE || exit 1
+        rm -rf $build_dir/kernel
+        echo "- Build modules done!"
+        echo ""
+    done
 fi
 
 ###################################################################################
@@ -390,12 +404,14 @@ fi
 if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
 
     echo "/*---------------------------------------------------------------"
-    echo "- create distros (distros: $DISTROS, distro dir: $build_dir/rootfs)"
+    echo "- create distros (distros: $DISTROS, distro dir: $rootfs_dir)"
     echo "---------------------------------------------------------------*/"
     if ! create_distros $DISTROS $rootfs_dir; then
         echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
     fi
-    rm -rf $rootfs_dir
+    for distro in ${distros[*]}; do
+        rm -rf ${rootfs_dir}/${distro}*
+    done
 
     echo "Build distros done!"
     echo ""
