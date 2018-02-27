@@ -18,10 +18,7 @@ set_ubuntu_mirror
 mirror=${UBUNTU_MIRROR:-http://ports.ubuntu.com/ubuntu-ports}
 estuary_repo=${UBUNTU_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu"}
 estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.0}
-installer_src_version="20101020ubuntu451.18"
 
-gpg --keyserver keyserver.ubuntu.com --recv-keys 4C9EBDA7
-gpg --no-default-keyring -a --export 4C9EBDA7 | gpg --no-default-keyring --keyring ~/.gnupg/trustedkeys.gpg --import -
 apt-get update -q=2
 apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools --no-install-recommends
 apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests --no-install-recommends
@@ -34,14 +31,16 @@ kernel_version=$(apt-cache depends linux-image-estuary | grep -m 1 Depends \
 echo "mirror is ${mirror}"
 echo "estuary_repo is ${estuary_repo}"
 echo "estuary_dist is ${estuary_dist}"
-echo "installer_src_version is ${installer_src_version}"
 echo "kernel_version is ${kernel_version}"
 
 # Build the installer
 mkdir -p ${workspace}
 cd ${workspace}
 rm -rf ./*
-(dget ${mirror}/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc)
+wget -nd -r --no-parent -A 'debian-installer_20101020ubuntu[0-9]*.[0-9]*.dsc' ${mirror}/pool/main/d/debian-installer/
+dscname=`ls -1 -t debian-installer*.dsc | head -1`
+rm -f debian-installer*.dsc
+(dget -u ${mirror}/pool/main/d/debian-installer/${dscname})
 
 cd debian-installer-*
 
