@@ -14,7 +14,7 @@ workspace=${distro_dir}/kernel
 # Install build tools,do not change first line!
 yum install -y epel-release
 yum install -y yum-plugin-ovl
-yum install -y python34 dpkg-dev quilt wget git rpm-build yum-utils make openssl-devel
+yum install -y python34 dpkg-dev quilt wget git rpm-build yum-utils make openssl-devel gcc
 yum install -y net-tools bc xmlto asciidoc openssl-devel audit-libs-devel 'perl(ExtUtils::Embed)'
 
 wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo
@@ -42,15 +42,15 @@ build_num=${BUILD_NUM:-${build_num}}
 
 # build arguments
 orig_dir=${workspace}/orig
-repo_dir=${workspace}/distro-repo
+repo_dir=${workspace}/debian-kernel-packages
 kernel_dir=${workspace}/linux
 
 # Checkout source code
 rm -rf $orig_dir $repo_dir ~/rpmbuild
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p ${out_rpm} && mkdir -p debian-pkg
+git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git
 
-rsync -avq $build_dir/../distro-repo/ distro-repo
 rsync -avq $build_dir/../kernel/ ${kernel_dir}
 
 # Export the kernel packaging version
@@ -61,7 +61,7 @@ git tag -f v${kernel_version}
 
 # Build the source kernel
 cd ../debian-pkg
-cp -r ../distro-repo/deb/kernel/debian-package/debian .
+cp -rf ${repo_dir}/debian-package/debian .
 
 # Use build number as ABI
 sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
@@ -84,7 +84,9 @@ debian/rules orig
 # Build rpm source package
 rpmversion=${kernel_version//-*/}
 cd ${workspace} 
-cp -rf ${workspace}/distro-repo/rpm/kernel/centos-package/* .
+rm -rf centos-kernel-packages
+git clone --depth 1 -b ${version} https://github.com/open-estuary/centos-kernel-packages.git
+cp -rf centos-kernel-packages/* .
 
 sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define pkgrelease.*/\%define pkgrelease estuary.${build_num}/g" SPECS/kernel-aarch64.spec

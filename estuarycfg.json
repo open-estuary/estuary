@@ -13,13 +13,13 @@
 
 "env": [
 {"ESTUARY_FTP": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"},
-{"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/debian"},
+{"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"},
 {"DEBIAN_MIRROR": "http://repo.estuary.cloud/debian/"},
 {"DEBIAN_SECURITY_MIRROR": "http://repo.estuary.cloud/debian-security/"},
-{"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu"},
+{"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"},
 {"UBUNTU_MIRROR": "http://repo.estuary.cloud/ubuntu-ports/"},
 {"UBUNTU_ISO_MIRROR": "http://repo.estuary.cloud/ubuntu/releases/16.04/release/"},
-{"CENTOS_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/centos"},
+{"CENTOS_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"},
 {"CENTOS_MIRROR": "http://repo.estuary.cloud/centos/7/os/aarch64/"},
 {"CENTOS_ISO_MIRROR": "http://repo.estuary.cloud/centos/7/isos/aarch64/"}
 ]

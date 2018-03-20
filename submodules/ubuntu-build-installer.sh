@@ -16,8 +16,8 @@ out_installer=${workspace}/out/images
 set_ubuntu_mirror
 
 mirror=${UBUNTU_MIRROR:-http://ports.ubuntu.com/ubuntu-ports}
-estuary_repo=${UBUNTU_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu"}
-estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.0}
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"}
+estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.1}
 
 apt-get update -q=2
 apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools --no-install-recommends

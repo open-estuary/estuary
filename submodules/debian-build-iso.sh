@@ -18,8 +18,8 @@ set_debian_mirror
 
 mirror=${DEBIAN_MIRROR:-http://ftp.jp.debian.org/debian/}
 securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org/}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian/"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/debian/"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 
 apt-get update -q=2
 apt-get install simple-cdd debian-archive-keyring -y
@@ -56,7 +56,7 @@ export CDNAME=estuary-${version}-debian
 
 # build 
 build-simple-cdd --force-root \
-	--dist stretch -p debian
+	--debug --verbose --dist stretch -p debian
 
 # publish
 mkdir -p ${out}

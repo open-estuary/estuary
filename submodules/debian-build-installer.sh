@@ -16,8 +16,8 @@ out_installer=${workspace}/out/images
 set_debian_mirror
 
 mirror=${DEBIAN_MIRROR:-http://ftp.jp.debian.org/debian/}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.0}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 installer_src_version="20170615+deb9u2"
 
 apt-get update -q=2
@@ -50,6 +50,7 @@ fat-modules-\${kernel:Version}
 btrfs-modules-\${kernel:Version}
 md-modules-\${kernel:Version}
 efi-modules-\${kernel:Version}
+nic-modules-\${kernel:Version}
 scsi-modules-\${kernel:Version}
 jfs-modules-\${kernel:Version}
 xfs-modules-\${kernel:Version}

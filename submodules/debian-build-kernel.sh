@@ -29,10 +29,10 @@ apt-get update -q=2
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
 cd ${workspace}
-rsync -avq $build_dir/../distro-repo/ distro-repo
-
-workspace=${workspace}/distro-repo/deb/kernel
-cd ${workspace}
+workspace=${workspace}/kernel
+rm -rf kernel
+git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git kernel
+cd kernel
 rsync -avq $build_dir/../kernel/ linux
 
 # Export the kernel packaging version
@@ -40,7 +40,7 @@ cd ${workspace}/linux
 
 #find build_num
 if [ ! -z "$(apt-cache show linux-image-estuary-arm64)" ]; then
-	build_num=$(apt-cache depends linux-image-estuary-arm64|grep Depends:|awk -F '-' '{print $4}')
+	build_num=$(apt-cache policy linux-image-estuary-arm64|grep Candidate:|awk -F '+' '{print $2}')
 	build_num=$((build_num + 1))
 else
 	build_num=500
@@ -85,6 +85,7 @@ dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
 
 # 2) Build the kernel package 
+kernel_deb_pkg_version=$(echo ${kernel_version} | sed -e 's,~rc,-rc,')
 kernel_abi_version=${kernel_deb_pkg_version}-${build_num}
 package_version=${build_num}
 
@@ -94,13 +95,21 @@ dpkg -i ${workspace}/linux-headers*
 
 
 cd ${workspace}/debian-meta-package
-sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rules.defs
+cp -rf ../debian-package/debian/lib debian/
+sed -i -e "s@sys.path.append.*@sys.path.append(\"debian/lib/python\")@" debian/bin/gencontrol.py
+sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_deb_pkg_version}/" debian/rules.defs
+sed -i "s/src/share/" debian/rules
 ./debian/rules debian/control || true
 NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D stretch --force-distribution "bump ABI to ${kernel_abi_version}"
 ./debian/rules debian/control || true
 dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
-# 3) publish
+# 3) Build the netboot package
+cd ${workspace}/debian-di
+dpkg-buildpackage -rfakeroot -sa -uc -us -d
+
+
+# 4) publish
  cd ${workspace}
 (mkdir -p ${out_deb} && cp -f *deb *.dsc *.tar.xz *.changes ${out_deb})
 #(cd ${out_deb} && dpkg-scanpackages -t udeb . > Packages)
