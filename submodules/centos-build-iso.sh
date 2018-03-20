@@ -64,7 +64,6 @@ sed -i 's/vmlinuz.*/& inst.ks=file:\/ks-iso.cfg/' ${dest_dir}/EFI/BOOT/grub.cfg
 # Download any additional RPMs to the directory structure and update the metadata.
 rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}
 sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-sed -i 's/5.[0-9]/5.1/g' /etc/yum.repos.d/estuary.repo
 sudo chmod +r /etc/yum.repos.d/estuary.repo
 sudo rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 yum clean dbcache

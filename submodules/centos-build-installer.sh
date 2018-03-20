@@ -53,7 +53,6 @@ wget
 
 %post --interpreter=/bin/bash
 sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-sed -i 's/5.[0-9]/5.1/g' /etc/yum.repos.d/estuary.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo

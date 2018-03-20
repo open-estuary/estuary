@@ -104,7 +104,7 @@ NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D 
 ./debian/rules debian/control || true
 dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
-# 3) Build the netboot package
+# 3) Build the customer installer udeb package
 cd ${workspace}/debian-di
 dpkg-buildpackage -rfakeroot -sa -uc -us -d
 

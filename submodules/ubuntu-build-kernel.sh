@@ -105,7 +105,7 @@ debian/rules clean || true
 dpkg-buildpackage -rfakeroot -sa -uc -us
 echo kernel build end......
 
-# 2) Build the netboot package
+# 2) Build the customer installer udeb package
 cd ${workspace}/ubuntu-di
 dpkg-buildpackage -rfakeroot -sa -uc -us -d
 

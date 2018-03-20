@@ -3,7 +3,6 @@ set_debian_mirror()
 	rm -rf /etc/apt/sources.list.d/*.list
 	wget -O - http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY | apt-key add -
 	wget -O /etc/apt/sources.list.d/estuary.list https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryhttp_debian.list
-	sed -i 's/estuary-5.0/estuary-5.1/g' /etc/apt/sources.list.d/estuary.list
 	if [ -n "${DEBIAN_MIRROR}" ]; then
 		local default_mirror="http://deb.debian.org/debian"
 		sed -i "s#${default_mirror}#${DEBIAN_MIRROR}#" \
