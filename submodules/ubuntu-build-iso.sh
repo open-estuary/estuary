@@ -35,12 +35,12 @@ rm -rf ${download}/* || true
 # download debs and filesystem
 cd ${download}
 if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
-    kernel_version=$(apt-cache depends linux-image-estuary|grep -m 1 Depends:|awk -F '-' '{print $3}')
-    build_num=$(apt-cache depends linux-image-estuary|grep -m 1 Depends:|awk -F '-' '{print $4}')
+    kernel_version=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F ' ' '{print $2}'|awk -F '.' '{print $1"."$2"."$3}')
+    build_num=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F '.' '{print $4}')
 else
     echo "ERROR:No linux-image-estuary found !"
 fi
-wget ${WGET_OPTS} ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
+wget ${WGET_OPTS} ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
 
 http_addr=${ESTUARY_FTP:-"http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"}
 wget ${WGET_OPTS} ${http_addr}/linux/Ubuntu/filesystem/filesystem.squashfs

@@ -10,7 +10,7 @@ out=${build_dir}/out/release/${version}/CentOS/netboot
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
-source_url=${CENTOS_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.0/centos"}
+source_url=${CENTOS_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/centos"}
 base_url=${CENTOS_MIRROR:-"http://mirror.centos.org/altarch/7/os/aarch64/"}
 
 rm -rf ${workspace}
@@ -52,7 +52,8 @@ wget
 %end
 
 %post --interpreter=/bin/bash
-wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryhttp.repo
+sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
+sed -i 's/5.[0-9]/5.1/g' /etc/yum.repos.d/estuary.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo

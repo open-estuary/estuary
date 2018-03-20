@@ -39,10 +39,10 @@ apt-get install -y git graphviz
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
 cd ${workspace}
-rsync -avq $build_dir/../distro-repo/ distro-repo
-
-workspace=${workspace}/distro-repo/deb/kernel
-cd ${workspace}
+workspace=${workspace}/kernel
+rm -rf kernel
+git clone --depth 1 -b ${version} https://github.com/open-estuary/ubuntu-kernel-packages.git kernel
+cd kernel
 rsync -avq $build_dir/../kernel/ linux
 
 # Export the kernel packaging version
@@ -50,7 +50,7 @@ cd ${workspace}/linux
 
 #find build_num
 if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
-	build_num=$(apt-cache depends linux-image-estuary|grep -m 1 Depends:|awk -F '-' '{print $4}')
+	build_num=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F '.' '{print $4}')
 	build_num=$((build_num + 1))
 else
 	build_num=500
@@ -65,7 +65,7 @@ else
 fi
 
 kernel_version=$(make kernelversion)
-kernel_deb_pkg_version=$(echo ${kernel_version} | sed -e 's/\.0-rc/~rc/')
+kernel_deb_pkg_version=$(echo ${kernel_version})
 export KDEB_PKGVERSION="${kernel_deb_pkg_version}-${build_num}.estuary"
 git tag -f v${kernel_deb_pkg_version//\~/-}
 
@@ -105,12 +105,16 @@ debian/rules clean || true
 dpkg-buildpackage -rfakeroot -sa -uc -us
 echo kernel build end......
 
+# 2) Build the netboot package
+cd ${workspace}/ubuntu-di
+dpkg-buildpackage -rfakeroot -sa -uc -us -d
+
+
 cd ..
 echo ${out_deb_not_meta}
 (mkdir -p ${out_deb_not_meta} && mv *.deb *.udeb *.tar.gz *.dsc *.changes ${out_deb_not_meta}) || true
 
-# 2) Build the meta kernel package 
-
+# 3) Build the meta kernel package
 cd ${workspace}/ubuntu-meta-package
 
 kernel_abi_version=${kernel_deb_pkg_version}.${build_num}.2
@@ -122,7 +126,8 @@ NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${kernel_abi_version}" 
 dpkg-buildpackage -rfakeroot -sa -uc -us -d
 echo meta kernel build end...
 
-# 3) publish
+
+# 4) publish
  cd ${workspace}
 (mkdir -p ${out_deb_meta} && mv *.deb *.dsc *.tar.gz *.changes ${out_deb_meta}) || true
 

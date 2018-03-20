@@ -269,17 +269,14 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
 fi
 if [ x"$action" != x"clean" ]; then
     cd ${top_dir}
+    if [ ! -f "kernel-${version}-ready" ]; then
+        rm -rf kernel
+    fi
     if [ ! -d "kernel" ]; then
-        git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+        git clone --depth 1 -b ${version} https://github.com/open-estuary/kbase.git kernel
+        touch kernel-${version}-ready
     else
         (cd kernel ; git pull || true)
-    fi
-    if [ x"$build_kernel_pkg_only" = x"true" ];then
-        if [ ! -d "distro-repo" ]; then
-            git clone --depth 1 -b ${version} https://github.com/open-estuary/distro-repo.git
-        else
-            (cd distro-repo ; git pull || true)
-        fi
     fi
 
 fi

@@ -53,8 +53,7 @@ build_modules()
     if [ ! -d "${rootfs}/lib/modules/${kernel_version}" ]; then
         pushd kernel
         make O=$kernel_dir -j${core_num} modules INSTALL_MOD_PATH=$rootfs \
-        && make PATH=$PATH O=$kernel_dir -j${core_num} INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs \
-        && make PATH=$PATH O=$kernel_dir -j${core_num} firmware_install INSTALL_FW_PATH=$rootfs/lib/firmware
+        && make PATH=$PATH O=$kernel_dir -j${core_num} INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
         if [ ! $? ]; then
             return 1
         fi
