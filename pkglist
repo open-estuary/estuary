@@ -416,6 +416,5 @@ xz-libs
 yum
 yum-metadata-parser
 yum-plugin-fastestmirror
-yum-plugin-priorities
 zip
 zlib
