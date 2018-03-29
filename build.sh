@@ -383,13 +383,15 @@ fi
 # Install modules
 ###################################################################################
 if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
-    cp -rf kernel $build_dir/kernel
     for distro in ${distros[*]}; do
+        build_dir=${build_dir}/${distro}
+        mkdir -p ${build_dir}
+        cp -rf kernel $build_dir/kernel
         echo "---------------------------------------------------------------"
         echo "- Build modules (kerneldir: $build_dir, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
         echo "---------------------------------------------------------------"
         ./submodules/build-modules.sh --kerneldir=$build_dir --rootfs=$rootfs_dir/$distro --cross=$CROSS_COMPILE || exit 1
-        rm -rf $build_dir/kernel
+        rm -rf $build_dir
         echo "- Build modules done!"
         echo ""
     done
