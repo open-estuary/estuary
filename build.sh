@@ -274,6 +274,7 @@ if [ x"$action" != x"clean" ]; then
     fi
     if [ ! -d "kernel" ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+        rm -rf kernel-*-ready
         touch kernel-${version}-ready
     else
         (cd kernel ; git pull || true)
