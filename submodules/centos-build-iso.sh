@@ -3,6 +3,7 @@
 set -ex
 
 rm -rf /etc/yum.repos.d/estuary.repo
+yum makecache fast
 yum install epel-release -y
 yum install -y yum-plugin-ovl
 yum install genisoimage xorriso -y

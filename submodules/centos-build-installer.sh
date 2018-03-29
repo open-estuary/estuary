@@ -17,10 +17,10 @@ rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p centos-installer
 
-# Make sure the base image is updated to 7.4.1708
-sudo sed -i 's/\$releasever/7.4.1708/g' /etc/yum.repos.d/CentOS-Base.repo
-
-sudo yum makecache -y
+wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
+chmod +r /etc/yum.repos.d/estuary.repo
+rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+yum makecache fast
 sudo yum install -y yum-plugin-ovl
 sudo yum install -y cpio lorax python-requests wget xz createrepo
 seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
