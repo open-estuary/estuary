@@ -2,9 +2,10 @@
 
 set -ex
 
-rm -rf /etc/yum.repos.d/estuary.repo
+wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
+chmod +r /etc/yum.repos.d/estuary.repo
+rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 yum makecache fast
-yum install epel-release -y
 yum install -y yum-plugin-ovl
 yum install genisoimage xorriso -y
 yum remove epel-release -y
@@ -36,7 +37,6 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     check_sum . ${ISO}.sum || exit 1
 fi
 
-
 # Create a working directory for your customized media.
 mkdir -p ${dest_dir}/temp
 
@@ -64,13 +64,9 @@ sed -i 's/vmlinuz.*/& inst.ks=file:\/ks-iso.cfg/' ${dest_dir}/EFI/BOOT/grub.cfg
 
 # Download any additional RPMs to the directory structure and update the metadata.
 rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}
-sudo wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-sudo chmod +r /etc/yum.repos.d/estuary.repo
-sudo rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
-yum clean dbcache
 package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
 yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
-yum install --downloadonly --downloaddir=${kernel_rpm_dir} epel-release
+yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=extras epel-release
 
 cp ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages
 cd ${dest_dir}

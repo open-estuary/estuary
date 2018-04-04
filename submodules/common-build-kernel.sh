@@ -54,7 +54,7 @@ build_kernel()
 
     pushd $KERNEL_DIR
     make O=$kernel_dir estuary_defconfig
-    make O=$kernel_dir -j${core_num} ${kernel_bin##*/}
+    make O=$kernel_dir -j${core_num} -s ${kernel_bin##*/}
 
     pwd
     popd

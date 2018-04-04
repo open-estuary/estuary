@@ -38,13 +38,13 @@ install_jq()
 
 install_dev_tools_debian()
 {
-	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support flex bison
 	check_docker_running_permission
 }
 
 install_dev_tools_ubuntu()
 {
-	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support flex bison
 	check_docker_running_permission
 }
 
