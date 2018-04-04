@@ -52,8 +52,8 @@ build_modules()
     popd
     if [ ! -d "${rootfs}/lib/modules/${kernel_version}" ]; then
         pushd kernel
-        make O=$kernel_dir -j${core_num} modules INSTALL_MOD_PATH=$rootfs \
-        && make PATH=$PATH O=$kernel_dir -j${core_num} INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
+        make O=$kernel_dir -j${core_num} -s modules INSTALL_MOD_PATH=$rootfs \
+        && make PATH=$PATH O=$kernel_dir -j${core_num} -s INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
         if [ ! $? ]; then
             return 1
         fi
