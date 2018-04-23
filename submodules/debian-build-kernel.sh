@@ -85,7 +85,7 @@ dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
 
 # 2) Build the kernel package 
-rc_flag=$(echo ${kernel_version} | grep "rc")
+rc_flag=$(echo ${kernel_version} | grep "rc") || true
 kernel_deb_pkg_version=$(echo ${kernel_version} | sed -e 's,~rc,-rc,')
 kernel_abi_version=${kernel_deb_pkg_version}-${build_num}
 package_version=${build_num}
