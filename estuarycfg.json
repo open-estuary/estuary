@@ -8,6 +8,7 @@
 {"name":"common","install":"yes"},
 {"name":"ubuntu","install":"yes"},
 {"name":"debian","install":"yes"},
+{"name":"opensuse","install":"yes"},
 {"name":"centos","install":"yes"}
 ],
 
@@ -19,6 +20,8 @@
 {"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"},
 {"UBUNTU_MIRROR": "http://repo.estuary.cloud/ubuntu-ports/"},
 {"UBUNTU_ISO_MIRROR": "http://repo.estuary.cloud/ubuntu/releases/16.04/release/"},
+{"OPENSUSE_MIRROR": "http://repo.estuary.cloud/opensuse"},
+{"OPENSUSE_ISO_MIRROR": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/OpenSuse"},
 {"CENTOS_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"},
 {"CENTOS_MIRROR": "http://repo.estuary.cloud/centos/7/os/aarch64/"},
 {"CENTOS_ISO_MIRROR": "http://repo.estuary.cloud/centos/7/isos/aarch64/"}

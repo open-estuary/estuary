@@ -85,6 +85,7 @@ dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
 
 # 2) Build the kernel package 
+rc_flag=$(echo ${kernel_version} | grep "rc")
 kernel_deb_pkg_version=$(echo ${kernel_version} | sed -e 's,~rc,-rc,')
 kernel_abi_version=${kernel_deb_pkg_version}-${build_num}
 package_version=${build_num}
@@ -97,7 +98,13 @@ dpkg -i ${workspace}/linux-headers*
 cd ${workspace}/debian-meta-package
 cp -rf ../debian-package/debian/lib debian/
 sed -i -e "s@sys.path.append.*@sys.path.append(\"debian/lib/python\")@" debian/bin/gencontrol.py
-sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_deb_pkg_version}/" debian/rules.defs
+
+if [ ! -n "$rc_flag" ]; then
+    sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rules.defs
+else
+    sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_deb_pkg_version}/" debian/rules.defs
+fi
+
 sed -i "s/src/share/" debian/rules
 ./debian/rules debian/control || true
 NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D stretch --force-distribution "bump ABI to ${kernel_abi_version}"

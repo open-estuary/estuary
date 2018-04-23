@@ -22,6 +22,7 @@ docker_run_sh() {
 	name=$(echo $script| awk -F '.' '{print $1}')
         debian_image="linaro/ci-arm64-debian:stretch"
         centos_image="openestuary/centos:3.1-full"
+        opensuse_image="arm64v8/opensuse:leap"
         ubuntu_image="openestuary/ubuntu:3.1-full"
         eval image="$"${distro}"_image"
         localarch=`uname -m`
