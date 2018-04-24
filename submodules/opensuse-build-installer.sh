@@ -7,17 +7,19 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c"
 
+out=${build_dir}/out/release/${version}/OpenSuse
 release_dir=${build_dir}/out/release/${version}/OpenSuse/netboot
 distro_dir=${build_dir}/tmp/opensuse
 workspace=${distro_dir}/installer
 netiso_url=${OPENSUSE_ISO_MIRROR:-"http://ftp.jaist.ac.jp/pub/Linux/openSUSE/ports/aarch64/distribution/leap/42.3/iso/"}
+opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-NET-aarch64-Build0200-Media.iso
 
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p opensuse-installer
 
-zypper install -y wget xorriso mkisofs
+zypper install -y wget xorriso mkisofs tar
 
 # download ISO
 iso_dir=/root/iso
@@ -40,3 +42,12 @@ mkisofs  -R -o boot.iso -b boot/aarch64/efi -c boot.catalog -no-emul-boot .
 # Final preparation for publishing
 mkdir -p ${release_dir}
 cp -rf ${workspace}/opensuse-installer/netinstall/* ${release_dir}
+
+# Publish
+cd ${out}
+mv netboot/boot.iso .
+wget ${WGET_OPTS} ${opensuse_url}/autoinst.xml -O netboot/autoinst.xml
+tar -czvf netboot.tar.gz netboot/
+
+# Clean
+rm -rf netboot/
