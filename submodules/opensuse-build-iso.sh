@@ -41,12 +41,3 @@ find . -name "packages*" |xargs gzip -f
 
 # Create the new ISO file.
 mksusecd --create ${out}/${ISO} --no-hybrid .
-
-# Publish
-cd ${out}
-mv netboot/boot.iso .
-wget ${WGET_OPTS} ${opensuse_url}/autoinst.xml -O netboot/autoinst.xml
-tar -czvf netboot.tar.gz netboot/
-
-# Clean
-rm -rf netboot/
