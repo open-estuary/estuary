@@ -34,7 +34,7 @@ declare -l distros DISTROS
 action=build			# build or clean, default to build
 build_dir=${top_dir}/build	# Build output directory
 platforms=			# Platforms to build, support platforms: d03, d05
-distros=			# Distros to build, support distro: debian, centos, ubuntu, opensuse
+distros=			# Distros to build, support distro: debian, centos, ubuntu, opensuse, fedora
 version=master			# estuary repo's tag or branch
 cfg_file=${DEFAULT_ESTUARYCFG}	# config file
 
@@ -308,6 +308,7 @@ for dist in ${distros};do
         debian_image="linaro/ci-arm64-debian:stretch"
         centos_image="openestuary/centos:3.1-full"
         opensuse_image="arm64v8/opensuse:leap"
+        fedora_image="arm64v8/fedora:26"
         ubuntu_image="openestuary/ubuntu:3.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}
