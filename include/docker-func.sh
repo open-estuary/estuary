@@ -23,6 +23,7 @@ docker_run_sh() {
         debian_image="linaro/ci-arm64-debian:stretch"
         centos_image="openestuary/centos:3.1-full"
         opensuse_image="arm64v8/opensuse:leap"
+        fedora_image="arm64v8/fedora:26"
         ubuntu_image="openestuary/ubuntu:3.1-full"
         eval image="$"${distro}"_image"
         localarch=`uname -m`

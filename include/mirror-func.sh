@@ -48,3 +48,12 @@ deb ${mirror}/ xenial-backports main restricted universe multiverse
 deb-src ${mirror}/ xenial-backports main restricted universe multiverse
 EOF
 }
+set_fedora_mirror()
+{
+    if [ -n "${FEDORA_MIRROR}" ]; then
+        local mirror=${FEDORA_MIRROR}
+        sed -i "s#http://download.fedoraproject.org/pub/fedora/linux#${mirror}#g" /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
+        sed -i '1,/metalink/{s/metalink/#metalink/}' /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
+        sed -i '1,/#baseurl/{s/#baseurl/baseurl/}' /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
+    fi
+}
