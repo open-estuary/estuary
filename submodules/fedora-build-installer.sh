@@ -9,7 +9,7 @@ out=${build_dir}/out/release/${version}/Fedora/netboot
 distro_dir=${build_dir}/tmp/fedora
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
-source_url=${FEDORA_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/fedora"}
+source_url=${FEDORA_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/fedora"}
 base_url=${FEDORA_MIRROR:-"http://dl.fedoraproject.org/pub/fedora-secondary"}/releases/26/Everything/aarch64/os/
 
 rm -rf ${workspace}

@@ -6,28 +6,29 @@
 
 "distros":[
 {"name":"common","install":"yes"},
-{"name":"ubuntu","install":"yes"},
+{"name":"centos","install":"yes"},
 {"name":"debian","install":"yes"},
-{"name":"opensuse","install":"yes"},
 {"name":"fedora","install":"yes"},
-{"name":"centos","install":"yes"}
+{"name":"opensuse","install":"yes"},
+{"name":"ubuntu","install":"yes"}
 ],
 
 "env": [
 {"ESTUARY_FTP": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"},
+{"CENTOS_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"},
+{"CENTOS_MIRROR": "http://repo.estuary.cloud/centos/7/os/aarch64/"},
+{"CENTOS_ISO_MIRROR": "http://repo.estuary.cloud/centos/7/isos/aarch64/"},
+{"FEDORA_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/fedora"},
+{"FEDORA_MIRROR": "http://repo.estuary.cloud/fedora"},
+{"FEDORA_ISO_MIRROR": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Fedora"},
 {"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"},
 {"DEBIAN_MIRROR": "http://repo.estuary.cloud/debian/"},
 {"DEBIAN_SECURITY_MIRROR": "http://repo.estuary.cloud/debian-security/"},
-{"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"},
-{"UBUNTU_MIRROR": "http://repo.estuary.cloud/ubuntu-ports/"},
-{"UBUNTU_ISO_MIRROR": "http://repo.estuary.cloud/ubuntu/releases/16.04/release/"},
 {"OPENSUSE_MIRROR": "http://repo.estuary.cloud/opensuse"},
 {"OPENSUSE_ISO_MIRROR": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/OpenSuse"},
-{"FEDORA_MIRROR": "http://repo.estuary.cloud/fedora"},
-{"FEDORA_ISO_MIRROR": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Fedora"},
-{"CENTOS_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"},
-{"CENTOS_MIRROR": "http://repo.estuary.cloud/centos/7/os/aarch64/"},
-{"CENTOS_ISO_MIRROR": "http://repo.estuary.cloud/centos/7/isos/aarch64/"}
+{"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"},
+{"UBUNTU_MIRROR": "http://repo.estuary.cloud/ubuntu-ports/"},
+{"UBUNTU_ISO_MIRROR": "http://repo.estuary.cloud/ubuntu/releases/16.04/release/"}
 ]
 
 }
