@@ -263,9 +263,9 @@ fi
 if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     binary_dir=${build_dir}/out/release/${version}/binary
     mkdir -p ${binary_dir} && cd ${binary_dir}
-    rm -rf estuary-uefi-* ${version}.zip
-    wget ${WGET_OPTS} https://github.com/open-estuary/estuary-uefi/archive/${version}.zip
-    unzip ${version}.zip ; cp -rf estuary-uefi-*/* . ; rm -rf estuary-uefi-* ${version}.zip
+    rm -rf estuary-uefi
+    git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git
+    cp -rf estuary-uefi/* . ; rm -rf estuary-uefi
 fi
 if [ x"$action" != x"clean" ]; then
     cd ${top_dir}
