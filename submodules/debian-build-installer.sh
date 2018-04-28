@@ -15,7 +15,7 @@ out_installer=${workspace}/out/images
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
 
-mirror=${DEBIAN_MIRROR:-http://ftp.jp.debian.org/debian/}
+mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/debian"}
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 installer_src_version="20170615+deb9u2"
@@ -30,7 +30,7 @@ kernel_abi=$(apt-cache depends linux-image-estuary-arm64 | grep -m 1 Depends \
 mkdir -p ${workspace}
 cd ${workspace}
 rm -rf debian-installer-*
-dget http://ftp.jp.debian.org/debian/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc
+dget ${mirror}/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc
 cd debian-installer-*
 apt-get build-dep -q --no-install-recommends -y .
 
