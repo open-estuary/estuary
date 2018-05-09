@@ -48,6 +48,7 @@ build_kernel()
     core_num=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
     export ARCH=arm64
+    rm -rf $output_dir/kernel
     mkdir -p $output_dir/kernel
     kernel_dir=$(cd $output_dir/kernel; pwd)
     kernel_bin=$kernel_dir/arch/arm64/boot/Image
