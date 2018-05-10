@@ -272,10 +272,22 @@ if [ x"$action" != x"clean" ]; then
     if [ ! -f "kernel-${version}-ready" ]; then
         rm -rf kernel
     fi
-    if [ ! -d "kernel" ]; then
+    process_num=`ps -ef | grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+    if [ ! -d "kernel" ] && [ $process_num -eq 0 ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
         rm -rf kernel-*-ready
         touch kernel-${version}-ready
+    elif [ -d "kernel" ] && [ $process_num -gt 0 ]; then
+        while [ 1 ];do
+            flag=`ps -ef |grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+            if [ $flag == 1 ]; then
+                echo "Waiting for clone into 'kernel' complete..."
+                sleep 2m
+                continue
+            else
+                break
+            fi
+        done
     else
         (cd kernel ; git pull || true)
     fi
