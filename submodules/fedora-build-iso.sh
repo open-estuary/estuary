@@ -11,9 +11,8 @@ distro_dir=${build_dir}/tmp/fedora
 cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
 live_os_dir=${distro_dir}/installer/out/images
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
-source_dir=/root/bootiso
-dest_dir=/root/bootisoks
-rm -rf ${source_dir} ${dest_dir}
+dest_dir=/root/fedora-iso
+rm -rf ${dest_dir}
 
 # Update fedora repo
 . ${top_dir}/include/mirror-func.sh

@@ -19,10 +19,9 @@ distro_dir=${build_dir}/tmp/centos
 cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
 live_os_dir=${distro_dir}/installer/out/LiveOS
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
-source_dir=/root/bootiso
-dest_dir=/root/bootisoks
+dest_dir=/root/centos-iso
 . ${top_dir}/include/checksum-func.sh
-rm -rf ${source_dir} ${dest_dir}
+rm -rf ${dest_dir}
 
 # download ISO
 ISO=CentOS-7-aarch64-Everything.iso
