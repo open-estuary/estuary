@@ -17,7 +17,6 @@ http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
 set_fedora_mirror
 
 # Install build tools,do not change first line!
-dnf install -y fedpkg rsync openssl-devel make gcc bison flex wget
 
 # Install estuary latest kernel
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
@@ -39,7 +38,7 @@ build_num=${BUILD_NUM:-${build_num}}
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf ${workspace} ~/rpmbuild
+rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p ${out_rpm}
 

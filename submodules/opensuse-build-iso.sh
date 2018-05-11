@@ -14,8 +14,6 @@ dvdiso_url=${OPENSUSE_ISO_MIRROR:-"http://ftp.jaist.ac.jp/pub/Linux/openSUSE/por
 opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-DVD-aarch64-Build0200-Media.iso
 
-zypper install -y wget xorriso inst-source-utils mksusecd tar
-
 # download ISO
 iso_dir=/root/iso
 mkdir -p ${iso_dir} && cd ${iso_dir}

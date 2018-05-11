@@ -19,8 +19,6 @@ rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p opensuse-installer
 
-zypper install -y wget xorriso mkisofs tar
-
 # download ISO
 iso_dir=/root/iso
 mkdir -p ${iso_dir} && cd ${iso_dir}

@@ -19,8 +19,6 @@ rm -rf ${dest_dir}
 . ${top_dir}/include/checksum-func.sh
 set_fedora_mirror
 
-dnf install -y yum-plugin-ovl
-dnf install -y genisoimage xorriso wget findutils createrepo
 
 # download ISO
 ISO=Fedora-Server-dvd-aarch64-26-1.5.iso

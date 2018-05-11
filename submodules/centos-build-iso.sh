@@ -5,10 +5,8 @@ set -ex
 wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
-yum makecache fast
-yum install -y yum-plugin-ovl
-yum install genisoimage xorriso -y
 yum remove epel-release -y
+yum makecache fast
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag

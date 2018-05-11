@@ -21,9 +21,6 @@ mkdir -p fedora-installer
 set_fedora_mirror
 
 # Install build tools and fix dependence problem
-dnf install -y yum-plugin-ovl
-dnf install -y cpio lorax python-requests xz createrepo libselinux-utils hfsplus-tools
-
 sed -i 's#"setfiles",#"setfiles","-e","/usr/lib/systemd",#g' /usr/lib/python3.6/site-packages/pylorax/imgutils.py
 seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
 chgrp disk /dev/loop[0-7]

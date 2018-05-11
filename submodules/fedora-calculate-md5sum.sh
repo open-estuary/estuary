@@ -12,7 +12,6 @@ workspace=${build_dir}/out/release/${version}/Fedora
 . ${top_dir}/include/mirror-func.sh
 set_fedora_mirror
 
-dnf install -y findutils
 . ${top_dir}/include/checksum-func.sh
 
 rm -f $workspace/*.MD5SUM

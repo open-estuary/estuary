@@ -22,23 +22,21 @@ chmod +r /etc/yum.repos.d/estuary.repo
 rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
 yum remove -y epel-release
 yum makecache fast
-sudo yum install -y yum-plugin-ovl
-sudo yum install -y cpio lorax python-requests wget xz createrepo
 seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
 chgrp disk /dev/loop[0-7]
 
 # Call lorax to create the netinstall image
 cd centos-installer
-sudo rm -rf netinstall
-sudo lorax '--product=CentOS Linux' --version=7 --release=7.4.1708 \
+rm -rf netinstall
+lorax '--product=CentOS Linux' --version=7 --release=7.4.1708 \
   --source=${base_url} \
   --source=${source_url}  \
   --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=CentOS 7 aarch64' netinstall/
 
 # Modify initrd to include a default kickstart (that includes the external repository)
 cd netinstall/images/pxeboot/
-sudo mkdir initrd; cd initrd
-sudo sh -c 'xzcat ../initrd.img | cpio -d -i -m'
+mkdir initrd; cd initrd
+sh -c 'xzcat ../initrd.img | cpio -d -i -m'
 cat > /tmp/ks.cfg << EOF
 url --url="http://mirror.centos.org/altarch/7/os/aarch64/"
 repo --name="estuary" --baseurl=${source_url}
@@ -60,11 +58,11 @@ wget -T 120 -c http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay
 yum clean dbcache
 %end
 EOF
-sudo cp /tmp/ks.cfg ks.cfg
+cp /tmp/ks.cfg ks.cfg
 sed '1,3d' ks.cfg > ks-iso.cfg
 
-sudo sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
-cd ..; sudo rm -rf initrd
+sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
+cd ..; rm -rf initrd
 
 # Rebuild boot.iso
 netinstall_dir=${workspace}/centos-installer/netinstall

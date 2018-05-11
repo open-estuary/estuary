@@ -315,12 +315,11 @@ fi
 ###################################################################################
 # Build/clean distros
 ###################################################################################
-#    docker run --rm --privileged ${qemu_image} bash
 for dist in ${distros};do
-        centos_image="openestuary/centos:3.1-full"
+        centos_image="estuary/centos:5.1-full"
         debian_image="linaro/ci-arm64-debian:stretch"
-        fedora_image="arm64v8/fedora:26"
-        opensuse_image="arm64v8/opensuse:leap"
+        fedora_image="estuary/fedora:5.1-full"
+        opensuse_image="estuary/opensuse:5.1-full"
         ubuntu_image="openestuary/ubuntu:3.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}

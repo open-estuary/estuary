@@ -12,9 +12,6 @@ distro_dir=${build_dir}/tmp/opensuse
 workspace=${distro_dir}/kernel
 WGET_OPTS="-T 120 -c"
 
-# Install build tools,do not change first line!
-zypper install -y git tar osc build hostname sudo perl-DateTime-Format-DateParse make gcc
-
 # Checkout source code
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
