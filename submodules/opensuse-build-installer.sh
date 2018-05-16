@@ -11,10 +11,12 @@ out=${build_dir}/out/release/${version}/OpenSuse
 release_dir=${build_dir}/out/release/${version}/OpenSuse/netboot
 distro_dir=${build_dir}/tmp/opensuse
 workspace=${distro_dir}/installer
-netiso_url=${OPENSUSE_ISO_MIRROR:-"http://ftp.jaist.ac.jp/pub/Linux/openSUSE/ports/aarch64/distribution/leap/42.3/iso/"}
+netiso_url=${OPENSUSE_ISO_MIRROR:-"http://download.opensuse.org/ports/aarch64/distribution/leap/42.3/iso/"}
 opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-NET-aarch64-Build0200-Media.iso
 
+kernel_abi="4.16.3-0.gd41301c"
+rpm -ivh --root=/  ${opensuse_url}/kernel-default-${kernel_abi}.aarch64.rpm
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p opensuse-installer
@@ -35,6 +37,20 @@ cd ${workspace}/opensuse-installer; rm -rf netinstall
 xorriso -osirrox on -indev ${iso_dir}/${ISO} -extract / netinstall
 cd netinstall
 sed -i 's/silent.*/& autoyast=http:\/\/htsat.vicp.cc:804\/opensuse\/autoinst.xml/' EFI/BOOT/grub.cfg
+
+cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
+mkdir initrd; cd initrd
+sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
+sed -i "s#http://download.opensuse.org/#http://download.opensuse.org/ports/aarch64/#g" linuxrc.config
+rm -rf modules
+mkdir -p lib/modules/${kernel_abi}-default/initrd
+ln -sf lib/modules/${kernel_abi}-default/initrd modules
+find /lib/modules/${kernel_abi}-default -name "loop.ko"|xargs -i cp -v {} modules/
+find /lib/modules/${kernel_abi}-default -name "squashfs.ko"|xargs -i cp -v {} modules/
+cp -rvf /lib/modules/${kernel_abi}-default lib/modules/
+sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../boot/aarch64/initrd'
+cd ..; rm -rf initrd
+
 mkisofs  -R -o boot.iso -b boot/aarch64/efi -c boot.catalog -no-emul-boot .
 
 # Final preparation for publishing
