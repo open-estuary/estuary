@@ -58,7 +58,6 @@ ata-modules-\${kernel:Version}
 sata-modules-\${kernel:Version}
 usb-storage-modules-\${kernel:Version}
 estuary-netboot-udeb
-linaro-erp-udeb
 EOF
 
 # Set up local repo

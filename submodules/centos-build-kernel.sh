@@ -11,10 +11,6 @@ out_rpm=${build_dir}/out/kernel-pkg/${version}/centos
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/kernel
 
-# Install build tools,do not change first line!
-
-wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo
-
 # Install estuary latest kernel
 wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo

@@ -38,6 +38,7 @@ cd dvdiso
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
 mkdir initrd; cd initrd
 sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
+wget ${WGET_OPTS} -O autoinst.xml ${opensuse_url}/autoinst-iso.xml
 sed -i "s#http://download.opensuse.org/#http://download.opensuse.org/ports/aarch64/#g" linuxrc.config
 rm -rf modules
 mkdir -p lib/modules/${kernel_abi}-default/initrd

@@ -28,7 +28,7 @@ chgrp disk /dev/loop[0-7]
 # Call lorax to create the netinstall image
 cd centos-installer
 rm -rf netinstall
-lorax '--product=CentOS Linux' --version=7 --release=7.4.1708 \
+lorax '--product=CentOS Linux' --version=7 --release=7 \
   --source=${base_url} \
   --source=${source_url}  \
   --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=CentOS 7 aarch64' netinstall/
@@ -54,7 +54,6 @@ wget
 wget -T 120 -c -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
-wget -T 120 -c http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo
 yum clean dbcache
 %end
 EOF
