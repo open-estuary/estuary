@@ -11,7 +11,8 @@ out=${build_dir}/out/release/${version}/OpenSuse
 release_dir=${build_dir}/out/release/${version}/OpenSuse/netboot
 distro_dir=${build_dir}/tmp/opensuse
 workspace=${distro_dir}/installer
-netiso_url=${OPENSUSE_ISO_MIRROR:-"http://download.opensuse.org/ports/aarch64/distribution/leap/42.3/iso/"}
+ports_url="http://ftp.neowiz.com/opensuse/ports/"
+netiso_url=${OPENSUSE_ISO_MIRROR:-"${ports_url}/aarch64/distribution/leap/42.3/iso/"}
 opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-NET-aarch64-Build0200-Media.iso
 
@@ -41,7 +42,8 @@ sed -i 's/silent.*/& autoyast=http:\/\/htsat.vicp.cc:804\/opensuse\/autoinst.xml
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
 mkdir initrd; cd initrd
 sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
-sed -i "s#http://download.opensuse.org/#http://download.opensuse.org/ports/aarch64/#g" linuxrc.config
+sed -i "s#http://download.opensuse.org/#${ports_url}/aarch64/#g" linuxrc.config
+sed -i "s#http://download.opensuse.org/ports/#${ports_url}#g" etc/YaST2/control.xml
 rm -rf modules
 mkdir -p lib/modules/${kernel_abi}-default/initrd
 ln -sf lib/modules/${kernel_abi}-default/initrd modules

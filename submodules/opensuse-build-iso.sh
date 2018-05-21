@@ -10,7 +10,8 @@ WGET_OPTS="-T 120 -c"
 out=${build_dir}/out/release/${version}/OpenSuse
 distro_dir=${build_dir}/tmp/opensuse
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
-dvdiso_url=${OPENSUSE_ISO_MIRROR:-"http://download.opensuse.org/ports/aarch64/distribution/leap/42.3/iso/"}
+ports_url="http://ftp.neowiz.com/opensuse/ports/"
+dvdiso_url=${OPENSUSE_ISO_MIRROR:-"${ports_url}/aarch64/distribution/leap/42.3/iso/"}
 opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-DVD-aarch64-Build0200-Media.iso
 
@@ -39,7 +40,8 @@ cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
 mkdir initrd; cd initrd
 sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
 wget ${WGET_OPTS} -O autoinst.xml ${opensuse_url}/autoinst-iso.xml
-sed -i "s#http://download.opensuse.org/#http://download.opensuse.org/ports/aarch64/#g" linuxrc.config
+sed -i "s#http://download.opensuse.org/#${ports_url}/aarch64/#g" linuxrc.config
+sed -i "s#http://download.opensuse.org/ports/#${ports_url}#g" etc/YaST2/control.xml
 rm -rf modules
 mkdir -p lib/modules/${kernel_abi}-default/initrd
 ln -sf lib/modules/${kernel_abi}-default/initrd modules
