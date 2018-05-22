@@ -35,6 +35,9 @@ cd ${kernel_rpm_dir} ; wget ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${opensu
 cd ${distro_dir}; rm -rf dvdiso
 xorriso -osirrox on -indev ${iso_dir}/${ISO} -extract / dvdiso
 cd dvdiso
+rm -f EFI/BOOT/bootaa64.efi boot/aarch64/efi
+wget ${WGET_OPTS} -O EFI/BOOT/bootaa64.efi ${opensuse_url}/bootaa64.efi
+wget ${WGET_OPTS} -O boot/aarch64/efi ${opensuse_url}/efi
 
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
 mkdir initrd; cd initrd
