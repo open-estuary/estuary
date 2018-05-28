@@ -19,7 +19,7 @@ mkdir -p centos-installer
 
 wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 yum remove -y epel-release
 yum makecache fast
 seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
@@ -53,7 +53,7 @@ wget
 %post --interpreter=/bin/bash
 wget -T 120 -c -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 yum clean dbcache
 %end
 EOF

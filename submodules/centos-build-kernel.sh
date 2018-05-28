@@ -14,7 +14,7 @@ workspace=${distro_dir}/kernel
 # Install estuary latest kernel
 wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 yum remove epel-release -y
 yum clean dbcache
 yum install --disablerepo=* --enablerepo=Estuary kernel -y

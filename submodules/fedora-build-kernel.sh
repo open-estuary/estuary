@@ -22,7 +22,7 @@ set_fedora_mirror
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 dnf clean dbcache
-rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 dnf install --disablerepo=* --enablerepo=Estuary,fedora kernel -y
 
 #find build_num

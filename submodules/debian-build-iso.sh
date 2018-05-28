@@ -28,7 +28,7 @@ mkdir -p ${workspace}
 cd ${workspace}
 
 # add estuary repo key
-wget -O - http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY | \
+wget -O - ${ESTUARY_REPO}/ESTUARY-GPG-KEY | \
 	apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg add -
 
 # create custom installer dir
