@@ -100,10 +100,11 @@ if [ x"$docker_status" = x"" ]; then
 fi
 
 gnupg_dir=${top_dir}/..
-if [ -d "$HOME/.gnupg" ]; then
+key_flag=`strings $HOME/.gnupg/secring.gpg|grep OpenEstuary`
+if [ -n "${key_flag}" ]; then
     cp -rf $HOME/.gnupg ${gnupg_dir}
 else
-    echo -e "\033[31mPlease import estuary secure key first!\033[0m";exit 1
+    echo -e "\033[31mPlease import ESTUARY-GPG-SECURE-KEY first!\033[0m";exit 1
 fi
 
 # get estuary repo version
