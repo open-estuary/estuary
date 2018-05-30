@@ -270,10 +270,10 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
 fi
 if [ x"$action" != x"clean" ]; then
     cd ${top_dir}
-    if [ ! -f "kernel-${version}-ready" ]; then
+    process_num=`ps -ef | grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+    if [ ! -f "kernel-${version}-ready" ] && [ $process_num -eq 0 ]; then
         rm -rf kernel
     fi
-    process_num=`ps -ef | grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
     if [ ! -d "kernel" ] && [ $process_num -eq 0 ]; then
         git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
         rm -rf kernel-*-ready
