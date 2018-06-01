@@ -35,17 +35,25 @@ EOF
 build_modules()
 {
     (
-    kernel_dir=$(cd $1; pwd)
+    output_dir=$(cd $1; pwd)
     rootfs=$(cd $2; pwd)
     cross_compile=$3
     core_num=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
+    export ARCH=arm64
+    export CROSS_COMPILE=$cross_compile
+    mkdir -p $output_dir/kernel
+    kernel_dir=$(cd $output_dir/kernel; pwd)
+
+    pushd kernel
+    make O=$kernel_dir estuary_defconfig
+    make O=$kernel_dir include/config/kernel.release
     kernel_version=$(cat $kernel_dir/include/config/kernel.release)
+    popd
     if [ ! -d "${rootfs}/lib/modules/${kernel_version}" ]; then
         pushd kernel
-        make ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} modules INSTALL_MOD_PATH=$rootfs \
-        && sudo make PATH=$PATH ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs \
-        && sudo make PATH=$PATH ARCH=arm64 CROSS_COMPILE=$cross_compile O=$kernel_dir -j${core_num} firmware_install INSTALL_FW_PATH=$rootfs/lib/firmware
+        make O=$kernel_dir -j${core_num} -s modules INSTALL_MOD_PATH=$rootfs \
+        && make PATH=$PATH O=$kernel_dir -j${core_num} -s INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
         if [ ! $? ]; then
             return 1
         fi

@@ -1,12 +1,13 @@
 #!/bin/bash
 set -ex
 
-build_dir=$(cd /root/$2 && pwd) # build workspace
+build_dir=$(cd $2 && pwd) # build workspace
 version=$1 # branch or tag
 version=${version:-master}
 
 TOPDIR=$(cd `dirname $0` ; pwd)
-distro_dir=${build_dir}/tmp/minifs
+LOCALARCH=`uname -m`
+distro_dir=${build_dir}/tmp/common
 workspace=${distro_dir}/kernel
 
 ###################################################################################
@@ -25,6 +26,19 @@ mkdir -p ${workspace} && cd ${workspace}
 rsync -avq $build_dir/../kernel/ ${KERNEL_DIR}
 
 ###################################################################################
+# Check args
+###################################################################################
+if [ x"$LOCALARCH" = x"x86_64" ]; then
+    CROSS_COMPILE="aarch64-linux-gnu-"
+    if [ x"$CROSS_COMPILE" != x"" ]; then
+        export CROSS_COMPILE=$CROSS_COMPILE
+    else
+        echo -e "\033[31mError! --cross must be specified!\033[0m"
+        exit 1
+    fi
+fi
+
+###################################################################################
 # build_kernel <output_dir>
 ###################################################################################
 build_kernel()
@@ -34,13 +48,14 @@ build_kernel()
     core_num=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
     export ARCH=arm64
+    rm -rf $output_dir/kernel
     mkdir -p $output_dir/kernel
     kernel_dir=$(cd $output_dir/kernel; pwd)
     kernel_bin=$kernel_dir/arch/arm64/boot/Image
 
     pushd $KERNEL_DIR
     make O=$kernel_dir estuary_defconfig
-    make O=$kernel_dir -j${core_num} ${kernel_bin##*/}
+    make O=$kernel_dir -j${core_num} -s ${kernel_bin##*/}
 
     pwd
     popd
@@ -83,7 +98,7 @@ fi
 # build kernel and check result
 rm_module_build_log kernel $OUTPUT_DIR
 if build_kernel  $OUTPUT_DIR && build_check $OUTPUT_DIR; then
-    gen_module_build_log kernel $OUTPUT_DIR ; rm -rf $OUTPUT_DIR/kernel ; exit 0
+    gen_module_build_log kernel $OUTPUT_DIR ; sudo rm -rf $OUTPUT_DIR/kernel ; exit 0
 else
     exit 1
 fi

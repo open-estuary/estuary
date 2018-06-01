@@ -3,6 +3,7 @@
 top_dir=$(cd `dirname $0`; cd .. ; pwd)
 sh_dir=${top_dir}/submodules
 . ${top_dir}/Include.sh
+home_dir=$(cd ${top_dir}/.. ; pwd)
 
 
 usage()
@@ -21,7 +22,7 @@ fi
 while test $# != 0
 do
     case $1 in
-        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'` ;;
+        --*=*) ac_option=`expr "X$1" : 'X\([^=]*\)='` ; ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)' || true` ;;
         *) ac_option=$1 ;;
     esac
 
@@ -41,10 +42,11 @@ done
 
 envlist_dir=${build_dir}/tmp
 envlist_file=${envlist_dir}/env.list
+build_absolute_dir=${build_dir}
 
 # get relative path
-sh_dir=$(echo $sh_dir| sed "s#$HOME/##")
-build_dir=$(echo $build_dir| sed "s#$HOME/##")
+sh_dir=$(echo $sh_dir| sed "s#$home_dir/##")
+build_dir=$(echo $build_dir| sed "s#$home_dir/##")
 
 # genrate env.list
 mkdir -p ${envlist_dir}
@@ -53,6 +55,9 @@ touch ${envlist_file}
 for var in ${envlist}; do
 	echo ${var} >> ${envlist_file}
 done
+sort -n ${envlist_file} | uniq > test.txt
+cat test.txt > ${envlist_file}
+rm -f test.txt
 
 # Notice:
 # Build kernel pakages and iso seperately.
@@ -62,8 +67,8 @@ done
 #    https://github.com/open-estuary/distro-repo in the fucture.
 # 2) build installer and iso, in which stage fetch kernel packages from
 #    estuary repo.
-if [ "${distro}" == "minifs" ];then
-    ./submodules/${distro}-build-kernel.sh ${version} ${build_dir}
+if [ "${distro}" == "common" ];then
+    ./submodules/${distro}-build-kernel.sh ${version} ${build_absolute_dir}
     if [ $? -ne 0 ]; then
         exit 1
     else
@@ -72,20 +77,20 @@ if [ "${distro}" == "minifs" ];then
 fi
 if [ "${build_kernel_pkg_only}" == "true" ]; then
 	# 1) build kernel
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-kernel.sh ${version} ${build_dir}
 else
 	# 2) build installer
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-installer.sh ${version} ${build_dir}
 
 	# 3) build iso
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-iso.sh 	${version} ${build_dir}
 
 	# 4) build rootfs tar
 
 	# 5) calculate md5sum
-	docker_run_sh ${distro} ${sh_dir} ${envlist_file} \
+	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-calculate-md5sum.sh ${version} ${build_dir}
 fi

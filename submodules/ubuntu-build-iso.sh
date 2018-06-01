@@ -23,39 +23,37 @@ download=${workspace}/download
 . ${top_dir}/include/mirror-func.sh
 set_ubuntu_mirror
 
-apt-get install -y apt-utils
-apt-get install -y xorriso
-apt-get install -y expect
+apt-get update -q=2
+apt-get install -y apt-utils xorriso expect
 
 mkdir -p ${workspace}
 mkdir -p ${cdimage}
 rm -rf ${cdimage}/* || true
-mkdir -p ${mnt}
-umount ${mnt} || true
 mkdir -p ${download}
 rm -rf ${download}/* || true
 
 # download debs and filesystem
 cd ${download}
-wget ${WGET_OPTS} ftp://repoftp:repopushez7411@117.78.41.188/releases/5.0/ubuntu/pool/main/linux-*4.12.0*.deb
+if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
+    kernel_version=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F ' ' '{print $2}'|awk -F '.' '{print $1"."$2"."$3}')
+    build_num=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F '.' '{print $4}')
+else
+    echo "ERROR:No linux-image-estuary found !"
+fi
+wget ${WGET_OPTS} ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
 
-wget ${WGET_OPTS} http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.squashfs
-wget ${WGET_OPTS} http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Ubuntu/filesystem/filesystem.size
+http_addr=${ESTUARY_FTP:-"http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"}
+wget ${WGET_OPTS} ${http_addr}/linux/Ubuntu/filesystem/filesystem.squashfs
+wget ${WGET_OPTS} ${http_addr}/linux/Ubuntu/filesystem/filesystem.size
 
 cd ${workspace}
 # download iso and decompress
 ISO=ubuntu-16.04.3-server-arm64.iso
-curl -m 10 -s -o /dev/null http://repo.estuary.cloud
-if [ $? -eq 0 ];then
-   http_addr=http://repo.estuary.cloud/ubuntu/releases/16.04/release/
-else
-   http_addr=http://cdimage.ubuntu.com/ubuntu/releases/16.04/release/
-fi
+http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/16.04/release/"}
 
 wget -T 120 -c ${http_addr}/${ISO}
 
-mount -o loop ubuntu-16.04.3-server-arm64.iso ${mnt}
-rsync -av ${mnt}/ ${cdimage}/
+xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras

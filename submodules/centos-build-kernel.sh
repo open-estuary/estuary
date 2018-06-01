@@ -11,22 +11,11 @@ out_rpm=${build_dir}/out/kernel-pkg/${version}/centos
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/kernel
 
-# Install build tools,do not change first line!
-yum install -y epel-release
-yum install -y python34 dpkg-dev quilt wget git rpm-build yum-utils make openssl-devel
-yum install -y net-tools bc xmlto asciidoc openssl-devel audit-libs-devel 'perl(ExtUtils::Embed)'
-
-wget http://repo.linaro.org/rpm/linaro-overlay/centos-7/linaro-overlay.repo -O /etc/yum.repos.d/linaro-overlay.repo
-yum groupinstall -y "Development tools"
-
-yum install -y redhat-rpm-config asciidoc hmaccalc pesign xmlto
-yum install -y binutils-devel elfutils-devel elfutils-libelf-devel
-yum install -y ncurses-devel newt-devel numactl-devel pciutils-devel python-devel zlib-devel
-
 # Install estuary latest kernel
 wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import http://repo.estuarydev.org/releases/ESTUARY-GPG-KEY
+rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
+yum remove epel-release -y
 yum clean dbcache
 yum install --disablerepo=* --enablerepo=Estuary kernel -y
 
@@ -41,15 +30,15 @@ build_num=${BUILD_NUM:-${build_num}}
 
 # build arguments
 orig_dir=${workspace}/orig
-repo_dir=${workspace}/distro-repo
+repo_dir=${workspace}/debian-kernel-packages
 kernel_dir=${workspace}/linux
 
 # Checkout source code
 rm -rf $orig_dir $repo_dir
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p ${out_rpm} && mkdir -p debian-pkg
+git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git
 
-rsync -avq $build_dir/../distro-repo/ distro-repo
 rsync -avq $build_dir/../kernel/ ${kernel_dir}
 
 # Export the kernel packaging version
@@ -60,7 +49,7 @@ git tag -f v${kernel_version}
 
 # Build the source kernel
 cd ../debian-pkg
-cp -r ../distro-repo/deb/kernel/debian-package/debian .
+cp -rf ${repo_dir}/debian-package/debian .
 
 # Use build number as ABI
 sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
@@ -83,7 +72,9 @@ debian/rules orig
 # Build rpm source package
 rpmversion=${kernel_version//-*/}
 cd ${workspace} 
-cp -rf ${workspace}/distro-repo/rpm/kernel/centos-package/* .
+rm -rf centos-kernel-packages
+git clone --depth 1 -b ${version} https://github.com/open-estuary/centos-kernel-packages.git
+cp -rf centos-kernel-packages/* .
 
 sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define pkgrelease.*/\%define pkgrelease estuary.${build_num}/g" SPECS/kernel-aarch64.spec

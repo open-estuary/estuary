@@ -176,7 +176,6 @@ copy_all_binaries()
 
     for plat in ${platforms[*]}; do
         mkdir -p $target_dir/$plat
-        Copy_grub_cfg $src_dir $target_dir/$plat $plat || return 1
         if declare -F Copy_${plat}_binaries >/dev/null; then
             Copy_${plat}_binaries $src_dir $target_dir/$plat || return 1
         fi

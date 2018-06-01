@@ -1,6 +1,6 @@
 * [Introduction](#1)
 * [Packages Installation](#2)
-* [Packages Documents](#3)
+* [Application Integration and Optimization](#3)
 * [Others](#4)
 
 
@@ -17,27 +17,12 @@ Typically packages could be installed via two ways:
 - Docker Images:
   - Use`docker pull openestuary/<app name>` to install the corresponding docker images. For more information, please refer to the corresponding manuals mentioned below. 
 
-<h2 id="3">Packages Documents</h2>
-Currently the following packages are supported on ARM64 platforms:
+<h2 id="3">Application Integration and Optimization</h2>
 
-|Package Name|Estuary Releases|Packages Releases|Install Methods|Notes|
-|--|--|--|--|--|
-|[Armor Manual](https://github.com/open-estuary/estuary/blob/master/doc/Armor_Manual.4All.md) | 3.0/3.1/5.0| |RPM/Deb| System tools such as perf |
-|[OpenJDK](https://github.com/open-estuary/packages/blob/master/openjdk/OpenJdk_Manual.md) | 3.0/3.1/5.0 |1.8 ||Linaro OpenJDK|
-|[Docker](https://github.com/open-estuary/estuary/blob/master/doc/Introduction_for_Docker.md)|3.0/3.1/5.0|  |RPM/Deb||Docker tool|
-|[MySql(Percona Server)](https://github.com/open-estuary/packages/blob/master/docker_apps/mysql/MySql_Manual.md)|3.0/3.1/5.0|  |RPM/Docker Image||
-|[AliSQL](https://github.com/open-estuary/packages/blob/master/docker_apps/alisql/AliSQL_Manual.md)|3.0/3.1/5.0|5.6/5.7|RPM/Docker Image||
-|[MariaDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mariadb/MariaDB_Manual.md)|3.0/3.1/5.0|10.1|RPM/Docker Image||
-|[Redis](https://github.com/open-estuary/packages/blob/master/docker_apps/redis/Redis_Manual.md)|3.0/3.1/5.0|3.2.4|RPM/Docker Image||
-|[PostgreSQL](https://github.com/open-estuary/packages/blob/master/docker_apps/postgresql/PostgreSQL_Manual.md)|3.0/3.1/5.0|9.6|RPM/Docker Image||
-|[Kubernetes](https://github.com/open-estuary/packages/blob/master/kubernetes/Kubernetes_Manual.md)|3.0/5.0|1.6.4|RPM||
-|[MongoDB](https://github.com/open-estuary/packages/blob/master/docker_apps/mongodb/MongoDB_Manual.md)|3.0/3.1/5.0|3.4|RPM/Docker Image||
-|[LAMP](https://github.com/open-estuary/packages/blob/master/docker_apps/lamp/LAMP_Manual.md)|3.0/3.1/5.0||Docker Image|Linux+Apache+MySQL+PHP|
-|[Cassandra](https://github.com/open-estuary/packages/blob/master/docker_apps/cassandra/Cassandra_Manual.md)|3.0/3.1/5.0|3.10|RPM/Docker Image||
-|[Ceph](https://github.com/open-estuary/packages/blob/master/docker_apps/ceph/Ceph_Manual.md)|3.0/3.1/5.0|11.1.1|RPM/Docker Image||
-|[OpenStack](https://github.com/open-estuary/packages/blob/master/openstack/doc/OpenStack_Manual.md)|3.0/3.1/5.0|  |RPM||
-||||  
-       
+
+For details, please refer to [Estuary Application Integration and Optimization](https://github.com/open-estuary/packages).
+ 
+ 
 <h2 id="4">Others</h2>
 
 - The yum/deb repositories will be supported officially from Estuary V500 release

@@ -20,31 +20,15 @@ check_docker_running_permission()
 
 }
 
-###################################################################################
-# int install_jq
-###################################################################################
-install_jq()
-{
-    tools_dir=${top_dir}/tools
-    mkdir -p ${tools_dir}
-    cd ${tools_dir}
-    jq_version=jq-1.5
-    if [ ! -d jq ]; then
-        git clone --depth 1 -b $jq_version https://github.com/stedolan/jq.git 
-    fi
-
-    cd jq && autoreconf -i && ./configure --disable-maintainer-mode && make && sudo make install
-}
-
 install_dev_tools_debian()
 {
-	sudo apt-get install git jq docker.io bc libssl-dev -y
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support flex bison gcc
 	check_docker_running_permission
 }
 
 install_dev_tools_ubuntu()
 {
-	sudo apt-get install git jq docker.io bc libssl-dev -y
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support flex bison gcc
 	check_docker_running_permission
 }
 
@@ -55,9 +39,9 @@ install_dev_tools_centos()
 {
 
    sudo yum groupinstall "Development Tools" -y 
-   sudo yum install autoconf automake libtool python git docker bc openssl-devel -y
+   sudo yum install -y epel-release
+   sudo yum install -y autoconf automake libtool python git docker bc openssl-devel unzip gcc jq
 
-    install_jq
     check_docker_running_permission
 
     return 0
@@ -79,8 +63,8 @@ install_dev_tools()
         echo "Unspported distro!" >&2; return 1
     fi
 
-    if [ -z "$(which jq)" ] || [ -z "$(which git)" ] \
-	    || [ -z "$(which docker)" ]; then
+    if [ -z "$(which jq)" ] || [ -z "$(which git)" ] || [ -z "$(which gcc)" ] \
+	    || [ -z "$(which docker)" ] || [ -z "$(which unzip)" ]; then
 	install_dev_tools_${host_distro}
     fi
 

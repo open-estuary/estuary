@@ -40,7 +40,7 @@ uncompress_file()
     postfix=`get_compress_file_postfix $src_file`
     case $postfix in
         .tar.bz2 | .tar.gz | .tar.xz | .xz | .tbz)
-            if ! tar xvf $src_file -C $target_dir >/dev/null 2>&1; then
+            if ! tar xf $src_file -C $target_dir >/dev/null 2>&1; then
                 return 1
             fi
             ;;
