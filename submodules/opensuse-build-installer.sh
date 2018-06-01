@@ -37,7 +37,7 @@ fi
 cd ${workspace}/opensuse-installer; rm -rf netinstall
 xorriso -osirrox on -indev ${iso_dir}/${ISO} -extract / netinstall
 cd netinstall
-sed -i 's/silent.*/& autoyast=http:\/\/htsat.vicp.cc:804\/opensuse\/autoinst.xml/' EFI/BOOT/grub.cfg
+sed -i 's/silent.*/& autoyast=http:\/\/htsat.vicp.cc:804\/opensuse\/autoinst.xml ifcfg=eth*=dhcp/' EFI/BOOT/grub.cfg
 rm -f EFI/BOOT/bootaa64.efi boot/aarch64/efi
 wget ${WGET_OPTS} -O EFI/BOOT/bootaa64.efi ${opensuse_url}/bootaa64.efi
 wget ${WGET_OPTS} -O boot/aarch64/efi ${opensuse_url}/efi
