@@ -37,35 +37,16 @@ lorax '--product=CentOS Linux' --version=7 --release=7 \
 cd netinstall/images/pxeboot/
 mkdir initrd; cd initrd
 sh -c 'xzcat ../initrd.img | cpio -d -i -m'
-cat > /tmp/ks.cfg << EOF
-url --url="http://mirror.centos.org/altarch/7/os/aarch64/"
-repo --name="estuary" --baseurl=${source_url}
-repo --name="extras" --baseurl="http://mirror.centos.org/altarch/7/extras/aarch64/"
-network  --bootproto=dhcp --device=eth0 --ipv6=auto --no-activate
-text
-
-%packages
-bash-completion
-epel-release
-wget
-%end
-
-%post --interpreter=/bin/bash
-wget -T 120 -c -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
-yum clean dbcache
-%end
-EOF
-cp /tmp/ks.cfg ks.cfg
-sed '1,3d' ks.cfg > ks-iso.cfg
+cfg_path="${top_dir}/configs/auto-install/centos/"
+cp -f $cfg_path/auto-iso/ks-iso.cfg .
+cp -f $cfg_path/auto-pxe/ks.cfg .
 
 sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
 cd ..; rm -rf initrd
 
 # Rebuild boot.iso
 netinstall_dir=${workspace}/centos-installer/netinstall
-sed -i 's/vmlinuz.*/& inst.ks=file:\/ks.cfg ip=dhcp/' ${netinstall_dir}/EFI/BOOT/grub.cfg
+cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
 rm -rf ${netinstall_dir}/images/boot.iso
 mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
   -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T \

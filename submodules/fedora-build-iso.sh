@@ -47,7 +47,8 @@ cp install.img ${dest_dir}/images
 
 # Change permissions on the working directory.
 chmod -R u+w ${dest_dir}
-sed -i 's/vmlinuz.*/& inst.ks=file:\/ks-iso.cfg/' ${dest_dir}/EFI/BOOT/grub.cfg
+cfg_path="${top_dir}/configs/auto-install/fedora/"
+cp -f $cfg_path/auto-iso/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
 
 # Download any additional RPMs to the directory structure and update the metadata.
 rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}

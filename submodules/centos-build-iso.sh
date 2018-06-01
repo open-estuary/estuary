@@ -39,13 +39,6 @@ mkdir -p ${dest_dir}/temp
 
 # Copy the source media to the working directory.
 xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
-mv ${dest_dir}/Packages/* ${dest_dir}/temp
-cat ${top_dir}/pkglist | while read line
-do
-    cp -f ${dest_dir}/temp/${line}-[0-9]* ${dest_dir}/Packages
-done
-cp -rf ${dest_dir}/temp/TRANS.TBL ${dest_dir}/Packages
-rm -rf ${dest_dir}/temp
 
 # Unmount the source ISO and remove the directory.
 
@@ -57,7 +50,8 @@ cp squashfs.img ${dest_dir}/LiveOS
 
 # Change permissions on the working directory.
 chmod -R u+w ${dest_dir}
-sed -i 's/vmlinuz.*/& inst.ks=file:\/ks-iso.cfg ip=dhcp/' ${dest_dir}/EFI/BOOT/grub.cfg
+cfg_path="${top_dir}/configs/auto-install/centos/"
+cp -f $cfg_path/auto-iso/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
 
 # Download any additional RPMs to the directory structure and update the metadata.
 rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}

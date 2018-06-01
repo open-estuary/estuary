@@ -38,30 +38,16 @@ lorax '--product=Fedora' --version=26 --release=26 \
 cd netinstall/images/pxeboot/
 mkdir initrd; cd initrd
 sh -c 'xzcat ../initrd.img | cpio -d -i -m'
-cat > /tmp/ks.cfg << EOF
-url --url="http://dl.fedoraproject.org/pub/fedora-secondary/releases/26/Everything/aarch64/os/"
-repo --name="estuary" --baseurl=${source_url}
-text
-
-%packages
-bash-completion
-wget
-%end
-
-%post --interpreter=/bin/bash
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config || true
-%end
-
-EOF
-cp /tmp/ks.cfg ks.cfg
-sed '1,2d' ks.cfg > ks-iso.cfg
+cfg_path="${top_dir}/configs/auto-install/fedora/"
+cp -f $cfg_path/auto-iso/ks-iso.cfg .
+cp -f $cfg_path/auto-pxe/ks.cfg .
 
 sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
 cd ..; rm -rf initrd
 
 # Rebuild boot.iso
 netinstall_dir=${workspace}/fedora-installer/netinstall
-sed -i 's/vmlinuz.*/& inst.ks=file:\/ks.cfg ip=dhcp/' ${netinstall_dir}/EFI/BOOT/grub.cfg
+cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
 rm -rf ${netinstall_dir}/images/boot.iso
 mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
   -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-26' -T \
