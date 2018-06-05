@@ -40,7 +40,7 @@ if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
 else
     echo "ERROR:No linux-image-estuary found !"
 fi
-wget ${WGET_OPTS} ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
+wget ${WGET_OPTS} ${ESTUARY_REPO}/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
 
 http_addr=${ESTUARY_FTP:-"http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"}
 wget ${WGET_OPTS} ${http_addr}/linux/Ubuntu/filesystem/filesystem.squashfs

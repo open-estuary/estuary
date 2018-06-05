@@ -16,7 +16,7 @@ out_installer=${workspace}/out/images
 set_ubuntu_mirror
 
 mirror=${UBUNTU_MIRROR:-http://ports.ubuntu.com/ubuntu-ports}
-estuary_repo=${UBUNTU_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"}
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
 estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.1}
 
 apt-get update -q=2
@@ -76,7 +76,7 @@ parport-modules-\${kernel:Version}
 plip-modules-\${kernel:Version}
 ppp-modules-\${kernel:Version}
 vlan-modules-\${kernel:Version}
-estuary-netboot-udeb
+estuary-cdrom-udeb
 EOF
 
 
@@ -89,11 +89,16 @@ EOF
 
 # Default preseed to add the overlay and kernel
 cat <<EOF > default-preseed
+# Additional repositories, local[0-9] available
+d-i apt-setup/local0/repository string \
+       ${ESTUARY_REPO}/5.1/ubuntu/ estuary-5.1 main
+d-i debian-installer/allow_unauthenticated string true
+
 # Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
 
 # Skip linux-image-generic installation
-d-i base-installer/kernel/image string none
+d-i base-installer/kernel/image string linux-image-estuary
 
 # Package selection
 tasksel tasksel/first multiselect standard
@@ -118,7 +123,6 @@ d-i pkgsel/include string openssh-server vim
 d-i preseed/late_command string in-target apt-get update || true
 EOF
 
-sed -i 's/estuary-netboot-udeb/estuary-cdrom-udeb/' pkg-lists/local
 fakeroot make build_cdrom_grub
 
 # publish cdrom
