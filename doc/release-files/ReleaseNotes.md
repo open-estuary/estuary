@@ -26,34 +26,27 @@ Estuary is a development version of the whole software solution which target is 
 
 ```
 1. UEFI
-       - D05 setup menu update(press F2 to enter menu)
-       - Support Perf: ddrc,l3c,nm,pmu
-       - Increase the function of Raid card
+       - Increase the function of Raid card(type 3008,type 3108)
 2. OS
        - Upgraded Linux kernel version to v4.16.3
 3. Distros
-       - Added support for CentOS
-       - Added support for Debian
-       - Added support for Ubuntu
        - Added support for Fedora
        - Added support for OpenSuse
 4. Applications
-       - Supported standard respository to install packages on CentOS and Ubuntu platform
        - Integrated new tool : Malluma
 5. Deployment
        - Support standard network installation, ISO installation, and compatible with the original NFS deployment
        - Build scripts support parallel compiling of CentOS, Ubuntu, Debian, Fedora, OpenSuse and common modules
-       - The build script supports parallel compiling of the various distribution kernel packages
 6. Document
-       - Updated project documentation (Readme, Grub, etc)
-       - Updated applications user manual (Redis, PostgreSQL, MySQL, MongoDB, etc)
+       - Updated project documentation (Readme, Grub, deploy_manual,etc)
 7. CI/Automation
        - Supported basic CI/Automation for D03 (Build, NFS/PXE Deployment, Some tests)
-       - Supported basic  CI/Automation for D05 (Build, NFS/PXE Deployment, Some tests)
+       - Supported basic CI/Automation for D05 (Build, NFS/PXE Deployment, Some tests)
 ```
 # Known issues:
 
 ```
-1. Estuary Debian system failed to config&check TSO
+1. Malluma can not install with default path
 2. After upgrade the bios,cannot find the option to boot OpenSuse&&Fedora
+3. OS can not install by BMC
 ```

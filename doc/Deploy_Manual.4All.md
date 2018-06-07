@@ -4,9 +4,8 @@
    * [Check the hardware board](#2.2)
    * [Upgrade UEFI and trust firmware](#2.3)
 * [Bring up System](#3)
-   * [Boot via PXE](#3.1)
-   * [Boot via NFS](#3.2)
-   * [Boot via ISO](#3.3)
+   * [Boot via Network](#3.1)
+   * [Boot via ISO](#3.2)
 
 <h2 id="1">Introduction</h2>
 
@@ -17,7 +16,9 @@ All following sections will take the D05 board as example, other boards have the
 <h2 id="2">Preparation</h2>
 
 <h3 id="2.1">Prerequisite</h3>
-
+```
+Notice : Only serial port output
+```
 Local network: To connect hardware boards and host machine, so that they can communicate each other.
 
 Serial cable: To connect hardware board’s serial port to host machine, so that you can access the target board’s UART in host machine.
@@ -34,6 +35,10 @@ Two methods are provided to **connect the board's UART port to a host machine**:
    b. Install a serial port application in host machine, e.g.: kermit or minicom.<br>
    c. Config serial port setting:115200/8/N/1 on host machine.<br>
 
+We also can connect the board use command ipmi:
+
+ /usr/bin/ipmitool -I lanplus -H hostip -U username -P password sol activate
+
 For more details, please refer to [UEFI_Manual.md](https://github.com/open-estuary/estuary/blob/master/doc/UEFI_Manual.4D05.md)
 "Upgrade UEFI" chapter.
 
@@ -47,9 +52,9 @@ You can upgrade UEFI and trust firmware yourself based on FTP service, but this 
 
 <h3 id="3">Booting The Installer</h3>
 
-<h3 id="3.1">Boot via PXE</h3>
+<h3 id="3.1">Boot via Network</h3>
 
-If you are booting the installer from the network, simply select PXE boot when presented by UEFI.
+a. If you are booting the installer from the network, simply select PXE boot when presented by UEFI.
 For the PXE,please refer to [Setup_PXE_Env_on_Host.md](https://github.com/open-estuary/estuary/blob/master/doc/Setup_PXE_Env_on_Host.4All.md).
 
 Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com/open-estuary/estuary/blob/master/doc/Grub_Manual.4All.md))
@@ -60,14 +65,12 @@ Modify grub config file(please refer to [Grub_Manual.4All.md](https://github.com
       # For booting GNU/Linux
         menuentry 'D05 Install' {
            set background_color=black
-           linux    /debian-installer/arm64/linux --- quiet
-           initrd   /debian-installer/arm64/initrd.gz
+           linux /netboot/boot/aarch64/linux --- quiet
+           initrd /netboot/boot/aarch64/initrd
         }
       ```
 
-<h3 id="3.2">Boot via NFS</h3>
-
-In this boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `"showmount -e <server ip address>" `to list the exported NFS directories on the NFS server.
+b. In NFS boot mode, the root parameter in grub.cfg menuentry will set to /dev/nfs and nfsroot will be set to the path of rootfs on NFS server. You can use `"showmount -e <server ip address>" `to list the exported NFS directories on the NFS server.
 
 D05 supports booting via NFS, you can try it as following steps:
 
@@ -84,7 +87,7 @@ D05 supports booting via NFS, you can try it as following steps:
   Note:
 If you are connecting the D05 board of openlab, please select "UEFI PXEv4 (MAC:000108001540)". The value of `<No>` is depended on which D05 GE port is connected.
 
-<h3 id="3.3">Boot via ISO</h3>
+<h3 id="3.2">Boot via ISO</h3>
 In case you are booting with the minimal ISO via SATA / SAS / SSD, simply select the right boot option in UEFI.
 
 At this stage you should be able to see the grub menu, Debian's installer like:

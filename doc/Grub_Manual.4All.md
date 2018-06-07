@@ -11,7 +11,7 @@ After rebooting board every time, the UEFI will firstly try to download the grub
 Then grub binary will load the kernel and start it with cmdline according to the configurations in `grub.cfg`.
 
 They include:
-```bash
+```
 grubaa64.efi    # The grub binary executable program for ARM64 architecture
 grub.cfg        # The grub config file which will be used by grub binary
 ```
@@ -22,7 +22,7 @@ Where to get them, please refer to Readme.txt.
 You can edit a `grub.cfg` file to support various boot mode or multi boot partitions, follow is an example.
 
 You should change them according to your real local environment.
-
+```
 set menu_color_normal=cyan/blue
 set menu_color_highlight=white/blue
 
@@ -143,7 +143,7 @@ menuentry --hotkey=s 'Install with speech synthesis' {
     linux    /debian-installer/arm64/linux speakup.synth=soft --- quiet
     initrd   /debian-installer/arm64/initrd.gz
 }
-
+```
 ## <a name="3">FAQ</a>
 
 If you want to modify `grub.cfg` command line temporarily. Type "E" key into grub modification menu. You will face problem that the "backspace" key not woking properly. You can fix backspace issue by changing terminal emulator's configuration.
