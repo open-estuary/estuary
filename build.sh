@@ -99,13 +99,6 @@ if [ x"$docker_status" = x"" ]; then
     service docker start
 fi
 
-gnupg_dir=${top_dir}/..
-key_flag=`strings $HOME/.gnupg/secring.gpg|grep OpenEstuary`
-if [ -n "${key_flag}" ]; then
-    cp -rf $HOME/.gnupg ${gnupg_dir}
-else
-    echo -e "\033[31mPlease import ESTUARY-GPG-SECURE-KEY first!\033[0m";exit 1
-fi
 
 # get estuary repo version
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
@@ -321,7 +314,7 @@ for dist in ${distros};do
         debian_image="linaro/ci-arm64-debian:stretch"
         fedora_image="estuary/fedora:5.1-full"
         opensuse_image="estuary/opensuse:5.1-full"
-        ubuntu_image="openestuary/ubuntu:3.1-full"
+        ubuntu_image="estuary/ubuntu:3.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}
         status=$?

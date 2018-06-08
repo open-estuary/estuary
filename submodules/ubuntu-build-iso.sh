@@ -199,6 +199,7 @@ apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/
 apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/apt-ftparchive-extras.conf
 apt-ftparchive -c \$APTCONF release \$BUILD/dists/\$DISTNAME > \$BUILD/dists/\$DISTNAME/Release
 
+gpg --import /home/ESTUARY-GPG-SECURE-KEY
 expect <<-END
         set timeout -1
         spawn gpg --default-key "3108CDA4" --output \$BUILD/dists/\$DISTNAME/Release.gpg -ba \$BUILD/dists/\$DISTNAME/Release
