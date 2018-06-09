@@ -24,7 +24,7 @@ docker_run_sh() {
         centos_image="estuary/centos:5.1-full"
         opensuse_image="estuary/opensuse:5.1-full"
         fedora_image="estuary/fedora:5.1-full"
-        ubuntu_image="estuary/ubuntu:3.1-full"
+        ubuntu_image="estuary/ubuntu:5.1-full"
         eval image="$"${distro}"_image"
         localarch=`uname -m`
         if [ x"$localarch" = x"x86_64" ]; then

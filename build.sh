@@ -314,7 +314,7 @@ for dist in ${distros};do
         debian_image="linaro/ci-arm64-debian:stretch"
         fedora_image="estuary/fedora:5.1-full"
         opensuse_image="estuary/opensuse:5.1-full"
-        ubuntu_image="estuary/ubuntu:3.1-full"
+        ubuntu_image="estuary/ubuntu:5.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}
         status=$?

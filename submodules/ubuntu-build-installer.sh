@@ -20,9 +20,6 @@ estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
 estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.1}
 
 apt-get update -q=2
-apt-get install -y debian-keyring gnupg dctrl-tools bc debiandoc-sgml xsltproc libbogl-dev glibc-pic libslang2-pic libnewt-pic genext2fs e2fsprogs mklibs genisoimage dosfstools --no-install-recommends
-apt-get install -y grub-efi-arm64-bin mtools module-init-tools openssl xorriso bf-utf-source docbook-xml docbook-xsl cpio python-requests --no-install-recommends
-apt-get install -y u-boot-tools --no-install-recommends
 
 # Find kernel abi
 kernel_version=$(apt-cache depends linux-image-estuary | grep -m 1 Depends \
@@ -37,9 +34,7 @@ echo "kernel_version is ${kernel_version}"
 mkdir -p ${workspace}
 cd ${workspace}
 rm -rf ./*
-wget -nd -r --no-parent -A 'debian-installer_20101020ubuntu[0-9]*.[0-9]*.dsc' ${mirror}/pool/main/d/debian-installer/
-dscname=`ls -1 -t debian-installer*.dsc | head -1`
-rm -f debian-installer*.dsc
+dscname="debian-installer_20101020ubuntu543.dsc"
 (dget -u ${mirror}/pool/main/d/debian-installer/${dscname})
 
 cd debian-installer-*
@@ -83,8 +78,8 @@ EOF
 # Set up local repo
 cat <<EOF > sources.list.udeb
 deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer
-deb ${mirror} xenial main/debian-installer
-deb ${mirror} xenial-updates main/debian-installer
+deb ${mirror} bionic main/debian-installer
+deb ${mirror} bionic-updates main/debian-installer
 EOF
 
 # Default preseed to add the overlay and kernel

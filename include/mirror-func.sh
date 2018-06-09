@@ -24,29 +24,13 @@ set_debian_mirror()
 
 set_ubuntu_mirror()
 {
-	if [ -n "${UBUNTU_ESTUARY_REPO}" ]; then
-		local default_repo="http://repo.estuarydev.org/releases/5.0/ubuntu"
-		sed -i "s#${default_repo}#${UBUNTU_ESTUARY_REPO}#" \
-			/etc/apt/sources.list.d/estuary.list
-		sed -i "s#5.0#5.1#g" \
-			/etc/apt/sources.list.d/estuary.list
-	fi
 
-	local mirror=${UBUNTU_MIRROR:-http://ports.ubuntu.com/ubuntu-ports}
+        if [ -n "${UBUNTU_MIRROR}" ]; then
+                local default_mirror="http://ports.ubuntu.com/ubuntu-ports"
+                sed -i "s#${default_mirror}#${UBUNTU_MIRROR}#" \
+                        /etc/apt/sources.list
+        fi
 
-cat >/etc/apt/sources.list<<EOF
-deb ${mirror}/ xenial main restricted universe multiverse
-deb-src ${mirror}/ xenial main restricted universe multiverse
-
-deb ${mirror}/ xenial-updates main restricted universe multiverse
-deb-src ${mirror}/ xenial-updates main restricted universe multiverse
-
-deb ${mirror}/ xenial-security main restricted universe multiverse
-deb-src ${mirror}/ xenial-security main restricted universe multiverse
-
-deb ${mirror}/ xenial-backports main restricted universe multiverse
-deb-src ${mirror}/ xenial-backports main restricted universe multiverse
-EOF
 }
 set_fedora_mirror()
 {

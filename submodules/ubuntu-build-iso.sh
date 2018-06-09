@@ -24,7 +24,6 @@ download=${workspace}/download
 set_ubuntu_mirror
 
 apt-get update -q=2
-apt-get install -y apt-utils xorriso expect
 
 mkdir -p ${workspace}
 mkdir -p ${cdimage}
@@ -42,14 +41,10 @@ else
 fi
 wget ${WGET_OPTS} ${ESTUARY_REPO}/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
 
-http_addr=${ESTUARY_FTP:-"http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"}
-wget ${WGET_OPTS} ${http_addr}/linux/Ubuntu/filesystem/filesystem.squashfs
-wget ${WGET_OPTS} ${http_addr}/linux/Ubuntu/filesystem/filesystem.size
-
 cd ${workspace}
 # download iso and decompress
-ISO=ubuntu-16.04.3-server-arm64.iso
-http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/16.04/release/"}
+ISO=ubuntu-18.04-server-arm64.iso
+http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/"}
 
 wget -T 120 -c ${http_addr}/${ISO}
 
@@ -73,14 +68,22 @@ cp -r ${grubfiles}/grub/arm64-efi ${cdimage}/boot/grub/
 cp -r ${grubfiles}/grub/efi.img ${cdimage}/boot/grub/
 cp -r ${grubfiles}/grub/font.pf2 ${cdimage}/boot/grub/
 
-# copy filesystem to install
-cp ${download}/filesystem.size ${cdimage}/install/
-cp ${download}/filesystem.squashfs ${cdimage}/install/
-
-cd ..
+# make filesystem to install
+rm -rf ${workspace}/SquashFS
+mkdir -p ${workspace}/SquashFS
+cd ${workspace}/SquashFS/
+unsquashfs ${cdimage}/install/filesystem.squashfs
+cd squashfs-root/
+cp /home/ubuntu-archive-keyring.gpg usr/share/keyrings/ubuntu-archive-keyring.gpg
+cp /home/ubuntu-archive-keyring.gpg etc/apt/trusted.gpg
+rm -rf ${cdimage}/install/filesystem.s*
+du -sx --block-size=1 ./ | cut -f1 > ${cdimage}/install/filesystem.size
+mksquashfs ./ ${cdimage}/install/filesystem.squashfs
+cd ${workspace}
 
 # make cd
-mkdir -p ${cdimage}/dists/xenial/extras/binary-arm64
+distro_version="bionic"
+mkdir -p ${cdimage}/dists/${distro_version}/extras/binary-arm64
 
 mkdir -p ./ubuntu-cd-make/apt-ftparchive
 mkdir -p ./ubuntu-cd-make/indices
@@ -96,8 +99,8 @@ TreeDefault {
 };
 
 BinDirectory "pool/main" {
-  Packages "dists/xenial/main/binary-arm64/Packages";
-  BinOverride "${workspace}/ubuntu-cd-make/indices/override.xenial.main";
+  Packages "dists/${distro_version}/main/binary-arm64/Packages";
+  BinOverride "${workspace}/ubuntu-cd-make/indices/override.${distro_version}.main";
 };
 
 Default {
@@ -122,7 +125,7 @@ TreeDefault {
 };
 
 BinDirectory "pool/extras" {
-  Packages "dists/xenial/extras/binary-arm64/Packages";
+  Packages "dists/${distro_version}/extras/binary-arm64/Packages";
 };
 
 Default {
@@ -147,8 +150,8 @@ TreeDefault {
 };
 
 BinDirectory "pool/main" {
-  Packages "dists/xenial/main/debian-installer/binary-arm64/Packages";
-  BinOverride "${workspace}/ubuntu-cd-make/indices/override.xenial.main.debian-installer";
+  Packages "dists/${distro_version}/main/debian-installer/binary-arm64/Packages";
+  BinOverride "${workspace}/ubuntu-cd-make/indices/override.${distro_version}.main.debian-installer";
 };
 
 Default {
@@ -166,9 +169,9 @@ EOF
 cat > ./ubuntu-cd-make/apt-ftparchive/release.conf << EOF
 APT::FTPArchive::Release::Origin "Ubuntu";
 APT::FTPArchive::Release::Label "Ubuntu";
-APT::FTPArchive::Release::Suite "xenial";
-APT::FTPArchive::Release::Version "16.04";
-APT::FTPArchive::Release::Codename "xenial";
+APT::FTPArchive::Release::Suite "${distro_version}";
+APT::FTPArchive::Release::Version "18.04";
+APT::FTPArchive::Release::Codename "${distro_version}";
 APT::FTPArchive::Release::Architectures "arm64";
 APT::FTPArchive::Release::Components "main extras";
 APT::FTPArchive::Release::Description "Ubuntu 16.04 LTS";
@@ -178,7 +181,7 @@ cat > ./ubuntu-cd-make/script_for_ubuntu_cd/indices.sh << EOF
 #!/bin/bash
 
 cd ${workspace}/ubuntu-cd-make/indices/
-DIST=xenial
+DIST=bionic
 for SUFFIX in extra.main main main.debian-installer restricted restricted.debian-installer; do
   wget -T 120 -c http://archive.ubuntu.com/ubuntu/indices/override.\$DIST.\$SUFFIX
 done
@@ -191,7 +194,7 @@ set -ex
 
 BUILD=${workspace}/cd-image
 APTCONF=${workspace}/ubuntu-cd-make/apt-ftparchive/release.conf
-DISTNAME=xenial
+DISTNAME=bionic
 
 pushd \$BUILD
 apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/apt-ftparchive-deb.conf
@@ -199,16 +202,13 @@ apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/
 apt-ftparchive -c \$APTCONF generate ${workspace}/ubuntu-cd-make/apt-ftparchive/apt-ftparchive-extras.conf
 apt-ftparchive -c \$APTCONF release \$BUILD/dists/\$DISTNAME > \$BUILD/dists/\$DISTNAME/Release
 
-gpg --import /home/ESTUARY-GPG-SECURE-KEY
+rm -rf \$BUILD/dists/\$DISTNAME/Release.gpg /root/.gnupg
+gpg1 --import /home/ESTUARY-GPG-SECURE-KEY
 expect <<-END
         set timeout -1
-        spawn gpg --default-key "3108CDA4" --output \$BUILD/dists/\$DISTNAME/Release.gpg -ba \$BUILD/dists/\$DISTNAME/Release
+        spawn gpg1 --default-key "3108CDA4" --output \$BUILD/dists/\$DISTNAME/Release.gpg -ba \$BUILD/dists/\$DISTNAME/Release
         expect {
                 "Enter passphrase:" {send "OPENESTUARY@123\r"}
-                timeout {send_user "Enter pass phrase timeout\n"}
-        }
-        expect {
-                "Overwrite" {send "y\r"}
                 timeout {send_user "Enter pass phrase timeout\n"}
         }
         expect eof
@@ -234,6 +234,3 @@ export CDNAME=estuary-${version}-ubuntu
 # publish
 mkdir -p ${out}
 cp output/*.iso ${out}/${CDNAME}.iso
-
-#scp ${out}/${CDNAME}.iso wangxiaochun@192.168.1.107:/home/wangxiaochun
-

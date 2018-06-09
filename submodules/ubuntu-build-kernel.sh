@@ -30,11 +30,7 @@ expect <<-END
                 "or Enter to continue" {send "\r"}
                 timeout {send_user "build-dep install timeout\n"}
         }
-        expect eof
 END
-
-apt-get install -y libnuma-dev
-apt-get install -y git graphviz
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
