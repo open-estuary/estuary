@@ -71,7 +71,7 @@ parport-modules-\${kernel:Version}
 plip-modules-\${kernel:Version}
 ppp-modules-\${kernel:Version}
 vlan-modules-\${kernel:Version}
-estuary-cdrom-udeb
+estuary-netboot-udeb
 EOF
 
 
@@ -118,6 +118,7 @@ d-i pkgsel/include string openssh-server vim
 d-i preseed/late_command string in-target apt-get update || true
 EOF
 
+sed -i 's/estuary-netboot-udeb/estuary-cdrom-udeb/' pkg-lists/local
 fakeroot make build_cdrom_grub
 
 # publish cdrom
