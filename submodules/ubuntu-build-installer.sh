@@ -84,16 +84,8 @@ EOF
 
 # Default preseed to add the overlay and kernel
 cat <<EOF > default-preseed
-# Additional repositories, local[0-9] available
-d-i apt-setup/local0/repository string \
-       ${ESTUARY_REPO}/5.1/ubuntu/ estuary-5.1 main
-d-i debian-installer/allow_unauthenticated string true
-
 # Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
-
-# Skip linux-image-generic installation
-d-i base-installer/kernel/image string linux-image-estuary
 
 # Package selection
 tasksel tasksel/first multiselect standard
