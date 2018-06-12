@@ -71,7 +71,7 @@ parport-modules-\${kernel:Version}
 plip-modules-\${kernel:Version}
 ppp-modules-\${kernel:Version}
 vlan-modules-\${kernel:Version}
-estuary-netboot-udeb
+estuary-cdrom-udeb
 EOF
 
 
@@ -84,12 +84,11 @@ EOF
 
 # Default preseed to add the overlay and kernel
 cat <<EOF > default-preseed
-# Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
-
-# Package selection
+d-i base-installer/kernel/image string none
 tasksel tasksel/first multiselect standard
 d-i pkgsel/include string openssh-server vim
+d-i preseed/late_command string apt-install linux-image-estuary
 EOF
 
 # 1) build netboot installer
@@ -102,15 +101,12 @@ mkdir -p ${out}
 
 ## 2) build cdrom installer
 cat <<EOF > default-preseed
-# Continue install on "no kernel modules were found for this kernel"
 d-i anna/no_kernel_modules boolean true
-
 d-i base-installer/kernel/image string linux-image-estuary
 d-i pkgsel/include string openssh-server vim
 d-i preseed/late_command string in-target apt-get update || true
 EOF
 
-sed -i 's/estuary-netboot-udeb/estuary-cdrom-udeb/' pkg-lists/local
 fakeroot make build_cdrom_grub
 
 # publish cdrom
