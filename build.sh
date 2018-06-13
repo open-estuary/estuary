@@ -312,7 +312,7 @@ fi
 for dist in ${distros};do
         centos_image="estuary/centos:5.1-full"
         debian_image="linaro/ci-arm64-debian:stretch"
-        fedora_image="estuary/fedora:5.1-full"
+        fedora_image="estuary/fedora:28"
         opensuse_image="estuary/opensuse:5.1-full"
         ubuntu_image="estuary/ubuntu:5.1-full"
         eval image="$"${dist}"_image"

@@ -21,7 +21,7 @@ set_fedora_mirror
 
 
 # download ISO
-ISO=Fedora-Server-dvd-aarch64-26-1.5.iso
+ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
 http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
 iso_dir=/root/iso
 mkdir -p ${iso_dir} && cd ${iso_dir}
@@ -72,7 +72,7 @@ createrepo -g repodata/comps.xml .
 
 
 # Create the new ISO file.
-cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-26" -o ${out}/${ISO} .
+cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-28" -o ${out}/${ISO} .
 
 # Clean
 rm -rf ${dest_dir} 

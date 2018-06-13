@@ -7,5 +7,5 @@ workspace=$(cd /root/$2 && pwd)
 . ${top_dir}/include/mirror-func.sh
 set_fedora_mirror
 
-find ${workspace} -type d -iname fedora |xargs rm -rvf
+find ${workspace} -type d -iname fedora |xargs rm -rf
 echo "clean fedora done."

@@ -10,7 +10,7 @@ distro_dir=${build_dir}/tmp/fedora
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
 source_url=${FEDORA_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/fedora"}
-base_url=${FEDORA_MIRROR:-"http://dl.fedoraproject.org/pub/fedora-secondary"}/releases/26/Everything/aarch64/os/
+base_url=${FEDORA_MIRROR:-"http://dl.fedoraproject.org/pub/fedora/linux"}/releases/28/Everything/aarch64/os/
 
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
@@ -22,16 +22,18 @@ set_fedora_mirror
 
 # Install build tools and fix dependence problem
 sed -i 's#"setfiles",#"setfiles","-e","/usr/lib/systemd",#g' /usr/lib/python3.6/site-packages/pylorax/imgutils.py
+sed -i '1,/installpkg kernel/{s/kernel.*/kernel-4.16.0 kernel-modules-extra-4.16.0/}' \
+       /usr/share/lorax/templates.d/99-generic/runtime-install.tmpl
 seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
 chgrp disk /dev/loop[0-7]
 
 # Call lorax to create the netinstall image
 cd fedora-installer
 rm -rf netinstall
-lorax '--product=Fedora' --version=26 --release=26 \
+lorax '--product=Fedora' --version=28 --release=28 \
   --source=${base_url} \
   --source=${source_url} \
-  --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=Fedora-S-dvd-aarch64-26' netinstall/
+  --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=Fedora-S-dvd-aarch64-28' netinstall/
 
 
 # Modify initrd to include a default kickstart (that includes the external repository)
@@ -50,7 +52,7 @@ netinstall_dir=${workspace}/fedora-installer/netinstall
 cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
 rm -rf ${netinstall_dir}/images/boot.iso
 mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
-  -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-26' -T \
+  -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-28' -T \
   -graft-points \
   images/pxeboot=${netinstall_dir}/images/pxeboot \
   EFI/BOOT=${netinstall_dir}/EFI/BOOT \
