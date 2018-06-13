@@ -58,6 +58,7 @@ dnf clean dbcache
 package_name="kernel kernel-core kernel-cross-headers kernel-devel kernel-headers kernel-modules kernel-modules-extra"
 dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
 
+rm -rf ${dest_dir}/Packages/k/kernel*4.[0-9][0-9].[0-9]*.rpm
 mkdir -p ${dest_dir}/Packages/extra
 cp -f ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages/extra/
 cd ${dest_dir}
