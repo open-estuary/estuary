@@ -63,10 +63,7 @@ install_dev_tools()
         echo "Unspported distro!" >&2; return 1
     fi
 
-    if [ -z "$(which jq)" ] || [ -z "$(which git)" ] || [ -z "$(which gcc)" ] \
-	    || [ -z "$(which docker)" ] || [ -z "$(which unzip)" ]; then
-	install_dev_tools_${host_distro}
-    fi
+    install_dev_tools_${host_distro}
 
 }
 
