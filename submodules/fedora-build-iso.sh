@@ -33,9 +33,6 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     check_sum . ${ISO}.sum || exit 1
 fi
 
-# Create a working directory for your customized media.
-mkdir -p ${dest_dir}/temp
-
 # Copy the source media to the working directory.
 xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
 

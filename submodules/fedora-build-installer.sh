@@ -51,13 +51,9 @@ cd ..; rm -rf initrd
 netinstall_dir=${workspace}/fedora-installer/netinstall
 cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
 rm -rf ${netinstall_dir}/images/boot.iso
-mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
+genisoimage -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
   -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-28' -T \
-  -graft-points \
-  images/pxeboot=${netinstall_dir}/images/pxeboot \
-  EFI/BOOT=${netinstall_dir}/EFI/BOOT \
-  images/efiboot.img=${netinstall_dir}/images/efiboot.img \
-  images/install.img=${netinstall_dir}/images/install.img
+  -allow-limited-size ${netinstall_dir}
 
 # Final preparation for publishing
 mkdir -p ${out_installer} && mkdir -p ${out}
