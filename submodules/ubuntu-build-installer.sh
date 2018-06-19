@@ -7,6 +7,7 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
 out=${build_dir}/out/release/${version}/Ubuntu/
+kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/ubuntu
 distro_dir=${build_dir}/tmp/ubuntu
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
@@ -24,6 +25,17 @@ apt-get update -q=2
 # Find kernel abi
 kernel_version=$(apt-cache depends linux-image-estuary | grep -m 1 Depends \
 | sed -e "s/.*linux-image-//g")
+
+if [ -f "${build_dir}/build-ubuntu-kernel" ]; then
+    build_kernel=true
+fi
+if [ x"$build_kernel" = x"true" ]; then
+    kernel_version=$(dpkg --info ${kernel_deb_dir}/meta/linux-image-estuary* \
+    | grep Depends | sed -e "s/.*linux-image-extra-//g" -e "s/,.*//g")
+    wget -N ${estuary_repo}/pool/main/estuary-cdrom-udeb_1_all.udeb -P ${kernel_deb_dir}/not_meta/
+    cd ${kernel_deb_dir}/not_meta/
+    dpkg-scanpackages -t udeb . > Packages
+fi
 
 echo "mirror is ${mirror}"
 echo "estuary_repo is ${estuary_repo}"
@@ -77,10 +89,15 @@ EOF
 
 # Set up local repo
 cat <<EOF > sources.list.udeb
-deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer
 deb ${mirror} bionic main/debian-installer
 deb ${mirror} bionic-updates main/debian-installer
 EOF
+if [ x"$build_kernel" = x"true" ]; then
+    echo "deb [trusted=yes] copy:${kernel_deb_dir}/not_meta ./" >> sources.list.udeb
+else
+    echo "deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer" >> sources.list.udeb
+fi
+
 
 # Default preseed to add the overlay and kernel
 cat <<EOF > default-preseed
@@ -92,6 +109,7 @@ d-i preseed/late_command string apt-install linux-image-estuary
 EOF
 
 # 1) build netboot installer
+echo "ONLY_KLIBC=0" >> config/arm64/netboot.cfg
 fakeroot make build_netboot
 
 # publish netboot
@@ -107,6 +125,7 @@ d-i pkgsel/include string openssh-server vim
 d-i preseed/late_command string in-target apt-get update || true
 EOF
 
+echo "ONLY_KLIBC=0" >> config/arm64/cdrom.cfg
 fakeroot make build_cdrom_grub
 
 # publish cdrom

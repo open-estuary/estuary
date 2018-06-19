@@ -33,6 +33,7 @@ check_running_not_in_container
 declare -l distros DISTROS
 action=build			# build or clean, default to build
 build_dir=${top_dir}/build	# Build output directory
+build_kernel=false         	# Build kernel packages
 platforms=			# Platforms to build, support platforms: d03, d05
 distros=			# Distros to build, support distro: centos, debian, fedora, opensuse, ubuntu
 version=master			# estuary repo's tag or branch
@@ -51,11 +52,13 @@ Options:
     -h, --help: Display this information
     -d, --distro: the distribuations
         * support distros: $distros
-    --builddir: Build output directory, default is ./build
+    --build_dir: Build output directory, default is ./build
+    -k, --build_kernel: Build kernel packages, default is false
     clean: Clean all distros.
 
 Example:
     ./build.sh --help
+    ./build.sh --build_dir=./workspace -d ubuntu -k true # build kernel packages
     ./build.sh --build_dir=./workspace # build distros from json configuration
     ./build.sh --build_dir=./workspace -d ubuntu,centos # build specified distros,separated with ","
     ./build.sh --build_dir=./workspace clean 	# clean distros
@@ -77,6 +80,7 @@ do
     case ${ac_option} in
         clean) action=clean ;;
 	--build_dir) eval build_dir=$ac_optarg ;;
+	-k | --build_kernel) eval build_kernel=$ac_optarg ;;
         -d | --distro) DISTROS=$ac_optarg ;;
         -h | --help) Usage ; exit 0 ;;
         *) Usage ; echo "Unknown option $1" ; exit 1 ;;
@@ -103,11 +107,18 @@ fi
 # get estuary repo version
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
 version=${tag:-${version}}
-build_kernel_pkg_only=${BUILD_KERNEL_PKG_ONLY:-false}
 
 # get absolute path
 cd ${top_dir}
 build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
+
+# check build kernel packages flag
+build_flag="true false"
+build_kernel=`echo $build_kernel | tr 'A-Z' 'a-z'`
+if [ x"$build_kernel" != x"false" ] && [ x"$build_kernel" != x"true" ] ; then
+        echo -e "\033[31mError! $build_kernel is not supported!\033[0m"
+        echo -e "\033[31mSupport build kernel flag: ${build_flag[*]}\033[0m" ; exit 1
+fi
 
 ###################################################################################
 # Parse configuration file
@@ -132,7 +143,7 @@ else
     all_distros=$distros
 fi
 
-if [ x"$build_kernel_pkg_only" = x"true" ]; then
+if [ x"$build_kernel" != x"false" ]; then
     if [ x"$distros" = x"" ]; then
         echo -e "\033[31mcommon no need to build package!\033[0m"
         exit 0
@@ -180,7 +191,7 @@ export ${envlist}
 DOWNLOAD_FTP_ADDR=`grep -Po "(?<=estuary_interal_ftp: )(.*)" $top_dir/estuary.txt`
 DOWNLOAD_FTP_ADDR=${ESTUARY_FTP:-"$DOWNLOAD_FTP_ADDR"}
 ESTUARY_FTP_CFGFILE="${version}.xml"
-if [ x"$build_common" = x"true" ] || [ x"$build_kernel_pkg_only" = x"false" ]; then
+if [ x"$build_common" = x"true" ] || [ x"$build_kernel" = x"false" ]; then
     if ! check_ftp_update $version . ; then
         echo "##############################################################################"
         echo "# Update estuary configuration file"
@@ -331,7 +342,7 @@ for dist in ${distros}; do
 	echo "---------------------------------------------------------------*/"
 	./submodules/${action}-distro.sh --distro=${dist} \
 		--version=${version} --envlist="${envlist}" \
-		--build_dir=${build_dir} --build_kernel=${build_kernel_pkg_only}
+		--build_dir=${build_dir} --build_kernel=${build_kernel}
 	if [ $? -ne 0 ]; then
 	    exit 1
 	fi
@@ -345,21 +356,11 @@ done
 if [ x"$build_common" = x"true" ]; then
         ./submodules/${action}-distro.sh --distro=common \
                 --version=${version} --envlist="${envlist}" \
-                --build_dir=${build_dir} --build_kernel=${build_kernel_pkg_only}
+                --build_dir=${build_dir} --build_kernel=${build_kernel}
         if [ $? -ne 0 ]; then
             exit 1
         fi
 	echo "${action} common rootfs done!"
-fi
-
-
-###################################################################################
-# Build/clean kernel packages finish here
-###################################################################################
-
-if [ x"$build_kernel_pkg_only" = x"true" ]; then
-    echo "${action} kernel packages done!"
-    exit 0
 fi
 
 ###################################################################################

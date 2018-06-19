@@ -31,7 +31,7 @@ do
     --version) version=$ac_optarg ;;
     --envlist) envlist=$ac_optarg ;;
     --build_dir) build_dir=$ac_optarg ;;
-    --build_kernel) build_kernel_pkg_only=$ac_optarg ;;
+    --build_kernel) build_kernel=$ac_optarg ;;
     *) echo "Unknown option $ac_option!"
         build_platform_usage ; exit 1 ;;
     esac
@@ -58,6 +58,7 @@ done
 sort -n ${envlist_file} | uniq > test.txt
 cat test.txt > ${envlist_file}
 rm -f test.txt
+rm -f ${build_absolute_dir}/build-${distro}-kernel
 
 # Notice:
 # Build kernel pakages and iso seperately.
@@ -75,11 +76,13 @@ if [ "${distro}" == "common" ];then
         exit 0
     fi
 fi
-if [ "${build_kernel_pkg_only}" == "true" ]; then
+
+if [ x"$build_kernel" != x"false" ]; then
 	# 1) build kernel
 	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-kernel.sh ${version} ${build_dir}
-else
+        touch ${build_absolute_dir}/build-${distro}-kernel
+fi
 	# 2) build installer
 	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-build-installer.sh ${version} ${build_dir}
@@ -93,4 +96,3 @@ else
 	# 5) calculate md5sum
 	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
 		${distro}-calculate-md5sum.sh ${version} ${build_dir}
-fi

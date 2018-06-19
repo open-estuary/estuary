@@ -7,12 +7,13 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
 out=${build_dir}/out/release/${version}/Ubuntu
+kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/ubuntu
 distro_dir=${build_dir}/tmp/ubuntu
 cdrom_installer_dir=${distro_dir}/installer/out/images
 workspace=${distro_dir}/ubuntu-cd
 
 export UBUNTU_CD=${workspace}
-WGET_OPTS="-T 120 -c"
+WGET_OPTS="-T 120 -c -q"
 
 cdimage=${workspace}/cd-image
 mnt=${workspace}/mnt
@@ -32,21 +33,30 @@ mkdir -p ${download}
 rm -rf ${download}/* || true
 
 # download debs and filesystem
-cd ${download}
-if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
-    kernel_version=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F ' ' '{print $2}'|awk -F '.' '{print $1"."$2"."$3}')
-    build_num=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F '.' '{print $4}')
-else
-    echo "ERROR:No linux-image-estuary found !"
+if [ -f "${build_dir}/build-ubuntu-kernel" ]; then
+    build_kernel=true
 fi
-wget ${WGET_OPTS} ${ESTUARY_REPO}/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
+
+if [ x"$build_kernel" != x"true" ]; then
+    cd ${download}
+    if [ ! -z "$(apt-cache show linux-image-estuary)" ]; then
+        kernel_version=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F ' ' '{print $2}'|awk -F '.' '{print $1"."$2"."$3}')
+        build_num=$(apt-cache policy linux-image-estuary|grep Candidate:|awk -F '.' '{print $4}')
+    else
+        echo "ERROR:No linux-image-estuary found !"
+    fi
+    wget ${WGET_OPTS} ${ESTUARY_REPO}/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
+else
+    cp -f ${kernel_deb_dir}/meta/linux-*.deb ${download}/
+    cp -f ${kernel_deb_dir}/not_meta/linux-*.deb ${download}/
+fi
 
 cd ${workspace}
 # download iso and decompress
 ISO=ubuntu-18.04-server-arm64.iso
 http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/"}
 
-wget -T 120 -c ${http_addr}/${ISO}
+wget ${WGET_OPTS} ${http_addr}/${ISO}
 
 xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
 
@@ -183,7 +193,7 @@ cat > ./ubuntu-cd-make/script_for_ubuntu_cd/indices.sh << EOF
 cd ${workspace}/ubuntu-cd-make/indices/
 DIST=bionic
 for SUFFIX in extra.main main main.debian-installer restricted restricted.debian-installer; do
-  wget -T 120 -c http://archive.ubuntu.com/ubuntu/indices/override.\$DIST.\$SUFFIX
+  wget ${WGET_OPTS} http://archive.ubuntu.com/ubuntu/indices/override.\$DIST.\$SUFFIX
 done
 EOF
 
