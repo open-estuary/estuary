@@ -109,7 +109,6 @@ d-i preseed/late_command string apt-install linux-image-estuary
 EOF
 
 # 1) build netboot installer
-echo "ONLY_KLIBC=0" >> config/arm64/netboot.cfg
 fakeroot make build_netboot
 
 # publish netboot
@@ -125,7 +124,6 @@ d-i pkgsel/include string openssh-server vim
 d-i preseed/late_command string in-target apt-get update || true
 EOF
 
-echo "ONLY_KLIBC=0" >> config/arm64/cdrom.cfg
 fakeroot make build_cdrom_grub
 
 # publish cdrom
