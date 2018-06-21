@@ -6,7 +6,9 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-out=${build_dir}/out/release/${version}/CentOS/netboot
+release_dir=${build_dir}/out/release/${version}/CentOS
+out=${release_dir}/netboot
+kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
@@ -28,6 +30,13 @@ chgrp disk /dev/loop[0-7]
 # Call lorax to create the netinstall image
 cd centos-installer
 rm -rf netinstall
+if [ -f "${build_dir}/build-centos-kernel" ]; then
+    build_kernel=true
+fi
+if [ x"$build_kernel" = x"true" ]; then
+    source_url="file://${kernel_rpm_dir}"
+    createrepo ${kernel_rpm_dir}
+fi
 lorax '--product=CentOS Linux' --version=7 --release=7 \
   --source=${base_url} \
   --source=${source_url}  \
@@ -45,6 +54,7 @@ sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../init
 cd ..; rm -rf initrd
 
 # Rebuild boot.iso
+if [ x"$build_kernel" != x"true" ]; then
 netinstall_dir=${workspace}/centos-installer/netinstall
 cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
 rm -rf ${netinstall_dir}/images/boot.iso
@@ -55,9 +65,16 @@ mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
   LiveOS=${netinstall_dir}/LiveOS \
   EFI/BOOT=${netinstall_dir}/EFI/BOOT \
   images/efiboot.img=${netinstall_dir}/images/efiboot.img
+fi
 
 # Final preparation for publishing
 mkdir -p ${out_installer} && mkdir -p ${out}
 cd ${workspace}/centos-installer
 cp -rf lorax.log netinstall/.discinfo netinstall/.treeinfo netinstall/EFI netinstall/images netinstall/LiveOS ${out_installer}
 cp -rf  ${out_installer}/* ${out}
+if [ x"$build_kernel" != x"true" ]; then
+    cd ${release_dir}
+    mv netboot/images/boot.iso .
+    tar -czvf netboot.tar.gz netboot/
+fi
+rm -rf ${out}

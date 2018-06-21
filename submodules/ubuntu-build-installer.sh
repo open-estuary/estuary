@@ -32,7 +32,6 @@ fi
 if [ x"$build_kernel" = x"true" ]; then
     kernel_version=$(dpkg --info ${kernel_deb_dir}/meta/linux-image-estuary* \
     | grep Depends | sed -e "s/.*linux-image-extra-//g" -e "s/,.*//g")
-    wget -N ${estuary_repo}/pool/main/estuary-cdrom-udeb_1_all.udeb -P ${kernel_deb_dir}/not_meta/
     cd ${kernel_deb_dir}/not_meta/
     dpkg-scanpackages -t udeb . > Packages
 fi
@@ -110,12 +109,12 @@ d-i preseed/late_command string apt-install linux-image-estuary
 EOF
 
 # 1) build netboot installer
-fakeroot make build_netboot
-
-# publish netboot
-mkdir -p ${out}
-(cp -f default-preseed ${out}/default-preseed.cfg)
-(cd dest/netboot/ && cp -f mini.iso netboot.tar.gz ${out})
+if [ x"$build_kernel" != x"true" ]; then
+    fakeroot make build_netboot
+    mkdir -p ${out}
+    (cp -f default-preseed ${out}/default-preseed.cfg)
+    (cd dest/netboot/ && cp -f mini.iso netboot.tar.gz ${out})
+fi
 
 ## 2) build cdrom installer
 cat <<EOF > default-preseed

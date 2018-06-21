@@ -29,45 +29,21 @@ fi
 build_num=${BUILD_NUM:-${build_num}}
 
 # build arguments
-orig_dir=${workspace}/orig
-repo_dir=${workspace}/debian-kernel-packages
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf $orig_dir $repo_dir
+rm -rf /root/rpmbuild/
 mkdir -p ${workspace} && cd ${workspace}
-mkdir -p ${out_rpm} && mkdir -p debian-pkg
-git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git
+mkdir -p ${out_rpm}
 
 rsync -avq $build_dir/../kernel/ ${kernel_dir}
 
 # Export the kernel packaging version
 cd ${kernel_dir}
 kernel_version=$(make kernelversion)
-export KDEB_PKGVERSION="${kernel_version}.estuary.${build_num}-1"
-git tag -f v${kernel_version}
-
-# Build the source kernel
-cd ../debian-pkg
-cp -rf ${repo_dir}/debian-package/debian .
-
-# Use build number as ABI
-sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
-
-cat << EOF > debian/changelog
-linux ($KDEB_PKGVERSION) unstable; urgency=medium
-
-  * Auto build:
-    - URL: ${GIT_URL}
-    - Branch: ${GIT_BRANCH}
-    - Commit: ${GIT_COMMIT}
-
- -- OpenEstuary <sjtuhjh@hotmail.com>  $(date -R)
-
-EOF
-
-debian/bin/genorig.py ../linux
-debian/rules orig
+kernel_abi=`echo ${kernel_version}|cut -d "." -f 1,2`
+make mrproper
+git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz -c > linux-${kernel_abi}.tar.xz
 
 # Build rpm source package
 rpmversion=${kernel_version//-*/}
@@ -84,7 +60,7 @@ sed -i "s/mv linux-\%{rheltarball}/mv linux-\*/g" SPECS/kernel-aarch64.spec
 sed -i "s/^BuildRequires: openssl$/BuildRequires: openssl-devel/g" SPECS/kernel-aarch64.spec
 sed -i "s/0.0.0/0.0.1/g" SPECS/kernel-aarch64.spec
 
-cp ${workspace}/orig/*.orig.tar.xz SOURCES/linux-${rpmversion}-estuary.${build_num}.tar.xz
+cp -f ${kernel_dir}/linux-${kernel_abi}.tar.xz SOURCES/linux-${rpmversion}-estuary.${build_num}.tar.xz
 rpmbuild --nodeps --define "%_topdir `pwd`" -bs SPECS/kernel-aarch64.spec
 
 # Copy back the resulted artifacts

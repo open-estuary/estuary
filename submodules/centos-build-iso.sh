@@ -54,9 +54,14 @@ cfg_path="${top_dir}/configs/auto-install/centos/"
 cp -f $cfg_path/auto-iso/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
 
 # Download any additional RPMs to the directory structure and update the metadata.
-rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}
+mkdir -p ${kernel_rpm_dir}
+if [ -f "${build_dir}/build-centos-kernel" ]; then
+    build_kernel=true
+fi
+if [ x"$build_kernel" != x"true" ]; then
 package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
 yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
+fi
 yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=extras epel-release
 
 cp ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages
@@ -74,11 +79,5 @@ createrepo -g repodata/comps.xml .
 # Create the new ISO file.
 cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "CentOS 7 aarch64" -o ${out}/${ISO} .
 
-# Publish
-cd ${out}
-mv netboot/images/boot.iso .
-tar -czvf netboot.tar.gz netboot/
-
 # Clean
-rm -rf netboot/
 rm -rf ${dest_dir} 

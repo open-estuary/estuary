@@ -57,12 +57,11 @@ Options:
     clean: Clean all distros.
 
 Example:
-    ./build.sh --help
-    ./build.sh --build_dir=./workspace -d ubuntu -k true # build kernel packages
-    ./build.sh --build_dir=./workspace # build distros from json configuration
-    ./build.sh --build_dir=./workspace -d ubuntu,centos # build specified distros,separated with ","
-    ./build.sh --build_dir=./workspace clean 	# clean distros
-    sudo ./build.sh --build_dir=./workspace -d ubuntu # when user is not root, you should add sudo !!!
+    sudo ./build.sh --help
+    sudo ./build.sh --build_dir=./workspace -d ubuntu -k true # build kernel packages
+    sudo ./build.sh --build_dir=./workspace # build distros from json configuration
+    sudo ./build.sh --build_dir=./workspace -d ubuntu,centos # build specified distros,separated with ","
+    sudo ./build.sh --build_dir=./workspace -d ubuntu clean 	# clean distros
 EOF
 }
 
@@ -143,7 +142,7 @@ else
     all_distros=$distros
 fi
 
-if [ x"$build_kernel" != x"false" ]; then
+if [ x"$build_kernel" = x"true" ]; then
     if [ x"$distros" = x"" ]; then
         echo -e "\033[31mcommon no need to build package!\033[0m"
         exit 0
@@ -361,6 +360,15 @@ if [ x"$build_common" = x"true" ]; then
             exit 1
         fi
 	echo "${action} common rootfs done!"
+fi
+
+###################################################################################
+# Build/clean kernel packages finish here
+###################################################################################
+
+if [ x"$build_kernel" = x"true" ]; then
+    echo "${action} kernel packages done!"
+    exit 0
 fi
 
 ###################################################################################
