@@ -23,15 +23,6 @@ set_ubuntu_mirror
 
 apt-get update -q=2
 
-expect <<-END
-        set timeout -1
-        spawn apt-get build-dep -q --no-install-recommends -y linux
-        expect {
-                "or Enter to continue" {send "\r"}
-                timeout {send_user "build-dep install timeout\n"}
-        }
-END
-
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
 cd ${workspace}
