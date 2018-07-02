@@ -20,7 +20,7 @@ docker_run_sh() {
 	shift 5
 	scipt_options=$@
 	name=$(echo $script| awk -F '.' '{print $1}')
-	name=$(echo ${name}${home_dir}/${sh_dir} | sed -e 's#/submodules##' -e 's#/#-#g')
+	name=$(echo ${name}${top_dir} | sed -e 's#/#-#g')
         debian_image="linaro/ci-arm64-debian:stretch"
         centos_image="estuary/centos:5.1-full"
         opensuse_image="estuary/opensuse:5.1-full"
