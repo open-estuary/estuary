@@ -14,7 +14,7 @@ SUPPORT_DISTROS=(`sed -n '/^\"distros\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/n
 top_dir=$(cd `dirname $0` ; pwd)
 dname=$(dirname "$PWD")
 
-export WGET_OPTS="-T 120 -c"
+export WGET_OPTS="-T 120 -c -q"
 export LC_ALL=C
 export LANG=C
 
@@ -320,11 +320,11 @@ fi
 # Build/clean distros
 ###################################################################################
 for dist in ${distros};do
-        centos_image="estuary/centos:5.1-full"
-        debian_image="linaro/ci-arm64-debian:stretch"
-        fedora_image="estuary/fedora:28"
-        opensuse_image="estuary/opensuse:5.1-full"
-        ubuntu_image="estuary/ubuntu:5.1-full"
+        export centos_image="estuary/centos:5.1-full"
+        export debian_image="linaro/ci-arm64-debian:stretch"
+        export fedora_image="estuary/fedora:28"
+        export opensuse_image="estuary/opensuse:5.1-full"
+        export ubuntu_image="estuary/ubuntu:5.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}
         status=$?

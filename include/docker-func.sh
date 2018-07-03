@@ -21,11 +21,6 @@ docker_run_sh() {
 	scipt_options=$@
 	name=$(echo $script| awk -F '.' '{print $1}')
 	name=$(echo ${name}${top_dir} | sed -e 's#/#-#g')
-        debian_image="linaro/ci-arm64-debian:stretch"
-        centos_image="estuary/centos:5.1-full"
-        opensuse_image="estuary/opensuse:5.1-full"
-        fedora_image="estuary/fedora:28"
-        ubuntu_image="estuary/ubuntu:5.1-full"
         eval image="$"${distro}"_image"
         localarch=`uname -m`
         if [ x"$localarch" = x"x86_64" ]; then
