@@ -40,7 +40,7 @@ do
 done
 
 
-envlist_dir=${build_dir}/tmp
+envlist_dir=${build_dir}/tmp/${distro}
 envlist_file=${envlist_dir}/env.list
 build_absolute_dir=${build_dir}
 
