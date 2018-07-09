@@ -230,7 +230,10 @@ popd
 mkdir -p ${workspace}/output
 rm -rf ${workspace}/output/ubuntu.iso
 
-xorriso -as mkisofs -r -checksum_algorithm_iso md5,sha1 -V 'custom' -o ${workspace}/output/ubuntu.iso -J -joliet-long -cache-inodes -e boot/grub/efi.img -no-emul-boot -append_partition 2 0xef ${workspace}/cd-image/boot/grub/efi.img -partition_cyl_align all ${workspace}/cd-image
+xorriso -as mkisofs -r -J -joliet-long \
+        -e boot/grub/efi.img \
+        -no-emul-boot \
+        -o ${workspace}/output/ubuntu.iso ${workspace}/cd-image
 EOF
 
 chmod a+x ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh

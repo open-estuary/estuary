@@ -27,10 +27,6 @@ apt-get install simple-cdd debian-archive-keyring -y
 mkdir -p ${workspace}
 cd ${workspace}
 
-# add estuary repo key
-wget -O - ${ESTUARY_REPO}/ESTUARY-GPG-KEY | \
-	apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg add -
-
 # create custom installer dir
 (mkdir -p installer/arm64/ && cd installer/arm64/ && ln -fs ${cdrom_installer_dir} images)
 
