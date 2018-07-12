@@ -54,6 +54,16 @@ export CDNAME=estuary-${version}-debian
 build-simple-cdd --force-root \
 	--debug --verbose --dist stretch -p debian
 
+# rebuild debian iso
+cdrom_dir=${workspace}/tmp/cd-build/stretch/CD1
+netboot_dir=${distro_dir}/installer/debian-installer-*/build/tmp/netboot/cd_tree
+cp -rf ${netboot_dir}/boot/grub/efi.img ${cdrom_dir}/boot/grub/
+xorriso -as mkisofs -r -J -c boot.cat \
+	-boot-load-size 4 -boot-info-table \
+	-eltorito-alt-boot \
+	--efi-boot boot/grub/efi.img -no-emul-boot \
+	-o ${workspace}/images/${CDNAME}-9.3-arm64-CD-1.iso ${cdrom_dir}
+
 # publish
 mkdir -p ${out}
 cp images/*.iso ${out}
