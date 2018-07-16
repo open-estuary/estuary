@@ -7,6 +7,7 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
 out=${build_dir}/out/release/${version}/Debian/
+kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/debian
 distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
@@ -25,6 +26,16 @@ apt-get update -q=2
 # Find kernel abi
 kernel_abi=$(apt-cache depends linux-image-estuary-arm64 | grep -m 1 Depends \
 | sed -e "s/.*linux-image-//g" -e "s/-arm64//g")
+
+if [ -f "${build_dir}/build-debian-kernel" ]; then
+    build_kernel=true
+fi
+if [ x"$build_kernel" = x"true" ]; then
+    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary* \
+    | grep Depends | sed -e "s/.*linux-image-//g" -e "s/,.*//g" -e "s/-arm64//g")
+    cd ${kernel_deb_dir}
+    dpkg-scanpackages -t udeb . > Packages
+fi
 
 # Build the installer
 mkdir -p ${workspace}
@@ -62,10 +73,14 @@ EOF
 
 # Set up local repo
 cat <<EOF > sources.list.udeb
-deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer
 deb ${mirror} stretch main/debian-installer
 deb ${mirror} stretch-backports main/debian-installer
 EOF
+if [ x"$build_kernel" = x"true" ]; then
+    echo "deb [trusted=yes] copy:${kernel_deb_dir} ./" >> sources.list.udeb
+else
+    echo "deb [trusted=yes] ${estuary_repo} ${estuary_dist} main/debian-installer" >> sources.list.udeb
+fi
 
 # Default preseed to add the overlay and kernel
 cat <<EOF > default-preseed
@@ -78,12 +93,12 @@ d-i base-installer/kernel/image string none
 EOF
 
 # 1) build netboot installer
-fakeroot make build_netboot
-
-# publish netboot 
-mkdir -p ${out}
-(cp -f default-preseed ${out}/default-preseed.cfg)
-(cd dest/netboot/ && cp -f mini.iso netboot.tar.gz ${out})
+if [ x"$build_kernel" != x"true" ]; then
+    fakeroot make build_netboot
+    mkdir -p ${out}
+    cp -f default-preseed ${out}/default-preseed.cfg
+    (cd dest/netboot/ && cp -f mini.iso netboot.tar.gz ${out})
+fi
 
 ## 2) build cdrom installer
 cat <<EOF > default-preseed

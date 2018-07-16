@@ -17,13 +17,11 @@ export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 # set mirror
 . ${top_dir}/include/mirror-func.sh
 echo "deb-src http://mirrors.163.com/debian/ stretch main" >> /etc/apt/sources.list
-
+set_debian_mirror
 apt-get update -q=2
 apt-get build-dep -q --no-install-recommends -y linux
 apt-get install -y git graphviz
 apt-get install -y ccache python-requests quilt cpio rsync dh-exec
-set_debian_mirror
-apt-get update -q=2
 
 
 # 1) build kernel packages debs, udebs
