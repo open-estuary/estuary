@@ -8,6 +8,7 @@ build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c"
 
 out=${build_dir}/out/release/${version}/OpenSuse
+kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 release_dir=${build_dir}/out/release/${version}/OpenSuse/netboot
 distro_dir=${build_dir}/tmp/opensuse
 workspace=${distro_dir}/installer
@@ -16,7 +17,11 @@ netiso_url=${OPENSUSE_ISO_MIRROR:-"${ports_url}/aarch64/distribution/leap/42.3/i
 opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-NET-aarch64-Build0200-Media.iso
 
-kernel_abi="4.16.3-0.gd41301c"
+if [ -f "${build_dir}/build-opensuse-kernel" ]; then
+    exit 0
+fi
+wget -N ${opensuse_url}
+kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
 rpm -ivh --root=/  ${opensuse_url}/kernel-default-${kernel_abi}.aarch64.rpm
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
