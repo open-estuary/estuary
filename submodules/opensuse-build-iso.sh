@@ -8,6 +8,7 @@ build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c"
 
 out=${build_dir}/out/release/${version}/OpenSuse
+kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 distro_dir=${build_dir}/tmp/opensuse
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 ports_url="http://ftp.neowiz.com/opensuse/ports/"
@@ -15,8 +16,19 @@ dvdiso_url=${OPENSUSE_ISO_MIRROR:-"${ports_url}/aarch64/distribution/leap/42.3/i
 opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/opensuse"}
 ISO=openSUSE-Leap-42.3-DVD-aarch64-Build0200-Media.iso
 
-kernel_abi="4.16.3-0.gd41301c"
-rpm -ivh --root=/  ${opensuse_url}/kernel-default-${kernel_abi}.aarch64.rpm
+if [ -f "${build_dir}/build-opensuse-kernel" ]; then
+    build_kernel=true
+fi
+if [ x"$build_kernel" != x"true" ]; then
+    wget -N ${opensuse_url}/
+    kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
+    kernel_path=${opensuse_url}
+else
+    kernel_rpm="kernel-default-[0-9]*.aarch64.rpm"
+    kernel_abi=`basename ${kernel_rpm_dir}/${kernel_rpm} | sed -e 's/kernel-default-//g ; s/.aarch64.rpm//g'`
+    kernel_path=${kernel_rpm_dir}
+fi
+rpm -ivh --root=/ ${kernel_path}/kernel-default-${kernel_abi}.aarch64.rpm
 
 # download ISO
 iso_dir=/root/iso
@@ -30,8 +42,10 @@ if [ ! -f $ISO ] || ! (sha256sum -c --status ${ISO}.sha256); then
 fi
 
 # create the DVD image
-rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}
-cd ${kernel_rpm_dir} ; wget ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${opensuse_url}/
+mkdir -p ${kernel_rpm_dir} ${out}
+if [ x"$build_kernel" != x"true" ]; then
+    wget -N ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${opensuse_url}/ -P ${kernel_rpm_dir}
+fi
 cd ${distro_dir}; rm -rf dvdiso
 xorriso -osirrox on -indev ${iso_dir}/${ISO} -extract / dvdiso
 cd dvdiso

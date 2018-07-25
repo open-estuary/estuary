@@ -7,6 +7,7 @@ build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c"
 
 out=${build_dir}/out/release/${version}/Fedora
+kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 distro_dir=${build_dir}/tmp/fedora
 cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
 live_os_dir=${distro_dir}/installer/out/images
@@ -48,12 +49,19 @@ cfg_path="${top_dir}/configs/auto-install/fedora/"
 cp -f $cfg_path/auto-iso/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
 
 # Download any additional RPMs to the directory structure and update the metadata.
-rm -rf ${kernel_rpm_dir} && mkdir -p ${kernel_rpm_dir}
+mkdir -p ${kernel_rpm_dir}
+if [ -f "${build_dir}/build-fedora-kernel" ]; then
+    build_kernel=true
+fi
+
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 dnf clean dbcache
+
 package_name="kernel kernel-core kernel-cross-headers kernel-devel kernel-headers kernel-modules kernel-modules-extra"
-dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
+if [ x"$build_kernel" != x"true" ]; then
+    dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
+fi
 
 rm -rf ${dest_dir}/Packages/k/kernel*4.[0-9][0-9].[0-9]*.rpm
 mkdir -p ${dest_dir}/Packages/extra

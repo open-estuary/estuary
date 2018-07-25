@@ -6,6 +6,7 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
 out=${build_dir}/out/release/${version}/Fedora/netboot
+kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 distro_dir=${build_dir}/tmp/fedora
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
@@ -15,6 +16,15 @@ base_url=${FEDORA_MIRROR:-"http://dl.fedoraproject.org/pub/fedora/linux"}/releas
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p fedora-installer
+
+if [ -f "${build_dir}/build-fedora-kernel" ]; then
+    build_kernel=true
+fi
+
+if [ x"$build_kernel" = x"true" ]; then
+    source_url="file://${kernel_rpm_dir}"
+    createrepo ${kernel_rpm_dir}
+fi
 
 # Update fedora repo
 . ${top_dir}/include/mirror-func.sh
@@ -48,12 +58,14 @@ sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../init
 cd ..; rm -rf initrd
 
 # Rebuild boot.iso
-netinstall_dir=${workspace}/fedora-installer/netinstall
-cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
-rm -rf ${netinstall_dir}/images/boot.iso
-genisoimage -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
-  -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-28' -T \
-  -allow-limited-size ${netinstall_dir}
+if [ x"$build_kernel" != x"true" ]; then
+    netinstall_dir=${workspace}/fedora-installer/netinstall
+    cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
+    rm -rf ${netinstall_dir}/images/boot.iso
+    genisoimage -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
+      -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-28' -T \
+      -allow-limited-size ${netinstall_dir}
+fi
 
 # Final preparation for publishing
 mkdir -p ${out_installer} && mkdir -p ${out}
@@ -63,9 +75,9 @@ cp -rf  ${out_installer}/* ${out}
 
 # Publish
 out=${build_dir}/out/release/${version}/Fedora
-cd ${out}
-mv netboot/images/boot.iso .
-tar -czvf netboot.tar.gz netboot/
-
-# Clean
-rm -rf netboot/
+if [ x"$build_kernel" != x"true" ]; then
+    cd ${out}
+    mv netboot/images/boot.iso .
+    tar -czvf netboot.tar.gz netboot/
+    rm -rf netboot/
+fi

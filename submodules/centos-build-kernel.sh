@@ -32,7 +32,7 @@ build_num=${BUILD_NUM:-${build_num}}
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf /root/rpmbuild/
+rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p ${out_rpm}
 
@@ -69,5 +69,5 @@ cp -p $workspace/SRPMS/*.src.rpm $out_rpm
 echo "Source packages available at $out_rpm"
 
 cd $out_rpm
-rpmbuild --rebuild *.src.rpm
-cp ~/rpmbuild/RPMS/aarch64/*.rpm .
+rpmbuild --define "%_topdir ${workspace}" --rebuild *.src.rpm
+cp $workspace/RPMS/aarch64/*.rpm .
