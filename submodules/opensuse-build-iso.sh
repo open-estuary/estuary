@@ -20,7 +20,7 @@ if [ -f "${build_dir}/build-opensuse-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" != x"true" ]; then
-    wget -N ${opensuse_url}
+    wget -N ${opensuse_url}/
     kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
     kernel_path=${opensuse_url}
 else

@@ -75,7 +75,6 @@ fs-core-modules-\${kernel:Version}
 fs-secondary-modules-\${kernel:Version}
 input-modules-\${kernel:Version}
 ipmi-modules-\${kernel:Version}
-irda-modules-\${kernel:Version}
 message-modules-\${kernel:Version}
 mouse-modules-\${kernel:Version}
 multipath-modules-\${kernel:Version}

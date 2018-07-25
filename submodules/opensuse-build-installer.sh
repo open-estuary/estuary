@@ -20,7 +20,7 @@ ISO=openSUSE-Leap-42.3-NET-aarch64-Build0200-Media.iso
 if [ -f "${build_dir}/build-opensuse-kernel" ]; then
     exit 0
 fi
-wget -N ${opensuse_url}
+wget -N ${opensuse_url}/
 kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
 rpm -ivh --root=/  ${opensuse_url}/kernel-default-${kernel_abi}.aarch64.rpm
 rm -rf ${workspace}
