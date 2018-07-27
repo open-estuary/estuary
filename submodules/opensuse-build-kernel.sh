@@ -6,11 +6,8 @@ build_dir=$(cd /root/$2 && pwd)
 version=$1 # branch or tag
 version=${version:-master}
 
-top_dir=$(cd `dirname $0`; cd ..; pwd)
 out_rpm=${build_dir}/out/kernel-pkg/${version}/opensuse
-distro_dir=${build_dir}/tmp/opensuse
-workspace=${distro_dir}/kernel
-WGET_OPTS="-T 120 -c"
+workspace=${build_dir}/tmp/opensuse/kernel
 
 # Checkout source code
 rm -rf ${workspace}
@@ -33,7 +30,6 @@ cd ${workspace}
 tar -Jcf linux-${kernel_abi}.tar.xz linux-${kernel_abi}/
 
 # Build kernel rpm package
-opensuse_url=${OPENSUSE_MIRROR:-"http://htsat.vicp.cc:804/"}
 cd ${workspace} 
 git clone https://github.com/open-estuary/opensuse-kernel-packages.git --depth 1 -b ${version} kernel-source
 cd kernel-source/
