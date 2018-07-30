@@ -12,7 +12,7 @@ workspace=${build_dir}/tmp/opensuse/installer
 leap_path=ports/aarch64/distribution/leap/15.0
 official_url=http://ftp.neowiz.com/opensuse/${leap_path}
 netiso_url=${OPENSUSE_ISO_MIRROR:-"${official_url}/iso"}
-config_url=http://htsat.vicp.cc:804/opensuse
+config_url=ftp://117.78.41.188/utils/distro-binary/opensuse
 private_url=${OPENSUSE_MIRROR:-"${config_url}"}
 ISO=openSUSE-Leap-15.0-NET-aarch64-Build124.1-Media.iso
 
@@ -45,6 +45,8 @@ sed -i "s#silent.*#& install=${official_url}/repo/oss ifcfg=eth*=dhcp#" EFI/BOOT
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
 mkdir initrd; cd initrd
 wget ${WGET_OPTS} ${private_url}/autoinst-15.0.xml -O autoinst.xml
+defined_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm)' autoinst.xml`
+sed -i "s/${defined_abi}/${kernel_abi}/" autoinst.xml
 sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
 rm -rf modules lib/modules/*
 mkdir -p lib/modules/${kernel_abi}-default/initrd
