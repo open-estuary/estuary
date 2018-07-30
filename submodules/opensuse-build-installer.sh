@@ -41,9 +41,10 @@ fi
 cd ${workspace}/opensuse-installer; rm -rf netinstall
 xorriso -osirrox on -indev ${iso_dir}/${ISO} -extract / netinstall
 cd netinstall
-sed -i "s#silent.*#& autoyast=${config_url}/autoinst-15.0.xml install=${official_url}/repo/oss ifcfg=eth*=dhcp#" EFI/BOOT/grub.cfg
+sed -i "s#silent.*#& install=${official_url}/repo/oss ifcfg=eth*=dhcp#" EFI/BOOT/grub.cfg
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
 mkdir initrd; cd initrd
+wget ${WGET_OPTS} ${private_url}/autoinst-15.0.xml -O autoinst.xml
 sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
 rm -rf modules lib/modules/*
 mkdir -p lib/modules/${kernel_abi}-default/initrd
@@ -68,7 +69,6 @@ cp -rf ${workspace}/opensuse-installer/netinstall/* ${release_dir}
 # Publish
 cd ${out}
 mv netboot/boot.iso .
-wget ${WGET_OPTS} ${private_url}/autoinst.xml -O netboot/autoinst.xml
 tar -czvf netboot.tar.gz netboot/
 
 # Clean
