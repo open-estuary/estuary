@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 
 set -ex
 
@@ -21,7 +22,7 @@ if [ -f "${build_dir}/build-opensuse-kernel" ]; then
 fi
 wget -N ${private_url}/
 kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
-rpm -ivh --root=/  ${private_url}/kernel-default-${kernel_abi}.aarch64.rpm
+rpm -ivh --root=/  ${private_url}/kernel-default-${kernel_abi}.aarch64.rpm 2>/dev/null
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p opensuse-installer

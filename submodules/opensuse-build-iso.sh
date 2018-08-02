@@ -10,6 +10,7 @@ out=${build_dir}/out/release/${version}/OpenSuse
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 dvdiso_dir=${build_dir}/tmp/opensuse/dvdiso
 official_url=http://ftp.neowiz.com/opensuse
+leap_path=ports/aarch64/distribution/leap/15.0
 config_url=ftp://117.78.41.188/utils/distro-binary/opensuse
 dvdiso_url=${OPENSUSE_ISO_MIRROR:-"${official_url}/ports/aarch64/distribution/leap/15.0/iso"}
 private_url=${OPENSUSE_MIRROR:-"${config_url}"}
@@ -70,3 +71,9 @@ touch content
 
 # Create the new ISO file.
 mksusecd --create ${out}/${ISO} --no-hybrid .
+if [ x"$build_kernel" != x"true" ]; then
+    mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${official_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" --micro --create ${out}/boot.iso --no-hybrid .
+    xorriso -osirrox on -indev ${out}/boot.iso -extract / netboot
+    tar -czvf ${out}/netboot.tar.gz netboot/
+    rm -rf netboot/
+fi
