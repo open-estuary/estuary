@@ -50,7 +50,7 @@ cfg_path="${top_dir}/configs/auto-install/centos/"
 cp -f $cfg_path/auto-iso/ks-iso.cfg .
 cp -f $cfg_path/auto-pxe/ks.cfg .
 
-sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../initrd.img'
+sh -c 'find . | cpio --quiet -o -H newc --owner 0:0 | xz --threads=0 --check=crc32 -c > ../initrd.img'
 cd ..; rm -rf initrd
 
 # Rebuild boot.iso

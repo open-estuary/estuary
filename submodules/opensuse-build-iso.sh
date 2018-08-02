@@ -27,7 +27,7 @@ else
     kernel_abi=`basename ${kernel_rpm_dir}/${kernel_rpm} | sed -e 's/kernel-default-//g ; s/.aarch64.rpm//g'`
     kernel_path=${kernel_rpm_dir}
 fi
-rpm -ivh --root=/ ${kernel_path}/kernel-default-${kernel_abi}.aarch64.rpm
+rpm -ivh --root=/ ${kernel_path}/kernel-default-${kernel_abi}.aarch64.rpm 2>/dev/null
 
 # download ISO
 iso_dir=/root/iso
@@ -57,7 +57,7 @@ ln -sf lib/modules/${kernel_abi}-default/initrd modules
 find /lib/modules/${kernel_abi}-default -name "loop.ko"|xargs -i cp -v {} modules/
 find /lib/modules/${kernel_abi}-default -name "squashfs.ko"|xargs -i cp -v {} modules/
 cp -rf /lib/modules/${kernel_abi}-default lib/modules/
-sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../boot/aarch64/initrd'
+sh -c 'find . | cpio --quiet -o -H newc --owner 0:0 | xz --check=crc32 -c --threads=0 > ../boot/aarch64/initrd'
 cd ..; rm -rf initrd
 
 rm -rf aarch64/kernel-* repodata
