@@ -43,7 +43,7 @@ cd ${kernel_dir}
 kernel_version=$(make kernelversion)
 kernel_abi=`echo ${kernel_version}|cut -d "." -f 1,2`
 make mrproper
-git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz -c > linux-${kernel_abi}.tar.xz
+git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz --threads=0 -c > linux-${kernel_abi}.tar.xz
 
 # Build rpm source package
 rpmversion=${kernel_version//-*/}

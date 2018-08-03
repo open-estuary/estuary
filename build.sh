@@ -272,21 +272,23 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     cp -rf estuary-uefi/* . ; rm -rf estuary-uefi
 fi
 if [ x"$action" != x"clean" ]; then
-    cd ${top_dir}
-    process_num=`ps -ef | grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+    cd ${top_dir}/..
+    process_cmd="git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git"
+    process_count="ps -ef | grep \"\${process_cmd}\" | grep -v grep | wc -l"
+    process_num=`eval ${process_count}`
     if [ ! -f "kernel-${version}-ready" ] && [ $process_num -eq 0 ]; then
         rm -rf kernel
     fi
     if [ ! -d "kernel" ] && [ $process_num -eq 0 ]; then
-        git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+        eval ${process_cmd}
         rm -rf kernel-*-ready
         touch kernel-${version}-ready
     elif [ -d "kernel" ] && [ $process_num -gt 0 ]; then
         while [ 1 ];do
-            flag=`ps -ef |grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+            flag=`eval ${process_count}`
             if [ $flag == 1 ]; then
-                echo "Waiting for clone into 'kernel' complete..."
-                sleep 2m
+                echo "Waiting clone 'kernel' complete..."
+                sleep 1m
                 continue
             else
                 break
@@ -295,6 +297,23 @@ if [ x"$action" != x"clean" ]; then
     else
         (cd kernel ; git pull || true)
     fi
+    process_cmd="cp -rf kernel ${top_dir}"
+    process_num=`eval ${process_count}`
+    if [ ! -d "${top_dir}/kernel" ] && [ $process_num -eq 0 ]; then
+        eval ${process_cmd}
+    elif [ -d "${top_dir}/kernel" ] && [ $process_num -gt 0 ]; then
+        while [ 1 ];do
+            flag=`eval ${process_count}`
+            if [ $flag == 1 ]; then
+                echo "Waiting copy 'kernel' complete..."
+                sleep 10s
+                continue
+            else
+                break
+            fi
+        done
+    fi
+    cd ${top_dir}
 
 fi
 

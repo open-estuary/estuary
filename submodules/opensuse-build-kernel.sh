@@ -27,7 +27,8 @@ mv ${workspace}/linux ${kernel_dir}
 
 # Build the source kernel
 cd ${workspace}
-tar -Jcf linux-${kernel_abi}.tar.xz linux-${kernel_abi}/
+tar -cf linux-${kernel_abi}.tar linux-${kernel_abi}/
+xz --threads=0 -z linux-${kernel_abi}.tar
 
 # Build kernel rpm package
 cd ${workspace} 
