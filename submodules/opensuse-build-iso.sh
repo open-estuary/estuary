@@ -74,6 +74,6 @@ mksusecd --create ${out}/${ISO} --no-hybrid .
 if [ x"$build_kernel" != x"true" ]; then
     mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${official_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" --micro --create ${out}/boot.iso --no-hybrid .
     xorriso -osirrox on -indev ${out}/boot.iso -extract / netboot
-    tar -czvf ${out}/netboot.tar.gz netboot/
+    tar -cf - netboot/ | pigz > ${out}/netboot.tar.gz
     rm -rf netboot/
 fi

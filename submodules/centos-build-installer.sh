@@ -75,6 +75,6 @@ cp -rf  ${out_installer}/* ${out}
 if [ x"$build_kernel" != x"true" ]; then
     cd ${release_dir}
     mv netboot/images/boot.iso .
-    tar -czvf netboot.tar.gz netboot/
+    tar -cf - netboot/ | pigz > netboot.tar.gz
 fi
 rm -rf ${out}

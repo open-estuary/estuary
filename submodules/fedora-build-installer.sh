@@ -78,6 +78,6 @@ out=${build_dir}/out/release/${version}/Fedora
 if [ x"$build_kernel" != x"true" ]; then
     cd ${out}
     mv netboot/images/boot.iso .
-    tar -czvf netboot.tar.gz netboot/
+    tar -cf - netboot/ | pigz > netboot.tar.gz
     rm -rf netboot/
 fi

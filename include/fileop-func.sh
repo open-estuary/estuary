@@ -45,7 +45,7 @@ uncompress_file()
             fi
             ;;
         .gz)
-            if ! gunzip $src_file -C $target_dir >/dev/null 2>&1; then
+            if ! pigz -d $src_file >/dev/null 2>&1; then
                 return 1
             fi
             ;;
@@ -78,7 +78,7 @@ uncompress_file_with_sudo()
             fi
             ;;
         .gz)
-            if ! sudo gunzip $src_file -C $target_dir >/dev/null 2>&1; then
+            if ! sudo pigz -d $src_file >/dev/null 2>&1; then
                 return 1
             fi
             ;;
