@@ -94,7 +94,7 @@ create_distros()
         fi
 
         pushd $distro_dir/$distro
-        if ! (sudo tar czf ../${distro}_ARM64.tar.gz *); then
+        if ! (sudo tar cf - . | pigz > ../${distro}_ARM64.tar.gz ); then
             echo "Error! Create ${distro}_ARM64.tar.gz failed!" >&2
             rm -f ../${distro}_ARM64.tar.gz ../arm64/${distro}_ARM64.tar.gz
             return 1
