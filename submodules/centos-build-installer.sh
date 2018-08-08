@@ -19,8 +19,8 @@ rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p centos-installer
 
-seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
-chgrp disk /dev/loop[0-7]
+. ${top_dir}/include/mirror-func.sh
+set_docker_loop
 
 # Call lorax to create the netinstall image
 cd centos-installer

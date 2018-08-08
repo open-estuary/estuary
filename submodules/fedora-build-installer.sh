@@ -30,8 +30,8 @@ fi
 sed -i 's#"setfiles",#"setfiles","-e","/usr/lib/systemd",#g' /usr/lib/python3.6/site-packages/pylorax/imgutils.py
 sed -i '1,/installpkg kernel/{s/kernel.*/kernel-4.16.0 kernel-modules-extra-4.16.0/}' \
        /usr/share/lorax/templates.d/99-generic/runtime-install.tmpl
-seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
-chgrp disk /dev/loop[0-7]
+. ${top_dir}/include/mirror-func.sh
+set_docker_loop
 
 # Call lorax to create the netinstall image
 cd fedora-installer

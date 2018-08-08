@@ -2,6 +2,7 @@
 
 set -ex
 
+top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c -q"
@@ -15,6 +16,9 @@ config_url=ftp://117.78.41.188/utils/distro-binary/opensuse
 dvdiso_url=${OPENSUSE_ISO_MIRROR:-"${official_url}/ports/aarch64/distribution/leap/15.0/iso"}
 private_url=${OPENSUSE_MIRROR:-"${config_url}"}
 ISO=openSUSE-Leap-15.0-DVD-aarch64-Build124.1-Media.iso
+
+. ${top_dir}/include/mirror-func.sh
+set_docker_loop
 
 if [ -f "${build_dir}/build-opensuse-kernel" ]; then
     build_kernel=true
@@ -44,9 +48,7 @@ mkdir -p ${kernel_rpm_dir} ${out}
 if [ x"$build_kernel" != x"true" ]; then
     wget -N ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${private_url}/ -P ${kernel_rpm_dir}
 fi
-rm -rf ${dvdiso_dir}
-seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
-chgrp disk /dev/loop[0-7]
+rm -rf ${dvdiso_dir}; mkdir -p ${dvdiso_dir}
 mount -o loop ${iso_dir}/${ISO} /opt
 pushd /opt
 tar cf - . | (cd ${dvdiso_dir}; tar xf -)
