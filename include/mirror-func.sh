@@ -35,4 +35,24 @@ set_fedora_mirror()
         sed -i '1,/metalink/{s/metalink/#metalink/}' /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
         sed -i '1,/#baseurl/{s/#baseurl/baseurl/}' /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
     fi
+    if [ -n "${FEDORA_ESTUARY_REPO}" ]; then
+        local mirror=${FEDORA_ESTUARY_REPO}
+        docker_mirror="ftp://repoftp:repopushez7411@117.78.41.188/releases/.*/fedora"
+        sed -i "s#${docker_mirror}#${mirror}#g" /etc/yum.repos.d/estuary.repo
+    fi
+}
+set_centos_mirror()
+{
+    if [ -n "${CENTOS_MIRROR}" ]; then
+        local mirror=${CENTOS_MIRROR}
+        docker_mirror="http://mirror.centos.org/altarch/\$releasever/os/\$basearch/"
+        sed -i "s#${docker_mirror}#${mirror}#g" /etc/yum.repos.d/CentOS-Base.repo
+    fi
+    if [ -n "${CENTOS_ESTUARY_REPO}" ]; then
+        local mirror=${CENTOS_ESTUARY_REPO}
+        docker_mirror="ftp://repoftp:repopushez7411@117.78.41.188/releases/.*/centos"
+        sed -i "s#${docker_mirror}#${mirror}#g" /etc/yum.repos.d/estuary.repo
+    fi
+    sed -i 's/5.[0-9]/5.1/g' /etc/yum.repos.d/estuary.repo
+    rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 }

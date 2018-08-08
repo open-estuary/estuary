@@ -13,16 +13,14 @@ WGET_OPTS="-T 120 -c"
 http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
 
 # Update fedora repo
-. ${top_dir}/include/mirror-func.sh
-set_fedora_mirror
-
-# Install build tools,do not change first line!
-
-# Install estuary latest kernel
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
-dnf clean dbcache
 rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
+. ${top_dir}/include/mirror-func.sh
+set_fedora_mirror
+dnf clean dbcache
+
+# Install estuary latest kernel
 dnf install --disablerepo=* --enablerepo=Estuary,fedora kernel -y
 
 #find build_num

@@ -16,10 +16,10 @@
 "env": [
 {"ESTUARY_FTP": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"},
 {"ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/"},
-{"CENTOS_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"},
+{"CENTOS_ESTUARY_REPO": "http://repo.estuary.cloud/releases/5.1/centos"},
 {"CENTOS_MIRROR": "http://repo.estuary.cloud/centos/7/os/aarch64/"},
 {"CENTOS_ISO_MIRROR": "http://repo.estuary.cloud/centos/7/isos/aarch64/"},
-{"FEDORA_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/fedora"},
+{"FEDORA_ESTUARY_REPO": "http://repo.estuary.cloud/releases/5.1/fedora"},
 {"FEDORA_MIRROR": "http://repo.estuary.cloud/fedora"},
 {"FEDORA_ISO_MIRROR": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/Fedora"},
 {"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"},

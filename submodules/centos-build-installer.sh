@@ -12,18 +12,13 @@ kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
-source_url=${CENTOS_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/centos"}
+source_url=${CENTOS_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"}
 base_url=${CENTOS_MIRROR:-"http://mirror.centos.org/altarch/7/os/aarch64/"}
 
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p centos-installer
 
-wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
-yum remove -y epel-release
-yum makecache fast
 seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
 chgrp disk /dev/loop[0-7]
 
@@ -35,12 +30,12 @@ if [ -f "${build_dir}/build-centos-kernel" ]; then
 fi
 if [ x"$build_kernel" = x"true" ]; then
     source_url="file://${kernel_rpm_dir}"
-    createrepo ${kernel_rpm_dir}
+    createrepo -q ${kernel_rpm_dir}
 fi
 lorax '--product=CentOS Linux' --version=7 --release=7 \
   --source=${base_url} \
   --source=${source_url}  \
-  --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=CentOS 7 aarch64' netinstall/
+  --isfinal --nomacboot --noupgrade --buildarch=aarch64 '--volid=CentOS 7 aarch64' netinstall/ 2>/dev/null
 
 # Modify initrd to include a default kickstart (that includes the external repository)
 cd netinstall/images/pxeboot/
@@ -58,7 +53,7 @@ if [ x"$build_kernel" != x"true" ]; then
 netinstall_dir=${workspace}/centos-installer/netinstall
 cp -f $cfg_path/auto-pxe/grub.cfg ${netinstall_dir}/EFI/BOOT/grub.cfg
 rm -rf ${netinstall_dir}/images/boot.iso
-mkisofs -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
+mkisofs -quiet -o ${netinstall_dir}/images/boot.iso -eltorito-alt-boot \
   -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T \
   -graft-points \
   images/pxeboot=${netinstall_dir}/images/pxeboot \
