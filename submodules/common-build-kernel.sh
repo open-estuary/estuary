@@ -22,8 +22,10 @@ OUTPUT_DIR=${build_dir}/out/release/${version}
 KERNEL_DIR=${workspace}/kernel
 
 # Checkout source code
-mkdir -p ${workspace} && cd ${workspace}
-rsync -avq $build_dir/../kernel/ ${KERNEL_DIR}
+mkdir -p ${workspace}
+cd ${TOPDIR}/../..
+tar cf - kernel/ | (cd ${workspace}; tar xf -)
+cd ${workspace}
 
 ###################################################################################
 # Check args

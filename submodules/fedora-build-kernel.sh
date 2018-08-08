@@ -37,10 +37,11 @@ kernel_dir=${workspace}/linux
 
 # Checkout source code
 rm -rf ${workspace}
-mkdir -p ${workspace} && cd ${workspace}
+mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
-rsync -avq $build_dir/../kernel/ ${kernel_dir}
+cd $build_dir/../../kernel/
+tar cf - . | (cd ${kernel_dir}; tar xf -)
 cd ${kernel_dir}
 kernel_version=$(make kernelversion)
 kernel_abi=`echo ${kernel_version}|cut -d "." -f 1,2`

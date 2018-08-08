@@ -29,8 +29,9 @@ cd ${workspace}
 workspace=${workspace}/kernel
 rm -rf kernel
 git clone --depth 1 -b ${version} https://github.com/open-estuary/ubuntu-kernel-packages.git kernel
-cd kernel
-rsync -avq $build_dir/../kernel/ linux
+mkdir -p ${workspace}/linux
+cd $build_dir/../../kernel/
+tar cf - . | (cd ${workspace}/linux; tar xf -)
 
 # Export the kernel packaging version
 cd ${workspace}/linux

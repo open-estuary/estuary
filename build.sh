@@ -297,22 +297,6 @@ if [ x"$action" != x"clean" ]; then
     else
         (cd kernel ; git pull || true)
     fi
-    process_cmd="cp -rf kernel ${top_dir}"
-    process_num=`eval ${process_count}`
-    if [ ! -d "${top_dir}/kernel" ] && [ $process_num -eq 0 ]; then
-        eval ${process_cmd}
-    elif [ -d "${top_dir}/kernel" ] && [ $process_num -gt 0 ]; then
-        while [ 1 ];do
-            flag=`eval ${process_count}`
-            if [ $flag == 1 ]; then
-                echo "Waiting copy 'kernel' complete..."
-                sleep 10s
-                continue
-            else
-                break
-            fi
-        done
-    fi
     cd ${top_dir}
 
 fi
@@ -422,7 +406,9 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     for distro in ${distros[*]}; do
         kernel_dir=${build_dir}/${distro}
         mkdir -p ${kernel_dir}
-        cp -rf kernel ${kernel_dir}/kernel
+        cd ${top_dir}/..
+        tar cf - kernel/ | (cd ${kernel_dir}; tar xf -)
+        cd ${top_dir}
         echo "---------------------------------------------------------------"
         echo "- Build modules (kerneldir: ${kernel_dir}, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
         echo "---------------------------------------------------------------"

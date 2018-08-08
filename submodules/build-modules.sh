@@ -1,5 +1,6 @@
 #!/bin/bash
 
+top_dir=$(cd `dirname $0`; cd .. ; pwd) # estuary
 KERNEL_DIR=kernel
 LOCALARCH=`uname -m`
 
@@ -45,13 +46,13 @@ build_modules()
     mkdir -p $output_dir/kernel
     kernel_dir=$(cd $output_dir/kernel; pwd)
 
-    pushd kernel
+    pushd ${top_dir}/../kernel
     make O=$kernel_dir estuary_defconfig
     make O=$kernel_dir include/config/kernel.release
     kernel_version=$(cat $kernel_dir/include/config/kernel.release)
     popd
     if [ ! -d "${rootfs}/lib/modules/${kernel_version}" ]; then
-        pushd kernel
+        pushd ${top_dir}/../kernel
         make O=$kernel_dir -j${core_num} -s modules INSTALL_MOD_PATH=$rootfs \
         && make PATH=$PATH O=$kernel_dir -j${core_num} -s INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
         if [ ! $? ]; then
