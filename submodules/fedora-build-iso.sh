@@ -24,9 +24,10 @@ wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 set_fedora_mirror
 dnf clean dbcache
+set_docker_loop
 
 # download ISO
-mkdir -p /root/iso && cd /root/iso
+mkdir -p /root/iso ${dest_dir} && cd /root/iso
 rm -f ${ISO}.sum
 wget ${WGET_OPTS} ${http_addr}/${ISO}.sum || exit 1
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
@@ -36,7 +37,11 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
 fi
 
 # Copy the source media to the working directory.
-xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
+mount -o loop ${ISO} /opt
+pushd /opt
+tar cf - . | (cd ${dest_dir}; tar xf -)
+popd
+umount /opt
 
 # Replace estuary binary for customized media.
 cd ${cdrom_installer_dir}

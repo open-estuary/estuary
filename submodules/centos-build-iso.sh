@@ -10,6 +10,7 @@ build_dir=$(cd /root/$2 && pwd)
 set_centos_mirror
 yum remove epel-release -y
 yum makecache fast
+set_docker_loop
 
 out=${build_dir}/out/release/${version}/CentOS
 distro_dir=${build_dir}/tmp/centos
@@ -36,7 +37,11 @@ fi
 mkdir -p ${dest_dir}/temp
 
 # Copy the source media to the working directory.
-xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
+mount -o loop ${ISO} /opt
+pushd /opt
+tar cf - . | (cd ${dest_dir}; tar xf -)
+popd
+umount /opt
 
 # Replace estuary binary for customized media.
 cd ${cdrom_installer_dir}

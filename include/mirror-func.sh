@@ -56,3 +56,8 @@ set_centos_mirror()
     sed -i 's/5.[0-9]/5.1/g' /etc/yum.repos.d/estuary.repo
     rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 }
+set_docker_loop()
+{
+    seq 0 7 | xargs -I {} mknod -m 660 /dev/loop{} b 7 {} || true
+    chgrp disk /dev/loop[0-7]
+}

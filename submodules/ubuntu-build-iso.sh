@@ -23,6 +23,7 @@ download=${workspace}/download
 # set mirror
 . ${top_dir}/include/mirror-func.sh
 set_ubuntu_mirror
+set_docker_loop
 
 apt-get update -q=2
 
@@ -58,7 +59,11 @@ http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/18.04/
 
 wget ${WGET_OPTS} ${http_addr}/${ISO}
 
-xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
+mount -o loop ${ISO} /opt
+pushd /opt
+tar cf - . | (cd ${cdimage}; tar xf -)
+popd
+umount /opt
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras
