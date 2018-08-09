@@ -9,7 +9,6 @@ build_dir=$(cd /root/$2 && pwd)
 . ${top_dir}/include/mirror-func.sh
 set_centos_mirror
 yum remove epel-release -y
-yum makecache fast
 set_docker_loop
 
 out=${build_dir}/out/release/${version}/CentOS
@@ -60,8 +59,8 @@ if [ -f "${build_dir}/build-centos-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" != x"true" ]; then
-package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
-yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
+    package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
+    yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
 fi
 yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=extras epel-release
 

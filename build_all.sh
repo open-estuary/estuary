@@ -9,7 +9,6 @@ ALL_SHELL_DISTRO="centos fedora ubuntu opensuse debian"
 BUILD_DIR="./workspace"
 for DISTRO in $ALL_SHELL_DISTRO;do
     ./build.sh --build_dir=${BUILD_DIR} -d "${DISTRO,,}" > ${DISTRO}.log 2>&1 &
-    sleep 1m
 done
 ./build.sh --build_dir=${BUILD_DIR} -d common > common.log 2>&1 &
 wait

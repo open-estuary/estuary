@@ -23,7 +23,6 @@ rm -rf ${dest_dir}
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
 set_fedora_mirror
-dnf clean dbcache
 set_docker_loop
 
 # download ISO

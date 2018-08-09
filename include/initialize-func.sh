@@ -39,10 +39,9 @@ install_dev_tools_ubuntu()
 ###################################################################################
 install_dev_tools_centos()
 {
-
-   sudo yum groupinstall "Development Tools" -y 
-   sudo yum install -y epel-release
-   sudo yum install -y autoconf automake libtool python git docker bc openssl-devel unzip gcc jq pigz
+    yum makecache fast
+    yum install -C -y epel-release
+    yum install -C -y autoconf automake libtool python git docker bc openssl-devel unzip gcc jq pigz
 
     check_docker_running_permission
 
