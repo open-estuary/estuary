@@ -80,6 +80,3 @@ createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
 cd ${dest_dir} && genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-28" -o ${out}/${ISO} .
-
-# Clean
-rm -rf ${dest_dir} 

@@ -78,6 +78,3 @@ createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
 cd ${dest_dir} && mkisofs -quiet -o ${out}/${ISO} -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T .
-
-# Clean
-rm -rf ${dest_dir} 

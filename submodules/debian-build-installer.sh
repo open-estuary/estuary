@@ -17,7 +17,7 @@ out_installer=${workspace}/out/images
 set_debian_mirror
 
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/debian"}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 installer_src_version="20170615+deb9u2"
 
