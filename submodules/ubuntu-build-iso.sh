@@ -22,6 +22,7 @@ download=${workspace}/download
 
 # set mirror
 . ${top_dir}/include/mirror-func.sh
+. ${top_dir}/include/checksum-func.sh
 set_ubuntu_mirror
 set_docker_loop
 
@@ -55,9 +56,15 @@ fi
 cd ${workspace}
 # download iso and decompress
 ISO=ubuntu-18.04-server-arm64.iso
-http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/"}
-
-wget ${WGET_OPTS} ${http_addr}/${ISO}
+http_addr=${UBUNTU_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/ubuntu/releases/18.04/release"}
+mkdir -p /root/iso && cd /root/iso
+rm -f ${ISO}.sum
+wget ${http_addr}/${ISO}.sum || exit 1
+if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
+    rm -f $ISO 2>/dev/null
+    wget -T 120 -c ${http_addr}/${ISO} || exit 1
+    check_sum . ${ISO}.sum || exit 1
+fi
 
 mount -o loop ${ISO} /opt
 pushd /opt
