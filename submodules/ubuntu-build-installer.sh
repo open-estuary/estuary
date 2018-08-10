@@ -55,6 +55,7 @@ cd build
 sed -i "s/PRESEED.*/PRESEED = default-preseed/g" config/common
 sed -i "s/KERNELVERSION =.*/KERNELVERSION = ${kernel_version}/g" config/arm64.cfg
 sed -i '1,/-cp/{s/-cp/#-cp/}' Makefile
+sed -i 's/gzip/pigz/g' Makefile
 
 # Local pkg-list (to include all udebs)
 cat <<EOF > pkg-lists/local

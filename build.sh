@@ -324,7 +324,7 @@ fi
 ###################################################################################
 for dist in ${distros};do
         export centos_image="estuary/centos:5.1-full"
-        export debian_image="linaro/ci-arm64-debian:stretch"
+        export debian_image="estuary/debian:5.1-full"
         export fedora_image="estuary/fedora:28"
         export opensuse_image="estuary/opensuse:5.1-full"
         export ubuntu_image="estuary/ubuntu:5.1-full"
