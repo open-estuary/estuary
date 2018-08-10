@@ -84,7 +84,7 @@ cp ${cdrom_installer_dir}/cdrom/initrd.gz ${cdimage}/install/initrd.gz
 mkdir -p ${grubfiles}
 cp ${cdrom_installer_dir}/cdrom/debian-cd_info.tar.gz ${grubfiles}
 cd ${grubfiles}
-tar -xzvf debian-cd_info.tar.gz
+tar -xzf debian-cd_info.tar.gz
 
 cp -r ${grubfiles}/grub/arm64-efi ${cdimage}/boot/grub/
 cp -r ${grubfiles}/grub/efi.img ${cdimage}/boot/grub/

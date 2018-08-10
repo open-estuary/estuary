@@ -28,7 +28,7 @@
 {"OPENSUSE_MIRROR": "http://repo.estuary.cloud/opensuse"},
 {"OPENSUSE_ISO_MIRROR": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/OpenSuse"},
 {"UBUNTU_ESTUARY_REPO": "http://repo.estuary.cloud/releases/5.1/ubuntu"},
-{"UBUNTU_MIRROR": "http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/"},
+{"UBUNTU_MIRROR": "http://repo.estuary.cloud/ubuntu-ports/"},
 {"UBUNTU_ISO_MIRROR": "http://repo.estuary.cloud/ubuntu/releases/18.04/release/"}
 ]
 
