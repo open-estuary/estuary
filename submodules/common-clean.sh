@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash
 
 workspace=$(cd $2 && pwd)
 

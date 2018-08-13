@@ -1,6 +1,4 @@
-#!/bin/bash -xe
-
-#set -ex
+#!/bin/bash
 
 workspace=$(cd /root/$2 && pwd)
 

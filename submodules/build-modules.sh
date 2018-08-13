@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 top_dir=$(cd `dirname $0`; cd .. ; pwd) # estuary
 KERNEL_DIR=kernel

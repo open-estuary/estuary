@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -x
 
 docker_run_sh() {
 	distro=$1

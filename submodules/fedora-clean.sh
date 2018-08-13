@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash
 set -ex
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 workspace=$(cd /root/$2 && pwd)
