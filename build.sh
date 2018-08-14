@@ -94,9 +94,7 @@ done
 ###################################################################################
 # Install development tools
 ###################################################################################
-if [ x"$action" != x"clean" ]; then
-    install_dev_tools
-fi
+install_dev_tools
 
 docker_status=`service docker status|grep "running"`
 if [ x"$docker_status" = x"" ]; then
