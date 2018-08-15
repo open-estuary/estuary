@@ -240,13 +240,12 @@ END
 find . -type f -print0 | xargs -0 md5sum > md5sum.txt
 popd
 
-mkdir -p ${workspace}/output
-rm -rf ${workspace}/output/ubuntu.iso
-
+export CDNAME=estuary-${version}-ubuntu
+mkdir -p ${out}
 xorriso -as mkisofs -r -J -joliet-long \
         -e boot/grub/efi.img \
         -no-emul-boot \
-        -o ${workspace}/output/ubuntu.iso ${workspace}/cd-image
+        -o ${out}/${CDNAME}.iso ${workspace}/cd-image
 EOF
 
 chmod a+x ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
@@ -254,9 +253,3 @@ chmod a+x ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
 ./ubuntu-cd-make/script_for_ubuntu_cd/indices.sh
 ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
 
-# add prefix name 
-export CDNAME=estuary-${version}-ubuntu
-
-# publish
-mkdir -p ${out}
-cp output/*.iso ${out}/${CDNAME}.iso

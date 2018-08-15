@@ -73,7 +73,7 @@ uncompress_file_with_sudo()
     postfix=`get_compress_file_postfix $src_file`
     case $postfix in
         .tar.bz2 | .tar.gz | .tar.xz | .xz | .tbz)
-            if ! sudo tar xvf $src_file -C $target_dir >/dev/null 2>&1; then
+            if ! sudo tar --use-compress-program=pigz -xf $src_file -C $target_dir >/dev/null 2>&1; then
                 return 1
             fi
             ;;
