@@ -322,11 +322,7 @@ fi
 # Build/clean distros
 ###################################################################################
 for dist in ${distros};do
-        export centos_image="estuary/centos:5.1-full"
-        export debian_image="estuary/debian:5.1-full"
-        export fedora_image="estuary/fedora:28"
-        export opensuse_image="estuary/opensuse:5.1-full"
-        export ubuntu_image="estuary/ubuntu:5.1-full"
+        export ${dist}_image="estuary/${dist}:5.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}
         status=$?
