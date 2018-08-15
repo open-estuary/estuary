@@ -79,29 +79,30 @@ create_distros()
     target_dir="${distro_dir}/../binary/arm64"
     mkdir -p ${target_dir}
     for distro in ${distros[*]}; do
+        target_file="${target_dir}/${distro}_arm64.tar.gz"
         if [ ! -d $distro_dir/$distro ]; then
             echo "Error! $distro_dir/$distro is not exist!" >&2 ; return 1
         fi
 
-        if [ -f ${target_dir}/${distro}_ARM64.tar.gz ]; then
-            echo "Check ${target_dir}/${distro}_ARM64.tar.gz update ......"
+        if [ -f ${target_file} ]; then
+            echo "Check ${target_file} update ......"
             last_modify=`sudo find $distro_dir/$distro 2>/dev/null -exec stat -c %Y {} \+ | sort -n -r | head -n1`
-            distro_last_modify=`stat -c %Y ${target_dir}/${distro}_ARM64.tar.gz 2>/dev/null`
+            distro_last_modify=`stat -c %Y ${target_file} 2>/dev/null`
             if [[ "$last_modify" -gt "$distro_last_modify" ]]; then
-                rm -f ${target_dir}/${distro}_ARM64.tar.gz
+                rm -f ${target_file}
             else
-                echo "File ${target_dir}/${distro}_ARM64.tar.gz no need to update."
+                echo "File ${target_file} no need to update."
                 continue
             fi
         fi
 
         pushd $distro_dir/$distro
-        if ! (sudo tar cf - . | pigz > ${target_dir}/${distro}_ARM64.tar.gz ); then
-            echo "Error! Create ${distro}_ARM64.tar.gz failed!" >&2
-            rm -f ${target_dir}/${distro}_ARM64.tar.gz
+        if ! (sudo tar cf - . | pigz > ${target_file} ); then
+            echo "Error! Create ${target_file} failed!" >&2
+            rm -f ${target_file}
             return 1
         fi
-        md5sum ${target_dir}/${distro}_ARM64.tar.gz > ${target_dir}/${distro}_ARM64.tar.gz.sum
+        md5sum ${target_file} > ${target_file}.sum
         popd
     done
 
