@@ -48,7 +48,7 @@ if [ x"$build_kernel" != x"true" ]; then
         echo "ERROR:No linux-image-estuary found !"
     fi
     estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
-    wget ${WGET_OPTS} ${estuary_repo}/pool/main/linux-*${kernel_version}*${build_num}*.deb
+    wget ${WGET_OPTS} -r -nd -np -L -A linux-*${kernel_version}*${build_num}*.deb ${estuary_repo}/pool/main/
 else
     cp -f ${kernel_deb_dir}/meta/linux-*.deb ${download}/
     cp -f ${kernel_deb_dir}/not_meta/linux-*.deb ${download}/
@@ -240,12 +240,11 @@ END
 find . -type f -print0 | xargs -0 md5sum > md5sum.txt
 popd
 
-export CDNAME=estuary-${version}-ubuntu
 mkdir -p ${out}
 xorriso -as mkisofs -r -J -joliet-long \
         -e boot/grub/efi.img \
         -no-emul-boot \
-        -o ${out}/${CDNAME}.iso ${workspace}/cd-image
+        -o ${out}/estuary-${version}-ubuntu.iso ${workspace}/cd-image
 EOF
 
 chmod a+x ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
