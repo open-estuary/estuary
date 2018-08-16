@@ -12,19 +12,17 @@ distro_dir=${build_dir}/tmp/debian
 cdrom_installer_dir=${distro_dir}/installer/out/images
 workspace=${distro_dir}/simple-cdd
 
-# set mirror
-. ${top_dir}/include/mirror-func.sh
-set_debian_mirror
-
 if [ -f "${build_dir}/build-debian-kernel" ]; then
     build_kernel=true
 fi
 
+# set mirror
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org/}
 estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
 estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
-
+. ${top_dir}/include/mirror-func.sh
+set_debian_mirror
 apt-get update -q=2
 apt-get install simple-cdd debian-archive-keyring -y
 

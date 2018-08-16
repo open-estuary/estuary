@@ -15,6 +15,8 @@ kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 . ${top_dir}/include/mirror-func.sh
 echo "deb-src http://mirrors.163.com/debian/ stretch main" >> /etc/apt/sources.list
 set_debian_mirror

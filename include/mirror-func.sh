@@ -3,7 +3,6 @@ set_debian_mirror()
 	rm -rf /etc/apt/sources.list.d/*.list
 	wget -O - ${ESTUARY_REPO}/ESTUARY-GPG-KEY | \
 	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg add -
-	wget -O /etc/apt/sources.list.d/estuary.list https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp_debian.list
 	if [ -n "${DEBIAN_MIRROR}" ]; then
 		local default_mirror="http://deb.debian.org/debian"
 		sed -i "s#${default_mirror}#${DEBIAN_MIRROR}#" \
@@ -15,6 +14,8 @@ set_debian_mirror()
                 sed -i "s#${default_security_mirror}#${DEBIAN_SECURITY_MIRROR}#" \
                         /etc/apt/sources.list
         fi
+	debian_region="${estuary_repo} ${estuary_dist}"
+	echo -e "deb ${debian_region} main\ndeb-src ${debian_region} main" >> /etc/apt/sources.list.d/estuary.list
 }
 
 set_ubuntu_mirror()
