@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -41,7 +41,6 @@ cd ${workspace}
 rm -rf debian-installer-*
 dget ${mirror}/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc
 cd debian-installer-*
-apt-get build-dep -q --no-install-recommends -y .
 
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=810654, so lava can use grub to load grub.cfg from the local disk
 sed -i 's/fshelp|//g' build/util/grub-cpmodules

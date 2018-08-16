@@ -24,7 +24,6 @@ estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
 apt-get update -q=2
-apt-get install simple-cdd debian-archive-keyring -y
 
 mkdir -p ${workspace}
 cd ${workspace}

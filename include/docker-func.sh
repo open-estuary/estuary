@@ -38,14 +38,10 @@ docker_run_sh() {
                 docker rm ${name}
         fi
 
+	mkdir -p log/${distro}
 	echo "Start container to build."
-	docker run  --privileged=true -i --env-file ${envlist_file} -v ${home_dir}:/root/ \
+	docker run  --privileged=true -i --rm --env-file ${envlist_file} -v ${home_dir}:/root/ \
 		${qemu_cmd} --name ${name} ${image} \
-		bash /root/${sh_dir}/${script} ${scipt_options}
-        echo "Collect log and clean container"
-        mkdir -p log/${distro}
-        docker logs ${name} > log/${distro}/${name}
-        docker stop ${name}
-        docker rm ${name}
+		bash /root/${sh_dir}/${script} ${scipt_options} | tee > log/${distro}/${name}
 
 }

@@ -21,10 +21,6 @@ estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 echo "deb-src http://mirrors.163.com/debian/ stretch main" >> /etc/apt/sources.list
 set_debian_mirror
 apt-get update -q=2
-apt-get build-dep -q --no-install-recommends -y linux
-apt-get install -y git graphviz
-apt-get install -y ccache python-requests quilt cpio rsync dh-exec
-
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
