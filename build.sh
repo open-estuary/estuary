@@ -401,9 +401,6 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     for distro in ${distros[*]}; do
         kernel_dir=${build_dir}/${distro}
         mkdir -p ${kernel_dir}
-        cd ${top_dir}/..
-        tar cf - kernel/ | (cd ${kernel_dir}; tar xf -)
-        cd ${top_dir}
         echo "---------------------------------------------------------------"
         echo "- Build modules (kerneldir: ${kernel_dir}, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
         echo "---------------------------------------------------------------"

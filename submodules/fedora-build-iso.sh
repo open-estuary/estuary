@@ -14,7 +14,7 @@ live_os_dir=${distro_dir}/installer/out/images
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 dest_dir=/root/fedora-iso
 ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
-http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
+http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
 rm -rf ${dest_dir}
 
 # Update fedora repo

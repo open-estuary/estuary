@@ -10,7 +10,7 @@ out_rpm=${build_dir}/out/kernel-pkg/${version}/fedora
 distro_dir=${build_dir}/tmp/fedora
 workspace=${distro_dir}/kernel
 WGET_OPTS="-T 120 -c"
-http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
+http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
 
 # Update fedora repo
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
