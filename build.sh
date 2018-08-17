@@ -399,13 +399,12 @@ fi
 ###################################################################################
 if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     for distro in ${distros[*]}; do
-        kernel_dir=${build_dir}/${distro}
+        kernel_dir=${top_dir}/../${distro}
         mkdir -p ${kernel_dir}
         echo "---------------------------------------------------------------"
         echo "- Build modules (kerneldir: ${kernel_dir}, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
         echo "---------------------------------------------------------------"
         ./submodules/build-modules.sh --kerneldir=${kernel_dir} --rootfs=$rootfs_dir/$distro --cross=$CROSS_COMPILE || exit 1
-        rm -rf ${kernel_dir}
         echo "- Build modules done!"
         echo ""
     done
