@@ -50,8 +50,8 @@ build_modules()
     source_dir=${top_dir}/../kernel
 
     pushd ${source_dir}
-    make O=$kernel_dir estuary_defconfig
-    make O=$kernel_dir include/config/kernel.release
+    make O=$kernel_dir -j${core_num} -s estuary_defconfig
+    make O=$kernel_dir -j${core_num} -s include/config/kernel.release
     kernel_version=$(cat $kernel_dir/include/config/kernel.release)
     popd
     if [ ! -d "${rootfs}/lib/modules/${kernel_version}" ]; then

@@ -28,10 +28,6 @@ docker_run_sh() {
              qemu_cmd="-v /usr/bin/qemu-aarch64-static:/usr/bin/qemu-aarch64-static"
         fi
 
-	if [ -z "$(docker info)" ]; then
-		echo -e "\033[31mError: docker is not running!\033[0m" ; exit 1   
-	fi
-
         echo "Start container to build."
         if [  x"$(docker ps -a|grep ${name})" != x"" ]; then
                 docker stop ${name}

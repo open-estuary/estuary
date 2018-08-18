@@ -61,10 +61,6 @@ mkdir initrd; cd initrd
 sh -c 'xzcat ../boot/aarch64/initrd | cpio -d -i -m -u'
 wget ${WGET_OPTS} -O autoinst.xml ${private_url}/autoinst-iso-15.0.xml
 rm -rf modules lib/modules/*
-mkdir -p lib/modules/${kernel_abi}-default/initrd
-ln -sf lib/modules/${kernel_abi}-default/initrd modules
-find /lib/modules/${kernel_abi}-default -name "loop.ko"|xargs -i cp -v {} modules/
-find /lib/modules/${kernel_abi}-default -name "squashfs.ko"|xargs -i cp -v {} modules/
 cp -rf /lib/modules/${kernel_abi}-default lib/modules/
 sh -c 'find . | cpio --quiet -o -H newc --owner 0:0 | xz --check=crc32 -c --threads=0 > ../boot/aarch64/initrd'
 cd ..; rm -rf initrd
@@ -74,7 +70,7 @@ cp ${kernel_rpm_dir}/kernel-default* aarch64/
 mkdir -p suse
 mv aarch64 noarch suse/
 create_package_descr -d suse/ -o suse/setup/descr/  -l english -l german
-find . -name "packages*" |xargs gzip -f
+find suse/setup/descr/ -name "packages*" |xargs gzip -f
 touch content
 
 # Create the new ISO file.
