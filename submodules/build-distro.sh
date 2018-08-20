@@ -93,7 +93,5 @@ fi
 		${distro}-build-iso.sh 	${version} ${build_dir}
 
 	# 4) build rootfs tar
-
 	# 5) calculate md5sum
-	docker_run_sh ${distro} ${sh_dir} ${home_dir} ${envlist_file} \
-		${distro}-calculate-md5sum.sh ${version} ${build_dir}
+	./submodules/${distro}-calculate-md5sum.sh ${version} ${build_absolute_dir}
