@@ -12,9 +12,8 @@ distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/kernel
 
 # Install estuary latest kernel
-wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
+. ${top_dir}/include/mirror-func.sh
+set_centos_mirror
 yum remove epel-release -y
 yum clean dbcache
 yum install --disablerepo=* --enablerepo=Estuary kernel -y
@@ -33,17 +32,18 @@ kernel_dir=${workspace}/linux
 
 # Checkout source code
 rm -rf ${workspace}
-mkdir -p ${workspace} && cd ${workspace}
+mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
-rsync -avq $build_dir/../kernel/ ${kernel_dir}
+cd $build_dir/../../kernel/
+tar cf - . | (cd ${kernel_dir}; tar xf -)
 
 # Export the kernel packaging version
 cd ${kernel_dir}
 kernel_version=$(make kernelversion)
 kernel_abi=`echo ${kernel_version}|cut -d "." -f 1,2`
 make mrproper
-git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz -c > linux-${kernel_abi}.tar.xz
+git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz --threads=0 -c > linux-${kernel_abi}.tar.xz
 
 # Build rpm source package
 rpmversion=${kernel_version//-*/}

@@ -22,13 +22,15 @@ check_docker_running_permission()
 
 install_dev_tools_debian()
 {
-	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support flex bison gcc
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential \
+             qemu qemu-user-static qemu-user binfmt-support flex bison gcc pigz
 	check_docker_running_permission
 }
 
 install_dev_tools_ubuntu()
 {
-	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential qemu qemu-user-static qemu-user binfmt-support flex bison gcc
+	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential \
+             qemu qemu-user-static qemu-user binfmt-support flex bison gcc pigz
 	check_docker_running_permission
 }
 
@@ -37,10 +39,9 @@ install_dev_tools_ubuntu()
 ###################################################################################
 install_dev_tools_centos()
 {
-
-   sudo yum groupinstall "Development Tools" -y 
-   sudo yum install -y epel-release
-   sudo yum install -y autoconf automake libtool python git docker bc openssl-devel unzip gcc jq
+    yum install -y epel-release
+    yum install -y autoconf automake libtool python git docker bc openssl-devel \
+                   unzip gcc jq pigz make bison flex
 
     check_docker_running_permission
 

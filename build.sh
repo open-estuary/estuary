@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 ###################################################################################
 # Const Variables, PATH
@@ -93,9 +94,7 @@ done
 ###################################################################################
 # Install development tools
 ###################################################################################
-if [ x"$action" != x"clean" ]; then
-    install_dev_tools
-fi
+install_dev_tools
 
 docker_status=`service docker status|grep "running"`
 if [ x"$docker_status" = x"" ]; then
@@ -272,21 +271,23 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
     cp -rf estuary-uefi/* . ; rm -rf estuary-uefi
 fi
 if [ x"$action" != x"clean" ]; then
-    cd ${top_dir}
-    process_num=`ps -ef | grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+    cd ${top_dir}/..
+    process_cmd="git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git"
+    process_count="ps -ef | grep \"\${process_cmd}\" | grep -v grep | wc -l"
+    process_num=`eval ${process_count}`
     if [ ! -f "kernel-${version}-ready" ] && [ $process_num -eq 0 ]; then
         rm -rf kernel
     fi
     if [ ! -d "kernel" ] && [ $process_num -eq 0 ]; then
-        git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git
+        eval ${process_cmd}
         rm -rf kernel-*-ready
         touch kernel-${version}-ready
     elif [ -d "kernel" ] && [ $process_num -gt 0 ]; then
         while [ 1 ];do
-            flag=`ps -ef |grep "git clone" | grep "kernel.git" | grep -v "grep" | wc -l`
+            flag=`eval ${process_count}`
             if [ $flag == 1 ]; then
-                echo "Waiting for clone into 'kernel' complete..."
-                sleep 2m
+                echo "Waiting clone 'kernel' complete..."
+                sleep 1m
                 continue
             else
                 break
@@ -295,6 +296,7 @@ if [ x"$action" != x"clean" ]; then
     else
         (cd kernel ; git pull || true)
     fi
+    cd ${top_dir}
 
 fi
 
@@ -320,11 +322,7 @@ fi
 # Build/clean distros
 ###################################################################################
 for dist in ${distros};do
-        export centos_image="estuary/centos:5.1-full"
-        export debian_image="linaro/ci-arm64-debian:stretch"
-        export fedora_image="estuary/fedora:28"
-        export opensuse_image="estuary/opensuse:5.1-full"
-        export ubuntu_image="estuary/ubuntu:5.1-full"
+        export ${dist}_image="estuary/${dist}:5.1-full"
         eval image="$"${dist}"_image"
         docker pull ${image}
         status=$?
@@ -401,14 +399,12 @@ fi
 ###################################################################################
 if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     for distro in ${distros[*]}; do
-        kernel_dir=${build_dir}/${distro}
+        kernel_dir=${top_dir}/../${distro}
         mkdir -p ${kernel_dir}
-        cp -rf kernel ${kernel_dir}/kernel
         echo "---------------------------------------------------------------"
         echo "- Build modules (kerneldir: ${kernel_dir}, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
         echo "---------------------------------------------------------------"
         ./submodules/build-modules.sh --kerneldir=${kernel_dir} --rootfs=$rootfs_dir/$distro --cross=$CROSS_COMPILE || exit 1
-        rm -rf ${kernel_dir}
         echo "- Build modules done!"
         echo ""
     done

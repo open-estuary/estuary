@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash
 
 top_dir=$(cd `dirname $0`; cd .. ; pwd)
 sh_dir=${top_dir}/submodules

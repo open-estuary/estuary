@@ -10,19 +10,17 @@ out_rpm=${build_dir}/out/kernel-pkg/${version}/fedora
 distro_dir=${build_dir}/tmp/fedora
 workspace=${distro_dir}/kernel
 WGET_OPTS="-T 120 -c"
-http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
+http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
 
 # Update fedora repo
-. ${top_dir}/include/mirror-func.sh
-set_fedora_mirror
-
-# Install build tools,do not change first line!
-
-# Install estuary latest kernel
 wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
 chmod +r /etc/yum.repos.d/estuary.repo
-dnf clean dbcache
 rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
+. ${top_dir}/include/mirror-func.sh
+set_fedora_mirror
+dnf clean dbcache
+
+# Install estuary latest kernel
 dnf install --disablerepo=* --enablerepo=Estuary,fedora kernel -y
 
 #find build_num
@@ -39,15 +37,16 @@ kernel_dir=${workspace}/linux
 
 # Checkout source code
 rm -rf ${workspace}
-mkdir -p ${workspace} && cd ${workspace}
+mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
-rsync -avq $build_dir/../kernel/ ${kernel_dir}
+cd $build_dir/../../kernel/
+tar cf - . | (cd ${kernel_dir}; tar xf -)
 cd ${kernel_dir}
 kernel_version=$(make kernelversion)
 kernel_abi=`echo ${kernel_version}|cut -d "." -f 1,2`
 make mrproper
-git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz -c > linux-${kernel_abi}.tar.xz
+git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz --threads=0 -c > linux-${kernel_abi}.tar.xz
 
 # Build the source kernel
 cd ${workspace}

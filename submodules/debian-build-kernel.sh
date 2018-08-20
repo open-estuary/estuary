@@ -15,14 +15,12 @@ kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
 . ${top_dir}/include/mirror-func.sh
 echo "deb-src http://mirrors.163.com/debian/ stretch main" >> /etc/apt/sources.list
 set_debian_mirror
 apt-get update -q=2
-apt-get build-dep -q --no-install-recommends -y linux
-apt-get install -y git graphviz
-apt-get install -y ccache python-requests quilt cpio rsync dh-exec
-
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
@@ -30,8 +28,9 @@ cd ${workspace}
 workspace=${workspace}/kernel
 rm -rf kernel
 git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git kernel
-cd kernel
-rsync -avq $build_dir/../kernel/ linux
+mkdir -p ${workspace}/linux
+cd $build_dir/../../kernel/
+tar cf - . | (cd ${workspace}/linux; tar xf -)
 
 # Export the kernel packaging version
 cd ${workspace}/linux

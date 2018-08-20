@@ -1,4 +1,5 @@
-#!/bin/bash -ex
+#!/bin/bash
+set -x
 
 docker_run_sh() {
 	distro=$1
@@ -27,24 +28,16 @@ docker_run_sh() {
              qemu_cmd="-v /usr/bin/qemu-aarch64-static:/usr/bin/qemu-aarch64-static"
         fi
 
-	if [ -z "$(docker info)" ]; then
-		echo -e "\033[31mError: docker is not running!\033[0m" ; exit 1   
-	fi
-
         echo "Start container to build."
         if [  x"$(docker ps -a|grep ${name})" != x"" ]; then
                 docker stop ${name}
                 docker rm ${name}
         fi
 
+	mkdir -p log/${distro}
 	echo "Start container to build."
-	docker run  --privileged=true -i --env-file ${envlist_file} -v ${home_dir}:/root/ \
+	docker run  --privileged=true -i --rm --env-file ${envlist_file} -v ${home_dir}:/root/ \
 		${qemu_cmd} --name ${name} ${image} \
-		bash /root/${sh_dir}/${script} ${scipt_options}
-        echo "Collect log and clean container"
-        mkdir -p log/${distro}
-        docker logs ${name} > log/${distro}/${name}
-        docker stop ${name}
-        docker rm ${name}
+		bash /root/${sh_dir}/${script} ${scipt_options} | tee > log/${distro}/${name}
 
 }

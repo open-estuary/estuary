@@ -22,7 +22,9 @@ download=${workspace}/download
 
 # set mirror
 . ${top_dir}/include/mirror-func.sh
+. ${top_dir}/include/checksum-func.sh
 set_ubuntu_mirror
+set_docker_loop
 
 apt-get update -q=2
 
@@ -45,7 +47,8 @@ if [ x"$build_kernel" != x"true" ]; then
     else
         echo "ERROR:No linux-image-estuary found !"
     fi
-    wget ${WGET_OPTS} ${ESTUARY_REPO}/5.1/ubuntu/pool/main/linux-*${kernel_version}*${build_num}*.deb
+    estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
+    wget ${WGET_OPTS} -r -nd -np -L -A linux-*${kernel_version}*${build_num}*.deb ${estuary_repo}/pool/main/
 else
     cp -f ${kernel_deb_dir}/meta/linux-*.deb ${download}/
     cp -f ${kernel_deb_dir}/not_meta/linux-*.deb ${download}/
@@ -54,11 +57,21 @@ fi
 cd ${workspace}
 # download iso and decompress
 ISO=ubuntu-18.04-server-arm64.iso
-http_addr=${UBUNTU_ISO_MIRROR:-"http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/"}
+http_addr=${UBUNTU_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/ubuntu/releases/18.04/release"}
+mkdir -p /root/iso && cd /root/iso
+rm -f ${ISO}.sum
+wget ${http_addr}/${ISO}.sum || exit 1
+if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
+    rm -f $ISO 2>/dev/null
+    wget -T 120 -c ${http_addr}/${ISO} || exit 1
+    check_sum . ${ISO}.sum || exit 1
+fi
 
-wget ${WGET_OPTS} ${http_addr}/${ISO}
-
-xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
+mount -o loop ${ISO} /opt
+pushd /opt
+tar cf - . | (cd ${cdimage}; tar xf -)
+popd
+umount /opt
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras
@@ -72,7 +85,7 @@ cp ${cdrom_installer_dir}/cdrom/initrd.gz ${cdimage}/install/initrd.gz
 mkdir -p ${grubfiles}
 cp ${cdrom_installer_dir}/cdrom/debian-cd_info.tar.gz ${grubfiles}
 cd ${grubfiles}
-tar -xzvf debian-cd_info.tar.gz
+tar -xzf debian-cd_info.tar.gz
 
 cp -r ${grubfiles}/grub/arm64-efi ${cdimage}/boot/grub/
 cp -r ${grubfiles}/grub/efi.img ${cdimage}/boot/grub/
@@ -227,13 +240,11 @@ END
 find . -type f -print0 | xargs -0 md5sum > md5sum.txt
 popd
 
-mkdir -p ${workspace}/output
-rm -rf ${workspace}/output/ubuntu.iso
-
+mkdir -p ${out}
 xorriso -as mkisofs -r -J -joliet-long \
         -e boot/grub/efi.img \
         -no-emul-boot \
-        -o ${workspace}/output/ubuntu.iso ${workspace}/cd-image
+        -o ${out}/estuary-${version}-ubuntu.iso ${workspace}/cd-image
 EOF
 
 chmod a+x ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
@@ -241,9 +252,3 @@ chmod a+x ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
 ./ubuntu-cd-make/script_for_ubuntu_cd/indices.sh
 ./ubuntu-cd-make/script_for_ubuntu_cd/scan_make.sh
 
-# add prefix name 
-export CDNAME=estuary-${version}-ubuntu
-
-# publish
-mkdir -p ${out}
-cp output/*.iso ${out}/${CDNAME}.iso

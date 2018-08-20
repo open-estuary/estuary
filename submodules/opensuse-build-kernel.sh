@@ -11,11 +11,12 @@ workspace=${build_dir}/tmp/opensuse/kernel
 
 # Checkout source code
 rm -rf ${workspace}
-mkdir -p ${workspace} && cd ${workspace}
+mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
 kernel_dir=${workspace}/linux
-rsync -avq $build_dir/../kernel/ ${kernel_dir}
+cd $build_dir/../../kernel/
+tar cf - . | (cd ${kernel_dir}; tar xf -)
 
 # Export the kernel packaging version
 cd ${kernel_dir}
@@ -27,7 +28,8 @@ mv ${workspace}/linux ${kernel_dir}
 
 # Build the source kernel
 cd ${workspace}
-tar -Jcf linux-${kernel_abi}.tar.xz linux-${kernel_abi}/
+tar -cf linux-${kernel_abi}.tar linux-${kernel_abi}/
+xz --threads=0 -z linux-${kernel_abi}.tar
 
 # Build kernel rpm package
 cd ${workspace} 

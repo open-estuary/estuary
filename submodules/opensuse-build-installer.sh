@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 
 set -ex
 
@@ -21,7 +22,7 @@ if [ -f "${build_dir}/build-opensuse-kernel" ]; then
 fi
 wget -N ${private_url}/
 kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
-rpm -ivh --root=/  ${private_url}/kernel-default-${kernel_abi}.aarch64.rpm
+rpm -ivh --root=/  ${private_url}/kernel-default-${kernel_abi}.aarch64.rpm 2>/dev/null
 rm -rf ${workspace}
 mkdir -p ${workspace} && cd ${workspace}
 mkdir -p opensuse-installer
@@ -54,7 +55,7 @@ ln -sf lib/modules/${kernel_abi}-default/initrd modules
 find /lib/modules/${kernel_abi}-default -name "loop.ko"|xargs -i cp -v {} modules/
 find /lib/modules/${kernel_abi}-default -name "squashfs.ko"|xargs -i cp -v {} modules/
 cp -rf /lib/modules/${kernel_abi}-default lib/modules/
-sh -c 'find . | cpio -o -H newc | xz --check=crc32 --lzma2=dict=512KiB > ../boot/aarch64/initrd'
+sh -c 'find . | cpio --quiet -o -H newc --owner 0:0 | xz --threads=0 --check=crc32 -c > ../boot/aarch64/initrd'
 cd ..; rm -rf initrd
 
 filename="control.xml bind common config gdb libstoragemgmt rescue root cracklib-dict-full.rpm"

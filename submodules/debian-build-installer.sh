@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
@@ -13,14 +13,12 @@ workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 
 # set mirror
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
+mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
+installer_src_version="20170615+deb9u2"
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
-
-mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://repo.estuarydev.org/releases/5.1/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
-installer_src_version="20170615+deb9u2"
-
 apt-get update -q=2
 
 # Find kernel abi
@@ -43,7 +41,6 @@ cd ${workspace}
 rm -rf debian-installer-*
 dget ${mirror}/pool/main/d/debian-installer/debian-installer_${installer_src_version}.dsc
 cd debian-installer-*
-apt-get build-dep -q --no-install-recommends -y .
 
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=810654, so lava can use grub to load grub.cfg from the local disk
 sed -i 's/fshelp|//g' build/util/grub-cpmodules

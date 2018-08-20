@@ -1,7 +1,10 @@
 #!/bin/bash
+set -x
 
+top_dir=$(cd `dirname $0`; cd .. ; pwd) # estuary
 KERNEL_DIR=kernel
 LOCALARCH=`uname -m`
+. $top_dir/submodules/submodules-common.sh
 
 ###################################################################################
 # install arguments
@@ -44,17 +47,25 @@ build_modules()
     export CROSS_COMPILE=$cross_compile
     mkdir -p $output_dir/kernel
     kernel_dir=$(cd $output_dir/kernel; pwd)
+    source_dir=${top_dir}/../kernel
 
-    pushd kernel
-    make O=$kernel_dir estuary_defconfig
-    make O=$kernel_dir include/config/kernel.release
+    pushd ${source_dir}
+    make O=$kernel_dir -j${core_num} -s estuary_defconfig
+    make O=$kernel_dir -j${core_num} -s include/config/kernel.release
     kernel_version=$(cat $kernel_dir/include/config/kernel.release)
     popd
     if [ ! -d "${rootfs}/lib/modules/${kernel_version}" ]; then
-        pushd kernel
-        make O=$kernel_dir -j${core_num} -s modules INSTALL_MOD_PATH=$rootfs \
-        && make PATH=$PATH O=$kernel_dir -j${core_num} -s INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
+        pushd ${source_dir}
+        last_commit=`get_last_commit $source_dir`
+        last_build=`cat $kernel_dir/.modules 2>/dev/null`
+        if [ x"$last_build" != x"$last_commit" ]; then
+            rm -rf $kernel_dir/*
+            make O=$kernel_dir -j${core_num} -s modules
+            echo $last_commit > $kernel_dir/.modules 2>/dev/null
+        fi
+        make PATH=$PATH O=$kernel_dir -j${core_num} -s INSTALL_MOD_STRIP=1 modules_install INSTALL_MOD_PATH=$rootfs
         if [ ! $? ]; then
+            rm -rf $kernel_dir
             return 1
         fi
         popd

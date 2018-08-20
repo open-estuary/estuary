@@ -2,15 +2,14 @@
 
 set -ex
 
-wget -O /etc/yum.repos.d/estuary.repo https://raw.githubusercontent.com/open-estuary/distro-repo/master/estuaryftp.repo
-chmod +r /etc/yum.repos.d/estuary.repo
-rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
-yum remove epel-release -y
-yum makecache fast
-
 top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
+
+. ${top_dir}/include/mirror-func.sh
+set_centos_mirror
+yum remove epel-release -y
+set_docker_loop
 
 out=${build_dir}/out/release/${version}/CentOS
 distro_dir=${build_dir}/tmp/centos
@@ -24,8 +23,7 @@ rm -rf ${dest_dir}
 # download ISO
 ISO=CentOS-7-aarch64-Everything.iso
 http_addr=${CENTOS_ISO_MIRROR:-"http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig/linux/CentOS"}
-iso_dir=/root/iso
-mkdir -p ${iso_dir} && cd ${iso_dir}
+mkdir -p /root/iso && cd /root/iso
 rm -f ${ISO}.sum
 wget ${http_addr}/${ISO}.sum || exit 1
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
@@ -38,9 +36,11 @@ fi
 mkdir -p ${dest_dir}/temp
 
 # Copy the source media to the working directory.
-xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
-
-# Unmount the source ISO and remove the directory.
+mount -o loop ${ISO} /opt
+pushd /opt
+tar cf - . | (cd ${dest_dir}; tar xf -)
+popd
+umount /opt
 
 # Replace estuary binary for customized media.
 cd ${cdrom_installer_dir}
@@ -59,10 +59,10 @@ if [ -f "${build_dir}/build-centos-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" != x"true" ]; then
-package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
-yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
+    package_name="kernel kernel-devel kernel-headers kernel-tools kernel-tools-libs kernel-tools-libs-devel perf python-perf"
+    yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
 fi
-yum install --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=extras epel-release
+yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=extras epel-release
 
 cp ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages
 cd ${dest_dir}
@@ -73,11 +73,8 @@ shopt -s extglob
 rm -f !(comps.xml)
 find . -name TRANS.TBL|xargs rm -f
 cd ${dest_dir}
-createrepo -g repodata/comps.xml .
+createrepo -q -g repodata/comps.xml .
 
 
 # Create the new ISO file.
-cd ${dest_dir} && mkisofs -o ${out}/${ISO} -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T .
-
-# Clean
-rm -rf ${dest_dir} 
+cd ${dest_dir} && mkisofs -quiet -o ${out}/${ISO} -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T .

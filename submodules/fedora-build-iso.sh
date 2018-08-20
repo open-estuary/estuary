@@ -13,19 +13,20 @@ cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
 live_os_dir=${distro_dir}/installer/out/images
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 dest_dir=/root/fedora-iso
+ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
+http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
 rm -rf ${dest_dir}
 
 # Update fedora repo
 . ${top_dir}/include/mirror-func.sh
 . ${top_dir}/include/checksum-func.sh
+wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
+chmod +r /etc/yum.repos.d/estuary.repo
 set_fedora_mirror
-
+set_docker_loop
 
 # download ISO
-ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
-http_addr=${FEDORA_ISO_MIRROR:-"http://htsat.vicp.cc:804/fedora"}
-iso_dir=/root/iso
-mkdir -p ${iso_dir} && cd ${iso_dir}
+mkdir -p /root/iso ${dest_dir} && cd /root/iso
 rm -f ${ISO}.sum
 wget ${WGET_OPTS} ${http_addr}/${ISO}.sum || exit 1
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
@@ -35,7 +36,11 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
 fi
 
 # Copy the source media to the working directory.
-xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
+mount -o loop ${ISO} /opt
+pushd /opt
+tar cf - . | (cd ${dest_dir}; tar xf -)
+popd
+umount /opt
 
 # Replace estuary binary for customized media.
 cd ${cdrom_installer_dir}
@@ -54,10 +59,6 @@ if [ -f "${build_dir}/build-fedora-kernel" ]; then
     build_kernel=true
 fi
 
-wget ${WGET_OPTS} -O /etc/yum.repos.d/estuary.repo ${http_addr}/estuaryftp.repo
-chmod +r /etc/yum.repos.d/estuary.repo
-dnf clean dbcache
-
 package_name="kernel kernel-core kernel-cross-headers kernel-devel kernel-headers kernel-modules kernel-modules-extra"
 if [ x"$build_kernel" != x"true" ]; then
     dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
@@ -74,11 +75,8 @@ shopt -s extglob
 rm -f !(comps.xml)
 find . -name TRANS.TBL|xargs rm -f
 cd ${dest_dir}
-createrepo -g repodata/comps.xml .
+createrepo -q -g repodata/comps.xml .
 
 
 # Create the new ISO file.
-cd ${dest_dir} && genisoimage -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-28" -o ${out}/${ISO} .
-
-# Clean
-rm -rf ${dest_dir} 
+cd ${dest_dir} && genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-28" -o ${out}/${ISO} .
