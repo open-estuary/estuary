@@ -39,9 +39,12 @@ install_dev_tools_ubuntu()
 ###################################################################################
 install_dev_tools_centos()
 {
-    yum install -y epel-release
-    yum install -y autoconf automake libtool python git docker bc openssl-devel \
-                   unzip gcc jq pigz make bison flex
+    pkglist="autoconf automake libtool python git docker bc openssl-devel unzip gcc jq pigz make bison flex"
+    install_available=`yum info epel-release $pkglist |grep "Available Packages"`
+    if [ x"$install_available" != x"" ]; then
+        yum install -y epel-release
+        yum install -y $pkglist
+    fi
 
     check_docker_running_permission
 

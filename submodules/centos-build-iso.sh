@@ -73,7 +73,7 @@ shopt -s extglob
 rm -f !(comps.xml)
 find . -name TRANS.TBL|xargs rm -f
 cd ${dest_dir}
-createrepo -q -g repodata/comps.xml .
+createrepo -q --update -g repodata/comps.xml .
 
 
 # Create the new ISO file.
