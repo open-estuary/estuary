@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 set -ex
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
