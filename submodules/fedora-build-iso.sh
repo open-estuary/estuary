@@ -62,6 +62,8 @@ else
     cp -rf ${kernel_rpm_dir}/* /tmp
 fi
 kernel_abi=$(basename -a ${kernel_rpm_dir}/kernel-4*.aarch64.rpm | tail -1 | sed -e 's/kernel-//g ; s/.aarch64.rpm//g')
+dnf install -q -y /tmp/kernel-core-${kernel_abi}.aarch64.rpm
+dnf install -q -y /tmp/kernel-modules-${kernel_abi}.aarch64.rpm
 dnf install -q -y /tmp/kernel-${kernel_abi}.aarch64.rpm
 cp -f /boot/vmlinuz-${kernel_abi}.aarch64 ${dest_dir}/images/pxeboot/vmlinuz
 
