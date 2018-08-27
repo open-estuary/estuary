@@ -67,11 +67,7 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     check_sum . ${ISO}.sum || exit 1
 fi
 
-mount -o loop ${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${cdimage}; tar xf -)
-popd
-umount /opt
+xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras

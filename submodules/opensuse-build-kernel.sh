@@ -10,7 +10,7 @@ out_rpm=${build_dir}/out/kernel-pkg/${version}/opensuse
 workspace=${build_dir}/tmp/opensuse/kernel
 
 # Checkout source code
-rm -rf ${workspace}
+rm -rf ${workspace} $out_rpm
 mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
@@ -48,7 +48,6 @@ sed -i "s/SRCVERSION=.*/SRCVERSION=${kernel_abi}/g" rpm/config.sh
 
 # Copy back the resulted artifacts
 tmp_rpm="/var/tmp/build-root/ARM-aarch64/home/abuild/rpmbuild/"
-mkdir -p $out_rpm
 cp -p ${tmp_rpm}/SRPMS/*.nosrc.rpm $out_rpm
 echo "Source packages available at $out_rpm"
 

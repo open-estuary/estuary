@@ -26,7 +26,7 @@ apt-get update -q=2
 mkdir -p ${workspace}
 cd ${workspace}
 workspace=${workspace}/kernel
-rm -rf kernel
+rm -rf kernel ${out_deb}
 git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git kernel
 mkdir -p ${workspace}/linux
 cd $build_dir/../../kernel/

@@ -12,9 +12,6 @@ yum remove epel-release -y
 set_docker_loop
 
 out=${build_dir}/out/release/${version}/CentOS
-distro_dir=${build_dir}/tmp/centos
-cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
-live_os_dir=${distro_dir}/installer/out/LiveOS
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
 dest_dir=/root/centos-iso
 . ${top_dir}/include/checksum-func.sh
@@ -36,11 +33,7 @@ fi
 mkdir -p ${dest_dir}/temp
 
 # Copy the source media to the working directory.
-mount -o loop ${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${dest_dir}; tar xf -)
-popd
-umount /opt
+xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
 
 # Change permissions on the working directory.
 chmod -R u+w ${dest_dir}

@@ -49,11 +49,7 @@ if [ x"$build_kernel" != x"true" ]; then
     wget -N ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${private_url}/ -P ${kernel_rpm_dir}
 fi
 rm -rf ${dvdiso_dir}; mkdir -p ${dvdiso_dir}
-mount -o loop ${iso_dir}/${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${dvdiso_dir}; tar xf -)
-popd
-umount /opt
+xorriso -osirrox on -indev ${ISO} -extract / ${dvdiso_dir}
 cd ${dvdiso_dir}
 
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
