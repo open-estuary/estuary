@@ -54,6 +54,7 @@ git clone https://github.com/open-estuary/fedora-kernel-packages.git --depth 1 -
 cd kernel-src-debug
 cp -f ${kernel_dir}/linux-${kernel_abi}.tar.xz .
 sed -i "s/\%define pkg_release.*/\%define pkg_release estuary.${build_num}.fc28/g" kernel.spec
+sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" kernel.spec
 
 dnf builddep kernel.spec -y
 fedpkg local
