@@ -2,6 +2,7 @@
 
 set -ex
 
+top_dir=$(cd `dirname $0`; cd ..; pwd)
 build_dir=$(cd /root/$2 && pwd)
 version=$1 # branch or tag
 version=${version:-master}
@@ -44,6 +45,8 @@ cp -f oscrc /root/.oscrc
 sed -i "s/SRCVERSION=.*/SRCVERSION=${kernel_abi}/g" rpm/config.sh
 ./scripts/tar-up.sh -nf -a arm64
 
+sed -i "s/\%define patchversion.*/\%define patchversion $kernel_version/g" kernel-source/kernel-default.spec
+sed -i "s/Version:.*/Version:        $kernel_version/g" kernel-source/kernel-default.spec
 ./scripts/osc_wrapper kernel-source/kernel-default.spec 
 
 # Copy back the resulted artifacts
