@@ -44,13 +44,6 @@ else
 fi
 build_num=${BUILD_NUM:-${build_num}}
 
-# find commit
-if [ -z $(git tag -l|grep ${version}) ]; then
-	pkg_partial_verion=$(git log --abbrev-commit|grep commit|awk '{print $2}')
-else
-	pkg_partial_verion=${version}
-fi
-
 kernel_version=$(make kernelversion)
 kernel_deb_pkg_version=$(echo ${kernel_version} | sed -e 's/\.0-rc/~rc/')
 export KDEB_PKGVERSION="${kernel_deb_pkg_version}.estuary.${build_num}-1"
@@ -61,6 +54,7 @@ cd ${workspace}/debian-package
 rm -rf orig
 
 # Use build_num as ABI
+
 sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
 
 cat << EOF > debian/changelog
@@ -68,7 +62,7 @@ linux ($KDEB_PKGVERSION) unstable; urgency=medium
 
   * Auto build:
     - URL: ${kernel_url}
-    - version: ${pkg_partial_verion}
+    - version: ${verion}
 
  -- OpenEstuary <xinliang.liu@linaro.org>  $(date -R)
 
@@ -82,26 +76,16 @@ dpkg-buildpackage -rfakeroot -sa -uc -us -d
 
 
 # 2) Build the kernel package 
-rc_flag=$(echo ${kernel_version} | grep "rc") || true
-kernel_deb_pkg_version=$(echo ${kernel_version} | sed -e 's,~rc,-rc,')
-kernel_abi_version=${kernel_deb_pkg_version}-${build_num}
 package_version=${build_num}
-
+kernel_abi_version=$(basename ${workspace}/linux-support*|sed -e "s/linux-support-//g" -e "s/_.*//g")
 dpkg -i ${workspace}/linux-support*
 dpkg -i ${workspace}/linux-kbuild*
 dpkg -i ${workspace}/linux-headers*
 
-
 cd ${workspace}/debian-meta-package
 cp -rf ../debian-package/debian/lib debian/
 sed -i -e "s@sys.path.append.*@sys.path.append(\"debian/lib/python\")@" debian/bin/gencontrol.py
-
-if [ ! -n "$rc_flag" ]; then
-    sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rules.defs
-else
-    sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_deb_pkg_version}/" debian/rules.defs
-fi
-
+sed -i "s/KERNELVERSION :=.*/KERNELVERSION := ${kernel_abi_version}/" debian/rules.defs
 sed -i "s/src/share/" debian/rules
 ./debian/rules debian/control || true
 NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${package_version}" -D stretch --force-distribution "bump ABI to ${kernel_abi_version}"

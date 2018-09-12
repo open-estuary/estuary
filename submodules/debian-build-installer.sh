@@ -29,7 +29,7 @@ if [ -f "${build_dir}/build-debian-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" = x"true" ]; then
-    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary* \
+    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary-arm64_4* \
     | grep Depends | sed -e "s/.*linux-image-//g" -e "s/,.*//g" -e "s/-arm64//g")
     cd ${kernel_deb_dir}
     dpkg-scanpackages -t udeb . > Packages
