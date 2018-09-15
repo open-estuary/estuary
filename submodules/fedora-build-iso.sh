@@ -11,6 +11,7 @@ kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 dest_dir=/root/fedora-iso
 ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
 http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
+FEDORA_ESTUARY_REPO=${FEDORA_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/fedora"}
 
 # Update fedora repo
 . ${top_dir}/include/mirror-func.sh
@@ -51,7 +52,9 @@ if [ x"$build_kernel" != x"true" ]; then
     dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
 fi
 cd ${kernel_rpm_dir}
-rpm -ivh kernel-core-4*.aarch64.rpm kernel-modules-4*.aarch64.rpm kernel-4*.aarch64.rpm
+rm -rf kernel*-4.16*.aarch64.rpm
+wget -q ${WGET_OPTS} -r -nd -np -L -A kernel*-4.16*.aarch64.rpm $FEDORA_ESTUARY_REPO/aarch64/ -P ${kernel_rpm_dir}
+rpm -ivh kernel-core-4.16*.aarch64.rpm kernel-modules-4.16*.aarch64.rpm kernel-4.16*.aarch64.rpm
 
 # Make initrd.img
 cd ${dest_dir}/images/pxeboot/initrd
@@ -76,7 +79,7 @@ rm -rf squashfs-root
 # Create repo for packages
 for pkg in $package_name; do
     rm -f ${dest_dir}/Packages/k/${pkg}-4*.rpm
-    cp -f ${kernel_rpm_dir}/${pkg}-4*.rpm ${dest_dir}/Packages/extra/
+    cp -f ${kernel_rpm_dir}/${pkg}-4.18*.rpm ${dest_dir}/Packages/extra/
 done
 cd ${dest_dir}
 xmlfile=`basename repodata/*comps*.xml`

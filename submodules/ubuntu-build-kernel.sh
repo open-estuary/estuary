@@ -47,7 +47,7 @@ build_num=${BUILD_NUM:-${build_num}}
 
 # find commit
 if [ -z $(git tag -l|grep ${version}) ]; then
-	pkg_partial_verion=$(git log --abbrev-commit|grep commit|awk '{print $2}')
+	pkg_partial_verion=$(git log --abbrev-commit --pretty=oneline -n1 | awk '{print $1}')
 else
 	pkg_partial_verion=${version}
 fi
