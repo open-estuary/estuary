@@ -45,7 +45,7 @@ set_centos_mirror()
         docker_mirror="ftp://repoftp:repopushez7411@117.78.41.188/releases/.*/centos"
         sed -i "s#${docker_mirror}#${mirror}#g" /etc/yum.repos.d/estuary.repo
     fi
-    sed -i 's/5.[0-9]/5.1/g' /etc/yum.repos.d/estuary.repo
+    sed -i 's/5.[0-9]/5.2/g' /etc/yum.repos.d/estuary.repo
     rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
 }
 set_docker_loop()

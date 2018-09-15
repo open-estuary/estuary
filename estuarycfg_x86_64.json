@@ -12,10 +12,10 @@
 
 "env": [
 {"ESTUARY_FTP": "http://repo.estuary.cloud/FolderNotVisibleOnWebsite/EstuaryInternalConfig/"},
-{"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"},
+{"DEBIAN_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/debian"},
 {"DEBIAN_MIRROR": "http://repo.estuary.cloud/debian/"},
 {"DEBIAN_SECURITY_MIRROR": "http://repo.estuary.cloud/debian-security/"},
-{"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/ubuntu"},
+{"UBUNTU_ESTUARY_REPO": "ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/ubuntu"},
 {"UBUNTU_MIRROR": "http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/"},
 {"UBUNTU_ISO_MIRROR": "http://repo.estuary.cloud/ubuntu/releases/18.04/release/"}
 ]

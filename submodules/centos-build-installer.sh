@@ -13,7 +13,7 @@ kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
 distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
-source_url=${CENTOS_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/centos"}
+source_url=${CENTOS_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/centos"}
 base_url=${CENTOS_MIRROR:-"http://mirror.centos.org/altarch/7/os/aarch64/"}
 
 rm -rf ${workspace}

@@ -17,8 +17,8 @@ out_installer=${workspace}/out/images
 set_ubuntu_mirror
 
 mirror=${UBUNTU_MIRROR:-http://ports.ubuntu.com/ubuntu-ports}
-estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
-estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.1}
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
+estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
 
 apt-get update -q=2
 

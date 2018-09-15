@@ -47,7 +47,7 @@ if [ x"$build_kernel" != x"true" ]; then
     else
         echo "ERROR:No linux-image-estuary found !"
     fi
-    estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
+    estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
     wget ${WGET_OPTS} -r -nd -np -L -A linux-*${kernel_version}*${build_num}*.deb ${estuary_repo}/pool/main/
 else
     cp -f ${kernel_deb_dir}/meta/linux-*.deb ${download}/

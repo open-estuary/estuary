@@ -13,8 +13,8 @@ workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 
 # set mirror
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.2}
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 installer_src_version="20170615+deb9u2"
 . ${top_dir}/include/mirror-func.sh
