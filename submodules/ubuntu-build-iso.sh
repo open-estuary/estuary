@@ -21,6 +21,9 @@ grubfiles=${workspace}/grubfiles
 download=${workspace}/download
 
 # set mirror
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
+estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
+
 . ${top_dir}/include/mirror-func.sh
 . ${top_dir}/include/checksum-func.sh
 set_ubuntu_mirror

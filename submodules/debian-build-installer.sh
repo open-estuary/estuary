@@ -91,6 +91,7 @@ EOF
 
 # 1) build netboot installer
 if [ x"$build_kernel" != x"true" ]; then
+    sed -i "s/nic-usb-modules-\${kernel:Version}//g" pkg-lists/netboot/arm64.cfg
     fakeroot make build_netboot
     mkdir -p ${out}
     cp -f default-preseed ${out}/default-preseed.cfg

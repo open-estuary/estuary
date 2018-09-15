@@ -13,13 +13,12 @@ workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 
 # set mirror
-. ${top_dir}/include/mirror-func.sh
-set_ubuntu_mirror
-
 mirror=${UBUNTU_MIRROR:-http://ports.ubuntu.com/ubuntu-ports}
 estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
 estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
 
+. ${top_dir}/include/mirror-func.sh
+set_ubuntu_mirror
 apt-get update -q=2
 
 # Find kernel abi

@@ -17,6 +17,8 @@ set_ubuntu_mirror()
                 sed -i "s#${default_mirror}#${UBUNTU_MIRROR}#" \
                         /etc/apt/sources.list
         fi
+        debian_region="${estuary_repo} ${estuary_dist}"
+        echo -e "deb ${debian_region} main\ndeb-src ${debian_region} main" > /etc/apt/sources.list.d/estuary.list
 
 }
 set_fedora_mirror()

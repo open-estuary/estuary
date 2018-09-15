@@ -18,6 +18,8 @@ kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 #export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
+estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
 . ${top_dir}/include/mirror-func.sh
 set_ubuntu_mirror
 
