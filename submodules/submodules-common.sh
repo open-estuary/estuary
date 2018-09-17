@@ -23,8 +23,11 @@ update_module_check()
     output_dir=$2
 
     last_build=`cat $output_dir/.$module_name 2>/dev/null`
-    last_commit=`get_last_commit $module_name`
+    last_commit=`get_last_commit $output_dir/../$module_name`
     if [ x"$last_build" != x"$last_commit" ]; then
+        return 1
+    fi
+    if [ x"$last_build" = x"" ]; then
         return 1
     fi
 
@@ -40,7 +43,7 @@ gen_module_build_log()
     (
     module_name=$1
     output_dir=$2
-    last_commit=`get_last_commit $module_name`
+    last_commit=`get_last_commit $output_dir/../$module_name`
     echo $last_commit > $output_dir/.$module_name 2>/dev/null
     )
 }
