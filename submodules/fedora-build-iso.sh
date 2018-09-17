@@ -52,6 +52,7 @@ if [ x"$build_kernel" != x"true" ]; then
     dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
 fi
 cd ${kernel_rpm_dir}
+kernel_abi=$(basename kernel-4.18*.rpm | sed -e "s/-estuary.*.rpm//g" -e "s/kernel-//g")
 rm -rf kernel*-4.16*.aarch64.rpm
 wget -q ${WGET_OPTS} -r -nd -np -L -A kernel*-4.16*.aarch64.rpm $FEDORA_ESTUARY_REPO/aarch64/ -P ${kernel_rpm_dir}
 rpm -ivh kernel-core-4.16*.aarch64.rpm kernel-modules-4.16*.aarch64.rpm kernel-4.16*.aarch64.rpm
@@ -60,6 +61,7 @@ rpm -ivh kernel-core-4.16*.aarch64.rpm kernel-modules-4.16*.aarch64.rpm kernel-4
 cd ${dest_dir}/images/pxeboot/initrd
 sh -c 'xzcat ../initrd.img | cpio -d -i -m'
 cp -f $cfg_path/auto-iso/ks-iso.cfg $cfg_path/auto-pxe/ks.cfg .
+sed -i "s/4.16.0/$kernel_abi/g" ks.cfg
 rm -rf lib/modules/4.*
 cp -rf /lib/modules/* lib/modules/
 cp -f /boot/vmlinuz* ${dest_dir}/images/pxeboot/vmlinuz
