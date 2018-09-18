@@ -12,9 +12,6 @@ yum remove epel-release -y
 set_docker_loop
 
 out=${build_dir}/out/release/${version}/CentOS
-distro_dir=${build_dir}/tmp/centos
-cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
-live_os_dir=${distro_dir}/installer/out/LiveOS
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/centos
 dest_dir=/root/centos-iso
 . ${top_dir}/include/checksum-func.sh
@@ -36,17 +33,7 @@ fi
 mkdir -p ${dest_dir}/temp
 
 # Copy the source media to the working directory.
-mount -o loop ${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${dest_dir}; tar xf -)
-popd
-umount /opt
-
-# Replace estuary binary for customized media.
-cd ${cdrom_installer_dir}
-cp initrd.img vmlinuz ${dest_dir}/images/pxeboot
-cd ${live_os_dir}
-cp squashfs.img ${dest_dir}/LiveOS
+xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
 
 # Change permissions on the working directory.
 chmod -R u+w ${dest_dir}
@@ -63,7 +50,32 @@ if [ x"$build_kernel" != x"true" ]; then
     yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary ${package_name}
 fi
 yum install -q --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=extras epel-release
+kernel_abi=$(basename -a ${kernel_rpm_dir}/kernel-4*.aarch64.rpm | tail -1 | sed -e 's/kernel-//g ; s/.aarch64.rpm//g')
+yum install -q -y ${kernel_rpm_dir}/kernel-${kernel_abi}.aarch64.rpm
+cp -f /boot/vmlinuz-${kernel_abi}.aarch64 ${dest_dir}/images/pxeboot/vmlinuz
 
+# Make initrd.img
+cd ${dest_dir}/images/pxeboot
+mkdir initrd; cd initrd
+sh -c 'xzcat ../initrd.img | cpio -d -i -m'
+cp -f $cfg_path/auto-iso/ks-iso.cfg .
+cp -f $cfg_path/auto-pxe/ks.cfg .
+rm -rf lib/modules/4.*
+cp -rf /lib/modules/${kernel_abi}.aarch64 lib/modules/
+sh -c 'find . | cpio --quiet -o -H newc --owner 0:0 | xz --threads=0 --check=crc32 -c > ../initrd.img'
+cd ..; rm -rf initrd
+
+# Make squashfs.img
+cd ${dest_dir}/LiveOS
+unsquashfs squashfs.img
+mount -o loop squashfs-root/LiveOS/rootfs.img /opt
+rm -rf /opt/usr/lib/modules/4.* ${dest_dir}/LiveOS/squashfs.img
+cp -rf /lib/modules/${kernel_abi}.aarch64 /opt/usr/lib/modules/
+umount /opt
+mksquashfs squashfs-root/ ${dest_dir}/LiveOS/squashfs.img
+rm -rf squashfs-root
+
+# createrepo for kernel packages
 cp ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages
 cd ${dest_dir}
 xmlfile=`basename repodata/*comps.xml`
@@ -73,8 +85,23 @@ shopt -s extglob
 rm -f !(comps.xml)
 find . -name TRANS.TBL|xargs rm -f
 cd ${dest_dir}
-createrepo -q --update -g repodata/comps.xml .
-
+createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
+mkdir -p ${out}
 cd ${dest_dir} && mkisofs -quiet -o ${out}/${ISO} -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T .
+
+# Rebuild boot.iso
+if [ x"$build_kernel" != x"true" ]; then
+    cp -f $cfg_path/auto-pxe/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
+    mkisofs -quiet -o ${out}/boot.iso -eltorito-alt-boot \
+        -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T \
+        -graft-points \
+        images/pxeboot=${dest_dir}/images/pxeboot \
+        LiveOS=${dest_dir}/LiveOS \
+        EFI/BOOT=${dest_dir}/EFI/BOOT \
+        images/efiboot.img=${dest_dir}/images/efiboot.img
+    cd ${dest_dir}
+    rm -rf Packages repodata temp
+    tar -cf - . | pigz > ${out}/netboot.tar.gz
+fi

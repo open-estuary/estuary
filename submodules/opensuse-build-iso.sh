@@ -10,11 +10,12 @@ WGET_OPTS="-T 120 -c -q"
 out=${build_dir}/out/release/${version}/OpenSuse
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 dvdiso_dir=${build_dir}/tmp/opensuse/dvdiso
-official_url=http://ftp.neowiz.com/opensuse
+official_url=http://download.opensuse.org
 leap_path=ports/aarch64/distribution/leap/15.0
 config_url=ftp://117.78.41.188/utils/distro-binary/opensuse
 dvdiso_url=${OPENSUSE_ISO_MIRROR:-"${official_url}/ports/aarch64/distribution/leap/15.0/iso"}
 private_url=${OPENSUSE_MIRROR:-"${config_url}"}
+estuary_dist=5.2
 ISO=openSUSE-Leap-15.0-DVD-aarch64-Build124.1-Media.iso
 
 . ${top_dir}/include/mirror-func.sh
@@ -24,9 +25,9 @@ if [ -f "${build_dir}/build-opensuse-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" != x"true" ]; then
-    wget -N ${private_url}/
+    wget -N ${private_url}/${estuary_dist}/
     kernel_abi=`grep  -o -P '(?<=kernel-default-)[0-9].*(?=.aarch64.rpm">)' index.html |tail -1`
-    kernel_path=${private_url}
+    kernel_path=${private_url}/${estuary_dist}
 else
     kernel_rpm="kernel-default-[0-9]*.aarch64.rpm"
     kernel_abi=`basename ${kernel_rpm_dir}/${kernel_rpm} | sed -e 's/kernel-default-//g ; s/.aarch64.rpm//g'`
@@ -46,14 +47,10 @@ fi
 # create the DVD image
 mkdir -p ${kernel_rpm_dir} ${out}
 if [ x"$build_kernel" != x"true" ]; then
-    wget -N ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${private_url}/ -P ${kernel_rpm_dir}
+    wget -N ${WGET_OPTS} -r -nd -np -L -A *.aarch64.rpm ${private_url}/${estuary_dist}/ -P ${kernel_rpm_dir}
 fi
 rm -rf ${dvdiso_dir}; mkdir -p ${dvdiso_dir}
-mount -o loop ${iso_dir}/${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${dvdiso_dir}; tar xf -)
-popd
-umount /opt
+xorriso -osirrox on -indev ${ISO} -extract / ${dvdiso_dir}
 cd ${dvdiso_dir}
 
 cp /boot/Image-${kernel_abi}-default boot/aarch64/linux
@@ -76,7 +73,7 @@ touch content
 # Create the new ISO file.
 mksusecd --create ${out}/${ISO} --no-hybrid .
 if [ x"$build_kernel" != x"true" ]; then
-    mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${official_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" --micro --create ${out}/boot.iso --no-hybrid .
+    mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${config_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" --micro --create ${out}/boot.iso --no-hybrid .
     xorriso -osirrox on -indev ${out}/boot.iso -extract / netboot
     tar -cf - netboot/ | pigz > ${out}/netboot.tar.gz
     rm -rf netboot/

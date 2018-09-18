@@ -21,6 +21,9 @@ grubfiles=${workspace}/grubfiles
 download=${workspace}/download
 
 # set mirror
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
+estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
+
 . ${top_dir}/include/mirror-func.sh
 . ${top_dir}/include/checksum-func.sh
 set_ubuntu_mirror
@@ -47,7 +50,7 @@ if [ x"$build_kernel" != x"true" ]; then
     else
         echo "ERROR:No linux-image-estuary found !"
     fi
-    estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.1/ubuntu"}
+    estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
     wget ${WGET_OPTS} -r -nd -np -L -A linux-*${kernel_version}*${build_num}*.deb ${estuary_repo}/pool/main/
 else
     cp -f ${kernel_deb_dir}/meta/linux-*.deb ${download}/
@@ -67,11 +70,7 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     check_sum . ${ISO}.sum || exit 1
 fi
 
-mount -o loop ${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${cdimage}; tar xf -)
-popd
-umount /opt
+xorriso -osirrox on -indev ${ISO} -extract / ${cdimage}
 
 # copy debs to extras
 mkdir -p ${cdimage}/pool/extras

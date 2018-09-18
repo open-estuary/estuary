@@ -1,8 +1,8 @@
-# Estuary v5.1 Release Information:
+# Estuary v5.2 Release Information:
 [Please click here to go to the download page of this release](http://open-estuary.org/estuary-download/)
 
 ```
-Release Version         : 5.1
+Release Version         : 5.2
 Release Date            : 29-May-2018
    QEMU                 : v2.7.0
    OpenJDK              : v1.8

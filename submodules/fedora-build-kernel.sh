@@ -36,30 +36,33 @@ build_num=${BUILD_NUM:-${build_num}}
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf ${workspace}
-mkdir -p ${workspace}/linux && cd ${workspace}
-mkdir -p ${out_rpm}
+rm -rf ${workspace} ${out_rpm}/* ~/rpmbuild/
+mkdir -p ${out_rpm} ${workspace}/linux && cd ${workspace}
 
 cd $build_dir/../../kernel/
 tar cf - . | (cd ${kernel_dir}; tar xf -)
 cd ${kernel_dir}
 kernel_version=$(make kernelversion)
 kernel_abi=`echo ${kernel_version}|cut -d "." -f 1,2`
+base_sublevel=`echo ${kernel_version}|cut -d "." -f 2`
 make mrproper
 git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz --threads=0 -c > linux-${kernel_abi}.tar.xz
 
 # Build the source kernel
+rpmversion=${kernel_version//-*/}
 cd ${workspace}
 git clone https://github.com/open-estuary/fedora-kernel-packages.git --depth 1 -b ${version} kernel-src-debug
 cd kernel-src-debug
 cp -f ${kernel_dir}/linux-${kernel_abi}.tar.xz .
 sed -i "s/\%define pkg_release.*/\%define pkg_release estuary.${build_num}.fc28/g" kernel.spec
+sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" kernel.spec
+sed -i "s/\%define base_sublevel.*/\%define base_sublevel $base_sublevel/g" kernel.spec
 
 dnf builddep kernel.spec -y
-fedpkg local
+rm -f sources
+fedpkg --verbose --debug local
 
 # Copy back the resulted artifacts
-mkdir -p $out_rpm
 cp -p *.src.rpm $out_rpm
 echo "Source packages available at $out_rpm"
 

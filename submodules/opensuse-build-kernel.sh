@@ -2,6 +2,7 @@
 
 set -ex
 
+top_dir=$(cd `dirname $0`; cd ..; pwd)
 build_dir=$(cd /root/$2 && pwd)
 version=$1 # branch or tag
 version=${version:-master}
@@ -10,7 +11,7 @@ out_rpm=${build_dir}/out/kernel-pkg/${version}/opensuse
 workspace=${build_dir}/tmp/opensuse/kernel
 
 # Checkout source code
-rm -rf ${workspace}
+rm -rf ${workspace} $out_rpm
 mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
@@ -44,11 +45,12 @@ cp -f oscrc /root/.oscrc
 sed -i "s/SRCVERSION=.*/SRCVERSION=${kernel_abi}/g" rpm/config.sh
 ./scripts/tar-up.sh -nf -a arm64
 
+sed -i "s/\%define patchversion.*/\%define patchversion $kernel_version/g" kernel-source/kernel-default.spec
+sed -i "s/Version:.*/Version:        $kernel_version/g" kernel-source/kernel-default.spec
 ./scripts/osc_wrapper kernel-source/kernel-default.spec 
 
 # Copy back the resulted artifacts
 tmp_rpm="/var/tmp/build-root/ARM-aarch64/home/abuild/rpmbuild/"
-mkdir -p $out_rpm
 cp -p ${tmp_rpm}/SRPMS/*.nosrc.rpm $out_rpm
 echo "Source packages available at $out_rpm"
 

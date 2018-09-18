@@ -264,41 +264,43 @@ fi
 # Download UEFI and kernel depository
 ###################################################################################
 if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
-    binary_dir=${build_dir}/out/release/${version}/binary
-    mkdir -p ${binary_dir} && cd ${binary_dir}
-    rm -rf estuary-uefi
-    git clone --depth 1 -b ${version} https://github.com/open-estuary/estuary-uefi.git
-    cp -rf estuary-uefi/* . ; rm -rf estuary-uefi
+    module_name="estuary-uefi kernel"
+elif [ x"$build_common" != x"true" ] && [ x"$action" != x"clean" ]; then
+    module_name="kernel"
 fi
-if [ x"$action" != x"clean" ]; then
+for module in $module_name; do
     cd ${top_dir}/..
-    process_cmd="git clone --depth 1 -b ${version} https://github.com/open-estuary/kernel.git"
+    process_cmd="git clone --depth 1 -b ${version} https://github.com/open-estuary/${module}.git"
     process_count="ps -ef | grep \"\${process_cmd}\" | grep -v grep | wc -l"
     process_num=`eval ${process_count}`
-    if [ ! -f "kernel-${version}-ready" ] && [ $process_num -eq 0 ]; then
-        rm -rf kernel
+    if [ ! -f "${module}-${version}-ready" ] && [ $process_num -eq 0 ]; then
+        rm -rf ${module}
     fi
-    if [ ! -d "kernel" ] && [ $process_num -eq 0 ]; then
+    if [ ! -d "${module}" ] && [ $process_num -eq 0 ]; then
         eval ${process_cmd}
-        rm -rf kernel-*-ready
-        touch kernel-${version}-ready
-    elif [ -d "kernel" ] && [ $process_num -gt 0 ]; then
+        rm -rf ${module}-*-ready
+        touch ${module}-${version}-ready
+    elif [ -d "${module}" ] && [ $process_num -gt 0 ]; then
         while [ 1 ];do
             flag=`eval ${process_count}`
             if [ $flag == 1 ]; then
-                echo "Waiting clone 'kernel' complete..."
-                sleep 1m
+                echo "Waiting clone '${module}' complete..."
+                sleep 30s
                 continue
             else
                 break
             fi
         done
     else
-        (cd kernel ; git pull || true)
+        (cd ${module} ; git pull || true)
     fi
     cd ${top_dir}
-
-fi
+    if [ x"$module" = x"estuary-uefi" ]; then
+        binary_dir=${build_dir}/out/release/${version}/binary
+        mkdir -p ${binary_dir}
+        cp -rf ${top_dir}/../estuary-uefi/* ${binary_dir}
+    fi
+done
 
 ###################################################################################
 # Copy binaries/docs ...

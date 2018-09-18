@@ -31,7 +31,7 @@ build_num=${BUILD_NUM:-${build_num}}
 kernel_dir=${workspace}/linux
 
 # Checkout source code
-rm -rf ${workspace}
+rm -rf ${workspace} ${out_rpm}
 mkdir -p ${workspace}/linux && cd ${workspace}
 mkdir -p ${out_rpm}
 
@@ -64,7 +64,6 @@ cp -f ${kernel_dir}/linux-${kernel_abi}.tar.xz SOURCES/linux-${rpmversion}-estua
 rpmbuild --nodeps --define "%_topdir `pwd`" -bs SPECS/kernel-aarch64.spec
 
 # Copy back the resulted artifacts
-mkdir -p $out_rpm
 cp -p $workspace/SRPMS/*.src.rpm $out_rpm
 echo "Source packages available at $out_rpm"
 

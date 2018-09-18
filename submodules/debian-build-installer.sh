@@ -13,8 +13,8 @@ workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 
 # set mirror
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.1}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/debian"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.2}
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 installer_src_version="20170615+deb9u2"
 . ${top_dir}/include/mirror-func.sh
@@ -29,7 +29,7 @@ if [ -f "${build_dir}/build-debian-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" = x"true" ]; then
-    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary* \
+    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary-arm64_4* \
     | grep Depends | sed -e "s/.*linux-image-//g" -e "s/,.*//g" -e "s/-arm64//g")
     cd ${kernel_deb_dir}
     dpkg-scanpackages -t udeb . > Packages
@@ -91,6 +91,7 @@ EOF
 
 # 1) build netboot installer
 if [ x"$build_kernel" != x"true" ]; then
+    sed -i "s/nic-usb-modules-\${kernel:Version}//g" pkg-lists/netboot/arm64.cfg
     fakeroot make build_netboot
     mkdir -p ${out}
     cp -f default-preseed ${out}/default-preseed.cfg

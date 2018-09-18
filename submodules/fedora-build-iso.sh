@@ -8,14 +8,10 @@ WGET_OPTS="-T 120 -c"
 
 out=${build_dir}/out/release/${version}/Fedora
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
-distro_dir=${build_dir}/tmp/fedora
-cdrom_installer_dir=${distro_dir}/installer/out/images/pxeboot
-live_os_dir=${distro_dir}/installer/out/images
-kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 dest_dir=/root/fedora-iso
 ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
 http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
-rm -rf ${dest_dir}
+FEDORA_ESTUARY_REPO=${FEDORA_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/fedora"}
 
 # Update fedora repo
 . ${top_dir}/include/mirror-func.sh
@@ -26,7 +22,9 @@ set_fedora_mirror
 set_docker_loop
 
 # download ISO
-mkdir -p /root/iso ${dest_dir} && cd /root/iso
+rm -rf ${dest_dir}
+mkdir -p /root/iso ${kernel_rpm_dir} ${dest_dir}/Packages/extra ${out} ${dest_dir}/images/pxeboot/initrd
+cd /root/iso
 rm -f ${ISO}.sum
 wget ${WGET_OPTS} ${http_addr}/${ISO}.sum || exit 1
 if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
@@ -36,17 +34,7 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
 fi
 
 # Copy the source media to the working directory.
-mount -o loop ${ISO} /opt
-pushd /opt
-tar cf - . | (cd ${dest_dir}; tar xf -)
-popd
-umount /opt
-
-# Replace estuary binary for customized media.
-cd ${cdrom_installer_dir}
-cp initrd.img vmlinuz ${dest_dir}/images/pxeboot
-cd ${live_os_dir}
-cp install.img ${dest_dir}/images
+xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
 
 # Change permissions on the working directory.
 chmod -R u+w ${dest_dir}
@@ -54,19 +42,47 @@ cfg_path="${top_dir}/configs/auto-install/fedora/"
 cp -f $cfg_path/auto-iso/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
 
 # Download any additional RPMs to the directory structure and update the metadata.
-mkdir -p ${kernel_rpm_dir}
 if [ -f "${build_dir}/build-fedora-kernel" ]; then
     build_kernel=true
 fi
-
 package_name="kernel kernel-core kernel-cross-headers kernel-devel kernel-headers kernel-modules kernel-modules-extra"
+dnf remove -q -y kernel-headers
 if [ x"$build_kernel" != x"true" ]; then
+    rm -rf ${kernel_rpm_dir}/*
     dnf install -y --downloadonly --downloaddir=${kernel_rpm_dir} --disablerepo=* --enablerepo=Estuary,fedora ${package_name}
 fi
+cd ${kernel_rpm_dir}
+kernel_abi=$(basename kernel-4.18*.rpm | sed -e "s/-estuary.*.rpm//g" -e "s/kernel-//g")
+rm -rf kernel*-4.16*.aarch64.rpm
+wget -q ${WGET_OPTS} -r -nd -np -L -A kernel*-4.16*.aarch64.rpm $FEDORA_ESTUARY_REPO/aarch64/ -P ${kernel_rpm_dir}
+rpm -ivh kernel-core-4.16*.aarch64.rpm kernel-modules-4.16*.aarch64.rpm kernel-4.16*.aarch64.rpm
 
-rm -rf ${dest_dir}/Packages/k/kernel*4.[0-9][0-9].[0-9]*.rpm
-mkdir -p ${dest_dir}/Packages/extra
-cp -f ${kernel_rpm_dir}/*.rpm ${dest_dir}/Packages/extra/
+# Make initrd.img
+cd ${dest_dir}/images/pxeboot/initrd
+sh -c 'xzcat ../initrd.img | cpio -d -i -m'
+cp -f $cfg_path/auto-iso/ks-iso.cfg $cfg_path/auto-pxe/ks.cfg .
+sed -i "s/4.16.0/$kernel_abi/g" ks.cfg
+rm -rf lib/modules/4.*
+cp -rf /lib/modules/* lib/modules/
+cp -f /boot/vmlinuz* ${dest_dir}/images/pxeboot/vmlinuz
+sh -c 'find . | cpio --quiet -o -H newc --owner 0:0 | xz --threads=0 --check=crc32 -c > ../initrd.img'
+cd ..; rm -rf initrd
+
+# Make squashfs.img
+cd ${dest_dir}/images
+unsquashfs install.img
+mount -o loop squashfs-root/LiveOS/rootfs.img /opt
+rm -rf /opt/usr/lib/modules/4.* ${dest_dir}/images/install.img
+cp -rf /lib/modules/* /opt/usr/lib/modules/
+umount /opt
+mksquashfs squashfs-root/ ${dest_dir}/images/install.img
+rm -rf squashfs-root
+
+# Create repo for packages
+for pkg in $package_name; do
+    rm -f ${dest_dir}/Packages/k/${pkg}-4*.rpm
+    cp -f ${kernel_rpm_dir}/${pkg}-4.18*.rpm ${dest_dir}/Packages/extra/
+done
 cd ${dest_dir}
 xmlfile=`basename repodata/*comps*.xml`
 cd repodata
@@ -75,8 +91,18 @@ shopt -s extglob
 rm -f !(comps.xml)
 find . -name TRANS.TBL|xargs rm -f
 cd ${dest_dir}
-createrepo -q --update -g repodata/comps.xml .
-
+createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
 cd ${dest_dir} && genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-28" -o ${out}/${ISO} .
+
+# Rebuild boot.iso
+if [ x"$build_kernel" != x"true" ]; then
+    cp -f $cfg_path/auto-pxe/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
+    cd ${dest_dir}
+    rm -rf Packages repodata temp
+    genisoimage -quiet -o ${out}/boot.iso -eltorito-alt-boot \
+      -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-28' -T \
+      -allow-limited-size .
+    tar -cf - . | pigz > ${out}/netboot.tar.gz
+fi

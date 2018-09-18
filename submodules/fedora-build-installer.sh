@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 set -ex
 
 top_dir=$(cd `dirname $0`; cd ..; pwd)
@@ -10,7 +11,7 @@ kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 distro_dir=${build_dir}/tmp/fedora
 workspace=${distro_dir}/installer
 out_installer=${workspace}/out
-source_url=${FEDORA_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.1/fedora"}
+source_url=${FEDORA_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/fedora"}
 base_url=${FEDORA_MIRROR:-"http://dl.fedoraproject.org/pub/fedora/linux"}/releases/28/Everything/aarch64/os/
 
 rm -rf ${workspace}

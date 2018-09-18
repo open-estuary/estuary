@@ -18,6 +18,8 @@ kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 #export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
+estuary_repo=${UBUNTU_ESTUARY_REPO:-"${ESTUARY_REPO}/5.2/ubuntu"}
+estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
 . ${top_dir}/include/mirror-func.sh
 set_ubuntu_mirror
 
@@ -27,7 +29,7 @@ apt-get update -q=2
 mkdir -p ${workspace}
 cd ${workspace}
 workspace=${workspace}/kernel
-rm -rf kernel
+rm -rf kernel ${out_deb}
 git clone --depth 1 -b ${version} https://github.com/open-estuary/ubuntu-kernel-packages.git kernel
 mkdir -p ${workspace}/linux
 cd $build_dir/../../kernel/
@@ -47,7 +49,7 @@ build_num=${BUILD_NUM:-${build_num}}
 
 # find commit
 if [ -z $(git tag -l|grep ${version}) ]; then
-	pkg_partial_verion=$(git log --abbrev-commit|grep commit|awk '{print $2}')
+	pkg_partial_verion=$(git log --abbrev-commit --pretty=oneline -n1 | awk '{print $1}')
 else
 	pkg_partial_verion=${version}
 fi
