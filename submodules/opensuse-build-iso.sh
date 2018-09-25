@@ -71,7 +71,7 @@ find suse/setup/descr/ -name "packages*" |xargs gzip -f
 touch content
 
 # Create the new ISO file.
-mksusecd --create ${out}/${ISO} --no-hybrid .
+mksusecd --boot "ifcfg=eth*=dhcp" --create ${out}/${ISO} --no-hybrid .
 if [ x"$build_kernel" != x"true" ]; then
     mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${config_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" --micro --create ${out}/boot.iso --no-hybrid .
     xorriso -osirrox on -indev ${out}/boot.iso -extract / netboot
