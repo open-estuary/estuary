@@ -9,7 +9,7 @@ WGET_OPTS="-T 120 -c"
 out=${build_dir}/out/release/${version}/Fedora
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/fedora
 dest_dir=/root/fedora-iso
-ISO=Fedora-Server-dvd-aarch64-28-1.1.iso
+ISO=Fedora-Server-dvd-aarch64-29_Beta-1.5.iso
 http_addr=${FEDORA_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/fedora"}
 FEDORA_ESTUARY_REPO=${FEDORA_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/fedora"}
 
@@ -53,9 +53,7 @@ if [ x"$build_kernel" != x"true" ]; then
 fi
 cd ${kernel_rpm_dir}
 kernel_abi=$(basename kernel-4.18*.rpm | sed -e "s/-estuary.*.rpm//g" -e "s/kernel-//g")
-rm -rf kernel*-4.16*.aarch64.rpm
-wget -q ${WGET_OPTS} -r -nd -np -L -A kernel*-4.16*.aarch64.rpm $FEDORA_ESTUARY_REPO/aarch64/ -P ${kernel_rpm_dir}
-rpm -ivh kernel-core-4.16*.aarch64.rpm kernel-modules-4.16*.aarch64.rpm kernel-4.16*.aarch64.rpm
+rpm -ivh kernel-core-4.18*.aarch64.rpm kernel-modules-4.18*.aarch64.rpm kernel-4.18*.aarch64.rpm
 
 # Make initrd.img
 cd ${dest_dir}/images/pxeboot/initrd
@@ -94,7 +92,7 @@ cd ${dest_dir}
 createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
-cd ${dest_dir} && genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-28" -o ${out}/${ISO} .
+cd ${dest_dir} && genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-29" -o ${out}/${ISO} .
 
 # Rebuild boot.iso
 if [ x"$build_kernel" != x"true" ]; then
@@ -102,7 +100,7 @@ if [ x"$build_kernel" != x"true" ]; then
     cd ${dest_dir}
     rm -rf Packages repodata temp
     genisoimage -quiet -o ${out}/boot.iso -eltorito-alt-boot \
-      -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-28' -T \
+      -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-29' -T \
       -allow-limited-size .
     tar -cf - . | pigz > ${out}/netboot.tar.gz
 fi
