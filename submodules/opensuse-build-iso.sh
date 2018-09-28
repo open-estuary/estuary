@@ -7,6 +7,7 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c -q"
 
+release_name=opensuse-netboot
 out=${build_dir}/out/release/${version}/OpenSuse
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 dvdiso_dir=${build_dir}/tmp/opensuse/dvdiso
@@ -73,8 +74,9 @@ touch content
 # Create the new ISO file.
 mksusecd --boot "ifcfg=eth*=dhcp" --create ${out}/${ISO} --no-hybrid .
 if [ x"$build_kernel" != x"true" ]; then
-    mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${config_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" --micro --create ${out}/boot.iso --no-hybrid .
-    xorriso -osirrox on -indev ${out}/boot.iso -extract / netboot
-    tar -cf - netboot/ | pigz > ${out}/netboot.tar.gz
+    mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${config_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" \
+             --micro --create ${out}/${release_name}.iso --no-hybrid .
+    xorriso -osirrox on -indev ${out}/${release_name}.iso -extract / netboot
+    tar -cf - netboot/ | pigz > ${out}/${release_name}.tar.gz
     rm -rf netboot/
 fi

@@ -99,8 +99,8 @@ if [ x"$build_kernel" != x"true" ]; then
     cp -f $cfg_path/auto-pxe/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
     cd ${dest_dir}
     rm -rf Packages repodata temp
-    genisoimage -quiet -o ${out}/boot.iso -eltorito-alt-boot \
+    genisoimage -quiet -o ${out}/fedora-netboot.iso -eltorito-alt-boot \
       -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-29' -T \
       -allow-limited-size .
-    tar -cf - . | pigz > ${out}/netboot.tar.gz
+    tar -cf - . | pigz > ${out}/fedora-netboot.tar.gz
 fi
