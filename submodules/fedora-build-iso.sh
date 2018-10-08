@@ -92,15 +92,16 @@ cd ${dest_dir}
 createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
-cd ${dest_dir} && genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog -hide boot.catalog -V "Fedora-S-dvd-aarch64-29" -o ${out}/${ISO} .
+genisoimage -quiet -e images/efiboot.img -no-emul-boot -T -J -R -c boot.catalog \
+    -hide boot.catalog -V "Fedora-S-dvd-aarch64-29" -o ${out}/fedora-everything-${version}.iso ${dest_dir}
 
 # Rebuild boot.iso
 if [ x"$build_kernel" != x"true" ]; then
     cp -f $cfg_path/auto-pxe/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
     cd ${dest_dir}
     rm -rf Packages repodata temp
-    genisoimage -quiet -o ${out}/fedora-netboot.iso -eltorito-alt-boot \
+    genisoimage -quiet -o ${out}/fedora-netboot-${version}.iso -eltorito-alt-boot \
       -e images/efiboot.img -no-emul-boot -R -J -V 'Fedora-S-dvd-aarch64-29' -T \
       -allow-limited-size .
-    tar -cf - . | pigz > ${out}/fedora-netboot.tar.gz
+    tar -cf - . | pigz > ${out}/fedora-netboot-${version}.tar.gz
 fi

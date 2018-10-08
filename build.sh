@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 ###################################################################################
 # Const Variables, PATH
@@ -13,7 +12,6 @@ fi
 SUPPORT_DISTROS=(`sed -n '/^\"distros\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=name:)(.*?)(?=,)" | sort`)
 
 top_dir=$(cd `dirname $0` ; pwd)
-dname=$(dirname "$PWD")
 
 export WGET_OPTS="-T 120 -c -q"
 export LC_ALL=C
@@ -174,7 +172,7 @@ EOF
 ###################################################################################
 for var in ${envlist}; do
 	repo_url=`echo ${var} |sed 's/.*=//g'`
-	wget -q --spider  $repo_url/
+	wget -T 30 -q --spider  $repo_url/
 	if [ $? -eq 0 ];then
 	    new="$new $var"
 	fi

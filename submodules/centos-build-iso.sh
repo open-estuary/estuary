@@ -89,12 +89,13 @@ createrepo -q -g repodata/comps.xml .
 
 # Create the new ISO file.
 mkdir -p ${out}
-cd ${dest_dir} && mkisofs -quiet -o ${out}/${ISO} -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T .
+mkisofs -quiet -o ${out}/centos-everything-${version}.iso -eltorito-alt-boot \
+        -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T ${dest_dir}
 
 # Rebuild boot.iso
 if [ x"$build_kernel" != x"true" ]; then
     cp -f $cfg_path/auto-pxe/grub.cfg ${dest_dir}/EFI/BOOT/grub.cfg
-    mkisofs -quiet -o ${out}/centos-netboot.iso -eltorito-alt-boot \
+    mkisofs -quiet -o ${out}/centos-netboot-${version}.iso -eltorito-alt-boot \
         -e images/efiboot.img -no-emul-boot -R -J -V 'CentOS 7 aarch64' -T \
         -graft-points \
         images/pxeboot=${dest_dir}/images/pxeboot \
@@ -103,5 +104,5 @@ if [ x"$build_kernel" != x"true" ]; then
         images/efiboot.img=${dest_dir}/images/efiboot.img
     cd ${dest_dir}
     rm -rf Packages repodata temp
-    tar -cf - . | pigz > ${out}/centos-netboot.tar.gz
+    tar -cf - . | pigz > ${out}/centos-netboot-${version}.tar.gz
 fi

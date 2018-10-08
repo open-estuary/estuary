@@ -7,7 +7,7 @@ version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 WGET_OPTS="-T 120 -c -q"
 
-release_name=opensuse-netboot
+release_name=opensuse-netboot-${version}
 out=${build_dir}/out/release/${version}/OpenSuse
 kernel_rpm_dir=${build_dir}/out/kernel-pkg/${version}/opensuse
 dvdiso_dir=${build_dir}/tmp/opensuse/dvdiso
@@ -72,7 +72,7 @@ find suse/setup/descr/ -name "packages*" |xargs gzip -f
 touch content
 
 # Create the new ISO file.
-mksusecd --boot "ifcfg=eth*=dhcp" --create ${out}/${ISO} --no-hybrid .
+mksusecd --boot "ifcfg=eth*=dhcp" --create ${out}/opensuse-everything-${version}.iso --no-hybrid .
 if [ x"$build_kernel" != x"true" ]; then
     mksusecd --boot "autoyast=${config_url}/autoinst-15.0.xml install=${config_url}/${leap_path}/repo/oss ifcfg=eth*=dhcp" \
              --micro --create ${out}/${release_name}.iso --no-hybrid .

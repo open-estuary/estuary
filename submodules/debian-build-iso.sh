@@ -53,7 +53,7 @@ sudo
 EOF
 
 # add prefix name 
-export CDNAME=estuary-${version}-debian
+export CDNAME=debian-everything-${version}
 
 # build 
 build-simple-cdd --force-root \

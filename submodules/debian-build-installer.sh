@@ -6,7 +6,7 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-release_name=debian-netboot
+release_name=debian-netboot-${version}
 out=${build_dir}/out/release/${version}/Debian/
 kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/debian
 distro_dir=${build_dir}/tmp/debian
