@@ -69,6 +69,10 @@ install_dev_tools()
 
     install_dev_tools_${host_distro}
 
+    docker_status=`service docker status|grep "running"`
+    if [ x"$docker_status" = x"" ]; then
+        service docker start
+    fi
 }
 
 ###################################################################################

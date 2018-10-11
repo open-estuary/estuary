@@ -6,6 +6,7 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
+release_name=ubuntu-netboot-${version}
 out=${build_dir}/out/release/${version}/Ubuntu/
 kernel_deb_dir=${build_dir}/out/kernel-pkg/${version}/ubuntu
 distro_dir=${build_dir}/tmp/ubuntu
@@ -111,8 +112,12 @@ EOF
 if [ x"$build_kernel" != x"true" ]; then
     fakeroot make build_netboot
     mkdir -p ${out}
-    (cp -f default-preseed ${out}/default-preseed.cfg)
-    (cd dest/netboot/ && cp -f mini.iso netboot.tar.gz ${out})
+    cp -f default-preseed ${out}/default-preseed.cfg
+    pushd dest/netboot/
+    mv mini.iso ${release_name}.iso
+    mv netboot.tar.gz ${release_name}.tar.gz
+    cp -f ${release_name}* ${out}
+    popd
 fi
 
 ## 2) build cdrom installer
