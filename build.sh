@@ -11,8 +11,6 @@ else
 fi
 SUPPORT_DISTROS=(`sed -n '/^\"distros\":\[/,/^\]/p' $DEFAULT_ESTUARYCFG 2>/dev/null | sed 's/\"//g' | grep -Po "(?<=name:)(.*?)(?=,)" | sort`)
 
-top_dir=$(cd `dirname $0` ; pwd)
-
 export WGET_OPTS="-T 120 -c -q"
 export LC_ALL=C
 export LANG=C
@@ -20,10 +18,12 @@ export LANG=C
 ###################################################################################
 # Includes
 ###################################################################################
-cd ${top_dir}
-. Include.sh
+top_dir=$(cd `dirname $0` ; pwd)
+source ${top_dir}/Include.sh
 
+###################################################################################
 # check host arch, docker running permission
+###################################################################################
 check_running_not_in_container
 
 ###################################################################################
@@ -33,8 +33,6 @@ declare -l distros DISTROS
 action=build			# build or clean, default to build
 build_dir=${top_dir}/build	# Build output directory
 build_kernel=false         	# Build kernel packages
-platforms=			# Platforms to build, support platforms: d03, d05
-distros=			# Distros to build, support distro: centos, debian, fedora, opensuse, ubuntu
 version=master			# estuary repo's tag or branch
 cfg_file=${DEFAULT_ESTUARYCFG}	# config file
 
@@ -88,64 +86,53 @@ do
     shift
 done
 
-
 ###################################################################################
 # Install development tools
 ###################################################################################
 install_dev_tools
 
-docker_status=`service docker status|grep "running"`
-if [ x"$docker_status" = x"" ]; then
-    service docker start
-fi
-
-
-# get estuary repo version
+###################################################################################
+# get estuary version
+###################################################################################
 tag=$(cd ${top_dir} && git describe --tags --exact-match || true)
 version=${tag:-${version}}
 
-# get absolute path
+###################################################################################
+# create workspace
+###################################################################################
 cd ${top_dir}
 build_dir=$(mkdir -p ${build_dir} && cd ${build_dir} && pwd)
 
+###################################################################################
 # check build kernel packages flag
-build_flag="true false"
+###################################################################################
 build_kernel=`echo $build_kernel | tr 'A-Z' 'a-z'`
 if [ x"$build_kernel" != x"false" ] && [ x"$build_kernel" != x"true" ] ; then
         echo -e "\033[31mError! $build_kernel is not supported!\033[0m"
-        echo -e "\033[31mSupport build kernel flag: ${build_flag[*]}\033[0m" ; exit 1
+        echo -e "\033[31mSupport build kernel flag: true false\033[0m" ; exit 1
 fi
 
 ###################################################################################
 # Parse configuration file
 ###################################################################################
-platforms=$(get_install_platforms ${cfg_file} | tr ' ' ',')
 envlist=$(get_envlist ${cfg_file})
-build_common=${BUILD_COMMON:-false}
+get_common=`echo $DISTROS |grep -w common`
+distros=$(echo $DISTROS |sed 's/common//g' |tr ',' ' ')
 
-if [ x"$DISTROS" != x"" ]; then
-    get_common=`echo $DISTROS |grep -w common`
-    distros=$(echo $DISTROS |sed 's/common//g' |tr ',' ' ')
-else
+if [ x"$DISTROS" = x"" ]; then
     get_common=`echo $(get_install_distros ${cfg_file}) |grep -w common`
     distros=$(get_install_distros ${cfg_file} |sed 's/common//g')
 fi
 
 DISTROS=$(echo $distros | tr ' ' ',')
-if [ x"$get_common" != x"" ]; then
-    build_common=true
-    all_distros="$distros common"
-else
-    all_distros=$distros
-fi
+all_distros=$distros
 
-if [ x"$build_kernel" = x"true" ]; then
-    if [ x"$distros" = x"" ]; then
-        echo -e "\033[31mcommon no need to build package!\033[0m"
-        exit 0
-    else
-        build_common=false
-    fi
+if [ x"$get_common" != x"" ] && [ x"$build_kernel" != x"true" ]; then
+    # -d centos,common -k false
+    build_common=true
+elif [ x"$get_common" != x"" ] && [ x"$build_kernel" = x"true" ] && [ x"$distros" = x"" ]; then
+    # -d common -k true
+    exit 0
 fi
 
 for dist in ${distros};do
@@ -159,7 +146,6 @@ done
 
 cat << EOF
 ##############################################################################
-# platform:	${platforms}
 # distro:	${all_distros}
 # version:	${version}
 # build_dir:	${build_dir}
@@ -189,9 +175,6 @@ DOWNLOAD_FTP_ADDR=${ESTUARY_FTP:-"$DOWNLOAD_FTP_ADDR"}
 ESTUARY_FTP_CFGFILE="${version}.xml"
 if [ x"$build_common" = x"true" ] || [ x"$build_kernel" = x"false" ]; then
     if ! check_ftp_update $version . ; then
-        echo "##############################################################################"
-        echo "# Update estuary configuration file"
-        echo "##############################################################################"
         if ! update_ftp_cfgfile $version $DOWNLOAD_FTP_ADDR . ; then
             echo -e "\033[31mError! Update Estuary FTP configuration file failed!\033[0m" ; exit 1
         fi
@@ -204,9 +187,6 @@ fi
 # Download/uncompress toolchains
 ###################################################################################
 if [ x"$LOCALARCH" = x"x86_64" ]; then
-    echo "##############################################################################"
-    echo "# Download/Uncompress toolchain"
-    echo "##############################################################################"
     mkdir -p toolchain
     download_toolchains $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR toolchain
     if [[ $? != 0 ]]; then
@@ -234,9 +214,6 @@ fi
 # Download binaries
 ###################################################################################
 if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
-    echo "##############################################################################"
-    echo "# Download binaries"
-    echo "##############################################################################"
     mkdir -p prebuild
     download_binaries $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR prebuild
     if [[ $? != 0 ]]; then
@@ -249,9 +226,6 @@ echo ""
 # Copy toolchains
 ###################################################################################
 if [ x"$LOCALARCH" = x"x86_64" ]; then
-    echo "##############################################################################"
-    echo "# Copy toolchains"
-    echo "##############################################################################"
     mkdir -p $BUILD_DIR/binary/arm64 2>/dev/null
     if ! copy_toolchains $ESTUARY_FTP_CFGFILE toolchain $BUILD_DIR/binary/arm64; then
         echo -e "\033[31mError! Copy toolchains failed!\033[0m" ; exit 1
@@ -303,15 +277,12 @@ done
 ###################################################################################
 # Copy binaries/docs ...
 ###################################################################################
-if [ x"$platforms" != x"" ] && [ x"$action" != x"clean" ] && [ x"$build_common" = x"true" ]; then
-    echo "##############################################################################"
-    echo "# Copy binaries/docs"
-    echo "##############################################################################"
+if [ x"$action" != x"clean" ] && [ x"$build_common" = x"true" ]; then
     binary_src_dir="./prebuild"
     doc_src_dir=${top_dir}/doc/release-files
     doc_dir=${build_dir}/out/release/${version}
 
-    if ! copy_all_binaries $platforms $binary_src_dir $binary_dir; then
+    if ! copy_all_binaries $binary_src_dir $binary_dir; then
         echo -e "\033[31mError! Copy binaries failed!\033[0m" ; exit 1
     fi
 
@@ -334,9 +305,6 @@ for dist in ${distros};do
 done
 
 for dist in ${distros}; do
-	echo "/*---------------------------------------------------------------"
-	echo "- ${action}  $dist"
-	echo "---------------------------------------------------------------*/"
 	./submodules/${action}-distro.sh --distro=${dist} \
 		--version=${version} --envlist="${envlist}" \
 		--build_dir=${build_dir} --build_kernel=${build_kernel}
@@ -373,19 +341,12 @@ fi
 # Download/uncompress distros tar
 ###################################################################################
 if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
-    echo "##############################################################################"
-    echo "# Download distros (distros: $DISTROS)"
-    echo "##############################################################################"
     mkdir -p distro
     download_distros $ESTUARY_FTP_CFGFILE $DOWNLOAD_FTP_ADDR distro $DISTROS
     if [[ $? != 0 ]]; then
         echo -e "\033[31mError! Download distros failed!\033[0m" ; exit 1
     fi
     echo ""
-
-    echo "##############################################################################"
-    echo "# Uncompress distros (distros: $DISTROS)"
-    echo "##############################################################################"
 
     rootfs_dir=$build_dir/out/release/${version}/.rootfs
     if ! uncompress_distros $DISTROS distro $rootfs_dir; then
@@ -401,9 +362,6 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     for distro in ${distros[*]}; do
         kernel_dir=${top_dir}/../${distro}
         mkdir -p ${kernel_dir}
-        echo "---------------------------------------------------------------"
-        echo "- Build modules (kerneldir: ${kernel_dir}, rootfs: $rootfs_dir/$distro, cross: $CROSS_COMPILE)"
-        echo "---------------------------------------------------------------"
         ./submodules/build-modules.sh --kerneldir=${kernel_dir} --rootfs=$rootfs_dir/$distro --cross=$CROSS_COMPILE || exit 1
         echo "- Build modules done!"
         echo ""
@@ -415,9 +373,6 @@ fi
 ###################################################################################
 if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
 
-    echo "/*---------------------------------------------------------------"
-    echo "- create distros (distros: $DISTROS, distro dir: $rootfs_dir)"
-    echo "---------------------------------------------------------------*/"
     if ! create_distros $DISTROS $rootfs_dir; then
         echo -e "\033[31mError! Create distro files failed!\033[0m" ; exit 1
     fi
@@ -428,5 +383,3 @@ if [ x"$DISTROS" != x"" ] && [ x"$action" != x"clean" ]; then
     echo "Build distros done!"
     echo ""
 fi
-
-

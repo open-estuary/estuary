@@ -162,24 +162,16 @@ Copy_HiKey_binaries()
 }
 
 ###################################################################################
-# copy_all_binaries <platforms> <src_dir> <target_dir>
+# copy_all_binaries <src_dir> <target_dir>
 ###################################################################################
 copy_all_binaries()
 {
     (
-    platforms=`echo $1 | tr ',' ' '`
-    src_dir=$2
-    target_dir=$3
+    src_dir=$1
+    target_dir=$2
 
     mkdir -p $target_dir/arm64
     Copy_Comm_binaries $src_dir $target_dir/arm64 || return 1
-
-    for plat in ${platforms[*]}; do
-        mkdir -p $target_dir/$plat
-        if declare -F Copy_${plat}_binaries >/dev/null; then
-            Copy_${plat}_binaries $src_dir $target_dir/$plat || return 1
-        fi
-    done
 
     return 0
     )
