@@ -36,6 +36,10 @@ docker_run_sh() {
 
 	mkdir -p log/${distro}
 	echo "Start container to build."
+	docker_flag=$(docker network inspect bridge|grep ${name})
+	if [ x"$docker_flag" != x"" ]; then
+	    docker network disconnect -f bridge ${name}
+	fi
 	docker run  --privileged=true -i --rm --env-file ${envlist_file} -v ${home_dir}:/root/ \
 		${qemu_cmd} --name ${name} ${image} \
 		bash /root/${sh_dir}/${script} ${scipt_options} | tee > log/${distro}/${name}
