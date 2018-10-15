@@ -80,6 +80,7 @@ cp ${download}/*.deb ${cdimage}/pool/extras
 # copy vmlinuz and initrd.gz from installer
 cp ${cdrom_installer_dir}/cdrom/vmlinuz ${cdimage}/install/vmlinuz
 cp ${cdrom_installer_dir}/cdrom/initrd.gz ${cdimage}/install/initrd.gz
+wget -c ${http_addr}/bootnetaa64.efi -O ${cdimage}/install/netboot/ubuntu-installer/arm64/bootnetaa64.efi
 
 # copy grub files from installer
 mkdir -p ${grubfiles}
