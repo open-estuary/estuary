@@ -46,11 +46,7 @@ else
     echo "local_packages=${kernel_deb_dir}" >> profiles/debian.conf
 fi
 
-cat > profiles/debian.packages << EOF
-linux-image-estuary-arm64
-grub-efi-arm64
-sudo
-EOF
+cp ${top_dir}/deblist  profiles/debian.packages
 
 # add prefix name 
 export CDNAME=debian-everything-${version}
