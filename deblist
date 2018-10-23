@@ -315,6 +315,10 @@ libxtables12
 libyaml-0-2
 linux-base
 linux-image-estuary-arm64
+linux-headers-estuary-arm64
+linux-estuary-doc
+linux-estuary-perf
+linux-estuary-source
 linux-libc-dev
 locales
 login
