@@ -125,7 +125,6 @@ if [ x"$DISTROS" = x"" ]; then
 fi
 
 DISTROS=$(echo $distros | tr ' ' ',')
-all_distros=$distros
 
 if [ x"$get_common" != x"" ] && [ x"$build_kernel" != x"true" ]; then
     # -d centos,common -k false
@@ -146,7 +145,7 @@ done
 
 cat << EOF
 ##############################################################################
-# distro:	${all_distros}
+# distro:	${distros}
 # version:	${version}
 # build_dir:	${build_dir}
 # envlist:	${envlist}
@@ -165,6 +164,7 @@ for var in ${envlist}; do
 done
 envlist=${new}
 export ${envlist}
+GITHUB_MIRROR=${GITHUB_MIRROR:-"github.com"}
 
 
 ###################################################################################
@@ -220,7 +220,6 @@ if [ x"$build_common" = x"true" ] && [ x"$action" != x"clean" ]; then
         echo -e "\033[31mError! Download binaries failed!\033[0m" ; exit 1
     fi
 fi
-echo ""
 
 ###################################################################################
 # Copy toolchains
@@ -242,7 +241,7 @@ elif [ x"$build_common" != x"true" ] && [ x"$action" != x"clean" ]; then
 fi
 for module in $module_name; do
     cd ${top_dir}/..
-    process_cmd="git clone --depth 1 -b ${version} https://github.com/open-estuary/${module}.git"
+    process_cmd="git clone --depth 1 -b ${version} https://${GITHUB_MIRROR}/open-estuary/${module}.git"
     process_count="ps -ef | grep \"\${process_cmd}\" | grep -v grep | wc -l"
     process_num=`eval ${process_count}`
     if [ ! -f "${module}-${version}-ready" ] && [ $process_num -eq 0 ]; then

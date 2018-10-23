@@ -10,7 +10,7 @@ out_deb=${build_dir}/out/kernel-pkg/${version}/debian
 distro_dir=${build_dir}/tmp/debian
 workspace=${distro_dir}/kernel
 
-kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
+kernel_url=${KERNEL_URL:-https://${GITHUB_MIRROR}/open-estuary/kernel.git}
 
 export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
@@ -27,7 +27,7 @@ mkdir -p ${workspace}
 cd ${workspace}
 workspace=${workspace}/kernel
 rm -rf kernel ${out_deb}
-git clone --depth 1 -b ${version} https://github.com/open-estuary/debian-kernel-packages.git kernel
+git clone --depth 1 -b ${version} https://${GITHUB_MIRROR}/open-estuary/debian-kernel-packages.git kernel
 mkdir -p ${workspace}/linux
 cd $build_dir/../../kernel/
 tar cf - . | (cd ${workspace}/linux; tar xf -)

@@ -51,7 +51,7 @@ git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz --threads=0 -c 
 # Build the source kernel
 rpmversion=${kernel_version//-*/}
 cd ${workspace}
-git clone https://github.com/open-estuary/fedora-kernel-packages.git --depth 1 -b ${version} kernel-src-debug
+git clone https://${GITHUB_MIRROR}/open-estuary/fedora-kernel-packages.git --depth 1 -b ${version} kernel-src-debug
 cd kernel-src-debug
 cp -f ${kernel_dir}/linux-${kernel_abi}.tar.xz .
 sed -i "s/\%define pkg_release.*/\%define pkg_release estuary.${build_num}.fc29/g" kernel.spec

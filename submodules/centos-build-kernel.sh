@@ -49,7 +49,7 @@ git archive --format=tar --prefix=linux-${kernel_abi}/ HEAD | xz --threads=0 -c 
 rpmversion=${kernel_version//-*/}
 cd ${workspace} 
 rm -rf centos-kernel-packages
-git clone --depth 1 -b ${version} https://github.com/open-estuary/centos-kernel-packages.git
+git clone --depth 1 -b ${version} https://${GITHUB_MIRROR}/open-estuary/centos-kernel-packages.git
 cp -rf centos-kernel-packages/* .
 
 sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" SPECS/kernel-aarch64.spec

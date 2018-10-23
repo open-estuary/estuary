@@ -34,7 +34,7 @@ xz --threads=0 -z linux-${kernel_abi}.tar
 
 # Build kernel rpm package
 cd ${workspace} 
-git clone https://github.com/open-estuary/opensuse-kernel-packages.git --depth 1 -b ${version} kernel-source
+git clone https://${GITHUB_MIRROR}/open-estuary/opensuse-kernel-packages.git --depth 1 -b ${version} kernel-source
 cd kernel-source/
 git config --global user.name "linwenkai"
 git config --global user.email 941116795@qq.com
