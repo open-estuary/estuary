@@ -5,8 +5,8 @@
 
 <h2 id="1">Introduction</h2>
 
-- The malluma software is the performance tuning tool, that could sample the cpu's data include the hardware events and software events by PMU, and scheduling condition's data, and I/O, network and so on. 
-- But it could only sample the ARM environment's data. It could help you  find your system bottleneck when you run your program. Maybe your program's bottleneck  is memory , I/O or scheduling, it could help you find  quickly.
+- The malluma software is the performance tuning tool, that could sample the cpu's data include the hardware events and software events by PMU, and scheduling condition's data, and I/O, network, LLC/DDR and so on. 
+- But it could only sample the ARM environment's data. It could help you  find your system bottleneck when you run your program. Maybe your program's bottleneck  is memory, I/O, LLC/DDR or scheduling, it could help you find  quickly.
 
 <h2 id="2">Install guide</h2>
 
@@ -14,13 +14,13 @@ First, it is necessary to setup the repository. Please refer to [https://github.
 
 Second, you should install the malluma's rpm package. You could use the command  as follows.
 ```
-yum install Malluma-sec.aarch64
+yum install Malluma.aarch64
 ```
 
 Third, you should install the malluma software, and specific steps are as follows:
     
 <pre>
-cd /opt/Malluma-sec-1.0 
+cd /opt/Malluma-2.0 
 sh ./install.sh  --environment //install the external environment
 sh ./install.sh  --check //check the environemnt if or not ready
 sh ./install.sh  --all //really install process
@@ -44,12 +44,6 @@ make geohash-int hiredis jemalloc linenoise lua
 When you run the third step "sh ./install.sh --check", maybe has some erros such as "./install.sh:line 475: 4*100+16*10+:syntax error:operand expected (error token is '+')". 
 You could ignore it, this type error would not affect the normal function about the Malluma.
 </pre>
-  - Question 3:
-<pre>
-When you run the fourth step "sh ./install.sh --all", if you select all default choice, maybe you would not normally use the Malluma when input the ip in the browser. 
-Maybe the cause is that the installation directory is the child about the installation package's directory.
-The suggest is when you run the fourth step, it would ask "Default software directory name...[Y/N]", you should say "N" to input the installation directory. Then you try it again. Good luck to you.
-</pre>
 
 <h2 id="3">User guide</h2>
 
@@ -64,5 +58,5 @@ sh uninstall.sh
 </pre>
 Second you should remove the malluma's rpm package.
 <pre>
-yum remove Malluma-sec.aarch64
+yum remove Malluma.aarch64
 </pre>
