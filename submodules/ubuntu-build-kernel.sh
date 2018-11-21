@@ -24,6 +24,7 @@ estuary_dist=${UBUNTU_ESTUARY_DIST:-estuary-5.2}
 set_ubuntu_mirror
 
 apt-get update -q=2
+apt-get install -y python-sphinx python-sphinx-rtd-theme
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
@@ -55,6 +56,7 @@ else
 fi
 
 kernel_version=$(make kernelversion)
+kernel_tag=v$(echo $kernel_version |sed "s/.[0-9]*-/-/")
 kernel_deb_pkg_version=$(echo ${kernel_version})
 export KDEB_PKGVERSION="${kernel_deb_pkg_version}-${build_num}.estuary"
 git tag -f v${kernel_deb_pkg_version//\~/-}
@@ -71,10 +73,13 @@ cd ${workspace}
 rm -rf linux/debian/
 rm -rf linux/debian.master/
 
-cp -r ubuntu-package/debian/ linux
-cp -r ubuntu-package/debian.master/ linux
-
 cd ${workspace}/linux
+patch_url=http://kernel.ubuntu.com/~kernel-ppa/mainline
+wget -T 60 -c ${patch_url}/${kernel_tag}/
+for pname in `cat index.html|grep -Po "(?<=\">)(.*?)(?=<)"|grep patch|sort -n|uniq`; do
+    wget -N -T 60 -c ${patch_url}/${kernel_tag}/${pname}
+    patch -p1 < ${pname}
+done
 # Use build_num as ABI
 cat << EOF > debian.master/changelog
 linux ($KDEB_PKGVERSION) unstable; urgency=medium
@@ -89,6 +94,8 @@ EOF
 
 # Enable HISI SAS module
 sed -i "s/CONFIG_SCSI_HISI_SAS=m/CONFIG_SCSI_HISI_SAS=y/g" debian.master/config/config.common.ubuntu
+sed -i "s/syncconfig/olddefconfig/g" debian/rules.d/2-binary-arch.mk
+sed -i '/^do_zfs/ s/true/false/g' debian.master/rules.d/arm64.mk
 
 echo kernel build start......
 debian/rules clean || true
@@ -109,6 +116,7 @@ cd ${workspace}/ubuntu-meta-package
 
 kernel_abi_version=${kernel_deb_pkg_version}.${build_num}.2
 package_version=${build_num}
+sed -i "s/linux-image-extra/linux-modules-\${kernel-abi-version}-generic, linux-modules-extra/g" debian/control.d/generic
 
 echo meta kernel build start...
 NAME="OpenEstuary" EMAIL=xinliang.liu@linaro.org dch -v "${kernel_abi_version}" -D xenial --force-distribution "Bump ABI to ${kernel_abi_version}"
