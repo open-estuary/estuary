@@ -94,6 +94,7 @@ EOF
 
 # Enable HISI SAS module
 sed -i "s/CONFIG_SCSI_HISI_SAS=m/CONFIG_SCSI_HISI_SAS=y/g" debian.master/config/config.common.ubuntu
+sed -i "/^CONFIG_STRICT_DEVMEM=y/d" debian.master/config/config.common.ubuntu
 sed -i "s/syncconfig/olddefconfig/g" debian/rules.d/2-binary-arch.mk
 sed -i '/^do_zfs/ s/true/false/g' debian.master/rules.d/arm64.mk
 
