@@ -21,6 +21,7 @@ estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.2}
 echo "deb-src http://mirrors.163.com/debian/ stretch main" >> /etc/apt/sources.list
 set_debian_mirror
 apt-get update -q=2
+apt-get install -y imagemagick systemtap-sdt-dev liblzma-dev python3-dev python-dev asciidoctor
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}

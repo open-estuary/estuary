@@ -31,7 +31,7 @@ if [ -f "${build_dir}/build-ubuntu-kernel" ]; then
 fi
 if [ x"$build_kernel" = x"true" ]; then
     kernel_version=$(dpkg --info ${kernel_deb_dir}/meta/linux-image-estuary* \
-    | grep Depends | sed -e "s/.*linux-image-extra-//g" -e "s/,.*//g")
+    | grep Depends | sed -e "s/.*linux-image-//" -e "s/,.*//")
     cd ${kernel_deb_dir}/not_meta/
     dpkg-scanpackages -t udeb . > Packages
 fi
