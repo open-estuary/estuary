@@ -264,7 +264,7 @@ for module in $module_name; do
             fi
         done
     else
-        (cd ${module} ; git pull || true)
+        (cd ${module} ; git fetch origin ${version} || true)
     fi
     cd ${top_dir}
     if [ x"$module" = x"estuary-uefi" ]; then
