@@ -87,6 +87,7 @@ d-i anna/no_kernel_modules boolean true
 
 # Skip linux-image-arm64 installation
 d-i base-installer/kernel/image string none
+d-i preseed/late_command string in-target apt-get remove -y apparmor
 
 EOF
 

@@ -28,9 +28,6 @@ if [ ! -f $ISO ] || ! check_sum . ${ISO}.sum; then
     check_sum . ${ISO}.sum || exit 1
 fi
 
-# Create a working directory for your customized media.
-mkdir -p ${dest_dir}/temp
-
 # Copy the source media to the working directory.
 xorriso -osirrox on -indev ${ISO} -extract / ${dest_dir}
 
@@ -103,6 +100,6 @@ if [ x"$build_kernel" != x"true" ]; then
         EFI/BOOT=${dest_dir}/EFI/BOOT \
         images/efiboot.img=${dest_dir}/images/efiboot.img
     cd ${dest_dir}
-    rm -rf Packages repodata temp
+    rm -rf Packages repodata
     tar -cf - . | pigz > ${out}/centos-netboot-${version}.tar.gz
 fi
