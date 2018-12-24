@@ -91,6 +91,9 @@ d-i preseed/late_command string in-target apt-get remove -y apparmor
 
 EOF
 
+# Change apt update to offline mode
+export ONLINE=n
+
 # 1) build netboot installer
 if [ x"$build_kernel" != x"true" ]; then
     sed -i "s/nic-usb-modules-\${kernel:Version}//g" pkg-lists/netboot/arm64.cfg
