@@ -21,6 +21,7 @@ Third, you should install the malluma software, and specific steps are as follow
     
 <pre>
 cd /opt/Malluma-2.0 
+yum install -y strace // install strace as a dependency, avoid this operation in next malluma version
 sh ./install.sh  --environment //install the external environment
 sh ./install.sh  --check //check the environemnt if or not ready
 sh ./install.sh  --all //really install process
