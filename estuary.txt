@@ -1,2 +1,2 @@
-estuary_interal_ftp: http://open-estuary.org/download/AllDownloads/FolderNotVisibleOnWebsite/EstuaryInternalConfig
+estuary_interal_ftp: http://114.119.4.74/FolderNotVisibleOnWebsite/EstuaryInternalConfig
 china_interal_ftp: ftp://117.78.41.188/FolderNotVisibleOnWebsite/EstuaryInternalConfig
