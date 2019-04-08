@@ -17,8 +17,8 @@ dest_dir=/root/centos-iso
 rm -rf ${dest_dir}
 
 # download ISO
-ISO=CentOS-7-aarch64-Minimal-1804.iso
-http_addr=${CENTOS_ISO_MIRROR:-"ftp://117.78.41.188/utils/distro-binary/centos"}
+ISO=CentOS-7-aarch64-Minimal-1810.iso
+http_addr=${CENTOS_ISO_MIRROR:-"http://114.119.4.74/centos/7/isos/aarch64"}
 mkdir -p /root/iso && cd /root/iso
 rm -f ${ISO}.sum
 wget ${http_addr}/${ISO}.sum || exit 1
