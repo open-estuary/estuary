@@ -14,13 +14,14 @@ workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 
 # set mirror
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.2}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/debian/"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-stretch}
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 installer_src_version="20170615+deb9u2"
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
 apt-get update -q=2
+apt-get -y install dctrl-tools
 
 # Find kernel abi
 kernel_abi=$(apt-cache depends linux-image-estuary-arm64 | grep -m 1 Depends \
@@ -30,7 +31,7 @@ if [ -f "${build_dir}/build-debian-kernel" ]; then
     build_kernel=true
 fi
 if [ x"$build_kernel" = x"true" ]; then
-    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary-arm64_4* \
+    kernel_abi=$(dpkg --info ${kernel_deb_dir}/linux-image-estuary-arm64_[0-9]* \
     | grep Depends | sed -e "s/.*linux-image-//g" -e "s/,.*//g" -e "s/-arm64//g")
     cd ${kernel_deb_dir}
     dpkg-scanpackages -t udeb . > Packages

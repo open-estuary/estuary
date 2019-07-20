@@ -19,12 +19,14 @@ fi
 # set mirror
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org/}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.2}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/debian/"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-stretch}
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
 apt-get update -q=2
+sed -i "s/yield keyid/yield keyid+'!'/g" /usr/lib/python3/dist-packages/simple_cdd/gnupg.py
 
+rm -rf ${workspace}
 mkdir -p ${workspace}
 cd ${workspace}
 

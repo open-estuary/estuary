@@ -15,13 +15,13 @@ kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
 
 # set mirror
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"ftp://repoftp:repopushez7411@117.78.41.188/releases/5.2/debian"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary-5.2}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/debian/"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-"stretch"}
 . ${top_dir}/include/mirror-func.sh
 echo "deb-src http://mirrors.163.com/debian/ stretch main" >> /etc/apt/sources.list
 set_debian_mirror
 apt-get update -q=2
-apt-get install -y imagemagick systemtap-sdt-dev liblzma-dev python3-dev python-dev asciidoctor
+apt-get install -y imagemagick systemtap-sdt-dev liblzma-dev python3-dev asciidoctor openjdk-8-jdk
 
 # 1) build kernel packages debs, udebs
 mkdir -p ${workspace}
@@ -57,6 +57,7 @@ rm -rf orig
 # Use build_num as ABI
 
 sed -i "s/^abiname:.*/abiname: ${build_num}/g" debian/config/defines
+sed -i "/riscv64/d" debian/config/defines
 
 cat << EOF > debian/changelog
 linux ($KDEB_PKGVERSION) unstable; urgency=medium

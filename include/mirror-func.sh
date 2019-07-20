@@ -42,13 +42,12 @@ set_centos_mirror()
         docker_mirror="http://mirror.centos.org/altarch/\$releasever/os/\$basearch/"
         sed -i "s#${docker_mirror}#${mirror}#g" /etc/yum.repos.d/CentOS-Base.repo
     fi
-    if [ -n "${CENTOS_ESTUARY_REPO}" ]; then
-        local mirror=${CENTOS_ESTUARY_REPO}
+    if [ -n "${estuary_repo}" ]; then
+        local mirror=${estuary_repo}
         docker_mirror="ftp://repoftp:repopushez7411@117.78.41.188/releases/.*/centos"
         sed -i "s#${docker_mirror}#${mirror}#g" /etc/yum.repos.d/estuary.repo
     fi
-    sed -i 's/5.[0-9]/5.2/g' /etc/yum.repos.d/estuary.repo
-    rpm --import ${ESTUARY_REPO}/ESTUARY-GPG-KEY
+    rpm --import /root/estuary/ESTUARY-GPG-KEY
 }
 set_docker_loop()
 {

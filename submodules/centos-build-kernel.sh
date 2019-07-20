@@ -12,6 +12,7 @@ distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/kernel
 
 # Install estuary latest kernel
+estuary_repo=${CENTOS_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/centos/"
 . ${top_dir}/include/mirror-func.sh
 set_centos_mirror
 yum remove epel-release -y
@@ -52,6 +53,7 @@ rm -rf centos-kernel-packages
 git clone --depth 1 -b ${version} https://github.com/open-estuary/centos-kernel-packages.git
 cp -rf centos-kernel-packages/* .
 
+sed -i "s/oldnoconfig/olddefconfig/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define rpmversion.*/\%define rpmversion $rpmversion/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define pkgrelease.*/\%define pkgrelease estuary.${build_num}/g" SPECS/kernel-aarch64.spec
 sed -i "s/\%define signmodules 1/\%define signmodules 0/g" SPECS/kernel-aarch64.spec
