@@ -22,7 +22,7 @@ check_docker_running_permission()
 
 install_dev_tools_debian()
 {
-	sudo apt-get install -y git jq docker.io bc libssl-dev unzip make build-essential \
+	sudo apt-get install -y git jq bc libssl-dev unzip make build-essential \
              qemu qemu-user-static qemu-user binfmt-support flex bison gcc pigz
 	check_docker_running_permission
 }
