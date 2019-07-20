@@ -12,7 +12,7 @@ distro_dir=${build_dir}/tmp/centos
 workspace=${distro_dir}/kernel
 
 # Install estuary latest kernel
-estuary_repo=${CENTOS_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/centos/"
+estuary_repo=${CENTOS_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/centos/"}
 . ${top_dir}/include/mirror-func.sh
 set_centos_mirror
 yum remove epel-release -y

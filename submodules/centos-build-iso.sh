@@ -6,7 +6,7 @@ top_dir=$(cd `dirname $0`; cd ..; pwd)
 version=$1 # branch or tag
 build_dir=$(cd /root/$2 && pwd)
 
-estuary_repo=${CENTOS_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/centos"
+estuary_repo=${CENTOS_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/centos"}
 . ${top_dir}/include/mirror-func.sh
 set_centos_mirror
 set_docker_loop
