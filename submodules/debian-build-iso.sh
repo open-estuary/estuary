@@ -19,8 +19,8 @@ fi
 # set mirror
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 securiry_mirror=${DEBIAN_SECURITY_MIRROR:-http://security.debian.org/}
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/debian/"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-stretch}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/estuary-repo/kernel-5.30/debian/"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary}
 . ${top_dir}/include/mirror-func.sh
 set_debian_mirror
 apt-get update -q=2

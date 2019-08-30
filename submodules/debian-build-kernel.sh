@@ -13,6 +13,7 @@ workspace=${distro_dir}/kernel
 kernel_url=${KERNEL_URL:-https://github.com/open-estuary/kernel.git}
 
 export DEB_BUILD_OPTIONS=parallel=`getconf _NPROCESSORS_ONLN`
+export DEB_BUILD_PROFILES=nodoc
 
 # set mirror
 estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/debian/"}

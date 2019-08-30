@@ -14,8 +14,8 @@ workspace=${distro_dir}/installer
 out_installer=${workspace}/out/images
 
 # set mirror
-estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/debian/"}
-estuary_dist=${DEBIAN_ESTUARY_DIST:-stretch}
+estuary_repo=${DEBIAN_ESTUARY_REPO:-"http://114.119.4.74/estuary-repo/kernel-5.30/debian/"}
+estuary_dist=${DEBIAN_ESTUARY_DIST:-estuary}
 mirror=${DEBIAN_MIRROR:-http://deb.debian.org/debian/}
 installer_src_version="20170615+deb9u2"
 . ${top_dir}/include/mirror-func.sh

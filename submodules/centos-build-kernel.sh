@@ -17,7 +17,7 @@ estuary_repo=${CENTOS_ESTUARY_REPO:-"http://114.119.4.74/kernel-5.3/centos/"}
 set_centos_mirror
 yum remove epel-release -y
 yum clean dbcache
-yum install --disablerepo=* --enablerepo=Estuary kernel -y
+yum install --nogpgcheck --disablerepo=* --enablerepo=Estuary kernel -y
 
 #find build_num
 if [ ! -z "$(yum info installed kernel)" ]; then
